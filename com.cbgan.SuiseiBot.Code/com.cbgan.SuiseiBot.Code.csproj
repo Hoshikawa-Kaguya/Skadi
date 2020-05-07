@@ -65,10 +65,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChatKeywords.cs" />
+    <Compile Include="handlers\DefaultHandle.cs" />
     <Compile Include="GroupMessageInterface.cs" />
     <Compile Include="PrivateMessageInterface.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SurpriseMFKHandle.cs" />
+    <Compile Include="handlers\SurpriseMFKHandle.cs" />
+    <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Native.Sdk\Native.Sdk.csproj">

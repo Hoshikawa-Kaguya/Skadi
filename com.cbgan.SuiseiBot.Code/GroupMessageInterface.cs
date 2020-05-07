@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +24,10 @@ namespace com.cbgan.SuiseiBot.Code
             ChatKeywords.key_word.TryGetValue(e.Message, out Chat_Type);//查找关键字
             switch (Chat_Type)
             {
+                case 0://输入无法被分类
+                    DefaultHandle dh=new DefaultHandle(sender, e);
+                    dh.Get_Chat();
+                    break;
                 case 1://娱乐功能
                     SurpriseMFKHandle smfh = new SurpriseMFKHandle(sender, e);
                     smfh.Get_Chat();//进行响应
