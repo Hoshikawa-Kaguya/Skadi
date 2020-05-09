@@ -104,9 +104,8 @@ namespace com.cbgan.SuiseiBot.Code.database
         /// <param name="tableName">表名</param>
         /// <param name="paramName">字段名</param>
         /// <param name="paramType">字段类型</param>
-        /// <param name="indexPrimaryKey">是否将第一个字段设为主键</param>
         /// <returns>影响的记录数</returns>
-        public int CreateTable(string tableName, string[] paramsName, string[] paramsType, bool indexPrimaryKey)
+        public int CreateTable(string tableName, string[] paramsName, string[] paramsType)
         {
             if (string.IsNullOrEmpty(tableName)) throw new Exception("Create new table failed(table name is null)");//有空表名
             if (paramsName.Length != paramsType.Length) throw new Exception("Get illegal params");//有不合法的数据
@@ -120,10 +119,8 @@ namespace com.cbgan.SuiseiBot.Code.database
                     //有同名表
                     if (Convert.ToBoolean(cmd.ExecuteScalar())) return 0;
                     //写入创建新表指令
-                    cmd.CommandText = "CREATE TABLE " + tableName + "(" + paramsName[0] + " " + paramsType[0];
-                    if (indexPrimaryKey) cmd.CommandText += " PRIMARY KEY";
-                    cmd.CommandText += ",";
-                    for (int i = 1; i < paramsName.Length; i++)
+                    cmd.CommandText = "CREATE TABLE " + tableName + "(";
+                    for (int i = 0; i < paramsName.Length; i++)
                     {
                         cmd.CommandText += paramsName[i] + " " + paramsType[i];
                         if (i != paramsName.Length - 1) cmd.CommandText += ",";
