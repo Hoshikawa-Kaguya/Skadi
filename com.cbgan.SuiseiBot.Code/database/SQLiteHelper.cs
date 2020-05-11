@@ -114,10 +114,6 @@ namespace com.cbgan.SuiseiBot.Code.database
                 if (this.SQLConnection != null && this.SQLConnection.State != System.Data.ConnectionState.Closed)
                 {
                     SQLiteCommand cmd = new SQLiteCommand(this.SQLConnection);
-                    //查找是否有同名表
-                    cmd.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='" + tableName + "'";
-                    //有同名表
-                    if (Convert.ToBoolean(cmd.ExecuteScalar())) return 0;
                     //写入创建新表指令
                     cmd.CommandText = "CREATE TABLE " + tableName + "(";
                     for (int i = 0; i < paramsName.Length; i++)
@@ -127,6 +123,28 @@ namespace com.cbgan.SuiseiBot.Code.database
                     }
                     cmd.CommandText += ")";
                     return cmd.ExecuteNonQuery();
+                }
+                else throw new Exception("Database not connected");
+            }
+            catch (Exception) { throw; }
+        }
+
+        /// <summary>
+        /// 查找是否存在同名表
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <returns>返回True/False代表是否存在</returns>
+        public bool TableExists(string tableName)
+        {
+            if (string.IsNullOrEmpty(tableName)) throw new Exception("Create new table failed(table name is null)");//有空表名
+            try
+            {
+                if (this.SQLConnection != null && this.SQLConnection.State != System.Data.ConnectionState.Closed)
+                {
+                    SQLiteCommand cmd = new SQLiteCommand(this.SQLConnection);
+                    //查找是否有同名表
+                    cmd.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='" + tableName + "'";
+                    return Convert.ToBoolean(cmd.ExecuteScalar());
                 }
                 else throw new Exception("Database not connected");
             }
@@ -170,16 +188,6 @@ namespace com.cbgan.SuiseiBot.Code.database
                 if (this.SQLConnection != null && this.SQLConnection.State != System.Data.ConnectionState.Closed)
                 {
                     SQLiteCommand cmd = new SQLiteCommand(this.SQLConnection);
-                    #region 判断是否存在主键，并判断是否插入重复主键
-                    string primaryKeyName = null;
-                    primaryKeyName = GetPrimaryKeyName(tableName);
-                    if (!string.IsNullOrEmpty(primaryKeyName))//当存在主键时查找是否有重复主键
-                    {
-                        int primaryKeyIndex = paramsName.ToList().IndexOf(primaryKeyName);
-                        cmd.CommandText = "SELECT COUNT(*) FROM " + tableName + " WHERE " + primaryKeyName + " = '" + paramsData[primaryKeyIndex] + "'";
-                        if (Convert.ToInt32(cmd.ExecuteScalar()) > 0) return 0;
-                    }
-                    #endregion
                     //插入数据
                     cmd.CommandText = "INSERT INTO " + tableName + " (\"" +
                         string.Join("\",\"", paramsName) +//写入字段名
@@ -198,15 +206,21 @@ namespace com.cbgan.SuiseiBot.Code.database
         /// <param name="tableName">表名</param>
         /// <param name="primaryKeyValue">主键值</param>
         /// <returns>返回SQLiteDataReader为查找行的数据</returns>
-        public SQLiteDataReader FindRow(string tableName, string primaryKeyValue)
+        public SQLiteDataReader FindRow(string tableName, string[] keyNames, string[] keyValues)
         {
-            if (string.IsNullOrEmpty(tableName) || string.IsNullOrEmpty(primaryKeyValue)) throw new Exception("Get null params");
+            if (string.IsNullOrEmpty(tableName) || keyNames.Length != keyValues.Length) throw new Exception("Get illegal params");
             try
             {
                 if (this.SQLConnection != null && this.SQLConnection.State != System.Data.ConnectionState.Closed)
                 {
                     SQLiteCommand cmd = new SQLiteCommand(this.SQLConnection);
-                    cmd.CommandText = "SELECT * FROM " + tableName + " WHERE " + GetPrimaryKeyName(tableName) + "='" + primaryKeyValue + "'";
+                    cmd.CommandText = "SELECT * FROM " + tableName + " WHERE ";
+                    for (int i = 0; i < keyNames.Length; i++)
+                    {
+                        cmd.CommandText += keyNames[i] + "='" + keyValues[i] + "'";
+                        if (keyNames.Length > 1 && i != keyNames.Length - 1) cmd.CommandText += " AND ";
+                    }
+                    Console.WriteLine(cmd.CommandText);
                     return cmd.ExecuteReader();
                 }
                 else throw new Exception("Database not connected");
@@ -215,20 +229,27 @@ namespace com.cbgan.SuiseiBot.Code.database
         }
 
         /// <summary>
-        /// 使用主键值删除行，返回影响的记录数
+        /// 使用键值删除行，返回影响的记录数
         /// </summary>
         /// <param name="tableName">表名</param>
-        /// <param name="primaryKeyValue">主键值</param>
+        /// <param name="keyNames">字段名</param>
+        /// <param name="keyValues">字段名</param>
         /// <returns>影响的记录数</returns>
-        public int DeleteRow(string tableName, string primaryKeyValue)
+        public int DeleteRow(string tableName, string[] keyNames, string[] keyValues)
         {
-            if (string.IsNullOrEmpty(tableName) || string.IsNullOrEmpty(primaryKeyValue)) throw new Exception("Get null params");
+            if (string.IsNullOrEmpty(tableName) || keyNames.Length != keyValues.Length) throw new Exception("Get illegal params");
             try
             {
                 if (this.SQLConnection != null && this.SQLConnection.State != System.Data.ConnectionState.Closed)
                 {
                     SQLiteCommand cmd = new SQLiteCommand(this.SQLConnection);
-                    cmd.CommandText = "DELETE FROM " + tableName + " WHERE " + GetPrimaryKeyName(tableName) + "='" + primaryKeyValue + "'";
+                    cmd.CommandText = "DELETE FROM " + tableName + " WHERE ";
+                    for (int i = 0; i < keyNames.Length; i++)
+                    {
+                        cmd.CommandText += keyNames[i] + "='" + keyValues[i] + "'";
+                        if (keyNames.Length > 1 && i != keyNames.Length - 1) cmd.CommandText += " AND ";
+                    }
+                    Console.WriteLine(cmd.CommandText);
                     return cmd.ExecuteNonQuery();
                 }
                 else throw new Exception("Database not connected");
@@ -237,27 +258,56 @@ namespace com.cbgan.SuiseiBot.Code.database
         }
 
         /// <summary>
-        /// 通过主键值查找行并更新数据，返回影响的记录数
+        /// 通过键值查找行并更新数据，返回影响的记录数
         /// </summary>
-        /// <param name="tableName"></param>
-        /// <param name="updateName"></param>
-        /// <param name="updateValue"></param>
-        /// <param name="primaryKeyValue"></param>
+        /// <param name="tableName">表名</param>
+        /// <param name="updateName">要更新的字段名</param>
+        /// <param name="updateValue">要更新的值</param>
+        /// <param name="keyNames">要查找的字段名数组</param>
+        /// <param name="keyValues">要查找的字段名值</param>
         /// <returns>影响的记录数</returns>
-        public int UpdateData(string tableName, string updateName, string updateValue, string primaryKeyValue)
+        public int UpdateData(string tableName, string updateName, string updateValue, string[] keyNames, string[] keyValues)
         {
-            if (string.IsNullOrEmpty(tableName) || string.IsNullOrEmpty(updateName) ||
-                string.IsNullOrEmpty(updateValue) || string.IsNullOrEmpty(primaryKeyValue)) throw new Exception("Get null params");
+            if (string.IsNullOrEmpty(tableName) || string.IsNullOrEmpty(updateName) || string.IsNullOrEmpty(updateValue) ||
+                keyValues.Length != keyNames.Length) throw new Exception("Get null params");
             try
             {
                 if (this.SQLConnection != null && this.SQLConnection.State != System.Data.ConnectionState.Closed)
                 {
                     SQLiteCommand cmd = new SQLiteCommand(this.SQLConnection);
-                    cmd.CommandText = "UPDATE " + tableName + " SET " + updateName + "='" + updateValue + "' WHERE " + GetPrimaryKeyName(tableName) + "='" + primaryKeyValue + "'";
-                    Console.WriteLine(cmd.CommandText);
+                    cmd.CommandText = "UPDATE " + tableName + " SET " + updateName + "='" + updateValue + "' WHERE ";
+                    for (int i = 0; i < keyNames.Length; i++)
+                    {
+                        cmd.CommandText += keyNames[i] + "='" + keyValues[i] + "'";
+                        if (keyNames.Length > 1 && i != keyNames.Length - 1) cmd.CommandText += " AND ";
+                    }
                     return cmd.ExecuteNonQuery();
                 }
                 else throw new Exception("Database not connected");
+            }
+            catch (Exception) { throw; }
+        }
+
+        /// <summary>
+        /// 查找是否有相同键值
+        /// </summary>
+        /// <param name="tableName">表名</param>
+        /// <param name="keyNames">要查找的字段名数组</param>
+        /// <param name="keyValues">要查找的字段名值</param>
+        /// <returns>返回包含主键名的List</returns>
+        public int GetCount(string tableName, string[] keyNames, string[] keyValues)
+        {
+            try
+            {
+                SQLiteCommand cmd = new SQLiteCommand(this.SQLConnection);
+                cmd.CommandText = "SELECT COUNT(*) FROM " + tableName + " WHERE ";
+                for (int i = 0; i < keyNames.Length; i++)
+                {
+                    cmd.CommandText += keyNames[i] + "='" + keyValues[i] + "'";
+                    if (keyNames.Length > 1 && i != keyNames.Length - 1) cmd.CommandText += " AND ";
+                }
+                Console.WriteLine(cmd.CommandText);
+                return Convert.ToInt32(cmd.ExecuteScalar());
             }
             catch (Exception) { throw; }
         }
@@ -308,31 +358,6 @@ namespace com.cbgan.SuiseiBot.Code.database
                 this.SQLiteTrans.Commit();
                 this.IsRunTrans = false;
             }
-        }
-
-        /// <summary>
-        /// 查找表主键名
-        /// </summary>
-        /// <param name="tableName">表名</param>
-        /// <returns></returns>
-        private string GetPrimaryKeyName(string tableName)
-        {
-            SQLiteCommand cmd = new SQLiteCommand(this.SQLConnection);
-            cmd.CommandText = "PRAGMA TABLE_INFO(" + tableName + ")";
-            try
-            {
-                using (SQLiteDataReader dataReader = cmd.ExecuteReader())//查找主键
-                {
-                    while (dataReader.Read())
-                    {
-                        if (Convert.ToBoolean(dataReader["pk"]))//查找到主键名
-                            Console.WriteLine(dataReader["Name"].ToString());
-                        return dataReader["Name"].ToString();
-                    }
-                }
-            }
-            catch (Exception) { throw; }
-            return null;
         }
     }
 }
