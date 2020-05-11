@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using com.cbgan.SuiseiBot.Code.database;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
 using Native.Sdk.Cqp.Model;
@@ -17,8 +18,8 @@ namespace com.cbgan.SuiseiBot.Code
             QQ id = e.FromQQ;
             if (e.Message.Text.Equals("debug"))
             {
-                string Curr_Dir = System.IO.Directory.GetCurrentDirectory() + "\\data";
-                id.SendPrivateMessage(Curr_Dir);
+                string DBPath = System.IO.Directory.GetCurrentDirectory() + "\\data\\" + e.CQApi.GetLoginQQ()+"\\fuck.db";
+                id.SendPrivateMessage(DBPath);
                 //string FilePath = Curr_Dir + '\\' + "NewFile.txt";
                 //FileStream fs = new FileStream(FilePath, FileMode.CreateNew);
                 //StreamWriter sw = new StreamWriter(fs);

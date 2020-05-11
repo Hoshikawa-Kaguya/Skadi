@@ -14,7 +14,7 @@ namespace com.cbgan.SuiseiBot.Code.database
     /// SQLite数据库帮助类
     /// 用于完成对数据库的基本操作
     /// </summary>
-    public class SQLiteHelper
+    internal class SQLiteHelper
     {
         #region 属性
         /// <summary>
@@ -37,6 +37,7 @@ namespace com.cbgan.SuiseiBot.Code.database
             this.DBPath = dbPath;
             this.IsRunTrans = false;
             this.AutoCommit = false;
+            this.SQLConnection = new SQLiteConnection("DATA SOURCE=" + this.DBPath);
         }
         #endregion
 
@@ -68,7 +69,6 @@ namespace com.cbgan.SuiseiBot.Code.database
             try
             {
                 if (string.IsNullOrEmpty(DBPath)) throw new Exception("Open dbfile failed(DBPath is null");
-                this.SQLConnection = new SQLiteConnection("DATA SOURCE=" + this.DBPath);
                 this.SQLConnection.Open();
                 return true;
             }
@@ -83,17 +83,8 @@ namespace com.cbgan.SuiseiBot.Code.database
         {
             try
             {
-                if (this.SQLConnection != null && this.SQLConnection.State != System.Data.ConnectionState.Closed)
-                {
-                    if (this.IsRunTrans && this.AutoCommit)
-                    {
-                        this.Commit();
-                    }
-                    this.SQLConnection.Close();
-                    this.SQLConnection = null;
-                    return true;
-                }
-                else throw new Exception("Close dbfile failed(Connection is closed or null");
+                this.SQLConnection.Close();
+                return true;
             }
             catch (Exception) { throw; }
         }
@@ -102,10 +93,11 @@ namespace com.cbgan.SuiseiBot.Code.database
         /// 创建新表，返回影响的记录数
         /// </summary>
         /// <param name="tableName">表名</param>
-        /// <param name="paramName">字段名</param>
-        /// <param name="paramType">字段类型</param>
+        /// <param name="paramsName">字段名</param>
+        /// <param name="paramsType">字段类型</param>
+        /// <param name="primaryKeyName">主键名</param>
         /// <returns>影响的记录数</returns>
-        public int CreateTable(string tableName, string[] paramsName, string[] paramsType)
+        public int CreateTable(string tableName, string[] paramsName, string[] paramsType, string[] primaryKeyName)
         {
             if (string.IsNullOrEmpty(tableName)) throw new Exception("Create new table failed(table name is null)");//有空表名
             if (paramsName.Length != paramsType.Length) throw new Exception("Get illegal params");//有不合法的数据
@@ -120,6 +112,13 @@ namespace com.cbgan.SuiseiBot.Code.database
                     {
                         cmd.CommandText += paramsName[i] + " " + paramsType[i];
                         if (i != paramsName.Length - 1) cmd.CommandText += ",";
+                    }
+                    if (primaryKeyName.Length != 0)//当有主键时
+                    {
+                        cmd.CommandText +=
+                            ",PRIMARY KEY(" +
+                            string.Join(",", primaryKeyName) +
+                            ")";
                     }
                     cmd.CommandText += ")";
                     return cmd.ExecuteNonQuery();

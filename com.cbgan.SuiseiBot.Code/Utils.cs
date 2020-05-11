@@ -127,11 +127,11 @@ namespace com.cbgan.SuiseiBot.Code
         /// <summary>
         /// 获取当前时间戳
         /// </summary>
-        public Func<long> GetNowTimeStamp = () => Convert.ToInt64((System.DateTime.Now - new System.DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds);
+        public static Func<long> GetNowTimeStamp = () => Convert.ToInt64((System.DateTime.Now - new System.DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds);
 
         /// <summary>
         /// 将long类型时间戳转换为DateTime
         /// </summary>
-        public Func<long,System.DateTime> TimeStampToDateTime = TimeStamp => new System.DateTime(1970, 1, 1, 8, 0, 0, 0).AddSeconds(TimeStamp);
+        public static Func<long,System.DateTime> TimeStampToDateTime = TimeStamp => new System.DateTime(1970, 1, 1, 8, 0, 0, 0).AddSeconds(TimeStamp);
     }
 }

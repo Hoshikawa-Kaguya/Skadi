@@ -23,6 +23,7 @@ namespace Native.Core
 			ChatKeywords.Keyword_init();
 			unityContainer.RegisterType<IPrivateMessage, PrivateMessageInterface>("私聊消息处理");
 			unityContainer.RegisterType<IGroupMessage, GroupMessageInterface>("群消息处理");
+			unityContainer.RegisterType<IAppEnable, AppEnableEvent>("应用已被启用");
 		}
 	}
 }
