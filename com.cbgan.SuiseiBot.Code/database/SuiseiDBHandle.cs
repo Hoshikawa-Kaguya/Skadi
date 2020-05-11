@@ -94,11 +94,13 @@ namespace com.cbgan.SuiseiBot.Code.database
                 //获取用户的数据
                 SQLiteDataReader DBReader = dbHelper.FindRow(TableName, PrimaryColName, UserID);
                 //初始化变量
-                DBReader.Read();
-                int FavorRate = Convert.ToInt32(DBReader["favor_rate"]);//获取当前好感度
+                Dictionary<string, long> user_data = DBDataReader(DBReader);
+                //获取当前好感度
+                long FavorRate = 0;
+                user_data.TryGetValue("favor_rate", out FavorRate);
                 dbHelper.UpdateData(TableName, "favor_rate", (FavorRate + 1).ToString(), PrimaryColName, UserID);
                 dbHelper.UpdateData(TableName, "use_date", Utils.GetNowTimeStamp().ToString(), PrimaryColName, UserID);
-                DateTime LastUseTime = Utils.TimeStampToDateTime(Convert.ToInt64(DBReader["use_date"]));//获取上次调用时间
+                //DateTime LastUseTime = Utils.TimeStampToDateTime(Convert.ToInt64(DBReader["use_date"]));//获取上次调用时间
                 dbHelper.CloseDB();
             }
             else                                                             //未找到签到记录
@@ -115,6 +117,17 @@ namespace com.cbgan.SuiseiBot.Code.database
                 dbHelper.CloseDB();
             }
             return statusValue;
+        }
+
+        private Dictionary<string,long> DBDataReader(SQLiteDataReader dbReader)
+        {
+            Dictionary<string, long> valuePairs = new Dictionary<string, long>();
+            while (dbReader.Read())
+            {
+                valuePairs.Add("favor_rate", Convert.ToInt64(dbReader["favor_rate"]));
+                valuePairs.Add("use_date", Convert.ToInt64(dbReader["use_date"]));
+            }
+            return valuePairs;
         }
     }
 }
