@@ -21,8 +21,9 @@ namespace com.cbgan.SuiseiBot.Code
         /// <param name="e">事件参数</param>
         public void GroupMessage(object sender, CQGroupMessageEventArgs e)
         {
-            int Chat_Type = 0;
-            ChatKeywords.key_word.TryGetValue(e.Message, out Chat_Type);//查找关键字
+            ChatKeywords.key_word.TryGetValue(e.Message, out int Chat_Type);//查找关键字
+            Console.WriteLine($"[{DateTime.Now}] INFO:收到信息[群:{e.FromGroup.Id},成员:{e.FromQQ.Id}]:[{(e.Message.Text).Replace("\r\n", "\\r\\n")}]");
+            if (Chat_Type != 0) Console.WriteLine($"[{DateTime.Now}] INFO:触发关键词，消息类型={Chat_Type}");
             e.CQLog.Debug("Chat_Type", Chat_Type);
             switch (Chat_Type)
             {

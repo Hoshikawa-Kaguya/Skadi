@@ -20,7 +20,6 @@ namespace Native.Core
 		/// <param name="container">用于注册的 IOC 容器 </param>
 		public static void Register (IUnityContainer unityContainer)
 		{
-			ChatKeywords.Keyword_init();
 			unityContainer.RegisterType<IPrivateMessage, PrivateMessageInterface>("私聊消息处理");
 			unityContainer.RegisterType<IGroupMessage, GroupMessageInterface>("群消息处理");
 			unityContainer.RegisterType<IAppEnable, AppEnableEvent>("应用已被启用");

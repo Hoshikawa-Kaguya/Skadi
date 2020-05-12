@@ -15,6 +15,9 @@ namespace com.cbgan.SuiseiBot.Code
     {
         public void AppEnable(object sender, CQAppEnableEventArgs e)
         {
+            ChatKeywords.Keyword_init();
+            Utils.AllocConsole();
+            Console.Title = "SuiseiBot";
             DatabaseInit.Init(e);//数据库初始化
             e.Handler = true;
         }

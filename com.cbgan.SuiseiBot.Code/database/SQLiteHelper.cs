@@ -219,7 +219,6 @@ namespace com.cbgan.SuiseiBot.Code.database
                         cmd.CommandText += keyNames[i] + "='" + keyValues[i] + "'";
                         if (keyNames.Length > 1 && i != keyNames.Length - 1) cmd.CommandText += " AND ";
                     }
-                    Console.WriteLine(cmd.CommandText);
                     return cmd.ExecuteReader();
                 }
                 else throw new Exception("Database not connected");
@@ -248,7 +247,6 @@ namespace com.cbgan.SuiseiBot.Code.database
                         cmd.CommandText += keyNames[i] + "='" + keyValues[i] + "'";
                         if (keyNames.Length > 1 && i != keyNames.Length - 1) cmd.CommandText += " AND ";
                     }
-                    Console.WriteLine(cmd.CommandText);
                     return cmd.ExecuteNonQuery();
                 }
                 else throw new Exception("Database not connected");
@@ -305,7 +303,6 @@ namespace com.cbgan.SuiseiBot.Code.database
                     cmd.CommandText += keyNames[i] + "='" + keyValues[i] + "'";
                     if (keyNames.Length > 1 && i != keyNames.Length - 1) cmd.CommandText += " AND ";
                 }
-                Console.WriteLine(cmd.CommandText);
                 return Convert.ToInt32(cmd.ExecuteScalar());
             }
             catch (Exception) { throw; }

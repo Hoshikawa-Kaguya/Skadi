@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -123,6 +124,13 @@ namespace com.cbgan.SuiseiBot.Code
                 return reader.ReadToEnd();
             }
         }
+
+        /// <summary>
+        /// 打开控制台
+        /// </summary>
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool AllocConsole();
 
         /// <summary>
         /// 获取当前时间戳
