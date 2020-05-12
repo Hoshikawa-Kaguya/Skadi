@@ -18,13 +18,7 @@ namespace com.cbgan.SuiseiBot.Code
             QQ id = e.FromQQ;
             if (e.Message.Text.Equals("debug"))
             {
-                string DBPath = System.IO.Directory.GetCurrentDirectory() + "\\data\\" + e.CQApi.GetLoginQQ()+"\\fuck.db";
-                id.SendPrivateMessage(DBPath);
-                //string FilePath = Curr_Dir + '\\' + "NewFile.txt";
-                //FileStream fs = new FileStream(FilePath, FileMode.CreateNew);
-                //StreamWriter sw = new StreamWriter(fs);
-                //sw.Write("哇哦");  //这里是写入的内容             
-                //sw.Flush();
+                
             }
             e.Handler = true;
         }

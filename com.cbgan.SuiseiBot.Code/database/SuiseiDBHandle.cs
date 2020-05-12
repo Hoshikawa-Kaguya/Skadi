@@ -15,11 +15,12 @@ namespace com.cbgan.SuiseiBot.Code.database
     internal class SuiseiDBHandle
     {
         #region 参数
-        public long QQID { private set; get; }          //QQ号
-        public long GroupId { private set; get; }       //群号
-        public long TriggerTime { private set; get; }  //触发时间戳
+        private long QQID { set; get; }             //QQ号
+        private long GroupId { set; get; }          //群号
+        public int CurrentFavorRate { set; get; }   //当前的好感度
+        private DateTime TriggerTime { set; get; }  //触发时间戳
+        private string[] UserID { set; get; }       //用户信息
         public CQGroupMessageEventArgs SuiseiGroupMessageEventArgs { private set; get; }
-        public CQAppEnableEventArgs SuiseiAppEnableEventArgs { private set; get; }
         public object Sender { private set; get; }
         public readonly static string TableName = "suisei";//数据库表名
         private static string DBPath;//数据库路径
@@ -38,14 +39,14 @@ namespace com.cbgan.SuiseiBot.Code.database
             this.GroupId = eventArgs.FromGroup.Id;
             this.Sender = sender;
             this.SuiseiGroupMessageEventArgs = eventArgs;
-            this.TriggerTime = Utils.GetNowTimeStamp();
+            this.TriggerTime = DateTime.Today;//触发日期
+            UserID = new string[] //用户信息
+            {
+                QQID.ToString(),                    //用户QQ
+                GroupId.ToString(),                 //用户所在群号
+            };
             DBPath = System.IO.Directory.GetCurrentDirectory() + "\\data\\" + eventArgs.CQApi.GetLoginQQ() + "\\suisei.db";
         }
-        /// <summary>
-        /// 在插件启用时使用
-        /// </summary>
-        /// <param name="eventArgs">CQAppEnableEventArgs类</param>
-        private SuiseiDBHandle(){}
         #endregion
 
         #region Suisei互动数据表的定义
@@ -60,7 +61,7 @@ namespace com.cbgan.SuiseiBot.Code.database
                     "INTEGER NOT NULL",
                     "INTEGER NOT NULL",
                     "INTEGER NOT NULL",
-                    "INTEGER NOT NULL" 
+                    "TEXT NOT NULL"
         };
         public readonly static string[] PrimaryColName = {//主键名
                     "uid",          //用户QQ
@@ -69,64 +70,88 @@ namespace com.cbgan.SuiseiBot.Code.database
         #endregion
 
         /// <summary>
-        /// 触发用户签到后修改数据库
-        /// 并判断是否增加好感度
+        /// 触发后查找数据库返回读取到的值
         /// </summary>
         /// <returns>状态值
-        /// 大于0   签到成功且为当前好感度
-        /// 0       初见
-        /// -1      签到失败（今天已经签到过）
+        /// 包含当前好感度和调用数据的Dictionary
+        /// "favor_rate":当前的好感度[int]
+        /// "use_date":上次调用时间[DateTime]
+        /// "isExists":是否存在上一次的记录
         /// </returns>
-        public int SignIn()
+        public Dictionary<string,string> SignIn()
         {
-            string[] UserID = //用户标识
+            try
             {
-                QQID.ToString(),                    //用户QQ
-                GroupId.ToString(),                 //用户所在群号
-            };
-            int statusValue = 0;
-            SQLiteHelper dbHelper = new SQLiteHelper(DBPath);
-            dbHelper.OpenDB();
-            SuiseiGroupMessageEventArgs.CQLog.Debug("数据库", "开始修改数据库");
-            if (Convert.ToBoolean(dbHelper.GetCount(TableName, PrimaryColName, UserID))) //查找是否有记录
-            {
-                SuiseiGroupMessageEventArgs.CQLog.Debug("数据库", "有记录");
-                //获取用户的数据
-                SQLiteDataReader DBReader = dbHelper.FindRow(TableName, PrimaryColName, UserID);
-                //初始化变量
-                Dictionary<string, long> user_data = DBDataReader(DBReader);
-                //获取当前好感度
-                long FavorRate = 0;
-                user_data.TryGetValue("favor_rate", out FavorRate);
-                dbHelper.UpdateData(TableName, "favor_rate", (FavorRate + 1).ToString(), PrimaryColName, UserID);
-                dbHelper.UpdateData(TableName, "use_date", Utils.GetNowTimeStamp().ToString(), PrimaryColName, UserID);
-                //DateTime LastUseTime = Utils.TimeStampToDateTime(Convert.ToInt64(DBReader["use_date"]));//获取上次调用时间
-                dbHelper.CloseDB();
-            }
-            else                                                             //未找到签到记录
-            {
-                SuiseiGroupMessageEventArgs.CQLog.Debug("数据库", "无记录");
-                string[] UserInitData = //创建用户初始化数据数组
+                SQLiteHelper dbHelper = new SQLiteHelper(DBPath);
+                dbHelper.OpenDB();
+                if (Convert.ToBoolean(dbHelper.GetCount(TableName, PrimaryColName, UserID))) //查找是否有记录
                 {
+                    //获取用户的数据
+                    SQLiteDataReader DBReader = dbHelper.FindRow(TableName, PrimaryColName, UserID);
+                    //初始化变量 获取当前好感度
+                    Dictionary<string, string> user_data = DBDataReader(DBReader);
+                    dbHelper.CloseDB();
+                    user_data.Add("isExists", "true");
+                    user_data.TryGetValue("favor_rate", out string favorRate);
+                    this.CurrentFavorRate = Convert.ToInt32(favorRate);//更新当前好感值
+                    return user_data;
+                }
+                else                                                             //未找到签到记录
+                {
+                    string[] UserInitData = //创建用户初始化数据数组
+                    {
                     QQID.ToString(),                    //用户QQ
                     GroupId.ToString(),                 //用户所在群号
                     "0",                                //好感度
-                    Utils.GetNowTimeStamp().ToString()  //签到时间
+                    TriggerTime.ToString()              //签到时间
                 };
-                dbHelper.InsertRow(TableName, ColName, UserInitData);//向数据库写入新数据
-                dbHelper.CloseDB();
+                    dbHelper.InsertRow(TableName, ColName, UserInitData);//向数据库写入新数据
+                    dbHelper.CloseDB();
+                    Dictionary<string, string> user_data = new Dictionary<string, string>();
+                    user_data.Add("favor_rate", "0");
+                    user_data.Add("use_date", TriggerTime.ToString());
+                    user_data.Add("isExists", "false");
+                    this.CurrentFavorRate = 0;
+                    return user_data;
+                }
             }
-            return statusValue;
+            catch (Exception){throw;}
         }
 
-        private Dictionary<string,long> DBDataReader(SQLiteDataReader dbReader)
+        /// <summary>
+        /// 更新当前的好感度
+        /// </summary>
+        /// <returns>返回成功标准</returns>
+        public bool FavorRateUp()
         {
-            Dictionary<string, long> valuePairs = new Dictionary<string, long>();
-            while (dbReader.Read())
+            try
             {
-                valuePairs.Add("favor_rate", Convert.ToInt64(dbReader["favor_rate"]));
-                valuePairs.Add("use_date", Convert.ToInt64(dbReader["use_date"]));
+                SQLiteHelper dbHelper = new SQLiteHelper(DBPath);
+                dbHelper.OpenDB();
+                //更新好感度数据
+                this.CurrentFavorRate++;
+                dbHelper.UpdateData(TableName, "favor_rate", CurrentFavorRate.ToString(), PrimaryColName, UserID);
+                dbHelper.UpdateData(TableName, "use_date", TriggerTime.ToString(), PrimaryColName, UserID);
+                dbHelper.CloseDB();
             }
+            catch (Exception){throw; }
+            return true;
+        }
+
+        /// <summary>
+        /// 读取SQLiteDataReader中的第一行数据
+        /// 其他数据丢弃
+        /// </summary>
+        /// <param name="dbReader"></param>
+        /// <returns>返回当前读取到的第一行数据</returns>
+        private Dictionary<string,string> DBDataReader(SQLiteDataReader dbReader)
+        {
+            Dictionary<string, string> valuePairs = new Dictionary<string, string>();
+            dbReader.Read();
+            //写入键值对
+            valuePairs.Add("favor_rate", dbReader["favor_rate"].ToString());
+            valuePairs.Add("use_date", dbReader["use_date"].ToString());
+            while (dbReader.Read()) ;//丢弃数据
             return valuePairs;
         }
     }
