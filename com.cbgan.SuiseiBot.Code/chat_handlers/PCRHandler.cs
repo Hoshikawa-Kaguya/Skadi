@@ -40,7 +40,7 @@ namespace com.cbgan.SuiseiBot.Code.handlers
             try
             {
                 //获取第二个字符开始到空格为止的PCR命令
-                pcrCommand = eventArgs.Message.ToString().Substring(1).Split(' ')[0];
+                pcrCommand = eventArgs.Message.Text.Substring(1).Split(' ')[0];
 
                 //命令为空
                 if (pcrCommand == "") return;
@@ -59,7 +59,7 @@ namespace com.cbgan.SuiseiBot.Code.handlers
             QQgroup = eventArgs.FromGroup;
 
             //index=0为命令本身，其余为参数
-            string[] commandArgs = eventArgs.Message.ToString().Split(' ');
+            string[] commandArgs = eventArgs.Message.Text.Split(' ');
 
             PCRDBHelper dbAction = new PCRDBHelper(sender, eventArgs);
 
@@ -71,11 +71,11 @@ namespace com.cbgan.SuiseiBot.Code.handlers
                 case "建会":
                     if (checkForLength(commandArgs, 1))
                     {
-                        if (commandArgs.Length == 2)
+                        if (commandArgs.Length == 3)
                         {
                             result = dbAction.createGuild(commandArgs[1], commandArgs[2]);
                         }
-                        else if (commandArgs.Length == 1)
+                        else if (commandArgs.Length == 2)
                         {
                             result = dbAction.createGuild(commandArgs[1], QQgroup.GetGroupInfo().Name);
                         }
@@ -92,47 +92,80 @@ namespace com.cbgan.SuiseiBot.Code.handlers
                     }
 
                     break;
-                //参数1 昵称
+                //参数1 QQ号
                 case "入会":
-                    List<CQCode> addedQQList=new List<CQCode>();    //已经入会的QQ号列表的AT值
-                    if (checkForLength(commandArgs, 1))
-                        if (eventArgs.Message.CQCodes.Count >= 1)
+                    Dictionary<long,int> addedQQList= new Dictionary<long, int>();    //已经入会的QQ号列表
+                    if (checkForLength(commandArgs, 1))         
+                        if (eventArgs.Message.CQCodes.Count >= 1)           //如果存在AT
                         {
-                            foreach (CQCode code in eventArgs.Message.CQCodes)
+                            foreach (CQCode code in eventArgs.Message.CQCodes)  //检查每一个AT
                             {
                                 if (code.Function.Equals(CQFunction.At)            &&
                                     code.Items.ContainsKey("qq")                   &&
                                     long.TryParse(code.Items["qq"], out long qqid) &&
-                                    qqid < QQ.MinValue)
+                                    qqid > QQ.MinValue)
                                 {
-                                    addedQQList.Add(CQApi.CQCode_At(qqid));
-                                    result = dbAction.joinGuild(qqid, commandArgs[2]);
+                                    //需要添加为成员的QQ号列表和对应操作的返回值
+                                    addedQQList.Add(qqid, dbAction.joinGuild(qqid, eventArgs.CQApi.GetGroupMemberInfo(eventArgs.FromGroup,qqid).Nick));
                                 }
                                 else
                                 {
+                                    //有操作的QQ号非法
                                     result = -1;
                                 }
                             }
+                            //如果只存在需要添加的成员，而没有需要更新的成员
+                            if (addedQQList.Count>0 && addedQQList.Where(x=> x.Value==1).ToList().Count==0)
+                            {
+                                result = 0;
+                            }
+                            else
+                            {//否则就是既存在需要更新又存在需要添加的
+                                result = 2;
+                            }
                         }
-                        else if (commandArgs.Length == 1)
+                        else
                         {
-                            result = dbAction.joinGuild(eventArgs.FromQQ, commandArgs[1]);
+                            result = dbAction.joinGuild(eventArgs.FromQQ, eventArgs.CQApi.GetGroupMemberInfo(eventArgs.FromGroup, eventArgs.FromQQ).Nick);
                         }
 
                     switch (result)
                     {
-                        case -2:
+                        case -2://不可能进入，但防御性编程，需要处理
                             QQgroup.SendGroupMessage(CQApi.CQCode_At(eventArgs.FromQQ.Id), " 未定义行为，请检查代码。");
                             break;
-                        case -1:
+                        case -1://一般情况下不可能非法，但也要处理
                             QQgroup.SendGroupMessage(CQApi.CQCode_At(eventArgs.FromQQ.Id), " QQ号输入非法。");
                             break;
-                        case 0:
+                        case 0://只存在新添加的成员
                           
-                            QQgroup.SendGroupMessage(CQApi.CQCode_At(eventArgs.FromQQ.Id), " 以下成员已经加入：\r\n",addedQQList.ToArray());
+                            StringBuilder sb=new StringBuilder();
+                            //at所有新添加的成员
+                            foreach (long qqNumber in addedQQList.Keys)
+                                sb.Append(CQApi.CQCode_At(qqNumber).ToSendString());
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(eventArgs.FromQQ.Id), " 以下成员已经加入：\r\n",sb.ToString());
+                           
                             break;
-                        case 1:
+                        case 1://只存在需要更新的成员，目前也不可能进入了
                             QQgroup.SendGroupMessage(CQApi.CQCode_At(eventArgs.FromQQ.Id), " 成员已经存在，更新了当前成员的信息。");
+                            break;
+                        case 2://存在需要更新和/或需要添加的成员
+                            StringBuilder sb2 = new StringBuilder();
+                            //筛选出所有返回值为1的操作，也即更新了的成员
+                            foreach (long qqNumber in addedQQList.Where(x => x.Value == 1).ToDictionary(x=>x.Key,x=>x.Value).Keys)
+                                sb2.Append(CQApi.CQCode_At(qqNumber).ToSendString());
+
+                            StringBuilder sb3 = new StringBuilder();
+                            //如果有操作返回值为0，说明存在新添加的成员
+                            if (addedQQList.Where(x => x.Value == 0).ToDictionary(x => x.Key, x => x.Value).Count > 0)
+                            {
+                                foreach (long qqNumber in addedQQList
+                                                          .Where(x => x.Value == 0)
+                                                          .ToDictionary(x => x.Key, x => x.Value).Keys)
+                                    sb3.Append(CQApi.CQCode_At(qqNumber).ToSendString());
+                            }
+
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(eventArgs.FromQQ.Id), " 有成员已经存在，以下成员已经更新：\r\n", sb2.ToString(), sb3.ToString()!=""?("\r\n以下成员已添加\r\n"+sb3.ToString()):""/*只有存在新添加成员的情况下才需要显示这一句*/);
                             break;
                     }
 

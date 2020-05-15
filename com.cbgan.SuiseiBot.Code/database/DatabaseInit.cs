@@ -24,6 +24,16 @@ namespace com.cbgan.SuiseiBot.Code.database
                 e.CQLog.Info("DBInit", "suisei table not found\ncreate new table");
                 dbHelper.CreateTable(SuiseiDBHelper.TableName, SuiseiDBHelper.ColName, SuiseiDBHelper.ColType,SuiseiDBHelper.PrimaryColName);
             }
+            if (!dbHelper.TableExists("guild")) //公会数据库初始化
+            {
+                e.CQLog.Info("DBInit", "guild table not found\ncreate new table");
+                dbHelper.CreateTable(PCRDBHelper.GuildTableName, PCRDBHelper.GColName, PCRDBHelper.GColType, PCRDBHelper.GPrimaryColName);
+            }
+            if (!dbHelper.TableExists("member")) //公会成员数据库初始化
+            {
+                e.CQLog.Info("DBInit", "member table not found\ncreate new table");
+                dbHelper.CreateTable(PCRDBHelper.MemberTableName, PCRDBHelper.MColName, PCRDBHelper.MColType, PCRDBHelper.MPrimaryColName);
+            }
             dbHelper.CloseDB();//关闭数据库连接
         }
     }

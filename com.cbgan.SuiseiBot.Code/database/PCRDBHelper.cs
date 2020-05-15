@@ -142,7 +142,7 @@ namespace com.cbgan.SuiseiBot.Code.database
                 if (Convert.ToBoolean(dbHelper.GetCount(MemberTableName, MPrimaryColName, memberKey))) //查找是否有记录
                 {
                     //已存在，则更新信息
-                    dbHelper.UpdateData(MemberTableName, "nickName", nickName, MPrimaryColName, memberKey);
+                    dbHelper.UpdateData(MemberTableName, "name", nickName, MPrimaryColName, memberKey);
                     dbHelper.CloseDB();
                     return 1;
                 }

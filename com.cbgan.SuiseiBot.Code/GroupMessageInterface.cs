@@ -25,7 +25,7 @@ namespace com.cbgan.SuiseiBot.Code
             Console.WriteLine($"[{DateTime.Now}] INFO:收到信息[群:{e.FromGroup.Id},成员:{e.FromQQ.Id}]:[{(e.Message.Text).Replace("\r\n", "\\r\\n")}]");
 
             //以!开头的消息全部交给PCR处理
-            if (e.Message.ToString().Trim().StartsWith("!") || e.Message.ToString().Trim().StartsWith("！"))
+            if (e.Message.Text.Trim().StartsWith("#"))
             {
                 PCRHandler pcr =new PCRHandler(sender,e);
                 pcr.GetChat();
