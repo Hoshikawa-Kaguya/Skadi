@@ -21,6 +21,8 @@ namespace com.cbgan.SuiseiBot.Code
             key_word.Add("给爷来个优质睡眠套餐", 1);
             //2 奇奇怪怪的签到
             key_word.Add("彗酱今天也很可爱", 2);
+
+            key_word.Add("debug", 1);
         }
     }
 }

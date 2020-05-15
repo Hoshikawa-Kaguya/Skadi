@@ -12,7 +12,7 @@ using System.IO;
 
 namespace com.cbgan.SuiseiBot.Code.database
 {
-    internal class SuiseiDBHandle
+    internal class SuiseiDBHelper
     {
         #region 参数
         private long QQID { set; get; }             //QQ号
@@ -33,7 +33,7 @@ namespace com.cbgan.SuiseiBot.Code.database
         /// <param name="sender">sender object</param>
         /// <param name="eventArgs">CQAppEnableEventArgs类</param>
         /// <param name="time">触发时间</param>
-        public SuiseiDBHandle(object sender, CQGroupMessageEventArgs eventArgs)
+        public SuiseiDBHelper(object sender, CQGroupMessageEventArgs eventArgs)
         {
             this.QQID = eventArgs.FromQQ.Id;
             this.GroupId = eventArgs.FromGroup.Id;

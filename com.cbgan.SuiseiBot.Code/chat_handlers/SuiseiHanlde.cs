@@ -17,15 +17,15 @@ namespace com.cbgan.SuiseiBot.Code.handlers
         #region 属性
         public object Sender { private set; get; }
         public Group QQGroup { private set; get; }
-        public CQGroupMessageEventArgs SuiseiHanldeEventArgs { private set; get; }
+        public CQGroupMessageEventArgs SuiseiEventArgs { private set; get; }
         #endregion
 
         #region 构造函数
         public SuiseiHanlde(object sender, CQGroupMessageEventArgs e)
         {
-            this.SuiseiHanldeEventArgs = e;
+            this.SuiseiEventArgs = e;
             this.Sender = sender;
-            this.QQGroup = SuiseiHanldeEventArgs.FromGroup;
+            this.QQGroup = SuiseiEventArgs.FromGroup;
         }
         #endregion
 
@@ -34,8 +34,8 @@ namespace com.cbgan.SuiseiBot.Code.handlers
         /// </summary>
         public void GetChat()
         {
-            SuiseiHanldeEventArgs.CQLog.Info("收到消息", "签到");
-            SuiseiDBHandle suiseiDB = new SuiseiDBHandle(Sender, SuiseiHanldeEventArgs);
+            SuiseiEventArgs.CQLog.Info("收到消息", "签到");
+            SuiseiDBHelper suiseiDB = new SuiseiDBHelper(Sender, SuiseiEventArgs);
             Dictionary<string, string> GetUserData = suiseiDB.SignIn();
             //获取调用时间
             GetUserData.TryGetValue("use_date", out string LastUseDateString);
@@ -53,7 +53,7 @@ namespace com.cbgan.SuiseiBot.Code.handlers
                 suiseiDB.FavorRateUp();
                 QQGroup.SendGroupMessage("奇怪的好感度增加了！\n当前好感度为：", FavorRate + 1);
             }
-            SuiseiHanldeEventArgs.Handler = true;
+            SuiseiEventArgs.Handler = true;
         }
     }
 }

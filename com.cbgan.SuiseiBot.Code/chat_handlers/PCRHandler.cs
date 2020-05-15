@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using com.cbgan.SuiseiBot.Code.chat_handlers;
 using com.cbgan.SuiseiBot.Code.database;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.Enum;
@@ -149,6 +150,13 @@ namespace com.cbgan.SuiseiBot.Code.handlers
                     break;
                 case "一键入会":
                     dbAction.allJoin();
+                    break;
+
+                default:
+                    if (GuildBattleManagerHandle.TryParseCommand(pcrCommand))
+                    {
+                        GuildBattleManagerHandle guildBattle = new GuildBattleManagerHandle(sender, eventArgs);
+                    }
                     break;
             }
         }

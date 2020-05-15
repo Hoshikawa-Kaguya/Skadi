@@ -69,11 +69,12 @@
   <ItemGroup>
     <Compile Include="ChatKeywords.cs" />
     <Compile Include="AppEnableEvent.cs" />
+    <Compile Include="chat_handlers\GuildBattleManagerHandle.cs" />
     <Compile Include="chat_handlers\PCRHandler.cs" />
     <Compile Include="database\DatabaseInit.cs" />
     <Compile Include="database\PCRDBHelper.cs" />
     <Compile Include="database\SQLiteHelper.cs" />
-    <Compile Include="database\SuiseiDBHandle.cs" />
+    <Compile Include="database\SuiseiDBHelper.cs" />
     <Compile Include="chat_handlers\DefaultHandle.cs" />
     <Compile Include="GroupMessageInterface.cs" />
     <Compile Include="chat_handlers\SuiseiHanlde.cs" />

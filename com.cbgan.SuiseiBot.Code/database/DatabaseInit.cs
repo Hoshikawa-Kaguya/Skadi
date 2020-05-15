@@ -22,7 +22,7 @@ namespace com.cbgan.SuiseiBot.Code.database
             if (!dbHelper.TableExists("suisei")) //彗酱数据库初始化
             {
                 e.CQLog.Info("DBInit", "suisei table not found\ncreate new table");
-                dbHelper.CreateTable(SuiseiDBHandle.TableName, SuiseiDBHandle.ColName, SuiseiDBHandle.ColType,SuiseiDBHandle.PrimaryColName);
+                dbHelper.CreateTable(SuiseiDBHelper.TableName, SuiseiDBHelper.ColName, SuiseiDBHelper.ColType,SuiseiDBHelper.PrimaryColName);
             }
             dbHelper.CloseDB();//关闭数据库连接
         }
