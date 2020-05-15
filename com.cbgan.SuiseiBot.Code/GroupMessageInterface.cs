@@ -24,7 +24,7 @@ namespace com.cbgan.SuiseiBot.Code
             
             Console.WriteLine($"[{DateTime.Now}] INFO:收到信息[群:{e.FromGroup.Id},成员:{e.FromQQ.Id}]:[{(e.Message.Text).Replace("\r\n", "\\r\\n")}]");
 
-            //以!开头的消息全部交给PCR处理
+            //以#开头的消息全部交给PCR处理
             if (e.Message.Text.Trim().StartsWith("#"))
             {
                 PCRHandler pcr =new PCRHandler(sender,e);
@@ -35,7 +35,7 @@ namespace com.cbgan.SuiseiBot.Code
                 //其他全字匹配功能
                 int Chat_Type = 0;
                 ChatKeywords.key_word.TryGetValue(e.Message, out Chat_Type); //查找关键字
-                if (Chat_Type != 0) Console.WriteLine($"[{DateTime.Now}] INFO:触发关键词，消息类型={Chat_Type}");
+                if (Chat_Type != 0) ConsoleLog.Info("触发关键词",$"消息类型={Chat_Type}");
                 switch (Chat_Type)
                 {
                     case 0: //输入无法被分类

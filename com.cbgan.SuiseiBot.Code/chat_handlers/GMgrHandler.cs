@@ -17,33 +17,33 @@ namespace com.cbgan.SuiseiBot.Code.handlers
     {
         #region 属性
 
-        public object                  sender     { private set; get; }
-        public CQGroupMessageEventArgs eventArgs  { private set; get; }
-        public string                  pcrCommand { private get; set; }
+        public object                  Sender     { private set; get; }
+        public CQGroupMessageEventArgs GMgrEventArgs  { private set; get; }
+        public string                  GMgrCommand { private get; set; }
         public Group                   QQgroup    { private get; set; }
 
         #endregion
 
         #region 构造函数
 
-        public PCRHandler(object sender, CQGroupMessageEventArgs e)
+        public PCRHandler(object Sender, CQGroupMessageEventArgs e)
         {
-            this.eventArgs = e;
-            this.sender    = sender;
+            this.GMgrEventArgs = e;
+            this.Sender    = Sender;
         }
 
         #endregion
 
         public void GetChat() //消息接收并判断是否响应
         {
-            if (eventArgs == null || sender == null) return;
+            if (GMgrEventArgs == null || Sender == null) return;
             try
             {
                 //获取第二个字符开始到空格为止的PCR命令
-                pcrCommand = eventArgs.Message.Text.Substring(1).Split(' ')[0];
+                GMgrCommand = GMgrEventArgs.Message.Text.Substring(1).Split(' ')[0];
 
                 //命令为空
-                if (pcrCommand == "") return;
+                if (GMgrCommand == "") return;
             }
             catch
             {
@@ -51,21 +51,21 @@ namespace com.cbgan.SuiseiBot.Code.handlers
                 return;
             }
 
-            Group_Response();
+            GroupResponse();
         }
 
-        private void Group_Response() //功能响应
+        private void GroupResponse() //功能响应
         {
-            QQgroup = eventArgs.FromGroup;
+            QQgroup = GMgrEventArgs.FromGroup;
 
             //index=0为命令本身，其余为参数
-            string[] commandArgs = eventArgs.Message.Text.Split(' ');
+            string[] commandArgs = GMgrEventArgs.Message.Text.Split(' ');
 
-            PCRDBHelper dbAction = new PCRDBHelper(sender, eventArgs);
+            PCRDBHelper dbAction = new PCRDBHelper(Sender, GMgrEventArgs);
 
             int result = -2;
 
-            switch (pcrCommand)
+            switch (GMgrCommand)
             {
                 //参数1 服务器地区，参数2 工会名（可选，缺省为群名）
                 case "建会":
@@ -84,10 +84,10 @@ namespace com.cbgan.SuiseiBot.Code.handlers
                     switch (result)
                     {
                         case 0:
-                            QQgroup.SendGroupMessage(CQApi.CQCode_At(eventArgs.FromQQ.Id), " 公会已经创建。");
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 公会已经创建。");
                             break;
                         case 1:
-                            QQgroup.SendGroupMessage(CQApi.CQCode_At(eventArgs.FromQQ.Id), " 公会已经存在，更新了当前公会的信息。");
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 公会已经存在，更新了当前公会的信息。");
                             break;
                     }
 
@@ -96,9 +96,9 @@ namespace com.cbgan.SuiseiBot.Code.handlers
                 case "入会":
                     Dictionary<long,int> addedQQList= new Dictionary<long, int>();    //已经入会的QQ号列表
                     if (checkForLength(commandArgs, 1))         
-                        if (eventArgs.Message.CQCodes.Count >= 1)           //如果存在AT
+                        if (GMgrEventArgs.Message.CQCodes.Count >= 1)           //如果存在AT
                         {
-                            foreach (CQCode code in eventArgs.Message.CQCodes)  //检查每一个AT
+                            foreach (CQCode code in GMgrEventArgs.Message.CQCodes)  //检查每一个AT
                             {
                                 if (code.Function.Equals(CQFunction.At)            &&
                                     code.Items.ContainsKey("qq")                   &&
@@ -106,7 +106,7 @@ namespace com.cbgan.SuiseiBot.Code.handlers
                                     qqid > QQ.MinValue)
                                 {
                                     //需要添加为成员的QQ号列表和对应操作的返回值
-                                    addedQQList.Add(qqid, dbAction.joinGuild(qqid, eventArgs.CQApi.GetGroupMemberInfo(eventArgs.FromGroup,qqid).Nick));
+                                    addedQQList.Add(qqid, dbAction.joinGuild(qqid, GMgrEventArgs.CQApi.GetGroupMemberInfo(GMgrEventArgs.FromGroup,qqid).Nick));
                                 }
                                 else
                                 {
@@ -126,16 +126,16 @@ namespace com.cbgan.SuiseiBot.Code.handlers
                         }
                         else
                         {
-                            result = dbAction.joinGuild(eventArgs.FromQQ, eventArgs.CQApi.GetGroupMemberInfo(eventArgs.FromGroup, eventArgs.FromQQ).Nick);
+                            result = dbAction.joinGuild(GMgrEventArgs.FromQQ, GMgrEventArgs.CQApi.GetGroupMemberInfo(GMgrEventArgs.FromGroup, GMgrEventArgs.FromQQ).Nick);
                         }
 
                     switch (result)
                     {
                         case -2://不可能进入，但防御性编程，需要处理
-                            QQgroup.SendGroupMessage(CQApi.CQCode_At(eventArgs.FromQQ.Id), " 未定义行为，请检查代码。");
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 未定义行为，请检查代码。");
                             break;
                         case -1://一般情况下不可能非法，但也要处理
-                            QQgroup.SendGroupMessage(CQApi.CQCode_At(eventArgs.FromQQ.Id), " QQ号输入非法。");
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " QQ号输入非法。");
                             break;
                         case 0://只存在新添加的成员
                           
@@ -143,11 +143,11 @@ namespace com.cbgan.SuiseiBot.Code.handlers
                             //at所有新添加的成员
                             foreach (long qqNumber in addedQQList.Keys)
                                 sb.Append(CQApi.CQCode_At(qqNumber).ToSendString());
-                            QQgroup.SendGroupMessage(CQApi.CQCode_At(eventArgs.FromQQ.Id), " 以下成员已经加入：\r\n",sb.ToString());
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 以下成员已经加入：\r\n",sb.ToString());
                            
                             break;
                         case 1://只存在需要更新的成员，目前也不可能进入了
-                            QQgroup.SendGroupMessage(CQApi.CQCode_At(eventArgs.FromQQ.Id), " 成员已经存在，更新了当前成员的信息。");
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 成员已经存在，更新了当前成员的信息。");
                             break;
                         case 2://存在需要更新和/或需要添加的成员
                             StringBuilder sb2 = new StringBuilder();
@@ -165,7 +165,7 @@ namespace com.cbgan.SuiseiBot.Code.handlers
                                     sb3.Append(CQApi.CQCode_At(qqNumber).ToSendString());
                             }
 
-                            QQgroup.SendGroupMessage(CQApi.CQCode_At(eventArgs.FromQQ.Id), " 有成员已经存在，以下成员已经更新：\r\n", sb2.ToString(), sb3.ToString()!=""?("\r\n以下成员已添加\r\n"+sb3.ToString()):""/*只有存在新添加成员的情况下才需要显示这一句*/);
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 有成员已经存在，以下成员已经更新：\r\n", sb2.ToString(), sb3.ToString()!=""?("\r\n以下成员已添加\r\n"+sb3.ToString()):""/*只有存在新添加成员的情况下才需要显示这一句*/);
                             break;
                     }
 
@@ -185,10 +185,10 @@ namespace com.cbgan.SuiseiBot.Code.handlers
                     dbAction.allJoin();
                     break;
 
-                default:
-                    if (GuildBattleManagerHandle.TryParseCommand(pcrCommand))
+                default://在有其他的指令时交给会战管理器进行响应
+                    if (GuildBattleManagerHandle.TryParseCommand(GMgrCommand))
                     {
-                        GuildBattleManagerHandle guildBattle = new GuildBattleManagerHandle(sender, eventArgs);
+                        GuildBattleManagerHandle guildBattle = new GuildBattleManagerHandle(Sender, GMgrEventArgs);
                     }
                     break;
             }
@@ -199,7 +199,7 @@ namespace com.cbgan.SuiseiBot.Code.handlers
         {
             if (args.Length < (len + 1))
             {
-                QQgroup.SendGroupMessage(CQApi.CQCode_At(eventArgs.FromQQ.Id), " 请输入正确的参数个数。");
+                QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 请输入正确的参数个数。");
                 return false;
             }
             else
