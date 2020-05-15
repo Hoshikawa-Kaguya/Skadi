@@ -69,7 +69,9 @@
   <ItemGroup>
     <Compile Include="ChatKeywords.cs" />
     <Compile Include="AppEnableEvent.cs" />
+    <Compile Include="chat_handlers\PCRHandler.cs" />
     <Compile Include="database\DatabaseInit.cs" />
+    <Compile Include="database\PCRDBHelper.cs" />
     <Compile Include="database\SQLiteHelper.cs" />
     <Compile Include="database\SuiseiDBHandle.cs" />
     <Compile Include="chat_handlers\DefaultHandle.cs" />
