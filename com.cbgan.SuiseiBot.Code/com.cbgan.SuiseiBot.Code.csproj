@@ -67,22 +67,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChatKeywords.cs" />
-    <Compile Include="AppEnableEvent.cs" />
-    <Compile Include="chat_handlers\GuildBattleManagerHandle.cs" />
-    <Compile Include="chat_handlers\GMgrHandler.cs" />
-    <Compile Include="ConsoleLog.cs" />
-    <Compile Include="database\DatabaseInit.cs" />
-    <Compile Include="database\PCRDBHelper.cs" />
-    <Compile Include="database\SQLiteHelper.cs" />
-    <Compile Include="database\SuiseiDBHelper.cs" />
-    <Compile Include="chat_handlers\DefaultHandle.cs" />
-    <Compile Include="GroupMessageInterface.cs" />
-    <Compile Include="chat_handlers\SuiseiHanlde.cs" />
-    <Compile Include="PrivateMessageInterface.cs" />
+    <Compile Include="Resource\ChatKeywords.cs" />
+    <Compile Include="CQInterface\AppEnableInterface.cs" />
+    <Compile Include="ChatHandlers\GuildBattleManagerHandle.cs" />
+    <Compile Include="ChatHandlers\GuildManagerHandler.cs" />
+    <Compile Include="Tool\ConsoleLog.cs" />
+    <Compile Include="Database\DatabaseInit.cs" />
+    <Compile Include="Database\GuildManagerDBHelper.cs" />
+    <Compile Include="SqliteTool\SQLiteColumn.cs" />
+    <Compile Include="SqliteTool\SQLiteHelper.cs" />
+    <Compile Include="Database\SuiseiDBHelper.cs" />
+    <Compile Include="ChatHandlers\DefaultHandle.cs" />
+    <Compile Include="CQInterface\GroupMessageInterface.cs" />
+    <Compile Include="ChatHandlers\SuiseiHanlde.cs" />
+    <Compile Include="CQInterface\PrivateMessageInterface.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="chat_handlers\SurpriseMFKHandle.cs" />
-    <Compile Include="Utils.cs" />
+    <Compile Include="ChatHandlers\SurpriseMFKHandle.cs" />
+    <Compile Include="Tool\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Native.Sdk\Native.Sdk.csproj">

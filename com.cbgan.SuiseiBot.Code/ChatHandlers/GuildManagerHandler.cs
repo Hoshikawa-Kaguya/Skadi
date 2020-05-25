@@ -61,7 +61,7 @@ namespace com.cbgan.SuiseiBot.Code.handlers
             //index=0为命令本身，其余为参数
             string[] commandArgs = GMgrEventArgs.Message.Text.Split(' ');
 
-            PCRDBHelper dbAction = new PCRDBHelper(Sender, GMgrEventArgs);
+            GuildManagerDBHelper dbAction = new GuildManagerDBHelper(Sender, GMgrEventArgs);
 
             int result = -2;
 

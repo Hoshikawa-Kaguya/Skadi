@@ -12,9 +12,9 @@ namespace com.cbgan.SuiseiBot.Code.chat_handlers
     {
         #region 属性
 
-        public object sender { private set; get; }
-        public CQGroupMessageEventArgs eventArgs { private set; get; }
-        public string pcrCommand { private get; set; }
+        public object Sender { private set; get; }
+        public CQGroupMessageEventArgs MgrEventArgs { private set; get; }
+        public string GBMgrCommand { private get; set; }
         public Group QQgroup { private get; set; }
 
         #endregion
@@ -23,8 +23,8 @@ namespace com.cbgan.SuiseiBot.Code.chat_handlers
 
         public GuildBattleManagerHandle(object sender, CQGroupMessageEventArgs e)
         {
-            this.eventArgs = e;
-            this.sender = sender;
+            this.MgrEventArgs = e;
+            this.Sender = sender;
         }
 
         #endregion

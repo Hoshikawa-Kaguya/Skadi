@@ -27,12 +27,12 @@ namespace com.cbgan.SuiseiBot.Code.database
             if (!dbHelper.TableExists("guild")) //公会数据库初始化
             {
                 ConsoleLog.Warning("数据库初始化", "未找到公会表数据表 - 创建一个新表");
-                dbHelper.CreateTable(PCRDBHelper.GuildTableName, PCRDBHelper.GColName, PCRDBHelper.GColType, PCRDBHelper.GPrimaryColName);
+                dbHelper.CreateTable(GuildManagerDBHelper.GuildTableName, GuildManagerDBHelper.GColName, GuildManagerDBHelper.GColType, GuildManagerDBHelper.GPrimaryColName);
             }
             if (!dbHelper.TableExists("member")) //公会成员数据库初始化
             {
                 ConsoleLog.Warning("数据库初始化", "未找到成员表数据表 - 创建一个新表");
-                dbHelper.CreateTable(PCRDBHelper.MemberTableName, PCRDBHelper.MColName, PCRDBHelper.MColType, PCRDBHelper.MPrimaryColName);
+                dbHelper.CreateTable(GuildManagerDBHelper.MemberTableName, GuildManagerDBHelper.MColName, GuildManagerDBHelper.MColType, GuildManagerDBHelper.MPrimaryColName);
             }
             dbHelper.CloseDB();//关闭数据库连接
         }

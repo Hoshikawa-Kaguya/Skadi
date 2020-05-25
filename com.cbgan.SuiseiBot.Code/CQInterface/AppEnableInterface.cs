@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace com.cbgan.SuiseiBot.Code
 {
-    public class AppEnableEvent : IAppEnable
+    public class AppEnableInterface : IAppEnable
     {
         public void AppEnable(object sender, CQAppEnableEventArgs e)
         {

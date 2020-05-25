@@ -8,7 +8,7 @@ using Native.Sdk.Cqp.EventArgs;
 
 namespace com.cbgan.SuiseiBot.Code.database
 {
-    internal class PCRDBHelper
+    internal class GuildManagerDBHelper
     {
         #region 参数
 
@@ -33,7 +33,7 @@ namespace com.cbgan.SuiseiBot.Code.database
         /// <param name="sender">sender object</param>
         /// <param name="eventArgs">CQAppEnableEventArgs类</param>
         /// <param name="time">触发时间</param>
-        public PCRDBHelper(object sender, CQGroupMessageEventArgs eventArgs)
+        public GuildManagerDBHelper(object sender, CQGroupMessageEventArgs eventArgs)
         {
             this.QQID      = eventArgs.FromQQ.Id;
             this.GroupId   = eventArgs.FromGroup.Id;
