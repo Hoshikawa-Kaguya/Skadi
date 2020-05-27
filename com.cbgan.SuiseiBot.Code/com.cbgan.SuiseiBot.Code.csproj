@@ -71,6 +71,7 @@
     <Compile Include="CQInterface\AppEnableInterface.cs" />
     <Compile Include="ChatHandlers\GuildBattleManagerHandle.cs" />
     <Compile Include="ChatHandlers\GuildManagerHandler.cs" />
+    <Compile Include="SqliteTool\SQLiteTable.cs" />
     <Compile Include="Tool\ConsoleLog.cs" />
     <Compile Include="Database\DatabaseInit.cs" />
     <Compile Include="Database\GuildManagerDBHelper.cs" />

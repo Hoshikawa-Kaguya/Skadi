@@ -34,7 +34,7 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         /// <returns>SQL指令</returns>
         public static string GetColType(PropertyInfo property)
         {
-            SQLiteColumn columnConfig = (SQLiteColumn)property.GetCustomAttribute(typeof(SQLiteColumn), true);
+            SQLiteColumn columnConfig = property.GetCustomAttribute<SQLiteColumn>();
             if (columnConfig == null || columnConfig.ColumnType == null)
             {
                 //整数类型
@@ -73,7 +73,7 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         /// <returns>SQL指令</returns>
         public static string ColIsIdentity(PropertyInfo property)
         {
-            SQLiteColumn columnConfig = (SQLiteColumn)property.GetCustomAttribute(typeof(SQLiteColumn), true);
+            SQLiteColumn columnConfig = property.GetCustomAttribute<SQLiteColumn>();
             if (columnConfig == null) return "";
             else return columnConfig.IsIdentity ? "AUTOINCREMENT" : "";
         }
@@ -85,7 +85,7 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         /// <returns>SQL指令</returns>
         public static string ColIsNullable(PropertyInfo property)
         {
-            SQLiteColumn columnConfig = (SQLiteColumn)property.GetCustomAttribute(typeof(SQLiteColumn), true);
+            SQLiteColumn columnConfig = property.GetCustomAttribute<SQLiteColumn>();
             if (columnConfig == null) return "NOT NULL";
             else return columnConfig.IsNullable ? "" : "NOT NULL";
         }
@@ -97,7 +97,7 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         /// <returns>是否为主键</returns>
         public static bool ColIsPrimaryKey(PropertyInfo property)
         {
-            SQLiteColumn columnConfig = (SQLiteColumn)property.GetCustomAttribute(typeof(SQLiteColumn), true);
+            SQLiteColumn columnConfig = property.GetCustomAttribute<SQLiteColumn>();
             if (columnConfig == null) return false;
             else return columnConfig.IsPrimaryKey;
         }
