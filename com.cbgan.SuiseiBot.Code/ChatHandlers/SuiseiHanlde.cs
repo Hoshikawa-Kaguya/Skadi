@@ -4,13 +4,14 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using com.cbgan.SuiseiBot.Code.database;
+using com.cbgan.SuiseiBot.Code.Database;
+using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
 using Native.Sdk.Cqp.Model;
 
-namespace com.cbgan.SuiseiBot.Code.handlers
+namespace com.cbgan.SuiseiBot.Code.ChatHandlers
 {
     internal class SuiseiHanlde
     {
@@ -34,14 +35,14 @@ namespace com.cbgan.SuiseiBot.Code.handlers
         /// </summary>
         public void GetChat()
         {
-            SuiseiEventArgs.CQLog.Info("收到消息", "签到");
+            ConsoleLog.Info("收到消息", "慧酱签到");
             SuiseiDBHelper suiseiDB = new SuiseiDBHelper(Sender, SuiseiEventArgs);
             Dictionary<string, string> GetUserData = suiseiDB.SignIn();
             //获取调用时间
             GetUserData.TryGetValue("use_date", out string LastUseDateString);
             //获取是否是第一次调用
             GetUserData.TryGetValue("isExists", out string isExists);
-            DateTime LastUseDate = Convert.ToDateTime(LastUseDateString);
+            DateTime LastUseDate = Utils.TimeStampToDateTime(Convert.ToInt64(LastUseDateString));
             if (DateTime.Today.Equals(LastUseDate) && isExists.Equals("true")) //今天已经签到过了
             {
                 QQGroup.SendGroupMessage("neeeeeeee\nmooooooo\n今天已经贴过了");

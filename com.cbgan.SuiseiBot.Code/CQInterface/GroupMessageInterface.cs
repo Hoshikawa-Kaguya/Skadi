@@ -4,13 +4,15 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using com.cbgan.SuiseiBot.Code.handlers;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
 using Native.Sdk.Cqp.Model;
 using Native.Sdk.Cqp;
+using com.cbgan.SuiseiBot.Resource;
+using com.cbgan.SuiseiBot.Code.Tool;
+using com.cbgan.SuiseiBot.Code.ChatHandlers;
 
-namespace com.cbgan.SuiseiBot.Code
+namespace com.cbgan.SuiseiBot.Code.CQInterface
 {
     public class GroupMessageInterface : IGroupMessage
     {
@@ -22,7 +24,7 @@ namespace com.cbgan.SuiseiBot.Code
         public void GroupMessage(object sender, CQGroupMessageEventArgs e)
         {
             
-            ConsoleLog.Info($"收到信息",$"[{(e.Message.Text).Replace("\r\n", "\\r\\n")}]");
+            ConsoleLog.Info($"收到信息[群:{e.FromGroup.Id}]",$"[{(e.Message.Text).Replace("\r\n", "\\r\\n")}]");
 
             //以#开头的消息全部交给PCR处理
             if (e.Message.Text.Trim().StartsWith("#"))

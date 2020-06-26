@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace com.cbgan.SuiseiBot.Code.database
+namespace com.cbgan.SuiseiBot.Code.SqliteTool
 {
     /// <summary>
     /// SQLite数据库ORM工具类
@@ -40,7 +40,7 @@ namespace com.cbgan.SuiseiBot.Code.database
 
         /// <summary>
         /// 创建新表，返回影响的记录数
-        /// [注意:含有联合主键字段的表字段只支持NOT NULL属性]
+        /// 本方法只用于创建包含联合主键的表
         /// </summary>
         /// <typeparam name="TableClass">自定义表格类</typeparam>
         /// <param name="sugarClient">SqlSugarClient</param>

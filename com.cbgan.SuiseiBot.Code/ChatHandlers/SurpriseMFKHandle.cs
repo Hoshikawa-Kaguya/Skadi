@@ -7,7 +7,7 @@ using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
 using Native.Sdk.Cqp.Model;
 
-namespace com.cbgan.SuiseiBot.Code
+namespace com.cbgan.SuiseiBot.Code.ChatHandlers
 {
     internal class SurpriseMFKHandle
     {

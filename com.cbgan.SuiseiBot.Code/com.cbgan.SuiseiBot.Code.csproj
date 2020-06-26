@@ -87,8 +87,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Resource\ChatKeywords.cs" />
     <Compile Include="CQInterface\AppEnableInterface.cs" />
+    <Compile Include="CQInterface\GroupMessageInterface.cs" />
+    <Compile Include="CQInterface\PrivateMessageInterface.cs" />
+    <Compile Include="Database\Tables.cs" />
+    <Compile Include="Resource\ChatKeywords.cs" />
     <Compile Include="ChatHandlers\GuildBattleManagerHandle.cs" />
     <Compile Include="ChatHandlers\GuildManagerHandler.cs" />
     <Compile Include="SqliteTool\SugarColUtils.cs" />
@@ -100,9 +103,7 @@
     <Compile Include="SqliteTool\SQLiteHelper.cs" />
     <Compile Include="Database\SuiseiDBHelper.cs" />
     <Compile Include="ChatHandlers\DefaultHandle.cs" />
-    <Compile Include="CQInterface\GroupMessageInterface.cs" />
     <Compile Include="ChatHandlers\SuiseiHanlde.cs" />
-    <Compile Include="CQInterface\PrivateMessageInterface.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ChatHandlers\SurpriseMFKHandle.cs" />
     <Compile Include="Tool\Utils.cs" />
@@ -116,6 +117,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

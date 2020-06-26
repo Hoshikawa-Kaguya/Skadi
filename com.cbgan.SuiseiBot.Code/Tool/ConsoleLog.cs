@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.cbgan.SuiseiBot.Code
+namespace com.cbgan.SuiseiBot.Code.Tool
 {
     internal class ConsoleLog
     {
@@ -16,7 +16,7 @@ namespace com.cbgan.SuiseiBot.Code
         public static void Info(string type,string message)
         {
             Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine($"[{DateTime.Now}][{type}]INFO:{message}");
+            Console.WriteLine($"[{DateTime.Now}][{type}][INFO]{message}");
         }
         /// <summary>
         /// 向控制台发送Warning信息

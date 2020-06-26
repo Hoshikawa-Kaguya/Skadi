@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.cbgan.SuiseiBot.Code
+namespace com.cbgan.SuiseiBot.Code.Tool
 {
     class Utils
     {
@@ -136,6 +136,11 @@ namespace com.cbgan.SuiseiBot.Code
         /// 获取当前时间戳
         /// </summary>
         public static Func<long> GetNowTimeStamp = () => (DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Ticks;
+
+        /// <summary>
+        /// 获取今天零点的时间戳
+        /// </summary>
+        public static Func<long> GetTodayStamp = () => (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Ticks;
 
         /// <summary>
         /// 将long类型时间戳转换为DateTime

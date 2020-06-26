@@ -9,8 +9,10 @@ using Native.Sdk.Cqp.Interface;
 using Native.Sdk.Cqp.Model;
 using Native.Sdk.Cqp;
 using System.IO;
+using com.cbgan.SuiseiBot.Code.Tool;
+using com.cbgan.SuiseiBot.Code.SqliteTool;
 
-namespace com.cbgan.SuiseiBot.Code.database
+namespace com.cbgan.SuiseiBot.Code.Database
 {
     internal class SuiseiDBHelper
     {
@@ -18,7 +20,7 @@ namespace com.cbgan.SuiseiBot.Code.database
         private long QQID { set; get; }             //QQ号
         private long GroupId { set; get; }          //群号
         public int CurrentFavorRate { set; get; }   //当前的好感度
-        private DateTime TriggerTime { set; get; }  //触发时间戳
+        private long TriggerTime { set; get; }  //触发时间戳
         private string[] UserID { set; get; }       //用户信息
         public CQGroupMessageEventArgs SuiseiGroupMessageEventArgs { private set; get; }
         public object Sender { private set; get; }
@@ -39,7 +41,7 @@ namespace com.cbgan.SuiseiBot.Code.database
             this.GroupId = eventArgs.FromGroup.Id;
             this.Sender = sender;
             this.SuiseiGroupMessageEventArgs = eventArgs;
-            this.TriggerTime = DateTime.Today;//触发日期
+            this.TriggerTime = Utils.GetTodayStamp();//触发日期
             UserID = new string[] //用户信息
             {
                 QQID.ToString(),                    //用户QQ
@@ -104,7 +106,7 @@ namespace com.cbgan.SuiseiBot.Code.database
                     GroupId.ToString(),                 //用户所在群号
                     "0",                                //好感度
                     TriggerTime.ToString()              //签到时间
-                };
+                    };
                     dbHelper.InsertRow(TableName, ColName, UserInitData);//向数据库写入新数据
                     dbHelper.CloseDB();
                     Dictionary<string, string> user_data = new Dictionary<string, string>();

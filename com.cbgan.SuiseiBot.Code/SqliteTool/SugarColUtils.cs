@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.cbgan.SuiseiBot.Code.database
+namespace com.cbgan.SuiseiBot.Code.SqliteTool
 {
     internal class SugarColUtils : Attribute
     {
@@ -126,7 +126,7 @@ namespace com.cbgan.SuiseiBot.Code.database
             List<string> ColNames = new List<string>();
             foreach (PropertyInfo colInfo in typeof(TableClass).GetProperties())
             {
-                if (ColIsPrimaryKey(colInfo)) ColNames.Add(colInfo.Name);
+                if (ColIsPrimaryKey(colInfo)) ColNames.Add(GetColName(colInfo));
             }
             return ColNames.Count == 0 ? null : ColNames;
         }

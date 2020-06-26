@@ -4,9 +4,10 @@ using System.Data.SQLite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using com.cbgan.SuiseiBot.Code.SqliteTool;
 using Native.Sdk.Cqp.EventArgs;
 
-namespace com.cbgan.SuiseiBot.Code.database
+namespace com.cbgan.SuiseiBot.Code.Database
 {
     internal class GuildManagerDBHelper
     {

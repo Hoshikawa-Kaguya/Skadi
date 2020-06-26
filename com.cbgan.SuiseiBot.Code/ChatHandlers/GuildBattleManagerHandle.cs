@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.cbgan.SuiseiBot.Code.chat_handlers
+namespace com.cbgan.SuiseiBot.Code.ChatHandlers
 {
     internal class GuildBattleManagerHandle
     {

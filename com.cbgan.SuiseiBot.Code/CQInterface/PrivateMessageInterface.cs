@@ -4,12 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using com.cbgan.SuiseiBot.Code.database;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
 using Native.Sdk.Cqp.Model;
 
-namespace com.cbgan.SuiseiBot.Code
+namespace com.cbgan.SuiseiBot.Code.CQInterface
 {
     public class PrivateMessageInterface : IPrivateMessage
     {

@@ -4,14 +4,13 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using com.cbgan.SuiseiBot.Code.chat_handlers;
-using com.cbgan.SuiseiBot.Code.database;
+using com.cbgan.SuiseiBot.Code.Database;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 
-namespace com.cbgan.SuiseiBot.Code.handlers
+namespace com.cbgan.SuiseiBot.Code.ChatHandlers
 {
     internal class PCRHandler
     {

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.cbgan.SuiseiBot.Code.database
+namespace com.cbgan.SuiseiBot.Code.SqliteTool
 {
     /// <summary>
     /// SQLite数据库帮助类
