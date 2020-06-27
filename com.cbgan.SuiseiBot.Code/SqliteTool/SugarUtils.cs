@@ -1,4 +1,5 @@
-﻿using SqlSugar;
+﻿using Native.Sdk.Cqp;
+using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -210,6 +211,29 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
                 else throw new ArgumentOutOfRangeException("Unsupported Expression type");
             }
             catch (Exception) { throw; }
+        }
+
+        /// <summary>
+        /// 获取当前数据库的绝对路径
+        /// </summary>
+        public static Func<CQApi,string> GetDBPath = (cqApi) => Directory.GetCurrentDirectory() + "\\data\\" + cqApi.GetLoginQQ() + "\\suisei.db";
+
+        /// <summary>
+        /// 创建一个SQLiteClient
+        /// </summary>
+        /// <param name="DBPath">数据库路径</param>
+        /// <returns></returns>
+        public static SqlSugarClient CreateSqlSugarClient(string DBPath)
+        {
+            SqlSugarClient dbClient = new SqlSugarClient(new ConnectionConfig()
+            {
+                ConnectionString = $"DATA SOURCE={DBPath}",
+                DbType = SqlSugar.DbType.Sqlite,
+                IsAutoCloseConnection = true,
+                InitKeyType = InitKeyType.Attribute
+            });
+            dbClient.Open();
+            return dbClient;
         }
 
         /// <summary>
