@@ -37,22 +37,17 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         {
             ConsoleLog.Info("收到消息", "慧酱签到");
             SuiseiDBHelper suiseiDB = new SuiseiDBHelper(Sender, SuiseiEventArgs);
-            Dictionary<string, string> GetUserData = suiseiDB.SignIn();
-            //获取调用时间
-            GetUserData.TryGetValue("use_date", out string LastUseDateString);
-            //获取是否是第一次调用
-            GetUserData.TryGetValue("isExists", out string isExists);
-            DateTime LastUseDate = Utils.TimeStampToDateTime(Convert.ToInt64(LastUseDateString));
-            if (DateTime.Today.Equals(LastUseDate) && isExists.Equals("true")) //今天已经签到过了
+            suiseiDB.SignIn();
+            SuiseiData userData = suiseiDB.UserData;//数据库查询到的用户数据
+            //签到成功判断
+            if (userData.ChatDate == suiseiDB.TriggerTime && suiseiDB.IsExists) //今天已经签到过了
             {
                 QQGroup.SendGroupMessage("neeeeeeee\nmooooooo\n今天已经贴过了");
             }
             else//签到
             {
-                GetUserData.TryGetValue("favor_rate", out string FavorRateString);
-                int FavorRate = Convert.ToInt32(FavorRateString);
                 suiseiDB.FavorRateUp();
-                QQGroup.SendGroupMessage("奇怪的好感度增加了！\n当前好感度为：", FavorRate + 1);
+                QQGroup.SendGroupMessage("奇怪的好感度增加了！\n当前好感度为：", userData.FavorRate);
             }
             SuiseiEventArgs.Handler = true;
         }

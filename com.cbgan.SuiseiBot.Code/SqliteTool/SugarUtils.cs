@@ -169,51 +169,6 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         }
 
         /// <summary>
-        /// 查找是否有相同键值
-        /// </summary>
-        /// <typeparam name="TableClass">自定义表格类</typeparam>
-        /// <param name="expression"></param>
-        /// <returns>相同值的个数</returns>
-        public static long GetCount<TableClass>(SqlSugarClient sugarClient, Expression<Func<TableClass, bool>> expression)
-        {
-            if (sugarClient == null) throw new NullReferenceException("null SqlSugarClient");
-            if (sugarClient.Ado.Connection.State != System.Data.ConnectionState.Open)
-                throw new InvalidOperationException("Database not ready");
-            try
-            {
-                BinaryExpression memberExpr = expression.Body as BinaryExpression;//将表达式转化为合适的子类
-                List<string> propertyNames = GetNames(memberExpr);//获取表达式种需要比较的变量名
-                Dictionary<string, string> namePairs = SugarColUtils.GetAllColName<TableClass>();//实际表名和类属性名的对应字典
-                if (memberExpr != null)
-                {
-                    //将表达式文本中的符号替换为sql语句的符号
-                    string epressionString = memberExpr.ToString();
-                    epressionString = epressionString.Replace("AndAlso", "AND");
-                    epressionString = epressionString.Replace("OrElse", "OR");
-                    epressionString = epressionString.Replace("\"", "'");
-                    foreach (string propertyName in propertyNames)//将属性名替换为表的字段名
-                    {
-                        namePairs.TryGetValue(
-                            propertyName.Split(new char[] { '.' })[1],
-                            out string currentColName);
-                        epressionString = epressionString.Replace(
-                            propertyName,
-                            currentColName);
-                    }
-                    //生成sql语句
-                    string sqlText = $"SELECT COUNT(*) FROM {SugarTableUtils.GetTableName<TableClass>()} WHERE {epressionString}";
-                    using (IDbCommand cmd = sugarClient.Ado.Connection.CreateCommand())
-                    {
-                        cmd.CommandText = sqlText;
-                        return (long)cmd.ExecuteScalar();
-                    }
-                }
-                else throw new ArgumentOutOfRangeException("Unsupported Expression type");
-            }
-            catch (Exception) { throw; }
-        }
-
-        /// <summary>
         /// 获取当前数据库的绝对路径
         /// </summary>
         public static Func<CQApi,string> GetDBPath = (cqApi) => Directory.GetCurrentDirectory() + "\\data\\" + cqApi.GetLoginQQ() + "\\suisei.db";
@@ -222,7 +177,7 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         /// 创建一个SQLiteClient
         /// </summary>
         /// <param name="DBPath">数据库路径</param>
-        /// <returns></returns>
+        /// <returns>默认开启的SqlSugarClient</returns>
         public static SqlSugarClient CreateSqlSugarClient(string DBPath)
         {
             SqlSugarClient dbClient = new SqlSugarClient(new ConnectionConfig()

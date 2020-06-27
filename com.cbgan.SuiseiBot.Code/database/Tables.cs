@@ -55,9 +55,9 @@ namespace com.cbgan.SuiseiBot.Code.Database
         public long Gid { get; set; }
         //好感度（大概
         [SugarColumn(ColumnName = "favor_rate", ColumnDataType = "INTEGER")]
-        public string FavorRate { get; set; }
+        public int FavorRate { get; set; }
         //签到时间(使用时间戳）
         [SugarColumn(ColumnName = "use_date", ColumnDataType = "INTEGER")]
-        public string ChatDate { get; set; }
+        public long ChatDate { get; set; }
     }
 }

@@ -8,9 +8,13 @@ namespace com.cbgan.SuiseiBot.Code.Database
 {
     internal static class DatabaseInit//数据库初始化类
     {
+        /// <summary>
+        /// 初始化数据库
+        /// </summary>
+        /// <param name="e">CQAppEnableEventArgs</param>
         public static void Init(CQAppEnableEventArgs e)
         {
-            string DBPath = System.IO.Directory.GetCurrentDirectory() + "\\data\\" + e.CQApi.GetLoginQQ() + "\\suisei.db";
+            string DBPath = SugarUtils.GetDBPath(e.CQApi);
             SqlSugarClient dbClient = new SqlSugarClient(new ConnectionConfig()
             {
                 ConnectionString = $"DATA SOURCE={DBPath}",
