@@ -44,8 +44,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
             {
                 GroupId.ToString(), //公会所在群号
             };
-            DBPath = System.IO.Directory.GetCurrentDirectory() + "\\data\\" + eventArgs.CQApi.GetLoginQQ() +
-                     "\\suisei.db";
+            DBPath = SugarUtils.GetDBPath(eventArgs.CQApi);
         }
 
         #endregion
