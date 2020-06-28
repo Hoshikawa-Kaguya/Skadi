@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace com.cbgan.SuiseiBot.Code.SqliteTool
 {
-    class SugarTableUtils : Attribute
+    internal class SugarTableUtils : Attribute
     {
         /// <summary>
         /// 获取表名

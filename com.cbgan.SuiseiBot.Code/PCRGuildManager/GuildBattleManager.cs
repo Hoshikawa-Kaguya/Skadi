@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.cbgan.SuiseiBot.Code.ChatHandlers
+namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
 {
     internal class GuildBattleManagerHandle
     {
@@ -31,8 +31,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
 
         public static bool TryParseCommand(string command)
         {
-            
-            return false;
+            throw new NotImplementedException();
         }
     }
 }

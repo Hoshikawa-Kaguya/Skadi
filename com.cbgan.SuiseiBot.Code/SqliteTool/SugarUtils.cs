@@ -14,7 +14,7 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
     /// SQLite数据库ORM工具类
     /// 用于完成对数据库的基本操作
     /// </summary>
-    internal class SugarUtils
+    internal static class SugarUtils
     {
         /// <summary>
         /// 创建新的数据库文件
@@ -189,40 +189,6 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
             });
             dbClient.Open();
             return dbClient;
-        }
-
-        /// <summary>
-        /// 获取条件表达式中的所有属性名
-        /// </summary>
-        /// <param name="binaryExpression"></param>
-        /// <returns>属性名列表</returns>
-        private static List<string> GetNames(BinaryExpression binaryExpression)
-        {
-            if (result.Count != 0)//列表不为空时清空列表
-                result = new List<string>();
-            ForeachExpressions(binaryExpression);
-            return result;
-        }
-        //用于存放返回结果的列表
-        static List<string> result = new List<string>();
-
-        /// <summary>
-        /// 递归遍历条件树获取属性名称
-        /// </summary>
-        /// <param name="binaryExpression">条件表达式</param>
-        private static void ForeachExpressions(BinaryExpression binaryExpression)
-        {
-            if (binaryExpression.NodeType == ExpressionType.AndAlso || binaryExpression.NodeType == ExpressionType.OrElse)
-            {
-                //中序遍历，不进行节点的解析
-                ForeachExpressions(binaryExpression.Left as BinaryExpression);
-                ForeachExpressions(binaryExpression.Right as BinaryExpression);
-            }
-            else
-            {
-                //刷选出的非逻辑运算表达式
-                result.Add(binaryExpression.Left.ToString());
-            }
         }
     }
 }

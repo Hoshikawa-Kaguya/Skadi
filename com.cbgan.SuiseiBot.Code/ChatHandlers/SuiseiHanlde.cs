@@ -11,7 +11,7 @@ using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
 using Native.Sdk.Cqp.Model;
 
-namespace com.cbgan.SuiseiBot.Code.ChatHandlers
+namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
 {
     internal class SuiseiHanlde
     {

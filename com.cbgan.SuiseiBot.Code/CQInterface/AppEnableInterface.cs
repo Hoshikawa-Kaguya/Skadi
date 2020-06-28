@@ -1,4 +1,5 @@
 ﻿using com.cbgan.SuiseiBot.Code.Database;
+using com.cbgan.SuiseiBot.Code.Resource;
 using com.cbgan.SuiseiBot.Code.Tool;
 using com.cbgan.SuiseiBot.Resource;
 using Native.Sdk.Cqp.EventArgs;
@@ -16,10 +17,19 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
     {
         public void AppEnable(object sender, CQAppEnableEventArgs e)
         {
-            ChatKeywords.Keyword_init();
+            if (sender == null || e == null)
+            {
+                e.Handler = true;
+                return;
+            }
+            //打开控制台
             Utils.AllocConsole();
             Console.Title = "SuiseiBot(请勿关闭此窗口)";
+            ConsoleLog.Info("初始化", "SuiseiBot初始化");
             DatabaseInit.Init(e);//数据库初始化
+            //将关键词写入内存
+            ChatKeywords.KeywordInit();
+            GuildCommand.GuildCommandInit();
             e.Handler = true;
         }
     }

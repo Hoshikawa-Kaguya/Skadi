@@ -10,6 +10,8 @@ using Native.Sdk.Cqp.Model;
 using Native.Sdk.Cqp;
 using com.cbgan.SuiseiBot.Resource;
 using com.cbgan.SuiseiBot.Code.Tool;
+using com.cbgan.SuiseiBot.Code.PCRGuildManager;
+using com.cbgan.SuiseiBot.Code.Resource;
 using com.cbgan.SuiseiBot.Code.ChatHandlers;
 
 namespace com.cbgan.SuiseiBot.Code.CQInterface
@@ -23,32 +25,35 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
         /// <param name="e">事件参数</param>
         public void GroupMessage(object sender, CQGroupMessageEventArgs e)
         {
-            
+            if (sender == null || e == null)
+            {
+                e.Handler = true;
+                return;
+            }
             ConsoleLog.Info($"收到信息[群:{e.FromGroup.Id}]",$"[{(e.Message.Text).Replace("\r\n", "\\r\\n")}]");
 
             //以#开头的消息全部交给PCR处理
             if (e.Message.Text.Trim().StartsWith("#"))
             {
-                PCRHandler pcr =new PCRHandler(sender,e);
-                pcr.GetChat();
+                PCRGuildHandle pcrGuild =new PCRGuildHandle(sender,e);
+                pcrGuild.GetChat();
             }
             else
             {
                 //其他全字匹配功能
-                int Chat_Type = 0;
-                ChatKeywords.key_word.TryGetValue(e.Message, out Chat_Type); //查找关键字
-                if (Chat_Type != 0) ConsoleLog.Info("触发关键词",$"消息类型={Chat_Type}");
-                switch (Chat_Type)
+                ChatKeywords.KeyWords.TryGetValue(e.Message, out KeywordType chatType); //查找关键字
+                if (chatType != 0) ConsoleLog.Info("触发关键词",$"消息类型={chatType}");
+                switch (chatType)
                 {
-                    case 0: //输入无法被分类
+                    case 0:case KeywordType.Debug: //输入无法被分类
                         DefaultHandle dh = new DefaultHandle(sender, e);
-                        dh.GetChat();
+                        dh.GetChat(chatType);
                         break;
-                    case 1: //娱乐功能
+                    case KeywordType.SurpriseMFK: //娱乐功能
                         SurpriseMFKHandle smfh = new SurpriseMFKHandle(sender, e);
                         smfh.GetChat(); //进行响应
                         break;
-                    case 2: //慧酱签到啦
+                    case KeywordType.Suisei: //慧酱签到啦
                         SuiseiHanlde suisei = new SuiseiHanlde(sender, e);
                         suisei.GetChat();
                         break;
@@ -56,7 +61,6 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
                         break;
                 }
             }
-
             e.Handler = true;
         }
     }

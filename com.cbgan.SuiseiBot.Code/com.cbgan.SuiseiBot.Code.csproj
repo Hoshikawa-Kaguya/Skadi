@@ -87,13 +87,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChatHandlers\PCRGuildHandle.cs" />
     <Compile Include="CQInterface\AppEnableInterface.cs" />
     <Compile Include="CQInterface\GroupMessageInterface.cs" />
     <Compile Include="CQInterface\PrivateMessageInterface.cs" />
     <Compile Include="Database\Tables.cs" />
     <Compile Include="Resource\ChatKeywords.cs" />
-    <Compile Include="ChatHandlers\GuildBattleManagerHandle.cs" />
-    <Compile Include="ChatHandlers\GuildManagerHandler.cs" />
+    <Compile Include="PCRGuildManager\GuildBattleManager.cs" />
+    <Compile Include="PCRGuildManager\GuildManager.cs" />
+    <Compile Include="Resource\GuildCommand.cs" />
+    <Compile Include="Resource\KeywordType.cs" />
+    <Compile Include="Resource\PCRGuildCommandType.cs" />
     <Compile Include="SqliteTool\SugarColUtils.cs" />
     <Compile Include="SqliteTool\SugarTableUtils.cs" />
     <Compile Include="SqliteTool\SugarUtils.cs" />

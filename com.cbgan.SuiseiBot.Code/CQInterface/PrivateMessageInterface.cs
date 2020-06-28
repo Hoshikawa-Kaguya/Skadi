@@ -14,10 +14,14 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
     {
         public void PrivateMessage(object sender, CQPrivateMessageEventArgs e)
         {
-            QQ id = e.FromQQ;
-            if (e.Message.Text.Equals("debug"))
+            if (sender == null || e == null)
             {
-                
+                e.Handler = true;
+                return;
+            }
+            if (e.Message.Text.Equals("在？"))
+            {
+                e.FromQQ.SendPrivateMessage("噫hihihihihih");
             }
             e.Handler = true;
         }

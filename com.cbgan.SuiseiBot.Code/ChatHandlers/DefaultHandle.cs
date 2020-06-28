@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Mail;
+using com.cbgan.SuiseiBot.Code.Resource;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 
-namespace com.cbgan.SuiseiBot.Code.ChatHandlers
+namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
 {
     internal class DefaultHandle
     {
@@ -25,10 +26,13 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
 
         #endregion
 
-        public void GetChat() //消息接收并判断是否响应
+        public void GetChat(KeywordType keywordType) //消息接收并判断是否响应
         {
             if (eventArgs == null || sender == null) return;
-            GroupResponse();
+            if (keywordType == KeywordType.Debug)
+            {
+                GroupResponse();
+            }
         }
 
         private void GroupResponse() //功能响应
