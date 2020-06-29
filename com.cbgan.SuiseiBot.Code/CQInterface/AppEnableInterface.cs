@@ -5,11 +5,6 @@ using com.cbgan.SuiseiBot.Resource;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace com.cbgan.SuiseiBot.Code.CQInterface
 {
@@ -23,7 +18,7 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
                 return;
             }
             //打开控制台
-            Utils.AllocConsole();
+            ConsoleLog.AllocConsole();
             Console.Title = "SuiseiBot(请勿关闭此窗口)";
             ConsoleLog.Info("初始化", "SuiseiBot初始化");
             DatabaseInit.Init(e);//数据库初始化

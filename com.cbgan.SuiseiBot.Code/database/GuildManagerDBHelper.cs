@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.SQLite;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using com.cbgan.SuiseiBot.Code.SqliteTool;
 using Native.Sdk.Cqp.EventArgs;
 
@@ -100,7 +95,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
 
         #endregion
 
-
+        #region 指令响应函数
         public void allJoin()
         {
             throw new NotImplementedException();
@@ -206,6 +201,6 @@ namespace com.cbgan.SuiseiBot.Code.Database
                 throw;
             }
         }
-
+        #endregion
     }
 }

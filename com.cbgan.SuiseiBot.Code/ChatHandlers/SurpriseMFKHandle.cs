@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Native.Sdk.Cqp.EventArgs;
-using Native.Sdk.Cqp.Interface;
 using Native.Sdk.Cqp.Model;
 
 namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
@@ -27,18 +23,22 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
         #region 调用时间记录Dictionary
         /// <param type="long">QQ号</param>
         /// <param type="DateTime">上次调用时间</param>
-        private static Dictionary<long, DateTime> use_time = new Dictionary<long, DateTime>();
+        private static Dictionary<long, DateTime> LastChatDate = new Dictionary<long, DateTime>();
         #endregion
 
-        public void GetChat()//消息接收并判断是否响应
+        #region 消息响应函数
+        /// <summary>
+        /// 消息接收函数
+        /// </summary>
+        public void GetChat()
         {
             if (MFKEventArgs == null || Sender == null) return;
             #region 计算调用间隔并判断是否恶意刷屏
             DateTime time = System.DateTime.Now;//获取当前时间
             DateTime last_use_time;
-            use_time.TryGetValue(MFKEventArgs.FromQQ.Id, out last_use_time);
+            LastChatDate.TryGetValue(MFKEventArgs.FromQQ.Id, out last_use_time);
             long timeSpan = (long)(time - last_use_time).TotalSeconds;//计算时间间隔(s)
-            use_time[MFKEventArgs.FromQQ.Id] = time;//刷新调用时间
+            LastChatDate[MFKEventArgs.FromQQ.Id] = time;//刷新调用时间
             if (timeSpan <= 60)//一分钟内调用
             {
                 MFKEventArgs.FromGroup.SendGroupMessage("再玩？再玩把你牙拔了当球踢\n(不要频繁使用娱乐功能)");
@@ -52,6 +52,10 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
             GroupResponse();
             MFKEventArgs.Handler = true;
         }
+
+        /// <summary>
+        /// 响应函数
+        /// </summary>
         private void GroupResponse()//功能响应
         {
             string chat = MFKEventArgs.Message;
@@ -93,5 +97,6 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                     break;
             }
         }
+        #endregion
     }
 }

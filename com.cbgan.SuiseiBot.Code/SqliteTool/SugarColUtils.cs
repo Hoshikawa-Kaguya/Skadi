@@ -1,15 +1,13 @@
 ﻿using SqlSugar;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace com.cbgan.SuiseiBot.Code.SqliteTool
 {
     internal class SugarColUtils : Attribute
     {
+        #region SugarColumn辅助方法
         /// <summary>
         /// 判断字段类型
         /// </summary>
@@ -130,5 +128,6 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
             }
             return ColNames.Count == 0 ? null : ColNames;
         }
+        #endregion
     }
 }

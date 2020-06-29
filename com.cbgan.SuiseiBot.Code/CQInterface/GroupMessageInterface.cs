@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Native.Sdk.Cqp.EventArgs;
+﻿using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
-using Native.Sdk.Cqp.Model;
-using Native.Sdk.Cqp;
 using com.cbgan.SuiseiBot.Resource;
 using com.cbgan.SuiseiBot.Code.Tool;
 using com.cbgan.SuiseiBot.Code.PCRGuildManager;

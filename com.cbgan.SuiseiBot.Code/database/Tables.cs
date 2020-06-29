@@ -1,12 +1,8 @@
-﻿using System;
-using SqlSugar;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SqlSugar;
 
 namespace com.cbgan.SuiseiBot.Code.Database
 {
+    #region 成员表定义
     /// <summary>
     /// 用于存放成员信息的表定义
     /// </summary>
@@ -23,7 +19,9 @@ namespace com.cbgan.SuiseiBot.Code.Database
         [SugarColumn(ColumnName = "name", ColumnDataType = "VARCHAR")]
         public string NickName { get; set; }
     }
+    #endregion
 
+    #region 公会表定义
     /// <summary>
     /// 用于存放公会信息的表定义
     /// </summary>
@@ -40,9 +38,11 @@ namespace com.cbgan.SuiseiBot.Code.Database
         [SugarColumn(ColumnName = "server", ColumnDataType = "VARCHAR")]
         public string ServerArea { get; set; }
     }
+    #endregion
 
+    #region 彗酱签到表定义
     /// <summary>
-    /// 用于存放公会信息的表定义
+    /// 用于存放彗酱信息的表定义
     /// </summary>
     [SugarTable("suisei", "suisei data table")]
     internal class SuiseiData
@@ -60,4 +60,5 @@ namespace com.cbgan.SuiseiBot.Code.Database
         [SugarColumn(ColumnName = "use_date", ColumnDataType = "INTEGER")]
         public long ChatDate { get; set; }
     }
+    #endregion
 }

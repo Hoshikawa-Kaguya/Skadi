@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.IO;
-using System.Linq.Expressions;
 using System.Reflection;
 
 namespace com.cbgan.SuiseiBot.Code.SqliteTool
@@ -16,6 +15,7 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
     /// </summary>
     internal static class SugarUtils
     {
+        #region IO辅助函数
         /// <summary>
         /// 创建新的数据库文件
         /// </summary>
@@ -39,6 +39,13 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
             }
         }
 
+        /// <summary>
+        /// 获取当前数据库的绝对路径
+        /// </summary>
+        public static Func<CQApi, string> GetDBPath = (cqApi) => Directory.GetCurrentDirectory() + "\\data\\" + cqApi.GetLoginQQ() + "\\suisei.db";
+        #endregion
+
+        #region 表辅助函数
         /// <summary>
         /// 创建新表，返回影响的记录数
         /// 本方法只用于创建包含联合主键的表
@@ -148,7 +155,9 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
             }
             catch (Exception) { throw; }
         }
+        #endregion
 
+        #region 简单辅助函数
         /// <summary>
         /// 执行sql语句
         /// </summary>
@@ -167,18 +176,15 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
                 return cmd.ExecuteNonQuery();
             }
         }
+        #endregion
 
-        /// <summary>
-        /// 获取当前数据库的绝对路径
-        /// </summary>
-        public static Func<CQApi,string> GetDBPath = (cqApi) => Directory.GetCurrentDirectory() + "\\data\\" + cqApi.GetLoginQQ() + "\\suisei.db";
-
+        #region Client简单创建函数
         /// <summary>
         /// 创建一个SQLiteClient
         /// </summary>
         /// <param name="DBPath">数据库路径</param>
         /// <returns>默认开启的SqlSugarClient</returns>
-        public static SqlSugarClient CreateSqlSugarClient(string DBPath)
+        internal static SqlSugarClient CreateSqlSugarClient(string DBPath)
         {
             SqlSugarClient dbClient = new SqlSugarClient(new ConnectionConfig()
             {
@@ -190,5 +196,6 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
             dbClient.Open();
             return dbClient;
         }
+        #endregion
     }
 }

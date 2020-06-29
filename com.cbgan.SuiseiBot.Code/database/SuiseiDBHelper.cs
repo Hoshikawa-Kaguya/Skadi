@@ -1,14 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data.SQLite;
 using Native.Sdk.Cqp.EventArgs;
-using Native.Sdk.Cqp.Interface;
-using Native.Sdk.Cqp.Model;
-using Native.Sdk.Cqp;
-using System.IO;
 using com.cbgan.SuiseiBot.Code.Tool;
 using com.cbgan.SuiseiBot.Code.SqliteTool;
 using SqlSugar;

@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using com.cbgan.SuiseiBot.Code.Database;
+﻿using com.cbgan.SuiseiBot.Code.Database;
 using com.cbgan.SuiseiBot.Code.Tool;
-using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.EventArgs;
-using Native.Sdk.Cqp.Interface;
 using Native.Sdk.Cqp.Model;
 
 namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
@@ -30,6 +22,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
         }
         #endregion
 
+        #region  消息响应函数
         /// <summary>
         /// 在收到消息后获取数据库数据并判断是否需要修改数据库
         /// </summary>
@@ -51,5 +44,6 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
             }
             SuiseiEventArgs.Handler = true;
         }
+        #endregion
     }
 }

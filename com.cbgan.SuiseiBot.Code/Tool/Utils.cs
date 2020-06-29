@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace com.cbgan.SuiseiBot.Code.Tool
 {
     class Utils
     {
+        #region HTTP工具
         public static string GetHttpResponse(string url, string UA = "Windows", int Timeout = 3000)
         {
             Dictionary<String, String> UAList = new Dictionary<String, String>();
@@ -124,14 +122,9 @@ namespace com.cbgan.SuiseiBot.Code.Tool
                 return reader.ReadToEnd();
             }
         }
+        #endregion
 
-        /// <summary>
-        /// 打开控制台
-        /// </summary>
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool AllocConsole();
-
+        #region 时间戳转换工具
         /// <summary>
         /// 获取当前时间戳
         /// </summary>
@@ -151,5 +144,6 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         /// 将DateTime转换为long时间戳
         /// </summary>
         public static Func<System.DateTime, long> DateTimeToTimeStamp = dateTime => (dateTime - (new System.DateTime(1970, 1, 1, 8, 0, 0, 0))).Ticks;
+        #endregion
     }
 }

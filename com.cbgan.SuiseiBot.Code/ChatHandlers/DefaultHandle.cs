@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Mail;
-using com.cbgan.SuiseiBot.Code.Resource;
+﻿using com.cbgan.SuiseiBot.Code.Resource;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 
@@ -26,6 +23,11 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
 
         #endregion
 
+        #region 消息响应函数
+        /// <summary>
+        /// 消息接收函数
+        /// </summary>
+        /// <param name="keywordType"></param>
         public void GetChat(KeywordType keywordType) //消息接收并判断是否响应
         {
             if (eventArgs == null || sender == null) return;
@@ -35,11 +37,15 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
             }
         }
 
+        /// <summary>
+        /// 响应函数
+        /// </summary>
         private void GroupResponse() //功能响应
         {
             string chat    = eventArgs.Message;
             Group  QQgroup = eventArgs.FromGroup;
             
         }
+        #endregion
     }
 }

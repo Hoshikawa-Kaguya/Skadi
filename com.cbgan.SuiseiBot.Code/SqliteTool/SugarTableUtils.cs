@@ -1,15 +1,12 @@
 ﻿using SqlSugar;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace com.cbgan.SuiseiBot.Code.SqliteTool
 {
     internal class SugarTableUtils : Attribute
     {
+        #region SugarTable辅助方法
         /// <summary>
         /// 获取表名
         /// </summary>
@@ -21,5 +18,6 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
             if (tableInfo == null) tableInfo = new SugarTable(typeof(TableClass).Name);
             return tableInfo.TableName;
         }
+        #endregion
     }
 }

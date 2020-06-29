@@ -1,13 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace com.cbgan.SuiseiBot.Code.Tool
 {
     internal class ConsoleLog
     {
+        #region 控制台调用函数
+        /// <summary>
+        /// 打开控制台
+        /// </summary>
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool AllocConsole();
+        #endregion
+
+        #region 格式化控制台Log函数
         /// <summary>
         /// 向控制台发送Info信息
         /// </summary>
@@ -66,5 +73,6 @@ namespace com.cbgan.SuiseiBot.Code.Tool
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine($"{message}");
         }
+        #endregion
     }
 }

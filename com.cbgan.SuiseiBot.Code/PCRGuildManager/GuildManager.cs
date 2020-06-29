@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using com.cbgan.SuiseiBot.Code.ChatHandlers;
 using com.cbgan.SuiseiBot.Code.Database;
 using com.cbgan.SuiseiBot.Code.Resource;
@@ -16,6 +13,12 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
 {
     internal static class PCRHandler
     {
+        /// <summary>
+        /// 公会管理指令响应函数
+        /// </summary>
+        /// <param name="Sender">CQSender</param>
+        /// <param name="GMgrEventArgs">CQGroupMessageEventArgs</param>
+        /// <param name="commandType">指令类型 [0-100]</param>
         public static void GuildMgrResponse(object Sender,CQGroupMessageEventArgs GMgrEventArgs,PCRGuildCommandType commandType) //功能响应
         {
             Group QQgroup = GMgrEventArgs.FromGroup;
