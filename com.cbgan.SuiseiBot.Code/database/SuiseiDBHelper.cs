@@ -80,7 +80,6 @@ namespace com.cbgan.SuiseiBot.Code.Database
                         UserData.Gid = GroupId;                 //用户所在群号
                         UserData.FavorRate = 0;                 //好感度
                         UserData.ChatDate = TriggerTime;        //签到时间
-                        SQLiteClient.Insertable(UserData).ExecuteCommand();//向数据库写入新数据
                         IsExists = false;
                         CurrentFavorRate = 0;
                     }
@@ -103,10 +102,18 @@ namespace com.cbgan.SuiseiBot.Code.Database
                 //更新好感度数据
                 this.CurrentFavorRate++;
                 UserData.FavorRate = CurrentFavorRate;  //更新好感度
-                UserData.ChatDate = TriggerTime;        //更新触发时间
                 using (SqlSugarClient SQLiteClient = SugarUtils.CreateSqlSugarClient(DBPath))
                 {
-                    SQLiteClient.Updateable(UserData).ExecuteCommand();
+                    //判断用户记录是否已经存在
+                    if (IsExists)//已存在则更新数据
+                    {
+                        UserData.ChatDate = TriggerTime;        //更新触发时间
+                        SQLiteClient.Updateable(UserData).ExecuteCommand();
+                    }
+                    else//不存在插入新行
+                    {
+                        SQLiteClient.Insertable(UserData).ExecuteCommand();//向数据库写入新数据
+                    }
                 }
             }
             catch (Exception e)

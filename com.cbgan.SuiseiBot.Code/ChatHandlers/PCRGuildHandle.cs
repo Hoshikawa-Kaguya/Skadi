@@ -18,8 +18,6 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         public object Sender { private set; get; }
         public CQGroupMessageEventArgs PCRGuildEventArgs { private set; get; }
         public string PCRGuildCommand { private get; set; }
-        public Group QQgroup { private get; set; }
-
         private PCRGuildCommandType CommandType { get; set; }
         #endregion
 
@@ -42,13 +40,19 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
                 GuildCommand.GuildCommands.TryGetValue(PCRGuildCommand, out PCRGuildCommandType commandType);
                 this.CommandType = commandType;
                 //未知指令
-                if (commandType == 0) GetUnknowCommand(PCRGuildEventArgs);
-                ConsoleLog.Info("PCR公会管理", commandType == 0 ? "解析到未知指令" : $"解析指令{CommandType}");
-                if (commandType > 0 && (int)commandType < 100)//公会管理指令
+                if (commandType == 0)
+                {
+                    GetUnknowCommand(PCRGuildEventArgs);
+                    ConsoleLog.Info("PCR公会管理", commandType == 0 ? "解析到未知指令" : $"解析指令{CommandType}");
+                    return;
+                }
+                //公会管理指令
+                if (commandType > 0 && (int)commandType < 100)
                 {
                     PCRHandler.GuildMgrResponse(Sender, PCRGuildEventArgs, CommandType);
                 }
-                else if((int)commandType > 100 && (int)commandType < 200)//出刀管理指令
+                //出刀管理指令
+                else if ((int)commandType > 100 && (int)commandType < 200)
                 {
                     throw new NotImplementedException();
                 }
@@ -88,16 +92,6 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
                 "\n指令帮助：" +
                 $"\n{helpString}");
         }
-
-        /// <summary>
-        /// 获取对应指令的帮助文本
-        /// </summary>
-        /// <returns>帮助文本</returns>
-        public static string GetCommandHelp(PCRGuildCommandType commandType)
-        {
-            //TODO 帮助文本库
-            throw new NotImplementedException();
-        }
         #endregion
 
         #region 辅助函数
@@ -119,6 +113,17 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
             {
                 return true;
             }
+        }
+
+
+        /// <summary>
+        /// 获取对应指令的帮助文本
+        /// </summary>
+        /// <returns>帮助文本</returns>
+        public static string GetCommandHelp(PCRGuildCommandType commandType)
+        {
+            //TODO 帮助文本库
+            throw new NotImplementedException();
         }
         #endregion
     }
