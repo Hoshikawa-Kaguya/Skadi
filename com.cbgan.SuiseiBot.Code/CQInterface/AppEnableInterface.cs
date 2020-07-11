@@ -25,6 +25,7 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             //将关键词写入内存
             ChatKeywords.KeywordInit();
             GuildCommand.GuildCommandInit();
+            CommandHelpText.InitHelpText();
             e.Handler = true;
         }
     }

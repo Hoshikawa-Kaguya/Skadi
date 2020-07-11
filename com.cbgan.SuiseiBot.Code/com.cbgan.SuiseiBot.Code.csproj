@@ -95,6 +95,7 @@
     <Compile Include="Resource\ChatKeywords.cs" />
     <Compile Include="PCRGuildManager\GuildBattleManager.cs" />
     <Compile Include="PCRGuildManager\GuildManager.cs" />
+    <Compile Include="Resource\CommandHelpText.cs" />
     <Compile Include="Resource\GuildCommand.cs" />
     <Compile Include="Resource\KeywordType.cs" />
     <Compile Include="Resource\PCRGuildCommandType.cs" />

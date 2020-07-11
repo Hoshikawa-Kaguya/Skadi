@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace com.cbgan.SuiseiBot.Resource
 {
-    internal class ChatKeywords
+    internal static class ChatKeywords
     {
         /// <summary>
         /// 关键字初始化及存储

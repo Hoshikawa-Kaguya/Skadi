@@ -65,7 +65,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                     if (PCRGuildHandle.CheckForLength(commandArgs, 1, GMgrEventArgs))   
                         if(GMgrEventArgs.Message.CQCodes.Count == 0)//没有AT任何人，参数非法
                         {
-                            PCRGuildHandle.GetIllegalArgs(GMgrEventArgs, PCRGuildCommandType.JoinGuild);
+                            PCRGuildHandle.GetIllegalArgs(GMgrEventArgs, PCRGuildCommandType.JoinGuild, "没有AT任何人");
                             return;
                         }
                         if (GMgrEventArgs.Message.CQCodes.Count >= 1)           //如果存在AT
@@ -78,7 +78,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                                     qqid > QQ.MinValue)
                                 {
                                     //需要添加为成员的QQ号列表和对应操作的返回值
-                                    addedQQList.Add(qqid, dbAction.joinGuild(qqid, GMgrEventArgs.CQApi.GetGroupMemberInfo(GMgrEventArgs.FromGroup,qqid).Nick));
+                                    addedQQList.Add(qqid, dbAction.JoinToGuild(qqid, GMgrEventArgs.CQApi.GetGroupMemberInfo(GMgrEventArgs.FromGroup,qqid).Nick));
                                 }
                                 else
                                 {
@@ -98,7 +98,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                         }
                         else
                         {
-                            result = dbAction.joinGuild(GMgrEventArgs.FromQQ, GMgrEventArgs.CQApi.GetGroupMemberInfo(GMgrEventArgs.FromGroup, GMgrEventArgs.FromQQ).Nick);
+                            result = dbAction.JoinToGuild(GMgrEventArgs.FromQQ, GMgrEventArgs.CQApi.GetGroupMemberInfo(GMgrEventArgs.FromGroup, GMgrEventArgs.FromQQ).Nick);
                         }
 
                     switch (result)
@@ -143,18 +143,18 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
 
                     break;
                 case PCRGuildCommandType.ListMember://查看成员
-                    dbAction.showMembers();
+                    dbAction.ShowMembers();
                     break;
                 //参数1 QQ号
                 case PCRGuildCommandType.QuitGuild://退会
                     if (PCRGuildHandle.CheckForLength(commandArgs, 1, GMgrEventArgs)) 
-                        result = dbAction.leaveGuild(commandArgs[1]);
+                        result = dbAction.LeaveGuild(commandArgs[1]);
                     break;
                 case PCRGuildCommandType.QuitAll://清空成员
-                    dbAction.emptyMember();
+                    dbAction.EmptyMember();
                     break;
                 case PCRGuildCommandType.JoinAll://一键入会
-                    dbAction.allJoin();
+                    dbAction.AllJoin();
                     break;
 
                 default://不可能发生，防御性处理

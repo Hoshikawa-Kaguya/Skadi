@@ -76,16 +76,18 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         /// <summary>
         /// 存在非法参数时的响应
         /// </summary>
-        /// <param name="e"></param>
-        public static void GetIllegalArgs(CQGroupMessageEventArgs e, PCRGuildCommandType commandType)
+        /// <param name="e">CQGroupMessageEventArgs</param>
+        /// <param name="commandType">指令类型</param>
+        /// <param name="errDescription">错误描述</param>
+        public static void GetIllegalArgs(CQGroupMessageEventArgs e, PCRGuildCommandType commandType, string errDescription)
         {
             ConsoleLog.Warning("PCR公会管理", "非法参数");
             string helpString = " ";//GetCommandHelp();
             e.FromGroup.SendGroupMessage(
-                CQApi.CQCode_At(e.FromQQ.Id), 
+                CQApi.CQCode_At(e.FromQQ.Id),
                 "\n非法参数请重新输入指令" +
-                "\n指令帮助：" +
-                $"\n{helpString}");
+                $"\n错误：{errDescription}" +
+                $"\n指令帮助：{helpString}");
         }
         #endregion
 
@@ -101,7 +103,9 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         {
             if (args.Length < (len + 1))
             {
-                e.FromGroup.SendGroupMessage(CQApi.CQCode_At(e.FromQQ.Id), "\n请输入正确的参数个数。");
+                e.FromGroup.SendGroupMessage(
+                    CQApi.CQCode_At(e.FromQQ.Id), 
+                    "\n请输入正确的参数个数。");
                 return false;
             }
             else
@@ -117,8 +121,9 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         /// <returns>帮助文本</returns>
         public static string GetCommandHelp(PCRGuildCommandType commandType)
         {
-            //TODO 帮助文本库
-            throw new NotImplementedException();
+            CommandHelpText.HelpText.TryGetValue(commandType, out string helptext);
+            if (string.IsNullOrEmpty(helptext)) helptext = "该指令还在开发中，请询问机器人维护者或者开发者";
+            return helptext;
         }
         #endregion
     }

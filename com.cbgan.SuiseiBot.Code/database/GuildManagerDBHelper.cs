@@ -96,22 +96,22 @@ namespace com.cbgan.SuiseiBot.Code.Database
         #endregion
 
         #region 指令响应函数
-        public void allJoin()
+        public void AllJoin()
         {
             throw new NotImplementedException();
         }
 
-        public void emptyMember()
+        public void EmptyMember()
         {
             throw new NotImplementedException();
         }
 
-        public int leaveGuild(string qq)
+        public int LeaveGuild(string qq)
         {
             throw new NotImplementedException();
         }
 
-        public void showMembers()
+        public void ShowMembers()
         {
             throw new NotImplementedException();
         }
@@ -125,7 +125,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
         /// 0：正常添加
         /// 1：该成员已存在，更新信息
         /// </returns>
-        public int joinGuild(long qqid, string nickName)
+        public int JoinToGuild(long qqid, string nickName)
         {
             try
             {

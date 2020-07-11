@@ -2,7 +2,7 @@
 
 namespace com.cbgan.SuiseiBot.Code.Resource
 {
-    internal class GuildCommand
+    internal static class GuildCommand
     {
         public static Dictionary<string, PCRGuildCommandType> GuildCommands = new Dictionary<string, PCRGuildCommandType>();
         /// <summary>
