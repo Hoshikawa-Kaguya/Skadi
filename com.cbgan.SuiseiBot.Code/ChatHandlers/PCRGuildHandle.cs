@@ -1,4 +1,4 @@
-﻿using com.cbgan.SuiseiBot.Code.PCRGuildManager;
+using com.cbgan.SuiseiBot.Code.PCRGuildManager;
 using com.cbgan.SuiseiBot.Code.Resource;
 using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp;
@@ -35,21 +35,21 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
                 GuildCommand.GuildCommands.TryGetValue(PCRGuildCommand, out PCRGuildCommandType commandType);
                 this.CommandType = commandType;
                 //未知指令
-                if (commandType == 0)
+                if (CommandType == 0)
                 {
                     GetUnknowCommand(PCRGuildEventArgs);
-                    ConsoleLog.Info("PCR公会管理", commandType == 0 ? "解析到未知指令" : $"解析指令{CommandType}");
+                    ConsoleLog.Info("PCR公会管理", CommandType == 0 ? "解析到未知指令" : $"解析指令{CommandType}");
                     return;
                 }
                 //公会管理指令
-                if (commandType > 0 && (int)commandType < 100)
+                if (CommandType > 0 && (int)CommandType < 100)
                 {
                     PCRHandler.GuildMgrResponse(Sender, PCRGuildEventArgs, CommandType);
                 }
                 //出刀管理指令
-                else if ((int)commandType > 100 && (int)commandType < 200)
+                else if ((int)CommandType > 100 && (int)CommandType < 200)
                 {
-                    throw new NotImplementedException();
+                    GuildBattleManager.GuildBattleResponse(Sender,PCRGuildEventArgs, CommandType);
                 }
             }
             catch(Exception e)
@@ -82,12 +82,11 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         public static void GetIllegalArgs(CQGroupMessageEventArgs e, PCRGuildCommandType commandType, string errDescription)
         {
             ConsoleLog.Warning("PCR公会管理", "非法参数");
-            string helpString = " ";//GetCommandHelp();
             e.FromGroup.SendGroupMessage(
-                CQApi.CQCode_At(e.FromQQ.Id),
-                "\n非法参数请重新输入指令" +
-                $"\n错误：{errDescription}" +
-                $"\n指令帮助：{helpString}");
+                                         CQApi.CQCode_At(e.FromQQ.Id),
+                                         "\n非法参数请重新输入指令" +
+                                         $"\n错误：{errDescription}" +
+                                         $"\n指令帮助：{GetCommandHelp(commandType)}");
         }
         #endregion
 

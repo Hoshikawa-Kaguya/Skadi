@@ -1,33 +1,26 @@
-﻿using Native.Sdk.Cqp.EventArgs;
-using Native.Sdk.Cqp.Model;
 using System;
+using Native.Sdk.Cqp.EventArgs;
+using com.cbgan.SuiseiBot.Code.Resource;
+using Native.Sdk.Cqp.Model;
 
 namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
 {
-    internal class GuildBattleManagerHandle
+    internal class GuildBattleManager
     {
-        #region 属性
-
-        public object Sender { private set; get; }
-        public CQGroupMessageEventArgs MgrEventArgs { private set; get; }
-        public string GBMgrCommand { private get; set; }
-        public Group QQgroup { private get; set; }
-
-        #endregion
-
-        #region 构造函数
-
-        public GuildBattleManagerHandle(object sender, CQGroupMessageEventArgs e)
+        #region 指令处理
+        public static void GuildBattleResponse(object Sender, CQGroupMessageEventArgs GBattleEventArgs,
+                                               PCRGuildCommandType commandType) //功能响应
         {
-            this.MgrEventArgs = e;
-            this.Sender = sender;
-        }
+            if (GBattleEventArgs == null) throw new ArgumentNullException(nameof(GBattleEventArgs));
+            Group qqGroup = GBattleEventArgs.FromGroup;
+            QQ senderQQ = GBattleEventArgs.FromQQ;
 
-        #endregion
-
-        public static bool TryParseCommand(string command)
-        {
+            // switch (commandType)
+            // {
+            //     
+            // }
             throw new NotImplementedException();
         }
+        #endregion
     }
 }

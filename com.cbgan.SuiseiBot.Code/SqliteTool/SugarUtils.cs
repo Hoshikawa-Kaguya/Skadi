@@ -1,4 +1,4 @@
-﻿using Native.Sdk.Cqp;
+using Native.Sdk.Cqp;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
@@ -46,14 +46,16 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         #endregion
 
         #region 表辅助函数
+
         /// <summary>
         /// 创建新表，返回影响的记录数
         /// 本方法只用于创建包含联合主键的表
         /// </summary>
         /// <typeparam name="TableClass">自定义表格类</typeparam>
         /// <param name="sugarClient">SqlSugarClient</param>
+        /// <param name="tableName">表名，为空值则为默认值</param>
         /// <returns>影响的记录数</returns>
-        public static int CreateTable<TableClass>(SqlSugarClient sugarClient)
+        public static int CreateTable<TableClass>(SqlSugarClient sugarClient,string tableName = null)
         {
             if (sugarClient == null) throw new NullReferenceException("null SqlSugarClient");
             try
@@ -62,8 +64,9 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
                     throw new InvalidOperationException("Database not ready");
                 using (IDbCommand cmd = sugarClient.Ado.Connection.CreateCommand())
                 {
+                    if (string.IsNullOrEmpty(tableName)) tableName = SugarTableUtils.GetTableName<TableClass>();
                     //写入创建新表指令
-                    cmd.CommandText = $"CREATE TABLE {SugarTableUtils.GetTableName<TableClass>()} (";
+                    cmd.CommandText = $"CREATE TABLE {tableName} (";
                     PropertyInfo[] properties = typeof(TableClass).GetProperties();
                     int i = 0;
                     foreach (PropertyInfo colInfo in properties)
@@ -73,7 +76,8 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
                         cmd.CommandText +=
                             $"{SugarColUtils.GetColName(colInfo)} " +
                             $"{SugarColUtils.GetColType(colInfo)} " +
-                            $"{SugarColUtils.ColIsNullable(colInfo)}";
+                            $"{SugarColUtils.ColIsNullable(colInfo)}" +
+                            $"{SugarColUtils.ColIsIdentity(colInfo)}";
                         if (i != properties.Length) cmd.CommandText += ",";
                     }
                     List<string> primaryKeys = SugarColUtils.GetColPrimaryKeys<TableClass>();

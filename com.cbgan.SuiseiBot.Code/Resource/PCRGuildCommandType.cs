@@ -1,4 +1,4 @@
-﻿namespace com.cbgan.SuiseiBot.Code.Resource
+namespace com.cbgan.SuiseiBot.Code.Resource
 {
     internal enum PCRGuildCommandType : int
     {
@@ -25,6 +25,7 @@
         /// <summary>
         /// 一键入会
         /// </summary>
-        JoinAll = 6
+        JoinAll = 6,
+
     }
 }
