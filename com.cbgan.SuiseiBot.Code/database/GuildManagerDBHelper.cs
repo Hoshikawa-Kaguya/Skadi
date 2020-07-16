@@ -1,6 +1,8 @@
-﻿using System;
+using System;
 using com.cbgan.SuiseiBot.Code.SqliteTool;
+using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp.EventArgs;
+using SqlSugar;
 
 namespace com.cbgan.SuiseiBot.Code.Database
 {
@@ -129,7 +131,8 @@ namespace com.cbgan.SuiseiBot.Code.Database
         {
             try
             {
-                SQLiteHelper dbHelper = new SQLiteHelper(DBPath);
+                SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);//TODO 使用using调用
+                SQLiteHelper dbHelper = new SQLiteHelper(DBPath); //TODO 改用ORM
                 dbHelper.OpenDB();
                 string[] memberKey =
                     {qqid.ToString(), GuildId[0]};
@@ -143,6 +146,17 @@ namespace com.cbgan.SuiseiBot.Code.Database
                 }
                 else //未找到，初次创建
                 {
+                    MemberStatus member = new MemberStatus()//写入新的状态数据
+                    {
+                        Gid  = GroupId,
+                        Uid  = qqid,
+                        Time = Utils.GetNowTimeStamp(),
+                        Flag = 0,
+                        Info = null,
+                        SL   = 0
+                    };
+                    dbClient.Insertable(member).ExecuteCommand();
+
                     string[] memberInfo =
                     {
                         qqid.ToString(), //用户QQ号
@@ -173,7 +187,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
         {
             try
             {
-                SQLiteHelper dbHelper = new SQLiteHelper(DBPath);
+                SQLiteHelper dbHelper = new SQLiteHelper(DBPath);//TODO 改用ORM
                 dbHelper.OpenDB();
                 if (Convert.ToBoolean(dbHelper.GetCount(GuildTableName, GPrimaryColName, GuildId))) //查找是否有记录
                 {

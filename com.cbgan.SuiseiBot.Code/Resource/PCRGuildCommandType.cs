@@ -26,6 +26,9 @@ namespace com.cbgan.SuiseiBot.Code.Resource
         /// 一键入会
         /// </summary>
         JoinAll = 6,
-
+        /// <summary>
+        /// 会战开始指令
+        /// </summary>
+        BattleStart = 101
     }
 }

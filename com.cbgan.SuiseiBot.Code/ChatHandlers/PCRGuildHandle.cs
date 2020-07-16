@@ -92,7 +92,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
 
         #region 辅助函数
         /// <summary>
-        /// 检查指令长度
+        /// 检查参数数组长度
         /// </summary>
         /// <param name="args">指令数组</param>
         /// <param name="len">目标长度</param>
@@ -112,7 +112,6 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
                 return true;
             }
         }
-
 
         /// <summary>
         /// 获取对应指令的帮助文本

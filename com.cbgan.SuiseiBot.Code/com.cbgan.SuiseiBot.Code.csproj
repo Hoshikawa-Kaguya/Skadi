@@ -91,6 +91,7 @@
     <Compile Include="CQInterface\AppEnableInterface.cs" />
     <Compile Include="CQInterface\GroupMessageInterface.cs" />
     <Compile Include="CQInterface\PrivateMessageInterface.cs" />
+    <Compile Include="Database\GuildBattleMgrDBHelper.cs" />
     <Compile Include="Database\Tables.cs" />
     <Compile Include="Resource\ChatKeywords.cs" />
     <Compile Include="PCRGuildManager\GuildBattleManager.cs" />

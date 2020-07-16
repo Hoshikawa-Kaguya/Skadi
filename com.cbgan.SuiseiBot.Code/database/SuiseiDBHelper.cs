@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Native.Sdk.Cqp.EventArgs;
 using com.cbgan.SuiseiBot.Code.Tool;
 using com.cbgan.SuiseiBot.Code.SqliteTool;
@@ -66,11 +66,13 @@ namespace com.cbgan.SuiseiBot.Code.Database
                     }
                     else//未找到签到记录
                     {
-                        UserData = new SuiseiData();            //创建用户初始化数据数组
-                        UserData.Uid = QQID;                    //用户QQ
-                        UserData.Gid = GroupId;                 //用户所在群号
-                        UserData.FavorRate = 0;                 //好感度
-                        UserData.ChatDate = TriggerTime;        //签到时间
+                        UserData = new SuiseiData //创建用户初始化数据
+                        {
+                            Uid       = QQID,       //用户QQ
+                            Gid       = GroupId,    //用户所在群号
+                            FavorRate = 0,          //好感度
+                            ChatDate  = TriggerTime //签到时间
+                        };
                         IsExists = false;
                         CurrentFavorRate = 0;
                     }

@@ -25,7 +25,7 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
             if (sugarClient == null) throw new NullReferenceException("null SqlSugarClient");
             //找到数据路径字符串
             string[] connectionArgs = sugarClient.CurrentConnectionConfig.ConnectionString.Split('=');
-            if (!connectionArgs[0].Equals("DATA SOURCE")||sugarClient.CurrentConnectionConfig.DbType!=SqlSugar.DbType.Sqlite) 
+            if (!connectionArgs[0].Equals("DATA SOURCE") || sugarClient.CurrentConnectionConfig.DbType != SqlSugar.DbType.Sqlite)
                 throw new ArgumentOutOfRangeException("Unsupported dbtype");
             try
             {
@@ -55,7 +55,7 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         /// <param name="sugarClient">SqlSugarClient</param>
         /// <param name="tableName">表名，为空值则为默认值</param>
         /// <returns>影响的记录数</returns>
-        public static int CreateTable<TableClass>(SqlSugarClient sugarClient,string tableName = null)
+        public static int CreateTable<TableClass>(SqlSugarClient sugarClient, string tableName = null)
         {
             if (sugarClient == null) throw new NullReferenceException("null SqlSugarClient");
             try
@@ -64,6 +64,7 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
                     throw new InvalidOperationException("Database not ready");
                 using (IDbCommand cmd = sugarClient.Ado.Connection.CreateCommand())
                 {
+                    //检查表名
                     if (string.IsNullOrEmpty(tableName)) tableName = SugarTableUtils.GetTableName<TableClass>();
                     //写入创建新表指令
                     cmd.CommandText = $"CREATE TABLE {tableName} (";
@@ -76,7 +77,7 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
                         cmd.CommandText +=
                             $"{SugarColUtils.GetColName(colInfo)} " +
                             $"{SugarColUtils.GetColType(colInfo)} " +
-                            $"{SugarColUtils.ColIsNullable(colInfo)}" +
+                            $"{SugarColUtils.ColIsNullable(colInfo)} " +
                             $"{SugarColUtils.ColIsIdentity(colInfo)}";
                         if (i != properties.Length) cmd.CommandText += ",";
                     }
@@ -98,8 +99,9 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         /// </summary>
         /// <typeparam name="TableClass">自定义表格类</typeparam>
         /// <param name="sugarClient">SqlSugarClient</param>
+        /// <param name="tableName">表名</param>
         /// <returns>返回True/False代表是否存在</returns>
-        public static bool TableExists<TableClass>(SqlSugarClient sugarClient)
+        public static bool TableExists<TableClass>(SqlSugarClient sugarClient, string tableName = null)
         {
             if (sugarClient == null) throw new NullReferenceException("null SqlSugarClient");
             if (sugarClient.Ado.Connection.State != System.Data.ConnectionState.Open)
@@ -108,8 +110,10 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
             {
                 using (IDbCommand cmd = sugarClient.Ado.Connection.CreateCommand())
                 {
+                    //检查是否有可变表名
+                    if (string.IsNullOrEmpty(tableName)) tableName = SugarTableUtils.GetTableName<TableClass>();
                     //查找是否有同名表
-                    cmd.CommandText = $"SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='{SugarTableUtils.GetTableName<TableClass>()}'";
+                    cmd.CommandText = $"SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='{tableName}'";
                     return Convert.ToBoolean(cmd.ExecuteScalar());
                 }
             }
@@ -192,10 +196,10 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         {
             SqlSugarClient dbClient = new SqlSugarClient(new ConnectionConfig()
             {
-                ConnectionString = $"DATA SOURCE={DBPath}",
-                DbType = SqlSugar.DbType.Sqlite,
+                ConnectionString      = $"DATA SOURCE={DBPath}",
+                DbType                = SqlSugar.DbType.Sqlite,
                 IsAutoCloseConnection = true,
-                InitKeyType = InitKeyType.Attribute
+                InitKeyType           = InitKeyType.Attribute
             });
             dbClient.Open();
             return dbClient;

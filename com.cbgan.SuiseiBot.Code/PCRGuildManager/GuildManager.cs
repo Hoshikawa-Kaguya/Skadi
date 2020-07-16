@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using com.cbgan.SuiseiBot.Code.ChatHandlers;
@@ -62,8 +62,9 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                 //参数1 QQ号
                 case PCRGuildCommandType.JoinGuild://入会
                     Dictionary<long,int> addedQQList= new Dictionary<long, int>();    //已经入会的QQ号列表
-                    if (PCRGuildHandle.CheckForLength(commandArgs, 1, GMgrEventArgs))   
-                        if(GMgrEventArgs.Message.CQCodes.Count == 0)//没有AT任何人，参数非法
+                    if (PCRGuildHandle.CheckForLength(commandArgs, 1, GMgrEventArgs))
+                    {
+                        if (GMgrEventArgs.Message.CQCodes.Count == 0)//没有AT任何人，参数非法
                         {
                             PCRGuildHandle.GetIllegalArgs(GMgrEventArgs, PCRGuildCommandType.JoinGuild, "没有AT任何人");
                             return;
@@ -72,13 +73,13 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                         {
                             foreach (CQCode code in GMgrEventArgs.Message.CQCodes)  //检查每一个AT
                             {
-                                if (code.Function.Equals(CQFunction.At)            &&
-                                    code.Items.ContainsKey("qq")                   &&
+                                if (code.Function.Equals(CQFunction.At) &&
+                                    code.Items.ContainsKey("qq") &&
                                     long.TryParse(code.Items["qq"], out long qqid) &&
                                     qqid > QQ.MinValue)
                                 {
                                     //需要添加为成员的QQ号列表和对应操作的返回值
-                                    addedQQList.Add(qqid, dbAction.JoinToGuild(qqid, GMgrEventArgs.CQApi.GetGroupMemberInfo(GMgrEventArgs.FromGroup,qqid).Nick));
+                                    addedQQList.Add(qqid, dbAction.JoinToGuild(qqid, GMgrEventArgs.CQApi.GetGroupMemberInfo(GMgrEventArgs.FromGroup, qqid).Nick));
                                 }
                                 else
                                 {
@@ -87,7 +88,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                                 }
                             }
                             //如果只存在需要添加的成员，而没有需要更新的成员
-                            if (addedQQList.Count>0 && addedQQList.Where(x=> x.Value==1).ToList().Count==0)
+                            if (addedQQList.Count > 0 && addedQQList.Where(x => x.Value == 1).ToList().Count == 0)
                             {
                                 result = 0;
                             }
@@ -100,6 +101,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                         {
                             result = dbAction.JoinToGuild(GMgrEventArgs.FromQQ, GMgrEventArgs.CQApi.GetGroupMemberInfo(GMgrEventArgs.FromGroup, GMgrEventArgs.FromQQ).Nick);
                         }
+                    }
 
                     switch (result)
                     {
