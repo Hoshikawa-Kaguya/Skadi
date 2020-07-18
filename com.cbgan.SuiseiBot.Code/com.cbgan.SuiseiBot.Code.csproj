@@ -103,6 +103,7 @@
     <Compile Include="SqliteTool\SugarColUtils.cs" />
     <Compile Include="SqliteTool\SugarTableUtils.cs" />
     <Compile Include="SqliteTool\SugarUtils.cs" />
+    <Compile Include="TimerEvent\TimerInit.cs" />
     <Compile Include="Tool\ConsoleLog.cs" />
     <Compile Include="Database\DatabaseInit.cs" />
     <Compile Include="Database\GuildManagerDBHelper.cs" />

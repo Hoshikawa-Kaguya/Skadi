@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 
 namespace com.cbgan.SuiseiBot.Code.Tool
@@ -67,7 +67,7 @@ namespace com.cbgan.SuiseiBot.Code.Tool
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write($"[{DateTime.Now}][{type}][");
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.Write($"WARNINIG");
+            Console.Write($"DEBUG");
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write("]");
             Console.ForegroundColor = ConsoleColor.Cyan;

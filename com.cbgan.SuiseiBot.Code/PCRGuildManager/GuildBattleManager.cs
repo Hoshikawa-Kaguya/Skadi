@@ -36,7 +36,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                                          $"\r\n{PCRGuildHandle.GetCommandHelp(commandType)}");
                 return;
             }
-            //TODO 检查是否存在公会
+            //TODO 自动更新boss数据
 
             switch (commandType)
             {

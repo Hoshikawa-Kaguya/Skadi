@@ -1,15 +1,20 @@
-﻿using com.cbgan.SuiseiBot.Code.Database;
+using com.cbgan.SuiseiBot.Code.Database;
 using com.cbgan.SuiseiBot.Code.Resource;
 using com.cbgan.SuiseiBot.Code.Tool;
 using com.cbgan.SuiseiBot.Resource;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
 using System;
+using System.Globalization;
+using System.Threading;
+using com.cbgan.SuiseiBot.Code.TimerEvent;
+using Native.Sdk.Cqp;
 
 namespace com.cbgan.SuiseiBot.Code.CQInterface
 {
     public class AppEnableInterface : IAppEnable
     {
+        private static TimerInit timer;
         public void AppEnable(object sender, CQAppEnableEventArgs e)
         {
             if (sender == null || e == null)
@@ -26,6 +31,8 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             ChatKeywords.KeywordInit();
             GuildCommand.GuildCommandInit();
             CommandHelpText.InitHelpText();
+            //初始化定时器线程
+            timer = new TimerInit(e.CQApi);
             e.Handler = true;
         }
     }

@@ -15,6 +15,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
         public static void Init(CQAppEnableEventArgs e)
         {
             string DBPath = SugarUtils.GetDBPath(e.CQApi);
+            ConsoleLog.Info("IO",$"获取数据路径{DBPath}");
             SqlSugarClient dbClient = new SqlSugarClient(new ConnectionConfig()
             {
                 ConnectionString = $"DATA SOURCE={DBPath}",
