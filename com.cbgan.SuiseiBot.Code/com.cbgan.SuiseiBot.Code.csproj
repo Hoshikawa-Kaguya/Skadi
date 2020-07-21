@@ -55,9 +55,13 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BrotliParser, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Brotli.Core, Version=2.0.4.2, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\BrotliParser.dll</HintPath>
+      <HintPath>bin\Debug\Brotli.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="BrotliParser, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\BrotliParser.exe</HintPath>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.3.0\lib\net45\EntityFramework.dll</HintPath>

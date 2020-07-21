@@ -209,7 +209,7 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         #endregion
 
         #region 连接本地数据库函数
-        public static string decompressDBFile(string InputFile, string outputFilePath, string outputFileName)
+        public static int decompressDBFile(string InputFile, string outputFilePath, string outputFileName)
         {
             //检查合法路径正则表达式
             Regex isDir = new Regex(@"^([a-zA-Z]:\\)?[^\/\:\*\?\""\<\>\|\,]*$");
@@ -217,32 +217,27 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
             Regex isFileName = new Regex(@"^[^\/\:\*\?\""\<\>\|\,]+$");
 
             if (
-                    File.Exists(args[1]) &&                                                     //检查是否有文件存在
-                    isDir.Match(Path.GetDirectoryName(args[2]) ?? string.Empty).Success &&//检查是否为合法路径
-                    isFileName.Match(args[3] ?? string.Empty).Success)                          //检查文件名是否合法
+                    File.Exists(InputFile) &&                                                     //检查是否有文件存在
+                    isDir.Match(Path.GetDirectoryName(outputFilePath) ?? string.Empty).Success &&//检查是否为合法路径
+                    isFileName.Match(outputFileName ?? string.Empty).Success)                          //检查文件名是否合法
             {
                 //在不存在路径时创建文件夹
-                Directory.CreateDirectory(Path.GetDirectoryName(args[2]) ?? string.Empty);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath) ?? string.Empty);
                 Console.WriteLine("读取文件...");
                 byte[] inputBuff;
                 try
                 {
                     //尝试读取文件
-                    inputBuff = ByteArrayIO.File2Byte(args[1]);
+                    inputBuff = ByteArrayIO.File2Byte(InputFile);
                 }
                 catch (Exception e)
                 {
                     //读取文件发生错误
-                    Console.ForegroundColor = ConsoleColor.DarkRed;
-                    Console.WriteLine($"保存文件时发生错误\n{e}");
-                    Thread.Sleep(3000);
                     return (int)ReturnType.IOError;
                 }
-                //读取到空文件
                 if (inputBuff.Length == 0)
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkRed;
-                    Console.WriteLine("读取到空文件");
+                    //读取到空文件
                     return (int)ReturnType.EmptyFile;
                 }
                 byte[] outBuff;
@@ -255,36 +250,24 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
                 catch (Exception e)
                 {
                     //解压发生错误
-                    Console.ForegroundColor = ConsoleColor.DarkRed;
-                    Console.WriteLine($"此文件不是Brotli压缩算法构建的无法解压\n{e}");
-                    Thread.Sleep(3000);
                     return (int)ReturnType.ParseError;
                 }
                 try
                 {
-                    Console.WriteLine("保存文件...");
                     //将文件保存到指定路径
-                    ByteArrayIO.Bytes2File(outBuff, $"{args[2]}\\{args[3]}");
+                    ByteArrayIO.Bytes2File(outBuff, $"{outputFilePath}\\{outputFileName}");
                 }
                 catch (Exception e)
                 {
                     //保存时发生错误
-                    Console.ForegroundColor = ConsoleColor.DarkRed;
-                    Console.WriteLine($"保存文件时发生错误\n{e}");
-                    Thread.Sleep(3000);
                     return (int)ReturnType.IOError;
                 }
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.WriteLine("无效参数");
-                Console.ForegroundColor = ConsoleColor.White;
-                Thread.Sleep(3000);
+                //无效参数
                 return (int)ReturnType.IllegalArgs;
             }
-
-            Console.ReadLine();
             return (int)ReturnType.Success;
         }
         #endregion
