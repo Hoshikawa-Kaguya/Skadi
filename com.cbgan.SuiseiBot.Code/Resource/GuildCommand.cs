@@ -19,6 +19,7 @@ namespace com.cbgan.SuiseiBot.Code.Resource
             GuildCommands.Add("一键入会", PCRGuildCommandType.JoinAll);
             //出道模块的指令（在做了在做了
             GuildCommands.Add("开始会战",PCRGuildCommandType.BattleStart);
+            GuildCommands.Add("加载BOSS",PCRGuildCommandType.LoadBoss);
         }
     }
 }

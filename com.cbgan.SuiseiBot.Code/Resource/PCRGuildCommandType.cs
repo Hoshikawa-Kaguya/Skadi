@@ -29,6 +29,10 @@ namespace com.cbgan.SuiseiBot.Code.Resource
         /// <summary>
         /// 会战开始指令
         /// </summary>
-        BattleStart = 101
+        BattleStart = 101,
+        /// <summary>
+        /// 会战开始指令
+        /// </summary>
+        LoadBoss = 102
     }
 }

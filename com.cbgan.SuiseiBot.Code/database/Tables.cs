@@ -112,4 +112,60 @@ namespace com.cbgan.SuiseiBot.Code.Database
         public int SL { get; set; }
     }
     #endregion
+
+    #region BOSS信息表定义
+    [SugarTable("boss_info")]
+    internal class BossInfo
+    {
+        //enemy_id用于标识boss借以寻找enemy_parameter
+        [SugarColumn(ColumnName = "eid", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public long Eid { get; set; }
+        //unit_id用于标识boss借以寻找unit_skill_data与unit_enemy_data获取boss技能属性
+        [SugarColumn(ColumnName = "uid", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public long Uid { get; set; }
+        //boss属性：名称
+        [SugarColumn(ColumnName = "name", ColumnDataType = "VARCHAR",IsPrimaryKey = true)]
+        public string Name { get; set; }
+        //boss属性：血量
+        [SugarColumn(ColumnName = "hp", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public int hp { get; set; }
+        //boss属性：物攻
+        [SugarColumn(ColumnName = "atk", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public int ATK { get; set; }
+        //boss属性：法攻
+        [SugarColumn(ColumnName = "magic_atk", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public int MagicATK { get; set; }
+        //boss属性：物防
+        [SugarColumn(ColumnName = "def", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public int DEF { get; set; }
+        //boss属性：法防
+        [SugarColumn(ColumnName = "magic_def", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public int MagicDEF { get; set; }
+    }
+    #endregion
+
+    #region BOSS组信息表表定义
+    [SugarTable("phase_info")]
+    internal class PhaseInfo
+    {
+        //Phase_id用于标识boss借以寻找enemy_parameter
+        [SugarColumn(ColumnName = "pid", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public long Pid { get; set; }
+        //enemy_id1用于标识一王
+        [SugarColumn(ColumnName = "eid1", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public long Eid1 { get; set; }
+        //enemy_id1用于标识二王
+        [SugarColumn(ColumnName = "eid2", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public long Eid2 { get; set; }
+        //enemy_id3用于标识三王
+        [SugarColumn(ColumnName = "eid3", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public long Eid3 { get; set; }
+        //enemy_id4用于标识四王
+        [SugarColumn(ColumnName = "eid4", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public long Eid4 { get; set; }
+        //enemy_id5用于标识一王
+        [SugarColumn(ColumnName = "eid5", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public long Eid5 { get; set; }
+    }
+    #endregion
 }

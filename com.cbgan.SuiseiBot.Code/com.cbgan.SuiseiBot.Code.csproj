@@ -55,6 +55,10 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BrotliParser, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\BrotliParser.dll</HintPath>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.3.0\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -91,6 +95,7 @@
     <Compile Include="CQInterface\AppEnableInterface.cs" />
     <Compile Include="CQInterface\GroupMessageInterface.cs" />
     <Compile Include="CQInterface\PrivateMessageInterface.cs" />
+    <Compile Include="Database\BossDBHelper.cs" />
     <Compile Include="Database\GuildBattleMgrDBHelper.cs" />
     <Compile Include="Database\Tables.cs" />
     <Compile Include="Resource\ChatKeywords.cs" />
