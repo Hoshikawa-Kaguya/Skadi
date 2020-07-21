@@ -45,6 +45,18 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         /// 获取当前数据库的绝对路径
         /// </summary>
         public static Func<CQApi, string> GetDBPath = (cqApi) => Directory.GetCurrentDirectory() + "\\data\\" + cqApi.GetLoginQQ() + "\\suisei.db";
+
+        /// <summary>
+        /// 获取目标数据库的绝对路径
+        /// </summary>
+        public static Func<CQApi, string> GetLocalPath = (cqApi) => Directory.GetCurrentDirectory() + "\\data\\" + cqApi.GetLoginQQ() + "\\";
+        #endregion
+
+        #region IO工具
+        /// <summary>
+        /// 获取数据文件路径
+        /// </summary>
+        public static Func<CQApi, string, string> GetBinFilePath = (cqApi, filename) => $"{Directory.GetCurrentDirectory()}\\bin\\{filename}";
         #endregion
 
         #region 表辅助函数
@@ -205,70 +217,6 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
             });
             dbClient.Open();
             return dbClient;
-        }
-        #endregion
-
-        #region 连接本地数据库函数
-        public static int decompressDBFile(string InputFile, string outputFilePath, string outputFileName)
-        {
-            //检查合法路径正则表达式
-            Regex isDir = new Regex(@"^([a-zA-Z]:\\)?[^\/\:\*\?\""\<\>\|\,]*$");
-            //检查合法文件名正则表达式
-            Regex isFileName = new Regex(@"^[^\/\:\*\?\""\<\>\|\,]+$");
-
-            if (
-                    File.Exists(InputFile) &&                                                     //检查是否有文件存在
-                    isDir.Match(Path.GetDirectoryName(outputFilePath) ?? string.Empty).Success &&//检查是否为合法路径
-                    isFileName.Match(outputFileName ?? string.Empty).Success)                          //检查文件名是否合法
-            {
-                //在不存在路径时创建文件夹
-                Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath) ?? string.Empty);
-                Console.WriteLine("读取文件...");
-                byte[] inputBuff;
-                try
-                {
-                    //尝试读取文件
-                    inputBuff = ByteArrayIO.File2Byte(InputFile);
-                }
-                catch (Exception e)
-                {
-                    //读取文件发生错误
-                    return (int)ReturnType.IOError;
-                }
-                if (inputBuff.Length == 0)
-                {
-                    //读取到空文件
-                    return (int)ReturnType.EmptyFile;
-                }
-                byte[] outBuff;
-                try
-                {
-                    Console.WriteLine("解压文件...");
-                    //尝试解压文件数据
-                    outBuff = BrotliUtils.BrotliDecompress(inputBuff);
-                }
-                catch (Exception e)
-                {
-                    //解压发生错误
-                    return (int)ReturnType.ParseError;
-                }
-                try
-                {
-                    //将文件保存到指定路径
-                    ByteArrayIO.Bytes2File(outBuff, $"{outputFilePath}\\{outputFileName}");
-                }
-                catch (Exception e)
-                {
-                    //保存时发生错误
-                    return (int)ReturnType.IOError;
-                }
-            }
-            else
-            {
-                //无效参数
-                return (int)ReturnType.IllegalArgs;
-            }
-            return (int)ReturnType.Success;
         }
         #endregion
     }

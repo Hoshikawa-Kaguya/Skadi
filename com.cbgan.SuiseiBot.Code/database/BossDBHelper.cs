@@ -15,13 +15,14 @@ namespace com.cbgan.SuiseiBot.Code.Database
         #region 参数
         private long GroupId { set; get; } //群号
         private string[] GuildId { set; get; } //公会信息
-
         public CQGroupMessageEventArgs EventArgs { private set; get; }
         public object Sender { private set; get; }
         private SqlSugarClient OriginDBClient;
         public readonly static string GuildTableName = "guild";  //公会数据库表名
         public readonly static string MemberTableName = "member"; //成员数据库表名
-        private static string DBPath;                    //数据库路径
+        private static string DBPath;//数据库保存路径
+        private static string BinPath;//二进制文件路径
+        private static string LocalDBPath;//
         #endregion
 
         #region 构造函数
@@ -30,8 +31,14 @@ namespace com.cbgan.SuiseiBot.Code.Database
             this.Sender = sender;
             this.EventArgs = eventArgs;
             this.GroupId = eventArgs.FromGroup.Id;
+            BinPath = SugarUtils.GetBinFilePath(eventArgs.CQApi, @"BrotliParser.exe");
             DBPath = SugarUtils.GetDBPath(eventArgs.CQApi);
-            OriginDB = SugarUtils.GetLocalClient(@"TargetDBPath");
+            decompressDBFile(
+                BinPath,
+                SugarUtils.GetLocalPath(eventArgs.CQApi) + @"redive_cn.db.br",
+                SugarUtils.GetLocalPath(eventArgs.CQApi),
+                SugarUtils.GetLocalPath(eventArgs.CQApi) + @"redive_cn.db"
+                );
         }
 
         #endregion
@@ -39,6 +46,18 @@ namespace com.cbgan.SuiseiBot.Code.Database
 
 
         #region 操作数据库函数
+        public static void decompressDBFile(string BinPath, string InputFile, string outputFilePath, string outputFileName)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(BinPath, InputFile+" "+ outputFilePath + " " + outputFileName);
+            }
+            catch
+            {
+                ConsoleLog.Error("BOSS信息数据库","BOSS信息数据库解压错误，请检查文件路径");
+            }
+        }
+
         public int StartLoadPhase()
         {
             using (SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath))
