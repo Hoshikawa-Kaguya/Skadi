@@ -94,6 +94,7 @@
     <Compile Include="Database\BossDBHelper.cs" />
     <Compile Include="Database\GuildBattleMgrDBHelper.cs" />
     <Compile Include="Database\Tables.cs" />
+    <Compile Include="PCRGuildManager\BossManager.cs" />
     <Compile Include="Resource\ChatKeywords.cs" />
     <Compile Include="PCRGuildManager\GuildBattleManager.cs" />
     <Compile Include="PCRGuildManager\GuildManager.cs" />

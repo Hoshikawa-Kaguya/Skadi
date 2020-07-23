@@ -33,6 +33,6 @@ namespace com.cbgan.SuiseiBot.Code.Resource
         /// <summary>
         /// 会战开始指令
         /// </summary>
-        UpdateBoss = 102
+        UpdateBoss = 201
     }
 }

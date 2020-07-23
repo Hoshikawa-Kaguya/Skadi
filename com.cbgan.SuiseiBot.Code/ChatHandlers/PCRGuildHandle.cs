@@ -51,6 +51,10 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
                 {
                     GuildBattleManager.GuildBattleResponse(Sender,PCRGuildEventArgs, CommandType);
                 }
+                else if ((int)CommandType > 200 && (int)CommandType < 300)
+                {
+                    BossManager.BossResponse(Sender, PCRGuildEventArgs, CommandType);
+                }
             }
             catch(Exception e)
             {
