@@ -291,7 +291,7 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         /// <param name="tableName">表名</param>
         /// <param name="keyNames">要查找的字段名数组</param>
         /// <param name="keyValues">要查找的字段名值</param>
-        /// <returns>返回包含主键名的List</returns>
+        /// <returns>返回包含主键名的List的count</returns>
         public int GetCount(string tableName, string[] keyNames, string[] keyValues)
         {
             try
@@ -304,6 +304,46 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
                     if (keyNames.Length > 1 && i != keyNames.Length - 1) cmd.CommandText += " AND ";
                 }
                 return Convert.ToInt32(cmd.ExecuteScalar());
+            }
+            catch (Exception) { throw; }
+        }
+
+        /// <summary>
+        /// 查找是否某键值范围内有值
+        /// </summary>
+        /// <param name="tableName">表名</param>
+        /// <param name="rangeFrom">要查找的范围的起始字段</param>
+        /// <param name="rangeTo">要查找的范围的结束字段</param>
+        /// <param name="targetValue">要查找的目标值</param>
+        /// <returns>返回包含主键名的List的count</returns>
+        public List<string> GetIdInTime(string tableName,string[] KeyNames, int time)
+        {
+            try
+            {
+                SQLiteCommand cmd = new SQLiteCommand(this.SQLConnection);
+                cmd.CommandText = "SELECT "+ String.Join(",",KeyNames)+ " FROM " + tableName;
+                SQLiteDataReader dr = cmd.ExecuteReader();
+                List<string> result = new List<string>();
+                while(dr.Read())
+                {
+                    DateTime start_time = Convert.ToDateTime(dr["start_time"].ToString().Replace('/', '-'));
+                    DateTime now_time = DateTime.Now;
+                    if (DateTime.Compare(now_time, start_time) > 0) continue;
+
+                    TimeSpan ts = start_time - now_time;
+                    if (ts.TotalDays < time)
+                    {
+                        result.Add(dr["clan_battle_id"].ToString());
+                    }
+                }
+                if (result.Count > 0)
+                {
+                    return result;
+                }
+                else
+                {
+                    return null;
+                }
             }
             catch (Exception) { throw; }
         }

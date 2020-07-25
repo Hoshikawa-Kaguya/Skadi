@@ -117,17 +117,25 @@ namespace com.cbgan.SuiseiBot.Code.Database
     [SugarTable("boss_info")]
     internal class BossInfo
     {
-        //wave_id用于标识boss的阶段
-        [SugarColumn(ColumnName = "wave_id", ColumnDataType = "INTEGER")]
-        public long Waveid { get; set; }
+        //phase_id用于标识boss的阶段
+        [SugarColumn(ColumnName = "phase_id", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public int Phaseid { get; set; }
 
-        //enemy_id用于标识boss借以寻找enemy_parameter
-        [SugarColumn(ColumnName = "eid", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
-        public long Eid { get; set; }
+        //lap_num_from用于记录阶段起始数
+        [SugarColumn(ColumnName = "lap_num_from", ColumnDataType = "INTEGER")]
+        public int LapNumFrom { get; set; }
 
-        //unit_id用于标识boss借以寻找unit_skill_data与unit_enemy_data获取boss技能属性
-        [SugarColumn(ColumnName = "uid", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
-        public long Uid { get; set; }
+        //lap_num_to用于记录周目结束数
+        [SugarColumn(ColumnName = "lap_num_to", ColumnDataType = "INTEGER")]
+        public int LapNumTO { get; set; }
+
+        //scale用于记录boss属性强化倍率
+        [SugarColumn(ColumnName = "scale", ColumnDataType = "INTEGER")]
+        public double Scale { get; set; }
+
+        //order_num用于标识boss的序号(1-5)
+        [SugarColumn(ColumnName = "order_num", ColumnDataType = "INTEGER",IsPrimaryKey = true)]
+        public int OrderNum { get; set; }
 
         //boss属性：名称
         [SugarColumn(ColumnName = "name", ColumnDataType = "VARCHAR")]
@@ -135,7 +143,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
 
         //boss属性：血量
         [SugarColumn(ColumnName = "hp", ColumnDataType = "INTEGER")]
-        public int hp { get; set; }
+        public long hp { get; set; }
 
         //boss属性：物攻
         [SugarColumn(ColumnName = "atk", ColumnDataType = "INTEGER")]
@@ -152,6 +160,10 @@ namespace com.cbgan.SuiseiBot.Code.Database
         //boss属性：法防
         [SugarColumn(ColumnName = "magic_def", ColumnDataType = "INTEGER")]
         public int MagicDEF { get; set; }
+
+        //用于记录boss描述
+        [SugarColumn(ColumnName = "comment", ColumnDataType = "VARCHAR")]
+        public string Comment { get; set; }
     }
     #endregion
 }

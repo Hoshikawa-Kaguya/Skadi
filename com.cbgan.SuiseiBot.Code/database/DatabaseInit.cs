@@ -48,6 +48,11 @@ namespace com.cbgan.SuiseiBot.Code.Database
                 ConsoleLog.Warning("数据库初始化", "未找到成员状态表 - 创建一个新表");
                 SugarUtils.CreateTable<MemberStatus>(dbClient);
             }
+            if (!SugarUtils.TableExists<BossInfo>(dbClient))//Boss信息表的初始化
+            {
+                ConsoleLog.Warning("数据库初始化", "未找到Boss信息表 - 创建一个新表");
+                SugarUtils.CreateTable<BossInfo>(dbClient);
+            }
         }
     }
 }

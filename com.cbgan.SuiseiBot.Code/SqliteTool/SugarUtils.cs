@@ -51,13 +51,6 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         public static Func<CQApi, string> GetLocalPath = (cqApi) => Directory.GetCurrentDirectory() + "\\data\\" + cqApi.GetLoginQQ() + "\\";
         #endregion
 
-        #region IO工具
-        /// <summary>
-        /// 获取数据文件路径
-        /// </summary>
-        public static Func<CQApi, string, string> GetBinFilePath = (cqApi, filename) => $"{Directory.GetCurrentDirectory()}\\bin\\{filename}";
-        #endregion
-
         #region 表辅助函数
 
         /// <summary>
