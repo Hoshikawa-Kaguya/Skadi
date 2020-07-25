@@ -23,6 +23,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
 
         public bool GuildExists()
         {
+            #region DEBUG
             bool isExists,isExists2;
             using (SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath))
             {
@@ -30,6 +31,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
                 isExists2 = dbClient.Queryable<GuildData>().Where(guild => guild.Gid == 1146619912).Any();
             }
             return isExists||isExists2;
+            #endregion
         }
 
         public int StartBattle()

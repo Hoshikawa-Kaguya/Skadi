@@ -1,4 +1,4 @@
-﻿using com.cbgan.SuiseiBot.Code.Tool;
+using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp;
 using System;
 using System.Collections.Generic;
@@ -24,9 +24,9 @@ namespace com.cbgan.SuiseiBot.Code.IO
         /// <param name="BinPath">二进制执行文件路径</param>
         public static void decompressDBFile(string LocalDBPath, string BinPath)
         {
-            string InputFile = LocalDBPath + @"redive_cn.db.br";
+            string InputFile = LocalDBPath + "redive_cn.db.br";
             string outputFilePath = LocalDBPath;
-            string outputFileName = @"redive_cn.db";
+            string outputFileName = "redive_cn.db";
 
             if (!File.Exists(outputFilePath + outputFileName))
             {

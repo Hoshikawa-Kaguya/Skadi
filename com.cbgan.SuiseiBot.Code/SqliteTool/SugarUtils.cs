@@ -48,7 +48,7 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         /// <summary>
         /// 获取目标数据库的绝对路径
         /// </summary>
-        public static Func<CQApi, string> GetLocalPath = (cqApi) => Directory.GetCurrentDirectory() + "\\data\\" + cqApi.GetLoginQQ() + "\\";
+        public static Func<CQApi, string> GetCacheDBPath = (cqApi) => Directory.GetCurrentDirectory() + "\\data\\" + cqApi.GetLoginQQ() + "\\";
         #endregion
 
         #region 表辅助函数

@@ -1,5 +1,0 @@
-actual_unit_background：角色原名
-character_love_rankup_text：角色原名+不同好感度语音（3种）
-clan_battle_boss_group：Boss相关数据
-clan_battle_period_rank_reward：会战奖励Rank
-unit_profile：角色名片（含游戏角色名+工会+种族+etc.）

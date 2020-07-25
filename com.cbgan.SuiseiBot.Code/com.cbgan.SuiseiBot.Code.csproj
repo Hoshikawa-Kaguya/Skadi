@@ -95,7 +95,7 @@
     <Compile Include="Database\GuildBattleMgrDBHelper.cs" />
     <Compile Include="Database\Tables.cs" />
     <Compile Include="IO\LocalDataIO.cs" />
-    <Compile Include="IO\NetDataIO.cs" />
+    <Compile Include="Network\DataUpdate.cs" />
     <Compile Include="PCRGuildManager\BossManager.cs" />
     <Compile Include="Resource\ChatKeywords.cs" />
     <Compile Include="PCRGuildManager\GuildBattleManager.cs" />
@@ -128,9 +128,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Network\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
