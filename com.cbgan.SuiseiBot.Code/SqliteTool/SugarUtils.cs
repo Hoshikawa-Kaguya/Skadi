@@ -43,12 +43,12 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         /// <summary>
         /// 获取当前数据库的绝对路径
         /// </summary>
-        public static Func<CQApi, string> GetDBPath = (cqApi) => Directory.GetCurrentDirectory() + "\\data\\" + cqApi.GetLoginQQ() + "\\suisei.db";
+        public static Func<CQApi, string> GetDBPath = (cqApi) => $@"{Directory.GetCurrentDirectory()}\data\{cqApi.GetLoginQQ()}\suisei.db";
 
         /// <summary>
         /// 获取目标数据库的绝对路径
         /// </summary>
-        public static Func<CQApi, string> GetCacheDBPath = (cqApi) => Directory.GetCurrentDirectory() + "\\data\\" + cqApi.GetLoginQQ() + "\\";
+        public static Func<CQApi, string, string> GetCacheDBPath = (cqApi,dbFileName) => $@"{Directory.GetCurrentDirectory()}\data\{cqApi.GetLoginQQ()}\{dbFileName}";
         #endregion
 
         #region 表辅助函数

@@ -35,7 +35,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
             this.GroupId = eventArgs.FromGroup.Id;
             BinPath = LocalDataIO.GetBinFilePath(eventArgs.CQApi, "BrotliParser.exe");
             DBPath = SugarUtils.GetDBPath(eventArgs.CQApi);
-            LocalDBPath = SugarUtils.GetCacheDBPath(eventArgs.CQApi);
+            LocalDBPath = SugarUtils.GetCacheDBPath(eventArgs.CQApi, "redive_cn.db");
         }
         #endregion
 
