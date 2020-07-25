@@ -18,10 +18,10 @@ namespace com.cbgan.SuiseiBot.Code.IO
         public static Func<CQApi, string, string> GetBinFilePath = (cqApi, filename) => $"{Directory.GetCurrentDirectory()}\\bin\\{filename}";
 
         /// <summary>
-        /// 解压程序
+        /// 解压程序，解压出的文件和原文件同路径
         /// </summary>
-        /// <param name="LocalDBPath"></param>
-        /// <param name="BinPath"></param>
+        /// <param name="LocalDBPath">数据文件路径</param>
+        /// <param name="BinPath">二进制执行文件路径</param>
         public static void decompressDBFile(string LocalDBPath, string BinPath)
         {
             string InputFile = LocalDBPath + @"redive_cn.db.br";

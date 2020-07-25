@@ -12,7 +12,14 @@ namespace com.cbgan.SuiseiBot.Code.IO
     internal static class NetDataIO
     {
         #region 网络文件IO
-        public static int DownloadFileFromURL(string url, string receivePath, string re)
+        /// <summary>
+        /// 从网络URL下载文件保存到本地
+        /// </summary>
+        /// <param name="url">目标URL</param>
+        /// <param name="receivePath">接收文件的地址</param>
+        /// <param name="re"></param>
+        /// <returns>返回1表示成功</returns>
+        public static int DownloadFileFromURL(string url, string receivePath)
         {
             try
             {
