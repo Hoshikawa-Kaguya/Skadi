@@ -23,12 +23,13 @@ namespace com.cbgan.SuiseiBot.Code.Database
 
         public bool GuildExists()
         {
-            bool isExists;
+            bool isExists,isExists2;
             using (SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath))
             {
                 isExists = dbClient.Queryable<GuildData>().Where(guild => guild.Gid == 883740678).Any();
+                isExists2 = dbClient.Queryable<GuildData>().Where(guild => guild.Gid == 1146619912).Any();
             }
-            return isExists;
+            return isExists||isExists2;
         }
 
         public int StartBattle()

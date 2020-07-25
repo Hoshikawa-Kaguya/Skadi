@@ -112,4 +112,58 @@ namespace com.cbgan.SuiseiBot.Code.Database
         public int SL { get; set; }
     }
     #endregion
+
+    #region BOSS信息表定义
+    [SugarTable("boss_info")]
+    internal class BossInfo
+    {
+        //phase_id用于标识boss的阶段
+        [SugarColumn(ColumnName = "phase_id", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public int Phaseid { get; set; }
+
+        //lap_num_from用于记录阶段起始数
+        [SugarColumn(ColumnName = "lap_num_from", ColumnDataType = "INTEGER")]
+        public int LapNumFrom { get; set; }
+
+        //lap_num_to用于记录周目结束数
+        [SugarColumn(ColumnName = "lap_num_to", ColumnDataType = "INTEGER")]
+        public int LapNumTO { get; set; }
+
+        //scale用于记录boss属性强化倍率
+        [SugarColumn(ColumnName = "scale", ColumnDataType = "INTEGER")]
+        public double Scale { get; set; }
+
+        //order_num用于标识boss的序号(1-5)
+        [SugarColumn(ColumnName = "order_num", ColumnDataType = "INTEGER",IsPrimaryKey = true)]
+        public int OrderNum { get; set; }
+
+        //boss属性：名称
+        [SugarColumn(ColumnName = "name", ColumnDataType = "VARCHAR")]
+        public string Name { get; set; }
+
+        //boss属性：血量
+        [SugarColumn(ColumnName = "hp", ColumnDataType = "INTEGER")]
+        public long hp { get; set; }
+
+        //boss属性：物攻
+        [SugarColumn(ColumnName = "atk", ColumnDataType = "INTEGER")]
+        public int ATK { get; set; }
+
+        //boss属性：法攻
+        [SugarColumn(ColumnName = "magic_atk", ColumnDataType = "INTEGER")]
+        public int MagicATK { get; set; }
+
+        //boss属性：物防
+        [SugarColumn(ColumnName = "def", ColumnDataType = "INTEGER")]
+        public int DEF { get; set; }
+
+        //boss属性：法防
+        [SugarColumn(ColumnName = "magic_def", ColumnDataType = "INTEGER")]
+        public int MagicDEF { get; set; }
+
+        //用于记录boss描述
+        [SugarColumn(ColumnName = "comment", ColumnDataType = "VARCHAR")]
+        public string Comment { get; set; }
+    }
+    #endregion
 }
