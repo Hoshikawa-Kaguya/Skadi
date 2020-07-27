@@ -96,7 +96,6 @@
     <Compile Include="Database\Tables.cs" />
     <Compile Include="IO\LocalDataIO.cs" />
     <Compile Include="Network\DataUpdate.cs" />
-    <Compile Include="IO\NetDataIO.cs" />
     <Compile Include="Network\NetServiceUtils.cs" />
     <Compile Include="PCRGuildManager\BossManager.cs" />
     <Compile Include="Resource\ChatKeywords.cs" />

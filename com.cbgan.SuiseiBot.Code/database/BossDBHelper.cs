@@ -33,25 +33,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
         }
         #endregion
 
-<<<<<<< HEAD
         #region 工具函数(DEBUG)
-=======
-        #region 辅助数据结构
-        private readonly string[] periodColName = new string[] { "clan_battle_id", "start_time" };
-
-        private readonly string[] phaseColName = new string[] { "clan_battle_id" };
-
-        private readonly string[] groupColName = new string[] { "clan_battle_boss_group_id" };
-
-        private readonly string[] waveColName = new string[] { "wave_group_id" };
-
-        private readonly string[] enemyColName = new string[] { "enemy_id" };
-
-        private readonly string[] unitColName = new string[] { "unit_id" };
-        #endregion
-
-        #region 工具函数
->>>>>>> origin/watremons
         public bool GuildExists()
         {
             bool isExists, isExists2;
