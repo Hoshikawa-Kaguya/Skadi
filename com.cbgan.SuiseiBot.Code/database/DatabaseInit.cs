@@ -28,7 +28,6 @@ namespace com.cbgan.SuiseiBot.Code.Database
                 ConsoleLog.Warning("数据库初始化", "未找到数据库文件，创建新的数据库");
                 SugarUtils.CreateNewSQLiteDBFile(dbClient);
             }
-            dbClient.Open();//开始数据库连接
             if (!SugarUtils.TableExists<SuiseiData>(dbClient)) //彗酱数据库初始化
             {
                 ConsoleLog.Warning("数据库初始化", "未找到慧酱数据表 - 创建一个新表");

@@ -1,17 +1,7 @@
 using com.cbgan.SuiseiBot.Code.IO;
 using com.cbgan.SuiseiBot.Code.SqliteTool;
-using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
-using System;
-using System.Collections.Generic;
-using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
-using System.Data.SqlClient;
-using System.Data.SQLite;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace com.cbgan.SuiseiBot.Code.Database
 {
