@@ -1,5 +1,7 @@
 using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,7 +18,33 @@ namespace com.cbgan.SuiseiBot.Code.IO
         /// 获取数据文件路径
         /// </summary>
         public static Func<CQApi, string, string> GetBinFilePath = (cqApi, filename) => $"{Directory.GetCurrentDirectory()}\\bin\\{filename}";
+        #endregion
 
+        #region 文件读取工具
+        /// <summary>
+        /// 读取Json文件并返回为一个JObject
+        /// </summary>
+        /// <param name="jsonPath">json文件路径</param>
+        /// <param name="jsonName">json文件名称</param>
+        /// <returns>保存整个文件信息的JObject</returns>
+        public static JObject LoadJsonFile(string jsonPath,string jsonName)
+        {
+            try
+            {
+                StreamReader jsonFile = File.OpenText(jsonPath + jsonName);
+                JsonTextReader reader = new JsonTextReader(jsonFile);
+                JObject jsonObject = (JObject)JToken.ReadFrom(reader);
+                return jsonObject;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        #endregion
+
+        #region 文件处理工具
         /// <summary>
         /// 解压程序，解压出的文件和原文件同路径
         /// </summary>
@@ -32,7 +60,7 @@ namespace com.cbgan.SuiseiBot.Code.IO
             {
                 try
                 {
-                    System.Diagnostics.Process.Start(BinPath, "-bd "+ InputFile + " " + outputFilePath + " " + outputFileName);
+                    System.Diagnostics.Process.Start(BinPath, "-bd " + InputFile + " " + outputFilePath + " " + outputFileName);
                     //GC.Collect();
                 }
                 catch

@@ -96,6 +96,8 @@
     <Compile Include="Database\Tables.cs" />
     <Compile Include="IO\LocalDataIO.cs" />
     <Compile Include="Network\DataUpdate.cs" />
+    <Compile Include="IO\NetDataIO.cs" />
+    <Compile Include="Network\NetServiceUtils.cs" />
     <Compile Include="PCRGuildManager\BossManager.cs" />
     <Compile Include="Resource\ChatKeywords.cs" />
     <Compile Include="PCRGuildManager\GuildBattleManager.cs" />
@@ -117,6 +119,7 @@
     <Compile Include="ChatHandlers\SuiseiHanlde.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ChatHandlers\SurpriseMFKHandle.cs" />
+    <Compile Include="Tool\JsonUtils.cs" />
     <Compile Include="Tool\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
