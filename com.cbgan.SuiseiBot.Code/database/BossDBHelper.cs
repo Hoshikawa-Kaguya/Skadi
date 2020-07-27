@@ -1,7 +1,9 @@
 ﻿using com.cbgan.SuiseiBot.Code.IO;
+using com.cbgan.SuiseiBot.Code.Network;
 using com.cbgan.SuiseiBot.Code.SqliteTool;
 using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp.EventArgs;
+using Newtonsoft.Json.Linq;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
@@ -33,6 +35,8 @@ namespace com.cbgan.SuiseiBot.Code.Database
         private static string DBPath;//数据库保存路径（suisei.db）
         private static string BinPath;//二进制文件路径
         private static string LocalDBPath;//原boss数据库保存路径
+
+        private static readonly string DBVersionJsonUrl = @"https://redive.estertion.win/last_version_cn.json";
         #endregion
 
         #region 构造函数
@@ -54,7 +58,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
 
         private readonly string[] groupColName = new string[] { "clan_battle_boss_group_id" };
 
-        private readonly string[] waveColName = new string[] { "wave_group_id"};
+        private readonly string[] waveColName = new string[] { "wave_group_id" };
 
         private readonly string[] enemyColName = new string[] { "enemy_id" };
 
@@ -75,6 +79,21 @@ namespace com.cbgan.SuiseiBot.Code.Database
         #endregion
 
         #region 操作数据库函数
+
+        public bool ChechDBVersion()
+        {
+            string localVersion = JsonUtils.GetKeyData(LocalDataIO.LoadJsonFile(LocalDBPath, @"last_version_cn.json"), "TruthVersions");
+            string latestVersion = JsonUtils.GetKeyData(JsonUtils.ConvertJson(NetServiceUtils.GetDataFromURL(DBVersionJsonUrl)), "TruthVersions");
+            if (localVersion == latestVersion)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
         #endregion
     }
 }
