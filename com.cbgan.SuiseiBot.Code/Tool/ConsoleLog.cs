@@ -20,7 +20,7 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         /// </summary>
         /// <param name="type">信息类型</param>
         /// <param name="message">信息内容</param>
-        public static void Info(string type,string message)
+        public static void Info(object type, object message)
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine($"[{DateTime.Now}][{type}][INFO]{message}");
@@ -30,7 +30,7 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         /// </summary>
         /// <param name="type">信息类型</param>
         /// <param name="message">信息内容</param>
-        public static void Warning(string type, string message)
+        public static void Warning(object type, object message)
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write($"[{DateTime.Now}][{type}][");
@@ -46,7 +46,7 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         /// </summary>
         /// <param name="type">信息类型</param>
         /// <param name="message">信息内容</param>
-        public static void Error(string type, string message)
+        public static void Error(object type, object message)
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write($"[{DateTime.Now}][{type}][");
@@ -62,7 +62,7 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         /// </summary>
         /// <param name="type">信息类型</param>
         /// <param name="message">信息内容</param>
-        public static void Debug(string type, string message)
+        public static void Debug(object type, object message)
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write($"[{DateTime.Now}][{type}][");

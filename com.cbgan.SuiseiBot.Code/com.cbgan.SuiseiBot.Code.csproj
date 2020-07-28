@@ -88,6 +88,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChatHandlers\PCRGuildHandle.cs" />
+    <Compile Include="ChatHandlers\PCRToolsHandle.cs" />
     <Compile Include="CQInterface\AppEnableInterface.cs" />
     <Compile Include="CQInterface\GroupMessageInterface.cs" />
     <Compile Include="CQInterface\PrivateMessageInterface.cs" />
@@ -95,16 +96,19 @@
     <Compile Include="Database\GuildBattleMgrDBHelper.cs" />
     <Compile Include="Database\Tables.cs" />
     <Compile Include="IO\LocalDataIO.cs" />
-    <Compile Include="Network\DataUpdate.cs" />
+    <Compile Include="Network\DownloadFileUtils.cs" />
+    <Compile Include="Network\HTTPUtils.cs" />
     <Compile Include="Network\NetServiceUtils.cs" />
     <Compile Include="PCRGuildManager\BossManager.cs" />
     <Compile Include="Resource\ChatKeywords.cs" />
     <Compile Include="PCRGuildManager\GuildBattleManager.cs" />
     <Compile Include="PCRGuildManager\GuildManager.cs" />
     <Compile Include="Resource\CommandHelpText.cs" />
-    <Compile Include="Resource\GuildCommand.cs" />
+    <Compile Include="Resource\PCRGuildCommand.cs" />
     <Compile Include="Resource\KeywordType.cs" />
     <Compile Include="Resource\PCRGuildCommandType.cs" />
+    <Compile Include="Resource\SpecialKeywords.cs" />
+    <Compile Include="Resource\SpecialKeywordsType.cs" />
     <Compile Include="SqliteTool\SugarColUtils.cs" />
     <Compile Include="SqliteTool\SugarTableUtils.cs" />
     <Compile Include="SqliteTool\SugarUtils.cs" />

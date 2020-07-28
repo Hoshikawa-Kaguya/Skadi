@@ -32,7 +32,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
                 //获取第二个字符开始到空格为止的PCR命令
                 PCRGuildCommand = PCRGuildEventArgs.Message.Text.Substring(1).Split(' ')[0];
                 //获取指令类型
-                GuildCommand.GuildCommands.TryGetValue(PCRGuildCommand, out PCRGuildCommandType commandType);
+                Resource.PCRGuildCommand.PCRGuildCommands.TryGetValue(PCRGuildCommand, out PCRGuildCommandType commandType);
                 this.CommandType = commandType;
                 //未知指令
                 if (CommandType == 0)
@@ -96,28 +96,6 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         #endregion
 
         #region 辅助函数
-        /// <summary>
-        /// 检查参数数组长度
-        /// </summary>
-        /// <param name="args">指令数组</param>
-        /// <param name="len">目标长度</param>
-        /// <param name="e">CQGroupMessageEventArgs</param>
-        /// <returns>长度合法性</returns>
-        public static bool CheckForLength(string[] args, int len, CQGroupMessageEventArgs e)
-        {
-            if (args.Length < (len + 1))
-            {
-                e.FromGroup.SendGroupMessage(
-                    CQApi.CQCode_At(e.FromQQ.Id), 
-                    "\n请输入正确的参数个数。");
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-
         /// <summary>
         /// 获取对应指令的帮助文本
         /// </summary>

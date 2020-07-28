@@ -1,4 +1,7 @@
-﻿using com.cbgan.SuiseiBot.Code.Resource;
+using com.cbgan.SuiseiBot.Code.Resource;
+using com.cbgan.SuiseiBot.Code.Tool;
+using Native.Sdk.Cqp;
+using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 
@@ -44,7 +47,6 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
         {
             string chat    = eventArgs.Message;
             Group  QQgroup = eventArgs.FromGroup;
-            
         }
         #endregion
     }

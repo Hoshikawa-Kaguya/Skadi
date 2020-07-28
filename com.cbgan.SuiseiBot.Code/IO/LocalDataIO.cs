@@ -22,6 +22,11 @@ namespace com.cbgan.SuiseiBot.Code.IO
         /// <summary>
         /// 获取数据文件路径
         /// </summary>
+        public static Func<string> GetBinPath = () => $@"{Directory.GetCurrentDirectory()}\bin\";
+
+        /// <summary>
+        /// 获取数据文件路径
+        /// </summary>
         public static Func<CQApi, string, string> GetLocalFilePath = (cqApi, filename) => $@"{Directory.GetCurrentDirectory()}\data\{cqApi.GetLoginQQ()}\{filename}";
         #endregion
 

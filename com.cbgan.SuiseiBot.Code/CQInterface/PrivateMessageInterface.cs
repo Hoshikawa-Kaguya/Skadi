@@ -1,6 +1,9 @@
+using System;
 using com.cbgan.SuiseiBot.Code.Tool;
+using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
+using Native.Sdk.Cqp.Model;
 
 namespace com.cbgan.SuiseiBot.Code.CQInterface
 {
@@ -8,7 +11,7 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
     {
         public void PrivateMessage(object sender, CQPrivateMessageEventArgs e)
         {
-            ConsoleLog.Info($"收到信息[私信:{e.FromQQ.Id}]",$"[{(e.Message.Text).Replace("\r\n", "\\r\\n")}\n{e.Message.Id}]");
+            ConsoleLog.Info($"收到信息[私信:{e.FromQQ.Id}]",$"{(e.Message.Text).Replace("\r\n", "\\r\\n")}\n{e.Message.Id}");
             if (sender == null || e == null)
             {
                 e.Handler = true;

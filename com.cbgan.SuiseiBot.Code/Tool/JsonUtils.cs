@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -24,7 +24,7 @@ namespace com.cbgan.SuiseiBot.Code.Tool
                 List<string> resultData = new List<string>();
                 foreach(var key in keyNames)
                 {
-                    resultData.Add(jsonData[key].ToString());
+                    resultData.Add(jsonData[key]?.ToString());
                 }
                 return resultData.ToArray();
             }
@@ -37,15 +37,21 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         /// <summary>
         /// 在JObject中找到KeyName字段数据
         /// </summary>
-        /// <param name="jsonData">输入的JObject</param>
-        /// <param name="keyName">目标字段</param>
+        /// <param>输入的JObject
+        ///     <name>jsonData</name>
+        /// </param>
+        /// <param>目标字段
+        ///     <name>keyName</name>
+        /// </param>
         /// <returns>返回目标字段字符串</returns>
-        public static Func<JObject,string, string> GetKeyData = (jsonData, keyName) => jsonData[keyName].ToString();
+        public static Func<JObject,string, string> GetKeyData = (jsonData, keyName) => jsonData[keyName]?.ToString();
 
         /// <summary>
         /// 将string转为JObject
         /// </summary>
-        /// <param name="jsonString">输入的string</param>
+        /// <param>输入的string
+        ///     <name>jsonString</name>
+        /// </param>
         /// <returns>返回一个JObject</returns>
         public static Func<string,JObject> ConvertJson = (jsonString) => (JObject)JsonConvert.DeserializeObject(jsonString);
         #endregion

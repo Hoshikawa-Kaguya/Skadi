@@ -35,8 +35,8 @@ Global
 		{B20B6FCD-2817-49B3-9B07-689649C560D2}.Debug|x86.Build.0 = Debug|x86
 		{B20B6FCD-2817-49B3-9B07-689649C560D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B20B6FCD-2817-49B3-9B07-689649C560D2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B20B6FCD-2817-49B3-9B07-689649C560D2}.Release|x86.ActiveCfg = Release|Any CPU
-		{B20B6FCD-2817-49B3-9B07-689649C560D2}.Release|x86.Build.0 = Release|Any CPU
+		{B20B6FCD-2817-49B3-9B07-689649C560D2}.Release|x86.ActiveCfg = Release|x86
+		{B20B6FCD-2817-49B3-9B07-689649C560D2}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

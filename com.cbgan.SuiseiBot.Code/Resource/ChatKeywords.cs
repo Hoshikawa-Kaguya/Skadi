@@ -1,4 +1,4 @@
-﻿using com.cbgan.SuiseiBot.Code.Resource;
+using com.cbgan.SuiseiBot.Code.Resource;
 using System.Collections.Generic;
 
 namespace com.cbgan.SuiseiBot.Resource
@@ -18,6 +18,8 @@ namespace com.cbgan.SuiseiBot.Resource
             KeyWords.Add("给爷来个优质睡眠套餐", KeywordType.SurpriseMFK);
             //2 奇奇怪怪的签到
             KeyWords.Add("彗酱今天也很可爱", KeywordType.Suisei);
+            //3 公主连结小功能
+            //暂无只需要关键词的功能
 
             KeyWords.Add("debug", KeywordType.Debug);
         }

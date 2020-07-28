@@ -1,10 +1,13 @@
-﻿using Native.Sdk.Cqp.EventArgs;
+using System.Linq;
+using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
 using com.cbgan.SuiseiBot.Resource;
 using com.cbgan.SuiseiBot.Code.Tool;
 using com.cbgan.SuiseiBot.Code.PCRGuildManager;
 using com.cbgan.SuiseiBot.Code.Resource;
 using com.cbgan.SuiseiBot.Code.ChatHandlers;
+using Native.Sdk.Cqp.Enum;
+using Native.Sdk.Cqp.Model;
 
 namespace com.cbgan.SuiseiBot.Code.CQInterface
 {
@@ -22,7 +25,7 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
                 e.Handler = true;
                 return;
             }
-            ConsoleLog.Info($"收到信息[群:{e.FromGroup.Id}]",$"[{(e.Message.Text).Replace("\r\n", "\\r\\n")}]");
+            ConsoleLog.Info($"收到信息[群:{e.FromGroup.Id}]",$"{(e.Message.Text).Replace("\r\n", "\\r\\n")}");
 
             //以#开头的消息全部交给PCR处理
             if (e.Message.Text.Trim().StartsWith("#"))
@@ -52,7 +55,32 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
                     default:
                         break;
                 }
+                //一般特殊指令匹配
+                if (e.Message.Text.Contains(' '))
+                {
+                    SpecialKeywordsType keywordType = SpecialKeywords.TryGetKeywordType(e.Message.Text);
+                    if (keywordType != 0) ConsoleLog.Info("触发关键词", $"消息类型={chatType}");
+                    switch (keywordType)
+                    {
+                        case SpecialKeywordsType.PCRTools:
+                            PCRToolsHandle pcrTools = new PCRToolsHandle(sender, e);
+                            pcrTools.GetChat();
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
+            
+            //TODO 转换B站小程序URL
+            //检查所发消息中是否有卡片消息
+            // foreach (CQCode cqCode in e.Message.CQCodes)
+            // {
+            //     if (cqCode.Function.Equals(CQFunction.Rich))
+            //     {
+            //         ConsoleLog.Debug("ss",e.SubType);
+            //     }
+            // }
             e.Handler = true;
         }
     }

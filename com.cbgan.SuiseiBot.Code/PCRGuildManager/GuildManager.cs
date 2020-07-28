@@ -4,6 +4,7 @@ using System.Text;
 using com.cbgan.SuiseiBot.Code.ChatHandlers;
 using com.cbgan.SuiseiBot.Code.Database;
 using com.cbgan.SuiseiBot.Code.Resource;
+using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.EventArgs;
@@ -34,7 +35,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
             {
                 //参数1 服务器地区，参数2 公会名（可选，缺省为群名）
                 case PCRGuildCommandType.CreateGuild://建会
-                    if (PCRGuildHandle.CheckForLength(commandArgs, 1, GMgrEventArgs)) 
+                    if (Utils.CheckForLength(commandArgs, 1, GMgrEventArgs)) 
                     {
                         if (commandArgs.Length == 3)
                         {
@@ -62,7 +63,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                 //参数1 QQ号
                 case PCRGuildCommandType.JoinGuild://入会
                     Dictionary<long,int> addedQQList= new Dictionary<long, int>();    //已经入会的QQ号列表
-                    if (PCRGuildHandle.CheckForLength(commandArgs, 1, GMgrEventArgs))
+                    if (Utils.CheckForLength(commandArgs, 1, GMgrEventArgs))
                     {
                         if (GMgrEventArgs.Message.CQCodes.Count == 0)//没有AT任何人，参数非法
                         {
@@ -149,7 +150,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                     break;
                 //参数1 QQ号
                 case PCRGuildCommandType.QuitGuild://退会
-                    if (PCRGuildHandle.CheckForLength(commandArgs, 1, GMgrEventArgs)) 
+                    if (Utils.CheckForLength(commandArgs, 1, GMgrEventArgs)) 
                         result = dbAction.LeaveGuild(commandArgs[1]);
                     break;
                 case PCRGuildCommandType.QuitAll://清空成员
