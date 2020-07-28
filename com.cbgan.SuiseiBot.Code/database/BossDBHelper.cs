@@ -1,3 +1,4 @@
+using System;
 using com.cbgan.SuiseiBot.Code.IO;
 using com.cbgan.SuiseiBot.Code.Network;
 using com.cbgan.SuiseiBot.Code.SqliteTool;
@@ -13,10 +14,10 @@ namespace com.cbgan.SuiseiBot.Code.Database
         private long GroupId { set; get; } //群号
         public CQGroupMessageEventArgs EventArgs { private set; get; }
         public object Sender { private set; get; }
-        //public readonly static string MemberTableName = "member"; //成员数据库表名
-        private static string DBPath;//数据库保存路径（suisei.db）
-        private static string BinPath;//二进制文件路径
-        private static string LocalDBPath;//原boss数据库保存路径
+        private static string DBPath { set; get; } //数据库保存路径（suisei.db）
+        private static string JsonPath { set; get; }
+        private static string BinPath { set; get; } //二进制文件路径
+        private static string CacheDBPath { set; get; } //原boss数据库保存路径
 
         private static readonly string DBVersionJsonUrl = @"https://redive.estertion.win/last_version_cn.json";
         #endregion
@@ -29,7 +30,8 @@ namespace com.cbgan.SuiseiBot.Code.Database
             this.GroupId = eventArgs.FromGroup.Id;
             BinPath = LocalDataIO.GetBinFilePath(eventArgs.CQApi, "BrotliParser.exe");
             DBPath = SugarUtils.GetDBPath(eventArgs.CQApi);
-            LocalDBPath = SugarUtils.GetCacheDBPath(eventArgs.CQApi, "redive_cn.db");
+            CacheDBPath = SugarUtils.GetCacheDBPath(eventArgs.CQApi, "redive_cn.db");
+            JsonPath = LocalDataIO.GetLocalFilePath(eventArgs.CQApi, "last_version_cn.json");
         }
         #endregion
 
@@ -48,20 +50,15 @@ namespace com.cbgan.SuiseiBot.Code.Database
 
         #region 操作数据库函数
 
-        public bool ChechDBVersion()
-        {
-            string localVersion = JsonUtils.GetKeyData(LocalDataIO.LoadJsonFile(LocalDBPath, @"last_version_cn.json"), "TruthVersions");
-            string latestVersion = JsonUtils.GetKeyData(JsonUtils.ConvertJson(NetServiceUtils.GetDataFromURL(DBVersionJsonUrl)), "TruthVersions");
-            if (localVersion == latestVersion)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+        /// <summary>
+        /// 检查游戏的数据库版本
+        /// </summary>
+        public Func<bool> ChechRediveDBVersion =
+            () =>
+                JsonUtils.GetKeyData(LocalDataIO.LoadJsonFile(JsonPath), "TruthVersions") ==
+                JsonUtils.GetKeyData(JsonUtils.ConvertJson(NetServiceUtils.GetDataFromURL(DBVersionJsonUrl)),
+                                     "TruthVersions");
 
-        }
         #endregion
     }
 }

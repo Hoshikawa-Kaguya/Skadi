@@ -36,7 +36,7 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
             }
             catch (Exception e)
             {
-                throw new IOException("Create new dbfile failed(" + connectionArgs[1] + ")\n" + e.Message);
+                throw new IOException($"Create new dbfile failed({connectionArgs[1]})\n{e.Message}");
             }
         }
 
@@ -117,7 +117,6 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
             return tableInfos.Exists(table => table.Name == tableName);
         }
 
-        //TODO 删除表格替换为ORM管理函数
         #endregion
 
         #region 简单辅助函数

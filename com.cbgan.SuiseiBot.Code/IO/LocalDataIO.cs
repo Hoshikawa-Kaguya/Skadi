@@ -17,7 +17,12 @@ namespace com.cbgan.SuiseiBot.Code.IO
         /// <summary>
         /// 获取数据文件路径
         /// </summary>
-        public static Func<CQApi, string, string> GetBinFilePath = (cqApi, filename) => $"{Directory.GetCurrentDirectory()}\\bin\\{filename}";
+        public static Func<CQApi, string, string> GetBinFilePath = (cqApi, filename) => $@"{Directory.GetCurrentDirectory()}\bin\{filename}";
+
+        /// <summary>
+        /// 获取数据文件路径
+        /// </summary>
+        public static Func<CQApi, string, string> GetLocalFilePath = (cqApi, filename) => $@"{Directory.GetCurrentDirectory()}\data\{cqApi.GetLoginQQ()}\{filename}";
         #endregion
 
         #region 文件读取工具
@@ -27,17 +32,18 @@ namespace com.cbgan.SuiseiBot.Code.IO
         /// <param name="jsonPath">json文件路径</param>
         /// <param name="jsonName">json文件名称</param>
         /// <returns>保存整个文件信息的JObject</returns>
-        public static JObject LoadJsonFile(string jsonPath,string jsonName)
+        public static JObject LoadJsonFile(string jsonPath)
         {
             try
             {
-                StreamReader jsonFile = File.OpenText(jsonPath + jsonName);
+                StreamReader jsonFile = File.OpenText(jsonPath);
                 JsonTextReader reader = new JsonTextReader(jsonFile);
                 JObject jsonObject = (JObject)JToken.ReadFrom(reader);
                 return jsonObject;
             }
             catch (Exception e)
             {
+                ConsoleLog.Error("IO ERROR",$"读取文件{jsonPath}时出错，错误：\n{e}");
                 throw e;
             }
         }
@@ -63,9 +69,9 @@ namespace com.cbgan.SuiseiBot.Code.IO
                     System.Diagnostics.Process.Start(BinPath, "-bd " + InputFile + " " + outputFilePath + " " + outputFileName);
                     //GC.Collect();
                 }
-                catch
+                catch(Exception e)
                 {
-                    ConsoleLog.Error("BOSS信息数据库", "BOSS信息数据库解压错误，请检查文件路径");
+                    ConsoleLog.Error("BOSS信息数据库", $"BOSS信息数据库解压错误，请检查文件路径 错误:\n{e}");
                 }
             }
         }

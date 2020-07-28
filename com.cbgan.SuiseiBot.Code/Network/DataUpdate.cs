@@ -13,7 +13,6 @@ namespace com.cbgan.SuiseiBot.Code.Network
         /// </summary>
         /// <param name="url">目标URL</param>
         /// <param name="receivePath">接收文件的地址</param>
-        /// <param name="re"></param>
         /// <returns>返回1表示成功</returns>
         public static int DownloadFileFromURL(string url, string receivePath)
         {

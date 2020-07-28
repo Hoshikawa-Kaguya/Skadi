@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using com.cbgan.SuiseiBot.Code.Tool;
 
 namespace com.cbgan.SuiseiBot.Code.Network
 {
@@ -19,8 +20,10 @@ namespace com.cbgan.SuiseiBot.Code.Network
         public static string GetDataFromURL(string url)
         {
             string pageString;
-            WebClient webClient = new WebClient();
-            webClient.Credentials = CredentialCache.DefaultCredentials;
+            WebClient webClient = new WebClient
+            {
+                Credentials = CredentialCache.DefaultCredentials
+            };
             try
             {
                 Byte[] pageData = webClient.DownloadData(url);
@@ -33,7 +36,8 @@ namespace com.cbgan.SuiseiBot.Code.Network
             }
             catch (Exception e)
             {
-                throw;
+                ConsoleLog.Error("网络线程错误",$"下载文件时发生错误\n{e}");
+                throw e;
             }
             return pageString;
         }
