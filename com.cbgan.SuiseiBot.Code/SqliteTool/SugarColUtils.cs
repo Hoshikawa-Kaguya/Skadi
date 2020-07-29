@@ -1,6 +1,5 @@
 using SqlSugar;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 namespace com.cbgan.SuiseiBot.Code.SqliteTool

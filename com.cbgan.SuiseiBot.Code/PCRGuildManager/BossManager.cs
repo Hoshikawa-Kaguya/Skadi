@@ -1,10 +1,6 @@
-﻿using System;
-using com.cbgan.SuiseiBot.Code.ChatHandlers;
+using System;
 using com.cbgan.SuiseiBot.Code.Database;
 using com.cbgan.SuiseiBot.Code.Resource;
-using com.cbgan.SuiseiBot.Code.Tool;
-using Native.Sdk.Cqp;
-using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.Model;
 using Native.Sdk.Cqp.EventArgs;
 

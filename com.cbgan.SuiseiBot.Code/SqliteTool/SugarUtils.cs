@@ -6,7 +6,6 @@ using System.Data;
 using System.Data.SQLite;
 using System.IO;
 using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace com.cbgan.SuiseiBot.Code.SqliteTool
 {
@@ -43,12 +42,20 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         /// <summary>
         /// 获取当前数据库的绝对路径
         /// </summary>
-        public static Func<CQApi, string> GetDBPath = (cqApi) => $@"{Directory.GetCurrentDirectory()}\data\{cqApi.GetLoginQQ()}\suisei.db";
-        
+        public static string GetDBPath(CQApi cqApi)
+        {
+            Directory.CreateDirectory($@"{cqApi.AppDirectory}data\{cqApi.GetLoginQQ()}\");
+            return $@"{cqApi.AppDirectory}data\{cqApi.GetLoginQQ()}\suisei.db";
+        }
+
         /// <summary>
         /// 获取目标数据库的绝对路径
         /// </summary>
-        public static Func<CQApi, string, string> GetCacheDBPath = (cqApi,dbFileName) => $@"{Directory.GetCurrentDirectory()}\data\{cqApi.GetLoginQQ()}\{dbFileName}";
+        public static string GetCacheDBPath(CQApi cqApi,string dbFileName)
+        {
+            Directory.CreateDirectory($@"{cqApi.AppDirectory}\data\cache\");
+            return $@"{cqApi.AppDirectory}\data\cache\{dbFileName}";
+        }
         #endregion
 
         #region 表辅助函数

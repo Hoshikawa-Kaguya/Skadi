@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp;
 
 namespace com.cbgan.SuiseiBot.Code.TimerEvent

@@ -1,7 +1,6 @@
-using com.cbgan.SuiseiBot.Code.Resource;
 using System.Collections.Generic;
 
-namespace com.cbgan.SuiseiBot.Resource
+namespace com.cbgan.SuiseiBot.Code.Resource
 {
     internal static class ChatKeywords
     {

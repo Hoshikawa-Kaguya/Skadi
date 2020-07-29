@@ -1,16 +1,11 @@
 using com.cbgan.SuiseiBot.Code.Database;
 using com.cbgan.SuiseiBot.Code.Resource;
 using com.cbgan.SuiseiBot.Code.Tool;
-using com.cbgan.SuiseiBot.Resource;
+using com.cbgan.SuiseiBot.Code.TimerEvent;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
 using System;
-using System.Globalization;
 using System.IO;
-using System.Threading;
-using com.cbgan.SuiseiBot.Code.IO;
-using com.cbgan.SuiseiBot.Code.TimerEvent;
-using Native.Sdk.Cqp;
 
 namespace com.cbgan.SuiseiBot.Code.CQInterface
 {

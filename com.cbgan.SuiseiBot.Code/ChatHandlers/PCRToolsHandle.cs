@@ -1,9 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using com.cbgan.SuiseiBot.Code.Network;
 using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp.EventArgs;
@@ -107,7 +102,11 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
                                                      $"会长    |{leaderName}\n" +
                                                      "如果查询到的信息有误，有可能关键词错误或公会排名在20060之后");
                         }
-                        else Console.WriteLine("未找到任意公会\n请检查是否查询的错误的公会名或公会排名在20060之后");
+                        else
+                        {
+                            QQgroup.SendGroupMessage("未找到任意公会\n请检查是否查询的错误的公会名或公会排名在20060之后");
+                            ConsoleLog.Info("JSON处理成功", "所查询列表为空");
+                        }
                     }
                     catch (Exception e)
                     {
@@ -117,6 +116,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
                     break;
                 //应该不可能触发
                 default:
+                    QQgroup.SendGroupMessage("发生了未知错误，请请向开发者反馈问题");
                     ConsoleLog.Error("特殊指令错误","在处理特殊指令是出现未知错误");
                     break;
             }

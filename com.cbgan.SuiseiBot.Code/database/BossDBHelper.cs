@@ -15,7 +15,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
         public CQGroupMessageEventArgs EventArgs { private set; get; }
         public object Sender { private set; get; }
         private static string DBPath { set; get; } //数据库保存路径（suisei.db）
-        private static string JsonPath { set; get; }
+        private static string CacheDBConfigPath { set; get; }
         private static string BinPath { set; get; } //二进制文件路径
         private static string CacheDBPath { set; get; } //原boss数据库保存路径
 
@@ -28,10 +28,10 @@ namespace com.cbgan.SuiseiBot.Code.Database
             this.Sender = sender;
             this.EventArgs = eventArgs;
             this.GroupId = eventArgs.FromGroup.Id;
-            BinPath = LocalDataIO.GetBinFilePath(eventArgs.CQApi, "BrotliParser.exe");
+            BinPath = LocalDataIO.GetBinFilePath("BrotliParser.exe");
             DBPath = SugarUtils.GetDBPath(eventArgs.CQApi);
             CacheDBPath = SugarUtils.GetCacheDBPath(eventArgs.CQApi, "redive_cn.db");
-            JsonPath = LocalDataIO.GetLocalFilePath(eventArgs.CQApi, "last_version_cn.json");
+            CacheDBConfigPath = LocalDataIO.GetGlobalConfigPath(eventArgs.CQApi) + "last_version_cn.json";
         }
         #endregion
 
@@ -55,7 +55,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
         /// </summary>
         public Func<bool> ChechRediveDBVersion =
             () =>
-                JsonUtils.GetKeyData(LocalDataIO.LoadJsonFile(JsonPath), "TruthVersions") ==
+                JsonUtils.GetKeyData(LocalDataIO.LoadJsonFile(CacheDBConfigPath), "TruthVersions") ==
                 JsonUtils.GetKeyData(JsonUtils.ConvertJson(NetServiceUtils.GetDataFromURL(DBVersionJsonUrl)),
                                      "TruthVersions");
 

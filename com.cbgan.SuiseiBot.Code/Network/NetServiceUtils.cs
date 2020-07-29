@@ -1,10 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using com.cbgan.SuiseiBot.Code.Tool;
 
 namespace com.cbgan.SuiseiBot.Code.Network

@@ -1,4 +1,3 @@
-using System.Data.Entity.Core.Metadata.Edm;
 using SqlSugar;
 
 namespace com.cbgan.SuiseiBot.Code.Database

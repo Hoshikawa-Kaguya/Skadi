@@ -1,9 +1,6 @@
-using System;
 using com.cbgan.SuiseiBot.Code.Tool;
-using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
-using Native.Sdk.Cqp.Model;
 
 namespace com.cbgan.SuiseiBot.Code.CQInterface
 {

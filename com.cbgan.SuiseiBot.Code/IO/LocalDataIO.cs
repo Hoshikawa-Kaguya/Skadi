@@ -3,11 +3,7 @@ using Native.Sdk.Cqp;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace com.cbgan.SuiseiBot.Code.IO
 {
@@ -17,7 +13,7 @@ namespace com.cbgan.SuiseiBot.Code.IO
         /// <summary>
         /// 获取数据文件路径
         /// </summary>
-        public static Func<CQApi, string, string> GetBinFilePath = (cqApi, filename) => $@"{Directory.GetCurrentDirectory()}\bin\{filename}";
+        public static Func<string, string> GetBinFilePath = (filename) => $@"{Directory.GetCurrentDirectory()}\bin\{filename}";
 
         /// <summary>
         /// 获取数据文件路径
@@ -25,9 +21,22 @@ namespace com.cbgan.SuiseiBot.Code.IO
         public static Func<string> GetBinPath = () => $@"{Directory.GetCurrentDirectory()}\bin\";
 
         /// <summary>
-        /// 获取数据文件路径
+        /// 获取配置文件路径
         /// </summary>
-        public static Func<CQApi, string, string> GetLocalFilePath = (cqApi, filename) => $@"{Directory.GetCurrentDirectory()}\data\{cqApi.GetLoginQQ()}\{filename}";
+        public static string GetUserConfigPath(CQApi cqApi)
+        {
+            Directory.CreateDirectory($@"{cqApi.AppDirectory}\configs\{cqApi.GetLoginQQ()}\");
+            return $@"{cqApi.AppDirectory}\configs\{cqApi.GetLoginQQ()}\";
+        }
+
+        /// <summary>
+        /// 获取全局配置文件路径
+        /// </summary>
+        public static string GetGlobalConfigPath(CQApi cqApi)
+        {
+            Directory.CreateDirectory($@"{cqApi.AppDirectory}\configs\global\");
+            return $@"{cqApi.AppDirectory}\configs\global\";
+        }
         #endregion
 
         #region 文件读取工具
@@ -35,7 +44,6 @@ namespace com.cbgan.SuiseiBot.Code.IO
         /// 读取Json文件并返回为一个JObject
         /// </summary>
         /// <param name="jsonPath">json文件路径</param>
-        /// <param name="jsonName">json文件名称</param>
         /// <returns>保存整个文件信息的JObject</returns>
         public static JObject LoadJsonFile(string jsonPath)
         {
