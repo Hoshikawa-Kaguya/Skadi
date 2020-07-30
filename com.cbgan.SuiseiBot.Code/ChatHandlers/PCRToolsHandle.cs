@@ -60,8 +60,8 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
                         QQgroup.SendGroupMessage("查询中...");
                         response =
                             HTTPUtils.PostHttpResponse("https://service-kjcbcnmw-1254119946.gz.apigw.tencentcs.com/name/0",
-                                                   clanInfoJson,
-                                                   "Windows", "application/json", "https://kengxxiao.github.io/Kyouka/");
+                                                       clanInfoJson,
+                                                       "Windows", "application/json", "https://kengxxiao.github.io/Kyouka/", 3000, "BOT");
                     }
                     catch (Exception e)
                     {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
+using com.cbgan.SuiseiBot.Code.Tool;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -86,12 +87,13 @@ namespace com.cbgan.SuiseiBot.Code.Network
         /// <param name="ContentType">内容类型</param>
         /// <param name="referer">referer</param>
         /// <param name="timeout">超时</param>
+        /// <param name="CustomSource">自定义的来源</param>
         /// <param name="cookies">cookies</param>
         /// <returns>String</returns>
         public static String PostHttpResponse(string url, JObject parameters,
                                               string userAgent = "Windows",
                                               string ContentType = "application/x-www-form-urlencoded", string referer = null,
-                                              int timeout = 3000, CookieCollection cookies = null)
+                                              int timeout = 3000, string CustomSource = null, CookieCollection cookies = null)
         {
             CookieContainer c = new CookieContainer();
             if (cookies != null)
@@ -100,7 +102,7 @@ namespace com.cbgan.SuiseiBot.Code.Network
             }
 
             return GetResponseString(CreatePostHttpResponse(url, parameters, ref c, userAgent, ContentType, referer,
-                                                            timeout));
+                                                            timeout, CustomSource));
         }
 
         /// <summary>
@@ -195,11 +197,12 @@ namespace com.cbgan.SuiseiBot.Code.Network
         /// <param name="referer">referer</param>
         /// <param name="timeout">超时</param>
         /// <param name="cookies">cookies</param>
+        /// <param name="CustomSource">自定义的来源</param>
         /// <returns>HttpWebResponse</returns>
         public static HttpWebResponse CreatePostHttpResponse(string url, JObject parameters,
                                                              ref CookieContainer cookies, string userAgent = "Windows",
                                                              string ContentType = "application/x-www-form-urlencoded", string referer = null,
-                                                             int timeout = 3000)
+                                                             int timeout = 3000,string CustomSource = null)
         {
             Dictionary<String, String> UAList = new Dictionary<String, String>
             {
@@ -236,6 +239,11 @@ namespace com.cbgan.SuiseiBot.Code.Network
 
             request.CookieContainer = cookies;
             request.Referer = referer ?? string.Empty;
+            //镜华查询在不知道什么时候加了一个这个字段否则就403
+            if (CustomSource != null)
+            {
+                request.Headers.Set("Custom-Source", CustomSource);
+            }
 
             //发送POST数据  
             if (!(parameters == null || parameters.Count == 0))
@@ -249,7 +257,11 @@ namespace com.cbgan.SuiseiBot.Code.Network
                 }
             }
 
-            string[] values = request.Headers.GetValues("Content-Type");
+            foreach (string requestHeader in request.Headers)
+            {
+                ConsoleLog.Debug("HTTP-Headers",$"{requestHeader}={request.Headers.GetValues(requestHeader)?[0]}");
+            }
+
             return request.GetResponse() as HttpWebResponse;
         }
 
