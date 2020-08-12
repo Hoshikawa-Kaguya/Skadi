@@ -96,10 +96,10 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
                             string leaderName = responseJObject["data"]?[0]?["leader_name"]?.ToString();
                             ConsoleLog.Info("JSON处理成功","向用户发送数据");
                             QQgroup.SendGroupMessage("查询成功！\n" +
-                                                     $"公会    |{commandArgs[1]}\n" +
-                                                     $"排名    |{rank}\n" +
+                                                     $"公会   |{commandArgs[1]}\n" +
+                                                     $"排名   |{rank}\n" +
                                                      $"总分数 |{totalScore}\n" +
-                                                     $"会长    |{leaderName}\n" +
+                                                     $"会长   |{leaderName}\n" +
                                                      "如果查询到的信息有误，有可能关键词错误或公会排名在20060之后");
                         }
                         else

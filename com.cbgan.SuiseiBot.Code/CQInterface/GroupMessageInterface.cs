@@ -1,6 +1,9 @@
+using System;
 using System.Linq;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
+using Native.Sdk.Cqp.Enum;
+using Native.Sdk.Cqp.Model;
 using com.cbgan.SuiseiBot.Code.Tool;
 using com.cbgan.SuiseiBot.Code.PCRGuildManager;
 using com.cbgan.SuiseiBot.Code.Resource;
@@ -71,13 +74,16 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             
             //TODO 转换B站小程序URL
             //检查所发消息中是否有卡片消息
-            // foreach (CQCode cqCode in e.Message.CQCodes)
-            // {
-            //     if (cqCode.Function.Equals(CQFunction.Rich))
-            //     {
-            //         ConsoleLog.Debug("ss",e.SubType);
-            //     }
-            // }
+             foreach (CQCode cqCode in e.Message.CQCodes)
+             {
+                 if (cqCode.Function.Equals(CQFunction.Rich))
+                 {
+                     int infoIndex = e.Message.Text.IndexOf("text=", StringComparison.Ordinal);
+                     string miniAppTextInfo =
+                         e.Message.Text.Substring(infoIndex, e.Message.Text.Length - infoIndex - 1);
+                     ConsoleLog.Info("收到卡片消息", miniAppTextInfo);
+                 }
+             }
             e.Handler = true;
         }
     }
