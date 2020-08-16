@@ -20,8 +20,8 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
                 return;
             }
             //打开控制台
-            ConsoleLog.AllocConsole();
-            Console.Title = "SuiseiBot(请勿关闭此窗口)";
+            //ConsoleLog.AllocConsole();
+            //Console.Title = "SuiseiBot(请勿关闭此窗口)";
             //修改环境文件夹
             ConsoleLog.Info("获取到环境路径", Directory.GetCurrentDirectory());
             System.Environment.SetEnvironmentVariable("Path", Directory.GetCurrentDirectory());

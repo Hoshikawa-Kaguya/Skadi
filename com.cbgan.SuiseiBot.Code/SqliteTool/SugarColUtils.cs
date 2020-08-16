@@ -1,6 +1,6 @@
-using SqlSugar;
 using System;
 using System.Reflection;
+using SqlSugar;
 
 namespace com.cbgan.SuiseiBot.Code.SqliteTool
 {
@@ -43,7 +43,7 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
                 //其他类型
                 return "BLOB";
             }
-            else return columnConfig.ColumnDataType;
+            return columnConfig.ColumnDataType;
         }
 
         /// <summary>

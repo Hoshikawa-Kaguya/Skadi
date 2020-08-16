@@ -1,6 +1,4 @@
 using System;
-using Native.Sdk.Cqp;
-using Native.Sdk.Cqp.EventArgs;
 
 namespace com.cbgan.SuiseiBot.Code.Tool
 {
@@ -11,24 +9,14 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         /// <summary>
         /// 检查参数数组长度
         /// </summary>
-        /// <param name="args">指令数组</param>
-        /// <param name="len">至少需要的参数个数</param>
-        /// <param name="e">CQGroupMessageEventArgs</param>
+        /// <param>指令数组
+        ///     <name>args</name>
+        /// </param>
+        /// <param>至少需要的参数个数
+        ///     <name>len</name>
+        /// </param>
         /// <returns>长度合法性</returns>
-        public static bool CheckForLength(string[] args, int len, CQGroupMessageEventArgs e)
-        {
-            if (args.Length < (len + 1))
-            {
-                e.FromGroup.SendGroupMessage(
-                                             CQApi.CQCode_At(e.FromQQ.Id),
-                                             "\n请输入正确的参数个数。");
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
+        public static Func<string[], int, bool> CheckForLength = (args, len) => args.Length >= len + 1;
 
         /// <summary>
         /// 获取当前时间戳

@@ -14,7 +14,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
         /// <param name="e">CQAppEnableEventArgs</param>
         public static void Init(CQAppEnableEventArgs e)
         {
-            string DBPath = SugarUtils.GetDBPath(e.CQApi);
+            string DBPath = SugarUtils.GetDBPath(e.CQApi.GetLoginQQ().Id.ToString());
             ConsoleLog.Info("IO",$"获取数据路径{DBPath}");
             SqlSugarClient dbClient = new SqlSugarClient(new ConnectionConfig()
             {
@@ -25,8 +25,10 @@ namespace com.cbgan.SuiseiBot.Code.Database
             });
             if (!File.Exists(DBPath))//查找数据文件
             {
+                //数据库文件不存在，新建数据库
                 ConsoleLog.Warning("数据库初始化", "未找到数据库文件，创建新的数据库");
-                SugarUtils.CreateNewSQLiteDBFile(dbClient);
+                Directory.CreateDirectory(Path.GetPathRoot(DBPath));
+                File.Create(DBPath).Close();
             }
             if (!SugarUtils.TableExists<SuiseiData>(dbClient)) //彗酱数据库初始化
             {

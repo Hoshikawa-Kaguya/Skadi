@@ -1,6 +1,6 @@
-﻿using SqlSugar;
 using System;
 using System.Reflection;
+using SqlSugar;
 
 namespace com.cbgan.SuiseiBot.Code.SqliteTool
 {
@@ -14,9 +14,9 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         /// <returns>表名</returns>
         public static string GetTableName<TableClass>()
         {
-            SugarTable tableInfo = typeof(TableClass).GetCustomAttribute<SugarTable>();
-            if (tableInfo == null) tableInfo = new SugarTable(typeof(TableClass).Name);
-            return tableInfo.TableName;
+            return (typeof(TableClass).GetCustomAttribute<SugarTable>() ??
+                    new SugarTable(typeof(TableClass).Name))
+                .TableName;
         }
         #endregion
     }

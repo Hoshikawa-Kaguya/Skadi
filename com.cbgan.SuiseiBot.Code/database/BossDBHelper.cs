@@ -1,5 +1,4 @@
 using System;
-using com.cbgan.SuiseiBot.Code.IO;
 using com.cbgan.SuiseiBot.Code.Network;
 using com.cbgan.SuiseiBot.Code.SqliteTool;
 using com.cbgan.SuiseiBot.Code.Tool;
@@ -23,16 +22,16 @@ namespace com.cbgan.SuiseiBot.Code.Database
         #endregion
 
         #region 构造函数
-        public BossDBHelper(object sender, CQGroupMessageEventArgs eventArgs)
-        {
-            this.Sender = sender;
-            this.EventArgs = eventArgs;
-            this.GroupId = eventArgs.FromGroup.Id;
-            BinPath = LocalDataIO.GetBinFilePath("BrotliParser.exe");
-            DBPath = SugarUtils.GetDBPath(eventArgs.CQApi);
-            CacheDBPath = SugarUtils.GetCacheDBPath(eventArgs.CQApi, "redive_cn.db");
-            CacheDBConfigPath = LocalDataIO.GetGlobalConfigPath(eventArgs.CQApi) + "last_version_cn.json";
-        }
+        // public BossDBHelper(object sender, CQGroupMessageEventArgs eventArgs)
+        // {
+        //     this.Sender = sender;
+        //     this.EventArgs = eventArgs;
+        //     this.GroupId = eventArgs.FromGroup.Id;
+        //     BinPath = LocalDataIO.GetBinFilePath("BrotliParser.exe");
+        //     DBPath = SugarUtils.GetDBPath(eventArgs.CQApi);
+        //     CacheDBPath = SugarUtils.GetCacheDBPath(eventArgs.CQApi, "redive_cn.db");
+        //     CacheDBConfigPath = LocalDataIO.GetGlobalConfigPath(eventArgs.CQApi) + "last_version_cn.json";
+        // }
         #endregion
 
         #region 工具函数(DEBUG)
@@ -53,11 +52,11 @@ namespace com.cbgan.SuiseiBot.Code.Database
         /// <summary>
         /// 检查游戏的数据库版本
         /// </summary>
-        public Func<bool> ChechRediveDBVersion =
-            () =>
-                JsonUtils.GetKeyData(LocalDataIO.LoadJsonFile(CacheDBConfigPath), "TruthVersions") ==
-                JsonUtils.GetKeyData(JsonUtils.ConvertJson(NetServiceUtils.GetDataFromURL(DBVersionJsonUrl)),
-                                     "TruthVersions");
+        // public Func<bool> ChechRediveDBVersion =
+        //     () =>
+        //         JsonUtils.GetKeyData(LocalDataIO.LoadJsonFile(CacheDBConfigPath), "TruthVersions") ==
+        //         JsonUtils.GetKeyData(JsonUtils.ConvertJson(NetServiceUtils.GetDataFromURL(DBVersionJsonUrl)),
+        //                              "TruthVersions");
 
         #endregion
     }

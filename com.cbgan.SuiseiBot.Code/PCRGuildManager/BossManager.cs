@@ -20,7 +20,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
             //index=0为命令本身，其余为参数
             string[] commandArgs = GBossEventArgs.Message.Text.Split(' ');
             //数据库实例
-            BossDBHelper bossDB = new BossDBHelper(Sender, GBossEventArgs);
+            //BossDBHelper bossDB = new BossDBHelper(Sender, GBossEventArgs);
 
             //接下来进行一系列操作
         }

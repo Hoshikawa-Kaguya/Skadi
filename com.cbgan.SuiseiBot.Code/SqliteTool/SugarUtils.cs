@@ -1,11 +1,10 @@
-using Native.Sdk.Cqp;
-using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SQLite;
 using System.IO;
 using System.Reflection;
+using System.Text;
+using SqlSugar;
 
 namespace com.cbgan.SuiseiBot.Code.SqliteTool
 {
@@ -17,44 +16,33 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
     {
         #region IO辅助函数
         /// <summary>
-        /// 创建新的数据库文件
+        /// 获取应用数据库的绝对路径
         /// </summary>
-        /// <returns>true 创建成功 false 创建失败</returns>
-        public static bool CreateNewSQLiteDBFile(SqlSugarClient sugarClient)
+        public static string GetDBPath(string dirName = null)
         {
-            if (sugarClient == null) throw new NullReferenceException("null SqlSugarClient");
-            //找到数据路径字符串
-            string[] connectionArgs = sugarClient.CurrentConnectionConfig.ConnectionString.Split('=');
-            if (!connectionArgs[0].Equals("DATA SOURCE") || sugarClient.CurrentConnectionConfig.DbType != SqlSugar.DbType.Sqlite)
-                throw new NotSupportedException("Unsupported dbtype");
-            try
-            {
-                if (File.Exists(connectionArgs[1])) return false;
-                SQLiteConnection.CreateFile(connectionArgs[1]);
-                return true;
-            }
-            catch (Exception e)
-            {
-                throw new IOException($"Create new dbfile failed({connectionArgs[1]})\n{e.Message}");
-            }
-        }
-
-        /// <summary>
-        /// 获取当前数据库的绝对路径
-        /// </summary>
-        public static string GetDBPath(CQApi cqApi)
-        {
-            Directory.CreateDirectory($@"{cqApi.AppDirectory}data\{cqApi.GetLoginQQ()}\");
-            return $@"{cqApi.AppDirectory}data\{cqApi.GetLoginQQ()}\suisei.db";
+            StringBuilder dbPath = new StringBuilder();
+            dbPath.Append(Environment.CurrentDirectory.Replace('\\','/'));
+            dbPath.Append("/data");
+            //自定义二级文件夹
+            if (!string.IsNullOrEmpty(dirName)) dbPath.Append($"/{dirName}");
+            //检查目录是否存在，不存在则新建一个
+            Directory.CreateDirectory(dbPath.ToString());
+            dbPath.Append("/suisei.db");
+            return dbPath.ToString();
         }
 
         /// <summary>
         /// 获取目标数据库的绝对路径
         /// </summary>
-        public static string GetCacheDBPath(CQApi cqApi,string dbFileName)
+        public static string GetCacheDBPath(string dbFileName)
         {
-            Directory.CreateDirectory($@"{cqApi.AppDirectory}\data\cache\");
-            return $@"{cqApi.AppDirectory}\data\cache\{dbFileName}";
+            StringBuilder dbPath = new StringBuilder();
+            dbPath.Append(Environment.CurrentDirectory.Replace('\\', '/'));
+            dbPath.Append("/cache");
+            //检查目录是否存在，不存在则新建一个
+            Directory.CreateDirectory(dbPath.ToString());
+            dbPath.Append($"/{dbFileName}");
+            return dbPath.ToString();
         }
         #endregion
 
@@ -137,15 +125,13 @@ namespace com.cbgan.SuiseiBot.Code.SqliteTool
         {
             if (sugarClient == null) throw new NullReferenceException("null SqlSugarClient");
             //使用Ado获取控制台执行指令
-            using (IDbCommand cmd = sugarClient.Ado.Connection.CreateCommand())
-            {
-                cmd.CommandText = command;
-                //检查数据库链接
-                sugarClient.Ado.CheckConnection();
-                int ret = cmd.ExecuteNonQuery();
-                if (sugarClient.CurrentConnectionConfig.IsAutoCloseConnection) sugarClient.Close();
-                return ret;
-            }
+            using IDbCommand cmd = sugarClient.Ado.Connection.CreateCommand();
+            cmd.CommandText = command;
+            //检查数据库链接
+            sugarClient.Ado.CheckConnection();
+            int ret = cmd.ExecuteNonQuery();
+            if (sugarClient.CurrentConnectionConfig.IsAutoCloseConnection) sugarClient.Close();
+            return ret;
         }
         #endregion
 

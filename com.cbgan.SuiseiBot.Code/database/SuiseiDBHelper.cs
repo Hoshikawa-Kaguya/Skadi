@@ -34,7 +34,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
             this.Sender = sender;
             this.SuiseiGroupMessageEventArgs = eventArgs;
             this.TriggerTime = Utils.GetTodayStamp();//触发日期
-            DBPath = SugarUtils.GetDBPath(eventArgs.CQApi);
+            DBPath = SugarUtils.GetDBPath(eventArgs.CQApi.GetLoginQQ().Id.ToString());
         }
         #endregion
 

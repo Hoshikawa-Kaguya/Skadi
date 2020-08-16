@@ -13,7 +13,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
         public GuildBattleMgrDBHelper(object sender, CQGroupMessageEventArgs eventArgs)
         {
             GroupId = eventArgs.FromGroup.Id;
-            DBPath = SugarUtils.GetDBPath(eventArgs.CQApi);
+            DBPath = SugarUtils.GetDBPath(eventArgs.CQApi.GetLoginQQ().Id.ToString());
         }
 
         public bool GuildExists()

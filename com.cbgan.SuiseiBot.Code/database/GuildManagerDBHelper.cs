@@ -41,7 +41,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
             {
                 GroupId.ToString(), //公会所在群号
             };
-            DBPath = SugarUtils.GetDBPath(eventArgs.CQApi);
+            DBPath = SugarUtils.GetDBPath(eventArgs.CQApi.GetLoginQQ().Id.ToString());
         }
 
         #endregion
@@ -132,41 +132,42 @@ namespace com.cbgan.SuiseiBot.Code.Database
             try
             {
                 SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);//TODO 使用using调用
-                SQLiteHelper dbHelper = new SQLiteHelper(DBPath); //TODO 改用ORM
-                dbHelper.OpenDB();
+                //SQLiteHelper dbHelper = new SQLiteHelper(DBPath); //TODO 改用ORM
+                //dbHelper.OpenDB();//TODO 改用ORM
                 string[] memberKey =
                     {qqid.ToString(), GuildId[0]};
 
-                if (Convert.ToBoolean(dbHelper.GetCount(MemberTableName, MPrimaryColName, memberKey))) //查找是否有记录
-                {
-                    //已存在，则更新信息
-                    dbHelper.UpdateData(MemberTableName, "name", nickName, MPrimaryColName, memberKey);
-                    dbHelper.CloseDB();
-                    return 1;
-                }
-                else //未找到，初次创建
-                {
-                    MemberStatus member = new MemberStatus()//写入新的状态数据
-                    {
-                        Gid  = GroupId,
-                        Uid  = qqid,
-                        Time = Utils.GetNowTimeStamp(),
-                        Flag = 0,
-                        Info = null,
-                        SL   = 0
-                    };
-                    dbClient.Insertable(member).ExecuteCommand();
-
-                    string[] memberInfo =
-                    {
-                        qqid.ToString(), //用户QQ号
-                        GuildId[0],      //用户所在QQ群号
-                        nickName         //用户昵称
-                    };
-                    dbHelper.InsertRow(MemberTableName, MColName, memberInfo); //向数据库写入新数据
-                    dbHelper.CloseDB();
-                    return 0;
-                }
+                // if (Convert.ToBoolean(dbHelper.GetCount(MemberTableName, MPrimaryColName, memberKey))) //查找是否有记录
+                // {
+                //     //已存在，则更新信息
+                //     dbHelper.UpdateData(MemberTableName, "name", nickName, MPrimaryColName, memberKey);
+                //     dbHelper.CloseDB();
+                //     return 1;
+                // }
+                // else //未找到，初次创建
+                // {
+                //     MemberStatus member = new MemberStatus()//写入新的状态数据
+                //     {
+                //         Gid  = GroupId,
+                //         Uid  = qqid,
+                //         Time = Utils.GetNowTimeStamp(),
+                //         Flag = 0,
+                //         Info = null,
+                //         SL   = 0
+                //     };
+                //     dbClient.Insertable(member).ExecuteCommand();
+                //
+                //     string[] memberInfo =
+                //     {
+                //         qqid.ToString(), //用户QQ号
+                //         GuildId[0],      //用户所在QQ群号
+                //         nickName         //用户昵称
+                //     };
+                //     dbHelper.InsertRow(MemberTableName, MColName, memberInfo); //向数据库写入新数据
+                //     dbHelper.CloseDB();
+                //     return 0;
+                // }
+                return 0;
             }
             catch (Exception)
             {
@@ -187,28 +188,30 @@ namespace com.cbgan.SuiseiBot.Code.Database
         {
             try
             {
-                SQLiteHelper dbHelper = new SQLiteHelper(DBPath);//TODO 改用ORM
-                dbHelper.OpenDB();
-                if (Convert.ToBoolean(dbHelper.GetCount(GuildTableName, GPrimaryColName, GuildId))) //查找是否有记录
-                {
-                    //已存在，则更新信息
-                    dbHelper.UpdateData(GuildTableName, "name", gName, GPrimaryColName, GuildId);
-                    dbHelper.UpdateData(GuildTableName, "server", gArea, GPrimaryColName, GuildId);
-                    dbHelper.CloseDB();
-                    return 1;
-                }
-                else //未找到，初次创建
-                {
-                    string[] GuildInitData = //创建用户初始化数据数组
-                    {
-                        GroupId.ToString(), //所在群号
-                        gName,              //公会名
-                        gArea               //所在区服
-                    };
-                    dbHelper.InsertRow(GuildTableName, GColName, GuildInitData); //向数据库写入新数据
-                    dbHelper.CloseDB();
-                    return 0;
-                }
+                //TODO 改用ORM
+                // SQLiteHelper dbHelper = new SQLiteHelper(DBPath);
+                // dbHelper.OpenDB();
+                // if (Convert.ToBoolean(dbHelper.GetCount(GuildTableName, GPrimaryColName, GuildId))) //查找是否有记录
+                // {
+                //     //已存在，则更新信息
+                //     dbHelper.UpdateData(GuildTableName, "name", gName, GPrimaryColName, GuildId);
+                //     dbHelper.UpdateData(GuildTableName, "server", gArea, GPrimaryColName, GuildId);
+                //     dbHelper.CloseDB();
+                //     return 1;
+                // }
+                // else //未找到，初次创建
+                // {
+                //     string[] GuildInitData = //创建用户初始化数据数组
+                //     {
+                //         GroupId.ToString(), //所在群号
+                //         gName,              //公会名
+                //         gArea               //所在区服
+                //     };
+                //     dbHelper.InsertRow(GuildTableName, GColName, GuildInitData); //向数据库写入新数据
+                //     dbHelper.CloseDB();
+                //     return 0;
+                // }
+                return 0;
             }
             catch (Exception)
             {

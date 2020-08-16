@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 
-namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
+namespace com.cbgan.SuiseiBot.Code.ChatHandlers
 {
     internal class SurpriseMFKHandle
     {
@@ -20,12 +21,6 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
         }
         #endregion
 
-        #region 调用时间记录Dictionary
-        /// <param type="long">QQ号</param>
-        /// <param type="DateTime">上次调用时间</param>
-        private static Dictionary<long, DateTime> LastChatDate = new Dictionary<long, DateTime>();
-        #endregion
-
         #region 消息响应函数
         /// <summary>
         /// 消息接收函数
@@ -33,22 +28,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
         public void GetChat()
         {
             if (MFKEventArgs == null || Sender == null) return;
-            #region 计算调用间隔并判断是否恶意刷屏
-            DateTime time = System.DateTime.Now;//获取当前时间
-            DateTime last_use_time;
-            LastChatDate.TryGetValue(MFKEventArgs.FromQQ.Id, out last_use_time);
-            long timeSpan = (long)(time - last_use_time).TotalSeconds;//计算时间间隔(s)
-            LastChatDate[MFKEventArgs.FromQQ.Id] = time;//刷新调用时间
-            if (timeSpan <= 60)//一分钟内调用
-            {
-                MFKEventArgs.FromGroup.SendGroupMessage("再玩？再玩把你牙拔了当球踢\n(不要频繁使用娱乐功能)");
-                MFKEventArgs.FromGroup.CQApi.SetGroupMemberBanSpeak(//禁言一小时
-                    MFKEventArgs.FromGroup.Id,
-                    MFKEventArgs.FromQQ.Id, 
-                    new TimeSpan(1, 0, 0));
-                return;
-            }
-            #endregion
+            CheckInCD.isInCD(MFKEventArgs);
             GroupResponse();
             MFKEventArgs.Handler = true;
         }

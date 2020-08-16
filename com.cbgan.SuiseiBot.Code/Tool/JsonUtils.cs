@@ -1,7 +1,7 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace com.cbgan.SuiseiBot.Code.Tool
 {
@@ -14,12 +14,12 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         /// <param name="jsonData"></param>
         /// <param name="keyNames"></param>
         /// <returns></returns>
-        public static string[] GetKeysData(JObject jsonData,string[] keyNames)
+        public static string[] GetKeysData(JObject jsonData, string[] keyNames)
         {
             try
             {
                 List<string> resultData = new List<string>();
-                foreach(var key in keyNames)
+                foreach (var key in keyNames)
                 {
                     resultData.Add(jsonData[key]?.ToString());
                 }
@@ -27,7 +27,8 @@ namespace com.cbgan.SuiseiBot.Code.Tool
             }
             catch (Exception e)
             {
-                throw e;
+                ConsoleLog.Error("Json处理错误", ConsoleLog.ErrorLogBuilder(e));
+                return null;
             }
         }
 
@@ -41,7 +42,7 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         ///     <name>keyName</name>
         /// </param>
         /// <returns>返回目标字段字符串</returns>
-        public static Func<JObject,string, string> GetKeyData = (jsonData, keyName) => jsonData[keyName]?.ToString();
+        public static Func<JObject, string, string> GetKeyData = (jsonData, keyName) => jsonData[keyName]?.ToString();
 
         /// <summary>
         /// 将string转为JObject
@@ -50,7 +51,7 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         ///     <name>jsonString</name>
         /// </param>
         /// <returns>返回一个JObject</returns>
-        public static Func<string,JObject> ConvertJson = (jsonString) => (JObject)JsonConvert.DeserializeObject(jsonString);
+        public static Func<string, JObject> ConvertJson = (jsonString) => (JObject)JsonConvert.DeserializeObject(jsonString);
         #endregion
     }
 }

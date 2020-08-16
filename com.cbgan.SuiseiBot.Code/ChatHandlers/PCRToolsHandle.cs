@@ -1,6 +1,7 @@
 using System;
 using com.cbgan.SuiseiBot.Code.Network;
 using com.cbgan.SuiseiBot.Code.Tool;
+using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 using Newtonsoft.Json.Linq;
@@ -44,7 +45,13 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
             {
                 case "查询排名":
                     //检查参数
-                    if(!Utils.CheckForLength(commandArgs,1,PCREventArgs)) break;
+                    if (!Utils.CheckForLength(commandArgs, 1))
+                    {
+                        PCREventArgs.FromGroup.SendGroupMessage(
+                                                                CQApi.CQCode_At(PCREventArgs.FromQQ.Id),
+                                                                "\n请输入正确的参数个数。");
+                        break;
+                    }
                     string response = null;
                     //获取网络响应
                     try
