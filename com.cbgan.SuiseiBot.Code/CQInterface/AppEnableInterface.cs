@@ -1,10 +1,8 @@
 using com.cbgan.SuiseiBot.Code.Database;
-using com.cbgan.SuiseiBot.Code.Resource;
 using com.cbgan.SuiseiBot.Code.Tool;
 using com.cbgan.SuiseiBot.Code.TimerEvent;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
-using System;
 using System.IO;
 using com.cbgan.SuiseiBot.Code.Resource.CommandHelp;
 using com.cbgan.SuiseiBot.Code.Resource.Commands;
@@ -30,10 +28,10 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             ConsoleLog.Info("初始化", "SuiseiBot初始化");
             DatabaseInit.Init(e);//数据库初始化
             //将关键词和帮助文本写入内存
-            ChatKeywords.KeywordInit();
-            PCRGuildCommand.PCRGuildCommandInit();
+            WholeMatchCmd.KeywordInit();
+            PCRGuildCmd.PCRGuildCommandInit();
             GuildCommandHelp.InitHelpText();
-            SpecialKeywords.SpecialKeywordsInit();
+            KeywordCmd.SpecialKeywordsInit();
             //初始化定时器线程
             timer = new TimerInit(e.CQApi);
             e.Handler = true;

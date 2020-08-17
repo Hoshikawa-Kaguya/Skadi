@@ -1,6 +1,5 @@
 using System;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace com.cbgan.SuiseiBot.Code.Tool
 {

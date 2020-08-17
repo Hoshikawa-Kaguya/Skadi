@@ -11,7 +11,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
     {
         #region 指令处理
         public static void BossResponse(object Sender, CQGroupMessageEventArgs GBossEventArgs,
-                                               PCRGuildCommandType commandType)//功能响应
+                                               PCRGuildCmdType commandType)//功能响应
         {
             if (GBossEventArgs == null) throw new ArgumentNullException(nameof(GBossEventArgs));
             Group qqGroup = GBossEventArgs.FromGroup;

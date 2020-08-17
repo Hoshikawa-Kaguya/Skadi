@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text;
 using com.cbgan.SuiseiBot.Code.ChatHandlers;
 using com.cbgan.SuiseiBot.Code.Database;
-using com.cbgan.SuiseiBot.Code.Resource;
 using com.cbgan.SuiseiBot.Code.Resource.Enum;
 using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp;
@@ -21,7 +20,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
         /// <param name="Sender">CQSender</param>
         /// <param name="GMgrEventArgs">CQGroupMessageEventArgs</param>
         /// <param name="commandType">指令类型 [0-100]</param>
-        public static void GuildMgrResponse(object Sender,CQGroupMessageEventArgs GMgrEventArgs,PCRGuildCommandType commandType) //功能响应
+        public static void GuildMgrResponse(object Sender,CQGroupMessageEventArgs GMgrEventArgs,PCRGuildCmdType commandType) //功能响应
         {
             Group QQgroup = GMgrEventArgs.FromGroup;
 
@@ -35,7 +34,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
             switch (commandType)
             {
                 //参数1 服务器地区，参数2 公会名（可选，缺省为群名）
-                case PCRGuildCommandType.CreateGuild://建会
+                case PCRGuildCmdType.CreateGuild://建会
                     if (Utils.CheckForLength(commandArgs, 1)) 
                     {
                         if (commandArgs.Length == 3)
@@ -62,13 +61,13 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
 
                     break;
                 //参数1 QQ号
-                case PCRGuildCommandType.JoinGuild://入会
+                case PCRGuildCmdType.JoinGuild://入会
                     Dictionary<long,int> addedQQList= new Dictionary<long, int>();    //已经入会的QQ号列表
                     if (Utils.CheckForLength(commandArgs, 1))
                     {
                         if (GMgrEventArgs.Message.CQCodes.Count == 0)//没有AT任何人，参数非法
                         {
-                            PCRGuildHandle.GetIllegalArgs(GMgrEventArgs, PCRGuildCommandType.JoinGuild, "没有AT任何人");
+                            PCRGuildHandle.GetIllegalArgs(GMgrEventArgs, PCRGuildCmdType.JoinGuild, "没有AT任何人");
                             return;
                         }
                         if (GMgrEventArgs.Message.CQCodes.Count >= 1)           //如果存在AT
@@ -146,18 +145,18 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                     }
 
                     break;
-                case PCRGuildCommandType.ListMember://查看成员
+                case PCRGuildCmdType.ListMember://查看成员
                     dbAction.ShowMembers();
                     break;
                 //参数1 QQ号
-                case PCRGuildCommandType.QuitGuild://退会
+                case PCRGuildCmdType.QuitGuild://退会
                     if (Utils.CheckForLength(commandArgs, 1)) 
                         result = dbAction.LeaveGuild(commandArgs[1]);
                     break;
-                case PCRGuildCommandType.QuitAll://清空成员
+                case PCRGuildCmdType.QuitAll://清空成员
                     dbAction.EmptyMember();
                     break;
-                case PCRGuildCommandType.JoinAll://一键入会
+                case PCRGuildCmdType.JoinAll://一键入会
                     dbAction.AllJoin();
                     break;
 

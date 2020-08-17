@@ -1,10 +1,8 @@
-using com.cbgan.SuiseiBot.Code.Resource;
 using com.cbgan.SuiseiBot.Code.Resource.Enum;
-using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 
-namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
+namespace com.cbgan.SuiseiBot.Code.ChatHandlers
 {
     internal class DefaultHandle
     {
@@ -30,10 +28,10 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
         /// 消息接收函数
         /// </summary>
         /// <param name="keywordType"></param>
-        public void GetChat(KeywordType keywordType) //消息接收并判断是否响应
+        public void GetChat(WholeMatchCmdType keywordType) //消息接收并判断是否响应
         {
             if (eventArgs == null || sender == null) return;
-            if (keywordType == KeywordType.Debug)
+            if (keywordType == WholeMatchCmdType.Debug)
             {
                 GroupResponse();
             }

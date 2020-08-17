@@ -1,7 +1,6 @@
 using System;
 using com.cbgan.SuiseiBot.Code.ChatHandlers;
 using com.cbgan.SuiseiBot.Code.Database;
-using com.cbgan.SuiseiBot.Code.Resource;
 using com.cbgan.SuiseiBot.Code.Resource.Enum;
 using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp;
@@ -15,7 +14,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
     {
         #region 指令处理
         public static void GuildBattleResponse(object Sender, CQGroupMessageEventArgs GBattleEventArgs,
-                                               PCRGuildCommandType commandType) //功能响应
+                                               PCRGuildCmdType commandType) //功能响应
         {
             if (GBattleEventArgs == null) throw new ArgumentNullException(nameof(GBattleEventArgs));
             Group qqGroup = GBattleEventArgs.FromGroup;
@@ -41,7 +40,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
 
             switch (commandType)
             {
-                case PCRGuildCommandType.BattleStart:
+                case PCRGuildCmdType.BattleStart:
                     //检查执行者权限
                     if (memberInfo.MemberType == QQGroupMemberType.Member)
                     {

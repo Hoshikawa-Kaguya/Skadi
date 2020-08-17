@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;

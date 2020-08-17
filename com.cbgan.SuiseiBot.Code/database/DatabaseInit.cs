@@ -1,3 +1,4 @@
+using System;
 using com.cbgan.SuiseiBot.Code.SqliteTool;
 using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp.EventArgs;
@@ -16,13 +17,6 @@ namespace com.cbgan.SuiseiBot.Code.Database
         {
             string DBPath = SugarUtils.GetDBPath(e.CQApi.GetLoginQQ().Id.ToString());
             ConsoleLog.Info("IO",$"获取数据路径{DBPath}");
-            SqlSugarClient dbClient = new SqlSugarClient(new ConnectionConfig()
-            {
-                ConnectionString = $"DATA SOURCE={DBPath}",
-                DbType = DbType.Sqlite,
-                IsAutoCloseConnection = true,
-                InitKeyType = InitKeyType.Attribute
-            });
             if (!File.Exists(DBPath))//查找数据文件
             {
                 //数据库文件不存在，新建数据库
@@ -30,6 +24,13 @@ namespace com.cbgan.SuiseiBot.Code.Database
                 Directory.CreateDirectory(Path.GetPathRoot(DBPath));
                 File.Create(DBPath).Close();
             }
+            SqlSugarClient dbClient = new SqlSugarClient(new ConnectionConfig()
+            {
+                ConnectionString      = $"DATA SOURCE={DBPath}",
+                DbType                = DbType.Sqlite,
+                IsAutoCloseConnection = true,
+                InitKeyType           = InitKeyType.Attribute
+            });
             if (!SugarUtils.TableExists<SuiseiData>(dbClient)) //彗酱数据库初始化
             {
                 ConsoleLog.Warning("数据库初始化", "未找到慧酱数据表 - 创建一个新表");

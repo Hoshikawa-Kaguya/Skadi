@@ -1,6 +1,6 @@
 namespace com.cbgan.SuiseiBot.Code.Resource.Enum
 {
-    internal enum KeywordType : int
+    internal enum WholeMatchCmdType : int
     {
         /// <summary>
         /// 娱乐功能

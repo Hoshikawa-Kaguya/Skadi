@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# CS0414: 字段“BossDBHelper.DBVersionJsonUrl”已被赋值，但从未使用过它的值
+dotnet_diagnostic.CS0414.severity = silent

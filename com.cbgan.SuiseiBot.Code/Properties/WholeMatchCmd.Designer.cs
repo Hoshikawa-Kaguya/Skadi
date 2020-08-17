@@ -22,14 +22,14 @@ namespace com.cbgan.SuiseiBot.Code.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    internal class WholeMatchCmd {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resources() {
+        internal WholeMatchCmd() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace com.cbgan.SuiseiBot.Code.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("com.cbgan.SuiseiBot.Code.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("com.cbgan.SuiseiBot.Code.Properties.WholeMatchCmd", typeof(WholeMatchCmd).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -57,6 +57,33 @@ namespace com.cbgan.SuiseiBot.Code.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 debug 的本地化字符串。
+        /// </summary>
+        internal static string Debug {
+            get {
+                return ResourceManager.GetString("Debug", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 彗酱今天也很可爱 的本地化字符串。
+        /// </summary>
+        internal static string Suisei {
+            get {
+                return ResourceManager.GetString("Suisei", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 .r,给老子来个禁言套餐,请问可以告诉我你的年龄吗？,给爷来个优质睡眠套餐 的本地化字符串。
+        /// </summary>
+        internal static string SurpriseMFK {
+            get {
+                return ResourceManager.GetString("SurpriseMFK", resourceCulture);
             }
         }
     }

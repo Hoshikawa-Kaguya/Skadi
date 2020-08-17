@@ -30,7 +30,7 @@ namespace Native.App.Export
 		static CQEventExport ()	
 		{	
 			// 初始化 Costura.Fody	
-			CosturaUtility.Initialize ();	
+			//CosturaUtility.Initialize ();	
 			
 			Type appDataType = typeof (AppData);	
 			appDataType.GetRuntimeProperty ("UnityContainer").GetSetMethod (true).Invoke (null, new object[] { new UnityContainer () });	

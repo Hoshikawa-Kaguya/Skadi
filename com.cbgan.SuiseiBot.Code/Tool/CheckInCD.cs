@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Native.Sdk.Cqp.EventArgs;
 
 namespace com.cbgan.SuiseiBot.Code.Tool

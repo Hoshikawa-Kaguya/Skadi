@@ -8,12 +8,12 @@ namespace com.cbgan.SuiseiBot.Code.Resource.CommandHelp
     /// </summary>
     internal static class GuildCommandHelp
     {
-        public static Dictionary<PCRGuildCommandType, string> HelpText = new Dictionary<PCRGuildCommandType, string>();
+        public static Dictionary<PCRGuildCmdType, string> HelpText = new Dictionary<PCRGuildCmdType, string>();
 
         public static void InitHelpText()
         {
-            HelpText.Add(PCRGuildCommandType.CreateGuild, "#建会 [区域(cn/tw/jp)] [公会名]");
-            HelpText.Add(PCRGuildCommandType.JoinGuild, "#入会 [@成员(或@自己)]");
+            HelpText.Add(PCRGuildCmdType.CreateGuild, "#建会 [区域(cn/tw/jp)] [公会名]");
+            HelpText.Add(PCRGuildCmdType.JoinGuild, "#入会 [@成员(或@自己)]");
         }
     }
 }

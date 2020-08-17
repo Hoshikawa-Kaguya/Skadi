@@ -1,6 +1,6 @@
 namespace com.cbgan.SuiseiBot.Code.Resource.Enum
 {
-    internal enum PCRGuildCommandType : int
+    internal enum PCRGuildCmdType : int
     {
         /// <summary>
         /// 建会
