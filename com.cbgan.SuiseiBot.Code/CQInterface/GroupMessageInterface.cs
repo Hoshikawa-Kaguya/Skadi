@@ -8,6 +8,8 @@ using com.cbgan.SuiseiBot.Code.Tool;
 using com.cbgan.SuiseiBot.Code.PCRGuildManager;
 using com.cbgan.SuiseiBot.Code.Resource;
 using com.cbgan.SuiseiBot.Code.ChatHandlers;
+using com.cbgan.SuiseiBot.Code.Resource.Commands;
+using com.cbgan.SuiseiBot.Code.Resource.Enum;
 
 namespace com.cbgan.SuiseiBot.Code.CQInterface
 {

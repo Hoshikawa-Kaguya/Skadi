@@ -2,6 +2,7 @@ using System;
 using com.cbgan.SuiseiBot.Code.ChatHandlers;
 using com.cbgan.SuiseiBot.Code.Database;
 using com.cbgan.SuiseiBot.Code.Resource;
+using com.cbgan.SuiseiBot.Code.Resource.Enum;
 using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.Enum;

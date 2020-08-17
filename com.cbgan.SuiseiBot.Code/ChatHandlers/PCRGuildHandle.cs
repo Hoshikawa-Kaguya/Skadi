@@ -4,6 +4,8 @@ using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.EventArgs;
 using System;
+using com.cbgan.SuiseiBot.Code.Resource.CommandHelp;
+using com.cbgan.SuiseiBot.Code.Resource.Enum;
 
 namespace com.cbgan.SuiseiBot.Code.ChatHandlers
 {
@@ -32,7 +34,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
                 //获取第二个字符开始到空格为止的PCR命令
                 PCRGuildCommand = PCRGuildEventArgs.Message.Text.Substring(1).Split(' ')[0];
                 //获取指令类型
-                Resource.PCRGuildCommand.PCRGuildCommands.TryGetValue(PCRGuildCommand, out PCRGuildCommandType commandType);
+                Resource.Commands.PCRGuildCommand.PCRGuildCommands.TryGetValue(PCRGuildCommand, out PCRGuildCommandType commandType);
                 this.CommandType = commandType;
                 //未知指令
                 if (CommandType == 0)
@@ -102,7 +104,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         /// <returns>帮助文本</returns>
         public static string GetCommandHelp(PCRGuildCommandType commandType)
         {
-            CommandHelpText.HelpText.TryGetValue(commandType, out string helptext);
+            GuildCommandHelp.HelpText.TryGetValue(commandType, out string helptext);
             if (string.IsNullOrEmpty(helptext)) helptext = "该指令还在开发中，请询问机器人维护者或者开发者";
             return helptext;
         }

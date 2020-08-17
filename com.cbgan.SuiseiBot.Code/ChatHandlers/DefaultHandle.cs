@@ -1,4 +1,5 @@
 using com.cbgan.SuiseiBot.Code.Resource;
+using com.cbgan.SuiseiBot.Code.Resource.Enum;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;

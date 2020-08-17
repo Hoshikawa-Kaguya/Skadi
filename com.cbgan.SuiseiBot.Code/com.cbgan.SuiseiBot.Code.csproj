@@ -93,15 +93,20 @@
     <Compile Include="Network\HTTPUtils.cs" />
     <Compile Include="Network\NetServiceUtils.cs" />
     <Compile Include="PCRGuildManager\BossManager.cs" />
-    <Compile Include="Resource\ChatKeywords.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Resource\Commands\ChatKeywords.cs" />
     <Compile Include="PCRGuildManager\GuildBattleManager.cs" />
     <Compile Include="PCRGuildManager\GuildManager.cs" />
-    <Compile Include="Resource\CommandHelpText.cs" />
-    <Compile Include="Resource\PCRGuildCommand.cs" />
-    <Compile Include="Resource\KeywordType.cs" />
-    <Compile Include="Resource\PCRGuildCommandType.cs" />
-    <Compile Include="Resource\SpecialKeywords.cs" />
-    <Compile Include="Resource\SpecialKeywordsType.cs" />
+    <Compile Include="Resource\CommandHelp\GuildCommandHelp.cs" />
+    <Compile Include="Resource\Commands\PCRGuildCommand.cs" />
+    <Compile Include="Resource\Enum\KeywordType.cs" />
+    <Compile Include="Resource\Enum\PCRGuildCommandType.cs" />
+    <Compile Include="Resource\Commands\SpecialKeywords.cs" />
+    <Compile Include="Resource\Enum\SpecialKeywordsType.cs" />
     <Compile Include="SqliteTool\SugarColUtils.cs" />
     <Compile Include="SqliteTool\SugarTableUtils.cs" />
     <Compile Include="SqliteTool\SugarUtils.cs" />
@@ -128,7 +133,12 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

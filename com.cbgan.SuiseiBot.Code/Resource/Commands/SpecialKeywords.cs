@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using com.cbgan.SuiseiBot.Code.Resource.Enum;
 
-namespace com.cbgan.SuiseiBot.Code.Resource
+namespace com.cbgan.SuiseiBot.Code.Resource.Commands
 {
     /// <summary>
     /// 存放需要参数的关键词

@@ -6,6 +6,8 @@ using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
 using System;
 using System.IO;
+using com.cbgan.SuiseiBot.Code.Resource.CommandHelp;
+using com.cbgan.SuiseiBot.Code.Resource.Commands;
 
 namespace com.cbgan.SuiseiBot.Code.CQInterface
 {
@@ -27,10 +29,10 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             System.Environment.SetEnvironmentVariable("Path", Directory.GetCurrentDirectory());
             ConsoleLog.Info("初始化", "SuiseiBot初始化");
             DatabaseInit.Init(e);//数据库初始化
-            //将关键词写入内存
+            //将关键词和帮助文本写入内存
             ChatKeywords.KeywordInit();
             PCRGuildCommand.PCRGuildCommandInit();
-            CommandHelpText.InitHelpText();
+            GuildCommandHelp.InitHelpText();
             SpecialKeywords.SpecialKeywordsInit();
             //初始化定时器线程
             timer = new TimerInit(e.CQApi);

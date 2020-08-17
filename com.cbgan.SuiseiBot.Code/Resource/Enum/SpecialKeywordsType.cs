@@ -1,4 +1,4 @@
-namespace com.cbgan.SuiseiBot.Code.Resource
+namespace com.cbgan.SuiseiBot.Code.Resource.Enum
 {
     internal enum SpecialKeywordsType : int
     {

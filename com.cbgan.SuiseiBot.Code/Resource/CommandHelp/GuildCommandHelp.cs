@@ -1,8 +1,12 @@
 using System.Collections.Generic;
+using com.cbgan.SuiseiBot.Code.Resource.Enum;
 
-namespace com.cbgan.SuiseiBot.Code.Resource
+namespace com.cbgan.SuiseiBot.Code.Resource.CommandHelp
 {
-    internal static class CommandHelpText
+    /// <summary>
+    /// 大佬快教教我这个指令怎么用.jpg
+    /// </summary>
+    internal static class GuildCommandHelp
     {
         public static Dictionary<PCRGuildCommandType, string> HelpText = new Dictionary<PCRGuildCommandType, string>();
 
