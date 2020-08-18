@@ -1,5 +1,6 @@
 using System;
-using com.cbgan.SuiseiBot.Code.Resource.UiltsEnum;
+using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
+using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
 
 namespace com.cbgan.SuiseiBot.Code.Tool
 {

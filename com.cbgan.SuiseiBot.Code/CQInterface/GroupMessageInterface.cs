@@ -5,8 +5,8 @@ using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.Model;
 using com.cbgan.SuiseiBot.Code.Tool;
 using com.cbgan.SuiseiBot.Code.ChatHandlers;
-using com.cbgan.SuiseiBot.Code.Resource.CmdEnum;
 using com.cbgan.SuiseiBot.Code.Resource.Commands;
+using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
 
 namespace com.cbgan.SuiseiBot.Code.CQInterface
 {
@@ -58,7 +58,7 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
                     break;
             }
 
-            //一般指令匹配
+            //参数指令匹配
             KeywordCmdType keywordType = KeywordCmd.TryGetKeywordType(e.Message.Text);
             if (keywordType != 0) ConsoleLog.Info("触发关键词", $"消息类型={cmdType}");
             switch (keywordType)

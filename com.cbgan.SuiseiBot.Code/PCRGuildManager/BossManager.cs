@@ -1,5 +1,5 @@
 using System;
-using com.cbgan.SuiseiBot.Code.Resource.CmdEnum;
+using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
 using Native.Sdk.Cqp.Model;
 using Native.Sdk.Cqp.EventArgs;
 

@@ -1,7 +1,7 @@
 using System;
 using com.cbgan.SuiseiBot.Code.Network;
-using com.cbgan.SuiseiBot.Code.Resource.CmdEnum;
-using com.cbgan.SuiseiBot.Code.Resource.UiltsEnum;
+using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
+using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
 using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
@@ -29,6 +29,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         #region 消息响应函数
         /// <summary>
         /// 收到信息的函数
+        /// 并匹配相应指令
         /// </summary>
         public void GetChat(KeywordCmdType cmdType)
         {
@@ -114,10 +115,10 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
                     string leaderName = responseJObject["data"]?[0]?["leader_name"]?.ToString();
                     ConsoleLog.Info("JSON处理成功", "向用户发送数据");
                     QQGroup.SendGroupMessage("查询成功！\n" +
-                                             $"公会   |{guildName}\n" +
-                                             $"排名   |{rank}\n" +
-                                             $"总分数 |{totalScore}\n" +
-                                             $"会长   |{leaderName}\n" +
+                                             $"公会  |{guildName}\n" +
+                                             $"排名  |{rank}\n" +
+                                             $"总分数|{totalScore}\n" +
+                                             $"会长  |{leaderName}\n" +
                                              "如果查询到的信息有误，有可能关键词错误或公会排名在20060之后");
                 }
                 else

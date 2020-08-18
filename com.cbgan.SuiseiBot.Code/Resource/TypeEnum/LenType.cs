@@ -1,4 +1,4 @@
-namespace com.cbgan.SuiseiBot.Code.Resource.UiltsEnum
+namespace com.cbgan.SuiseiBot.Code.Resource.TypeEnum
 {
     internal enum LenType : int
     {

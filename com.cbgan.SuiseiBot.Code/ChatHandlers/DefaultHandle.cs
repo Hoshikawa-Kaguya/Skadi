@@ -1,4 +1,5 @@
-using com.cbgan.SuiseiBot.Code.Resource.CmdEnum;
+using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
+using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 
@@ -26,17 +27,22 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         #region 消息响应函数
         /// <summary>
         /// 消息接收函数
+        /// 并匹配相应指令
         /// </summary>
         /// <param name="keywordType"></param>
         public void GetChat(WholeMatchCmdType keywordType) //消息接收并判断是否响应
         {
             if (eventArgs == null || sender == null) return;
-            if (keywordType == WholeMatchCmdType.Debug)
+            switch (keywordType)
             {
-                GroupResponse();
+                case WholeMatchCmdType.Debug:
+                    GroupResponse();
+                    break;
             }
         }
+        #endregion
 
+        #region MyRegion
         /// <summary>
         /// 响应函数
         /// </summary>
@@ -44,7 +50,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         {
             string chat    = eventArgs.Message;
             Group  QQgroup = eventArgs.FromGroup;
-            //QQgroup.SendGroupMessage(CQApi.CQCode_Image())
+            QQgroup.SendGroupMessage(CQApi.CQCode_Image("1.gif"));
         }
         #endregion
     }

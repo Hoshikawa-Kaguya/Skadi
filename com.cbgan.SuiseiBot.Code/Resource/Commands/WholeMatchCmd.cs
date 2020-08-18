@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using com.cbgan.SuiseiBot.Code.Resource.CmdEnum;
+using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
 
 namespace com.cbgan.SuiseiBot.Code.Resource.Commands
 {
