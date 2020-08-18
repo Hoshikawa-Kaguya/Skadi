@@ -1,4 +1,5 @@
 using System;
+using com.cbgan.SuiseiBot.Code.Resource.UiltsEnum;
 
 namespace com.cbgan.SuiseiBot.Code.Tool
 {
@@ -9,14 +10,18 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         /// <summary>
         /// 检查参数数组长度
         /// </summary>
-        /// <param>指令数组
-        ///     <name>args</name>
-        /// </param>
-        /// <param>至少需要的参数个数
-        ///     <name>len</name>
-        /// </param>
-        /// <returns>长度合法性</returns>
-        public static Func<string[], int, bool> CheckForLength = (args, len) => args.Length >= len + 1;
+        /// <param name="args">指令数组</param>
+        /// <param name="len">至少需要的参数个数</param>
+        /// <returns>长度合法性\n-1不符合 0符合 1超出</returns>
+        public static LenType CheckForLength(string[] args, int len)
+        {
+            if (args.Length >= len + 1)
+            {
+                if (args.Length == len + 1) return LenType.Legitimate;
+                else return LenType.Extra;
+            }
+            else return LenType.Illegal;
+        }
 
         /// <summary>
         /// 获取当前时间戳

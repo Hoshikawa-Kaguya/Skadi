@@ -1,4 +1,4 @@
-using com.cbgan.SuiseiBot.Code.Resource.Enum;
+using com.cbgan.SuiseiBot.Code.Resource.CmdEnum;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 

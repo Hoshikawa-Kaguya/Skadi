@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using com.cbgan.SuiseiBot.Code.Resource.Enum;
+using com.cbgan.SuiseiBot.Code.Resource.CmdEnum;
 
 namespace com.cbgan.SuiseiBot.Code.Resource.Commands
 {
@@ -12,15 +12,14 @@ namespace com.cbgan.SuiseiBot.Code.Resource.Commands
         public static void KeywordInit()
         {
             //1 娱乐功能
-            KeyWords.Add(".r", WholeMatchCmdType.SurpriseMFK);//随机数
-            KeyWords.Add("给老子来个禁言套餐", WholeMatchCmdType.SurpriseMFK);
-            KeyWords.Add("请问可以告诉我你的年龄吗？", WholeMatchCmdType.SurpriseMFK);
-            KeyWords.Add("给爷来个优质睡眠套餐", WholeMatchCmdType.SurpriseMFK);
+            KeyWords.Add(".r", WholeMatchCmdType.SurpriseMFK_Random);//随机数
+            KeyWords.Add("给老子来个禁言套餐", WholeMatchCmdType.SurpriseMFK_Ban);
+            KeyWords.Add("请问可以告诉我你的年龄吗？", WholeMatchCmdType.SurpriseMFK_24YearsOld);
+            KeyWords.Add("给爷来个优质睡眠套餐", WholeMatchCmdType.SurpriseMFK_RedTea);
             //2 奇奇怪怪的签到
-            KeyWords.Add("彗酱今天也很可爱", WholeMatchCmdType.Suisei);
+            KeyWords.Add("彗酱今天也很可爱", WholeMatchCmdType.Suisei_SignIn);
             //3 公主连结小功能
             //暂无只需要关键词的功能
-
             KeyWords.Add("debug", WholeMatchCmdType.Debug);
         }
     }

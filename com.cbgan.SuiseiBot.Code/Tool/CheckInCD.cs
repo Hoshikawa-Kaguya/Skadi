@@ -21,7 +21,13 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         #endregion
 
         #region 调用时间检查
-        public static void isInCD(CQGroupMessageEventArgs eventArgs)
+        /// <summary>
+        /// 检查用户调用时是否在CD中
+        /// 对任何可能刷屏的指令都有效
+        /// </summary>
+        /// <param name="eventArgs">CQGroupMessageEventArgs</param>
+        /// <returns>是否在CD中</returns>
+        public static bool isInCD(CQGroupMessageEventArgs eventArgs)
         {
             DateTime time = DateTime.Now; //获取当前时间
             User user = new User
@@ -39,7 +45,9 @@ namespace com.cbgan.SuiseiBot.Code.Tool
                                                                  eventArgs.FromGroup.Id,
                                                                  eventArgs.FromQQ.Id,
                                                                  new TimeSpan(1, 0, 0));
+                return true;
             }
+            return false;
         }
         #endregion
     }

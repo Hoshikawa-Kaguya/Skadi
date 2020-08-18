@@ -1,13 +1,12 @@
 using System;
-using System.Linq;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
 using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.Model;
 using com.cbgan.SuiseiBot.Code.Tool;
 using com.cbgan.SuiseiBot.Code.ChatHandlers;
+using com.cbgan.SuiseiBot.Code.Resource.CmdEnum;
 using com.cbgan.SuiseiBot.Code.Resource.Commands;
-using com.cbgan.SuiseiBot.Code.Resource.Enum;
 
 namespace com.cbgan.SuiseiBot.Code.CQInterface
 {
@@ -33,21 +32,27 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             }
 
             //全字指令匹配
-            WholeMatchCmd.KeyWords.TryGetValue(e.Message, out WholeMatchCmdType chatType); //查找关键字
-            if (chatType != 0) ConsoleLog.Info("触发关键词", $"消息类型={chatType}");
-            switch (chatType)
+            WholeMatchCmd.KeyWords.TryGetValue(e.Message, out WholeMatchCmdType cmdType); //查找关键字
+            if (cmdType != 0) ConsoleLog.Info("触发关键词", $"消息类型={cmdType}");
+            switch (cmdType)
             {
-                case WholeMatchCmdType.Debug: //输入debug
+                //输入debug
+                case WholeMatchCmdType.Debug: 
                     DefaultHandle dh = new DefaultHandle(sender, e);
-                    dh.GetChat(chatType);
+                    dh.GetChat(cmdType);
                     return;
-                case WholeMatchCmdType.SurpriseMFK: //娱乐功能
+                //娱乐功能
+                case WholeMatchCmdType.SurpriseMFK_Random:
+                case WholeMatchCmdType.SurpriseMFK_Ban:
+                case WholeMatchCmdType.SurpriseMFK_RedTea:
+                case WholeMatchCmdType.SurpriseMFK_24YearsOld:
                     SurpriseMFKHandle smfh = new SurpriseMFKHandle(sender, e);
-                    smfh.GetChat(); //进行响应
+                    smfh.GetChat(cmdType);
                     return;
-                case WholeMatchCmdType.Suisei: //慧酱签到啦
+                //慧酱签到啦
+                case WholeMatchCmdType.Suisei_SignIn: 
                     SuiseiHanlde suisei = new SuiseiHanlde(sender, e);
-                    suisei.GetChat();
+                    suisei.GetChat(cmdType);
                     return;
                 default:
                     break;
@@ -55,7 +60,7 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
 
             //一般指令匹配
             KeywordCmdType keywordType = KeywordCmd.TryGetKeywordType(e.Message.Text);
-            if (keywordType != 0) ConsoleLog.Info("触发关键词", $"消息类型={chatType}");
+            if (keywordType != 0) ConsoleLog.Info("触发关键词", $"消息类型={cmdType}");
             switch (keywordType)
             {
                 case KeywordCmdType.PCRTools_GetGuildRank:

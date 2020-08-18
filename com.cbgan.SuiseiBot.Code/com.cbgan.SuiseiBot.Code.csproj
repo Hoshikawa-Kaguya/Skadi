@@ -107,10 +107,11 @@
     <Compile Include="PCRGuildManager\GuildManager.cs" />
     <Compile Include="Resource\CommandHelp\GuildCommandHelp.cs" />
     <Compile Include="Resource\Commands\PCRGuildCmd.cs" />
-    <Compile Include="Resource\Enum\WholeMatchCmdType.cs" />
-    <Compile Include="Resource\Enum\PCRGuildCmdType.cs" />
+    <Compile Include="Resource\CmdEnum\WholeMatchCmdType.cs" />
+    <Compile Include="Resource\CmdEnum\PCRGuildCmdType.cs" />
     <Compile Include="Resource\Commands\KeywordCmd.cs" />
-    <Compile Include="Resource\Enum\KeywordCmdType.cs" />
+    <Compile Include="Resource\CmdEnum\KeywordCmdType.cs" />
+    <Compile Include="Resource\UiltsEnum\LenType.cs" />
     <Compile Include="SqliteTool\SugarColUtils.cs" />
     <Compile Include="SqliteTool\SugarTableUtils.cs" />
     <Compile Include="SqliteTool\SugarUtils.cs" />
@@ -137,6 +138,7 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

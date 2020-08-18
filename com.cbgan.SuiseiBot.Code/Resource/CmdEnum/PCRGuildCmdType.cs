@@ -1,4 +1,4 @@
-namespace com.cbgan.SuiseiBot.Code.Resource.Enum
+namespace com.cbgan.SuiseiBot.Code.Resource.CmdEnum
 {
     internal enum PCRGuildCmdType : int
     {

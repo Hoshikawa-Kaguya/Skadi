@@ -51,31 +51,29 @@ namespace com.cbgan.SuiseiBot.Code.Database
         {
             try
             {
-                using (SqlSugarClient SQLiteClient = SugarUtils.CreateSqlSugarClient(DBPath))
+                using SqlSugarClient SQLiteClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                if (Convert.ToBoolean(
+                                      SQLiteClient.Queryable<SuiseiData>().Where(user => user.Uid == QQID && user.Gid == GroupId).Count()
+                                     )) //查找是否有记录
                 {
-                    if (Convert.ToBoolean(
-                    SQLiteClient.Queryable<SuiseiData>().Where(user => user.Uid == QQID && user.Gid == GroupId).Count()
-                    )) //查找是否有记录
+                    //查询数据库数据
+                    UserData = SQLiteClient.Queryable<SuiseiData>()
+                                           .Where(userInfo => userInfo.Uid == QQID && userInfo.Gid == GroupId)
+                                           .First();
+                    IsExists         = true;
+                    CurrentFavorRate = UserData.FavorRate; //更新当前好感值
+                }
+                else //未找到签到记录
+                {
+                    UserData = new SuiseiData //创建用户初始化数据
                     {
-                        //查询数据库数据
-                        UserData = SQLiteClient.Queryable<SuiseiData>()
-                            .Where(userInfo => userInfo.Uid == QQID && userInfo.Gid == GroupId)
-                            .First();
-                        IsExists = true;
-                        CurrentFavorRate = UserData.FavorRate;//更新当前好感值
-                    }
-                    else//未找到签到记录
-                    {
-                        UserData = new SuiseiData //创建用户初始化数据
-                        {
-                            Uid       = QQID,       //用户QQ
-                            Gid       = GroupId,    //用户所在群号
-                            FavorRate = 0,          //好感度
-                            ChatDate  = TriggerTime //签到时间
-                        };
-                        IsExists = false;
-                        CurrentFavorRate = 0;
-                    }
+                        Uid       = QQID,       //用户QQ
+                        Gid       = GroupId,    //用户所在群号
+                        FavorRate = 0,          //好感度
+                        ChatDate  = TriggerTime //签到时间
+                    };
+                    IsExists         = false;
+                    CurrentFavorRate = 0;
                 }
             }
             catch (Exception e)
@@ -95,18 +93,16 @@ namespace com.cbgan.SuiseiBot.Code.Database
                 //更新好感度数据
                 this.CurrentFavorRate++;
                 UserData.FavorRate = CurrentFavorRate;  //更新好感度
-                using (SqlSugarClient SQLiteClient = SugarUtils.CreateSqlSugarClient(DBPath))
+                using SqlSugarClient SQLiteClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                //判断用户记录是否已经存在
+                if (IsExists) //已存在则更新数据
                 {
-                    //判断用户记录是否已经存在
-                    if (IsExists)//已存在则更新数据
-                    {
-                        UserData.ChatDate = TriggerTime;        //更新触发时间
-                        SQLiteClient.Updateable(UserData).ExecuteCommand();
-                    }
-                    else//不存在插入新行
-                    {
-                        SQLiteClient.Insertable(UserData).ExecuteCommand();//向数据库写入新数据
-                    }
+                    UserData.ChatDate = TriggerTime; //更新触发时间
+                    SQLiteClient.Updateable(UserData).ExecuteCommand();
+                }
+                else //不存在插入新行
+                {
+                    SQLiteClient.Insertable(UserData).ExecuteCommand(); //向数据库写入新数据
                 }
             }
             catch (Exception e)
