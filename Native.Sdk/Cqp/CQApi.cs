@@ -362,6 +362,24 @@ namespace Native.Sdk.Cqp
 				new KeyValuePair<string, string> ("file", path));
 		}
 		/// <summary>
+		/// 获取酷Q "图片" 代码
+		/// 用于发送网络图片
+		/// </summary>
+		/// <param name="url">图片的路径, 将图片放在 酷Q\data\image 下, 并填写相对路径. 如 酷Q\data\image\1.jpg 则填写 1.jpg</param>
+		/// <exception cref="ArgumentException">参数: path 是空字符串或为 null</exception>
+		/// <returns>返回 <see cref="CQCode"/> 对象</returns>
+		public static CQCode CQCode_UrlImage(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+            {
+                throw new ArgumentException("路径不能为空", "url");
+            }
+
+            return new CQCode(
+                              CQFunction.Image,
+                              new KeyValuePair<string, string>("url", url));
+        }
+		/// <summary>
 		/// 获取酷Q "语音" 代码
 		/// </summary>
 		/// <param name="path">语音的路径, 将音频放在 酷Q\data\record 下, 并填写相对路径. 如 酷Q\data\record\1.amr 则填写 1.amr</param>

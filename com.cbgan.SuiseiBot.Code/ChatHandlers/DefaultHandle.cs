@@ -50,7 +50,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         {
             string chat    = eventArgs.Message;
             Group  QQgroup = eventArgs.FromGroup;
-            QQgroup.SendGroupMessage(CQApi.CQCode_Image("1.gif"));
+            QQgroup.SendGroupMessage(CQApi.CQCode_UrlImage("https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2996287886,894071748&fm=26&gp=0.jpg"));
         }
         #endregion
     }

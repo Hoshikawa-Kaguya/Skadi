@@ -97,6 +97,7 @@
     <Compile Include="Database\BossDBHelper.cs" />
     <Compile Include="Database\GuildBattleMgrDBHelper.cs" />
     <Compile Include="Database\Tables.cs" />
+    <Compile Include="IO\ConfigIO.cs" />
     <Compile Include="IO\IOUtils.cs" />
     <Compile Include="Network\DownloadFileUtils.cs" />
     <Compile Include="Network\HTTPUtils.cs" />
@@ -107,6 +108,7 @@
     <Compile Include="PCRGuildManager\GuildManager.cs" />
     <Compile Include="Resource\CommandHelp\GuildCommandHelp.cs" />
     <Compile Include="Resource\Commands\PCRGuildCmd.cs" />
+    <Compile Include="Resource\ConfigClass.cs" />
     <Compile Include="Resource\TypeEnum\CmdType\WholeMatchCmdType.cs" />
     <Compile Include="Resource\TypeEnum\CmdType\PCRGuildCmdType.cs" />
     <Compile Include="Resource\Commands\KeywordCmd.cs" />

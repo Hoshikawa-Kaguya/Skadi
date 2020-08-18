@@ -5,7 +5,7 @@ using com.cbgan.SuiseiBot.Code.Tool;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace SuiseiBot.IO
+namespace com.cbgan.SuiseiBot.Code.IO
 {
     internal static class IOUtils
     {
