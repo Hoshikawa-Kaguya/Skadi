@@ -106,10 +106,30 @@ namespace com.cbgan.SuiseiBot.Code.Database
         {
             throw new NotImplementedException();
         }
-
-        public int LeaveGuild(string qq)
+        /// <summary>
+        /// 移除一名成员
+        /// </summary>
+        /// <param name="qqid">成员QQ号</param>
+        /// <param name="groupid">成员所在群号</param>
+        /// <returns>状态值
+        /// 0：正常移除
+        /// 1：该成员并不在公会内
+        /// </returns>
+        public int LeaveGuild(long qqid,long groupid)
         {
-            throw new NotImplementedException();
+            int                  retCode  = -1;
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            if (dbClient.Queryable<MemberData>().Where(i => i.Uid == qqid && GroupId == groupid).Any())
+            {
+                retCode = 0;
+                dbClient.Deleteable<MemberData>().Where(i => i.Uid == qqid && GroupId == groupid).ExecuteCommand();
+            }
+            else
+            {
+                retCode = 1;
+            }
+
+            return retCode;
         }
 
         public void ShowMembers()
@@ -121,20 +141,35 @@ namespace com.cbgan.SuiseiBot.Code.Database
         /// 添加一名成员
         /// </summary>
         /// <param name="qqid">成员QQ号</param>
+        /// <param name="groupid">成员所在群号</param>
         /// <param name="nickName">成员昵称</param>
         /// <returns>状态值
         /// 0：正常添加
         /// 1：该成员已存在，更新信息
         /// </returns>
-        public int JoinToGuild(long qqid, string nickName)
+        public int JoinToGuild(long qqid,long groupid, string nickName)
         {
             try
             {
-                SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);//TODO 使用using调用
-                //SQLiteHelper dbHelper = new SQLiteHelper(DBPath); //TODO 改用ORM
-                //dbHelper.OpenDB();//TODO 改用ORM
-                string[] memberKey =
-                    {qqid.ToString(), GuildId[0]};
+                int retCode = -1;
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                var data = new MemberData()
+                {
+                    NickName = nickName,
+                    Uid      = qqid,
+                    Gid      = groupid
+                };
+                if (dbClient.Queryable<MemberData>().Where(i => i.Uid == qqid && GroupId == groupid).Any())
+                {
+                    retCode = 1;
+                    dbClient.Updateable<MemberData>(data).Where(i => i.Uid == qqid && GroupId == groupid).ExecuteCommand();
+                }
+                else
+                {
+                    retCode = 0;
+                    dbClient.Insertable<MemberData>(data).ExecuteCommand();
+                }
+
 
                 // if (Convert.ToBoolean(dbHelper.GetCount(MemberTableName, MPrimaryColName, memberKey))) //查找是否有记录
                 // {
@@ -166,7 +201,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
                 //     dbHelper.CloseDB();
                 //     return 0;
                 // }
-                return 0;
+                return retCode;
             }
             catch (Exception)
             {
