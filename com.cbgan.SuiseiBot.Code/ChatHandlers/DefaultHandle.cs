@@ -1,4 +1,5 @@
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
+using com.cbgan.SuiseiBot.Code.TimerEvent.DD;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
@@ -36,21 +37,21 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
             switch (keywordType)
             {
                 case WholeMatchCmdType.Debug:
-                    GroupResponse();
+                    Test();
                     break;
             }
         }
         #endregion
 
-        #region MyRegion
+        #region DEBUG
         /// <summary>
         /// 响应函数
         /// </summary>
-        private void GroupResponse() //功能响应
+        private void Test() //功能响应
         {
-            string chat    = eventArgs.Message;
             Group  QQgroup = eventArgs.FromGroup;
-            QQgroup.SendGroupMessage(CQApi.CQCode_UrlImage("https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2996287886,894071748&fm=26&gp=0.jpg"));
+            //测试用代码
+            DDHelper.TimeToDD(eventArgs.CQApi);
         }
         #endregion
     }

@@ -27,6 +27,11 @@
 - [ ] PCR公会战管理
 - [ ] 自动同步远端数据库
 
+## 目前正在做的
+
+- [ ] 自动更新B站官方动态~~很可能还有DD推送功能~~
+- [ ] 读取外部的配置文件
+
 ## 可能会基于[OneBot协议](https://github.com/howmanybots/onebot)对项目进行重构（虽说并没有找到适配框架）
 
 今后可能会适配[OneBot](https://github.com/howmanybots/onebot)标准：![OneBot](https://img.shields.io/static/v1?label=OneBot&message=v11&color=blueviolet&style=for-the-badge)

@@ -1,4 +1,4 @@
-﻿using Native.Sdk.Cqp.Enum;
+using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.Expand;
 using Native.Sdk.Cqp.Interface;
 using System;

@@ -89,6 +89,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Apis\BiliDynamicApi\CardEnum\CardType.cs" />
+    <Compile Include="Apis\BiliDynamicApi\DynamicData\Card\PlainTextCard.cs" />
+    <Compile Include="Apis\BiliDynamicApi\DynamicData\Card\TextAndPicCard.cs" />
+    <Compile Include="Apis\BiliDynamicApi\DynamicData\Dynamic.cs" />
+    <Compile Include="Apis\BiliDynamicApi\DynamicData\UserInfo.cs" />
+    <Compile Include="Apis\BiliDynamicApi\NetUtils.cs" />
     <Compile Include="ChatHandlers\PCRGuildHandle.cs" />
     <Compile Include="ChatHandlers\PCRToolsHandle.cs" />
     <Compile Include="CQInterface\AppEnableInterface.cs" />
@@ -117,6 +123,7 @@
     <Compile Include="SqliteTool\SugarColUtils.cs" />
     <Compile Include="SqliteTool\SugarTableUtils.cs" />
     <Compile Include="SqliteTool\SugarUtils.cs" />
+    <Compile Include="TimerEvent\DD\DDHelper.cs" />
     <Compile Include="TimerEvent\TimerInit.cs" />
     <Compile Include="Tool\CheckInCD.cs" />
     <Compile Include="Tool\ConsoleLog.cs" />
