@@ -1,9 +1,8 @@
-using System;
 using com.cbgan.SuiseiBot.Code.SqliteTool;
-using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
 using System.IO;
+using com.cbgan.SuiseiBot.Code.Tool.Log;
 
 namespace com.cbgan.SuiseiBot.Code.Database
 {

@@ -28,7 +28,9 @@ namespace com.cbgan.SuiseiBot.Code.TimerEvent
         /// <param name="apiObject">CQApi</param>
         private void DDEvent(object apiObject)
         {
+            //TODO 实装DD模块和PCR推送
             CQApi cqApi = (CQApi)apiObject;
+
         }
 
         // /// <summary>

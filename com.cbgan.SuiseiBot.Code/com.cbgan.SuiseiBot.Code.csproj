@@ -57,6 +57,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BilibiliApi, Version=0.1.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\BilibiliApi.0.1.4\lib\netstandard2.0\BilibiliApi.dll</HintPath>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -65,6 +68,9 @@
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpYaml, Version=1.6.6.0, Culture=neutral, PublicKeyToken=1ced8108e942bc02, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpYaml.1.6.6\lib\net45\SharpYaml.dll</HintPath>
     </Reference>
     <Reference Include="SqlSugar, Version=5.0.0.15, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\sqlSugar.5.0.0.15\lib\SqlSugar.dll</HintPath>
@@ -89,21 +95,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Apis\BiliDynamicApi\CardEnum\CardType.cs" />
-    <Compile Include="Apis\BiliDynamicApi\DynamicData\Card\PlainTextCard.cs" />
-    <Compile Include="Apis\BiliDynamicApi\DynamicData\Card\TextAndPicCard.cs" />
-    <Compile Include="Apis\BiliDynamicApi\DynamicData\Dynamic.cs" />
-    <Compile Include="Apis\BiliDynamicApi\DynamicData\UserInfo.cs" />
-    <Compile Include="Apis\BiliDynamicApi\NetUtils.cs" />
     <Compile Include="ChatHandlers\PCRGuildHandle.cs" />
     <Compile Include="ChatHandlers\PCRToolsHandle.cs" />
     <Compile Include="CQInterface\AppEnableInterface.cs" />
     <Compile Include="CQInterface\GroupMessageInterface.cs" />
     <Compile Include="CQInterface\PrivateMessageInterface.cs" />
-    <Compile Include="Database\BossDBHelper.cs" />
-    <Compile Include="Database\GuildBattleMgrDBHelper.cs" />
+    <Compile Include="Database\Helpers\BossDBHelper.cs" />
+    <Compile Include="Database\Helpers\GuildBattleMgrDBHelper.cs" />
     <Compile Include="Database\Tables.cs" />
-    <Compile Include="IO\ConfigIO.cs" />
+    <Compile Include="IO\Config\ConfigIO.cs" />
     <Compile Include="IO\IOUtils.cs" />
     <Compile Include="Network\DownloadFileUtils.cs" />
     <Compile Include="Network\HTTPUtils.cs" />
@@ -114,7 +114,7 @@
     <Compile Include="PCRGuildManager\GuildManager.cs" />
     <Compile Include="Resource\CommandHelp\GuildCommandHelp.cs" />
     <Compile Include="Resource\Commands\PCRGuildCmd.cs" />
-    <Compile Include="Resource\ConfigClass.cs" />
+    <Compile Include="IO\Config\ConfigClass.cs" />
     <Compile Include="Resource\TypeEnum\CmdType\WholeMatchCmdType.cs" />
     <Compile Include="Resource\TypeEnum\CmdType\PCRGuildCmdType.cs" />
     <Compile Include="Resource\Commands\KeywordCmd.cs" />
@@ -126,15 +126,16 @@
     <Compile Include="TimerEvent\DD\DDHelper.cs" />
     <Compile Include="TimerEvent\TimerInit.cs" />
     <Compile Include="Tool\CheckInCD.cs" />
-    <Compile Include="Tool\ConsoleLog.cs" />
+    <Compile Include="Tool\Log\ConsoleLog.cs" />
     <Compile Include="Database\DatabaseInit.cs" />
-    <Compile Include="Database\GuildManagerDBHelper.cs" />
-    <Compile Include="Database\SuiseiDBHelper.cs" />
+    <Compile Include="Database\Helpers\GuildManagerDBHelper.cs" />
+    <Compile Include="Database\Helpers\SuiseiDBHelper.cs" />
     <Compile Include="ChatHandlers\DefaultHandle.cs" />
     <Compile Include="ChatHandlers\SuiseiHanlde.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ChatHandlers\SurpriseMFKHandle.cs" />
     <Compile Include="Tool\JsonUtils.cs" />
+    <Compile Include="Tool\Log\LogLevel.cs" />
     <Compile Include="Tool\Utils.cs" />
   </ItemGroup>
   <ItemGroup>

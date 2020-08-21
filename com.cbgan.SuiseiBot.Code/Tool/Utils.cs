@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
-using com.cbgan.SuiseiBot.Code.ChatHandlers;
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
 using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.Model;
 
 namespace com.cbgan.SuiseiBot.Code.Tool
 {
-    internal class Utils
+    internal static class Utils
     {
         #region CQCode处理
         /// <summary>
@@ -42,6 +40,7 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         }
 
         #endregion
+
         #region 时间戳转换工具
 
         /// <summary>

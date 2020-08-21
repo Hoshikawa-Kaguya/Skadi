@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace com.cbgan.SuiseiBot.Code.Tool
+namespace com.cbgan.SuiseiBot.Code.Tool.Log
 {
     /// <summary>
     /// 用来格式化输出的控制台Log的通用代码
@@ -9,8 +9,17 @@ namespace com.cbgan.SuiseiBot.Code.Tool
     /// </summary>
     internal class ConsoleLog
     {
-        #region 格式化错误Log
+        #region Log等级设置
+        private static LogLevel Level = LogLevel.Info;
 
+        /// <summary>
+        /// 设置日志等级
+        /// </summary>
+        /// <param name="level">LogLevel</param>
+        public static void SetLogLevel(LogLevel level) => Level = level;
+        #endregion
+
+        #region 格式化错误Log
         public static string ErrorLogBuilder(Exception e)
         {
             StringBuilder errorMessageBuilder = new StringBuilder();
@@ -40,8 +49,11 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         /// <param name="message">信息内容</param>
         public static void Info(object type, object message)
         {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine($"[{DateTime.Now}][INFO][{type}]{message}");
+            if (Level != LogLevel.Error || Level != LogLevel.Warning)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"[{DateTime.Now}][INFO][{type}]{message}");
+            }
         }
 
         /// <summary>
@@ -51,15 +63,18 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         /// <param name="message">信息内容</param>
         public static void Warning(object type, object message)
         {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"[{DateTime.Now}][");
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.Write("WARNINIG");
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"][{type}]");
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"{message}");
-            Console.ForegroundColor = ConsoleColor.White;
+            if (Level != LogLevel.Error)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"[{DateTime.Now}][");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write("WARNINIG");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"][{type}]");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"{message}");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
         }
 
         /// <summary>
@@ -105,15 +120,18 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         /// <param name="message">信息内容</param>
         public static void Verbose(object type, object message)
         {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"[{DateTime.Now}][");
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.Write("Verbose");
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"][{type}]");
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine(message);
-            Console.ForegroundColor = ConsoleColor.White;
+            if (Level == LogLevel.Debug)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"[{DateTime.Now}][");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.Write("Verbose");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"][{type}]");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine(message);
+                Console.ForegroundColor = ConsoleColor.White;
+            }
         }
 
         /// <summary>
@@ -123,15 +141,18 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         /// <param name="message">信息内容</param>
         public static void Debug(object type, object message)
         {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"[{DateTime.Now}][");
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.Write("DEBUG");
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"][{type}]");
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine(message);
-            Console.ForegroundColor = ConsoleColor.White;
+            if (Level == LogLevel.Debug)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"[{DateTime.Now}][");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.Write("DEBUG");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"][{type}]");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine(message);
+                Console.ForegroundColor = ConsoleColor.White;
+            }
         }
 
         #endregion

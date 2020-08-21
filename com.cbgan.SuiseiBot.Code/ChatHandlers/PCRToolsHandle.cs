@@ -3,6 +3,7 @@ using com.cbgan.SuiseiBot.Code.Network;
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
 using com.cbgan.SuiseiBot.Code.Tool;
+using com.cbgan.SuiseiBot.Code.Tool.Log;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 using Newtonsoft.Json.Linq;

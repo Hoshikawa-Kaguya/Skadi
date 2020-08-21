@@ -1,10 +1,10 @@
 using com.cbgan.SuiseiBot.Code.PCRGuildManager;
-using com.cbgan.SuiseiBot.Code.Tool;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.EventArgs;
 using System;
 using com.cbgan.SuiseiBot.Code.Resource.CommandHelp;
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
+using com.cbgan.SuiseiBot.Code.Tool.Log;
 
 namespace com.cbgan.SuiseiBot.Code.ChatHandlers
 {

@@ -1,6 +1,5 @@
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
 using com.cbgan.SuiseiBot.Code.TimerEvent.DD;
-using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 

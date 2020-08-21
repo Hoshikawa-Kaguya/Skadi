@@ -1,4 +1,4 @@
-using com.cbgan.SuiseiBot.Code.Tool;
+using com.cbgan.SuiseiBot.Code.Tool.Log;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
 

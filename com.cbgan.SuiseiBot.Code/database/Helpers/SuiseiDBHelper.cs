@@ -1,10 +1,11 @@
 using System;
-using Native.Sdk.Cqp.EventArgs;
-using com.cbgan.SuiseiBot.Code.Tool;
 using com.cbgan.SuiseiBot.Code.SqliteTool;
+using com.cbgan.SuiseiBot.Code.Tool;
+using com.cbgan.SuiseiBot.Code.Tool.Log;
+using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
 
-namespace com.cbgan.SuiseiBot.Code.Database
+namespace com.cbgan.SuiseiBot.Code.Database.Helpers
 {
     internal class SuiseiDBHelper
     {

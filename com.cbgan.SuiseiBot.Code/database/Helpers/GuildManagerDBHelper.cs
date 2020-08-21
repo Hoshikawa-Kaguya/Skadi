@@ -3,7 +3,7 @@ using com.cbgan.SuiseiBot.Code.SqliteTool;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
 
-namespace com.cbgan.SuiseiBot.Code.Database
+namespace com.cbgan.SuiseiBot.Code.Database.Helpers
 {
     internal class GuildManagerDBHelper
     {

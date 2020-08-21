@@ -1,8 +1,8 @@
 using System;
 using com.cbgan.SuiseiBot.Code.ChatHandlers;
-using com.cbgan.SuiseiBot.Code.Database;
+using com.cbgan.SuiseiBot.Code.Database.Helpers;
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
-using com.cbgan.SuiseiBot.Code.Tool;
+using com.cbgan.SuiseiBot.Code.Tool.Log;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.Model;

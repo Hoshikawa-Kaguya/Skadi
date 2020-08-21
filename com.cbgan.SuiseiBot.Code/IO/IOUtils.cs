@@ -1,7 +1,8 @@
 using System;
 using System.Globalization;
 using System.IO;
-using com.cbgan.SuiseiBot.Code.Tool;
+using System.Text;
+using com.cbgan.SuiseiBot.Code.Tool.Log;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -21,24 +22,21 @@ namespace com.cbgan.SuiseiBot.Code.IO
             return path;
         }
 
-        //TODO 改用自己的文件存储方式
-        // /// <summary>
-        // /// 获取配置文件路径
-        // /// </summary>
-        // public static string GetUserConfigPath(CQApi cqApi)
-        // {
-        //     Directory.CreateDirectory($@"{cqApi.AppDirectory}\configs\{cqApi.GetLoginQQ()}\");
-        //     return $@"{cqApi.AppDirectory}\configs\{cqApi.GetLoginQQ()}\";
-        // }
-        //
-        // /// <summary>
-        // /// 获取全局配置文件路径
-        // /// </summary>
-        // public static string GetGlobalConfigPath(CQApi cqApi)
-        // {
-        //     Directory.CreateDirectory($@"{cqApi.AppDirectory}\configs\global\");
-        //     return $@"{cqApi.AppDirectory}\configs\global\";
-        // }
+        /// <summary>
+        /// 获取应用配置文件的绝对路径
+        /// </summary>
+        public static string GetConfigPath(string dirName = null)
+        {
+            StringBuilder dbPath = new StringBuilder();
+            dbPath.Append(Environment.CurrentDirectory.Replace('\\', '/'));
+            dbPath.Append("/data");
+            //自定义二级文件夹
+            if (!string.IsNullOrEmpty(dirName)) dbPath.Append($"/{dirName}");
+            //检查目录是否存在，不存在则新建一个
+            Directory.CreateDirectory(dbPath.ToString());
+            dbPath.Append("/config.yaml");
+            return dbPath.ToString();
+        }
 
         /// <summary>
         /// 创建错误报告文件

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using com.cbgan.SuiseiBot.Code.Tool.Log;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 

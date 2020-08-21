@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
-using com.cbgan.SuiseiBot.Code.Tool;
+using com.cbgan.SuiseiBot.Code.Tool.Log;
 
 namespace com.cbgan.SuiseiBot.Code.Network
 {
