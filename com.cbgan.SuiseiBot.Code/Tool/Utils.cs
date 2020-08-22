@@ -63,30 +63,29 @@ namespace com.cbgan.SuiseiBot.Code.Tool
         /// 获取当前时间戳
         /// 时间戳单位(毫秒)
         /// </summary>
-        public static Func<long> GetNowTimeStamp =
-            () => (DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Ticks / 10000;
+        public static long GetNowTimeStamp() 
+            => (long)(DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;
 
         /// <summary>
         /// 获取今天零点的时间戳
         /// 时间戳单位(毫秒)
         /// </summary>
-        public static Func<long> GetTodayStamp =
-            () => (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Ticks / 10000;
+        public static long GetTodayStamp() 
+            => (long)(DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;
 
         /// <summary>
         /// 将long类型时间戳转换为DateTime
         /// 时间戳单位(毫秒)
         /// </summary>
-        public static Func<long, System.DateTime> TimeStampToDateTime =
-            TimeStamp => new System.DateTime(1970, 1, 1, 8, 0, 0, 0).AddMilliseconds(TimeStamp);
+        public static DateTime TimeStampToDateTime(long TimeStamp)
+            => new System.DateTime(1970, 1, 1, 8, 0, 0, 0).AddSeconds(TimeStamp);
 
         /// <summary>
         /// 将DateTime转换为long时间戳
         /// 时间戳单位(毫秒)
         /// </summary>
-        public static Func<System.DateTime, long> DateTimeToTimeStamp =
-            dateTime => (dateTime - (new System.DateTime(1970, 1, 1, 8, 0, 0, 0))).Ticks / 10000;
-
+        public static long DateTimeToTimeStamp(DateTime dateTime)
+            => (long)(dateTime - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;
         #endregion
     }
 }

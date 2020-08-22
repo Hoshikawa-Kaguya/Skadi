@@ -55,6 +55,11 @@ namespace com.cbgan.SuiseiBot.Code.Database
                 ConsoleLog.Warning("数据库初始化", "未找到Boss信息表 - 创建一个新表");
                 SugarUtils.CreateTable<BossInfo>(dbClient);
             }
+            if (!SugarUtils.TableExists<BiliSubscription>(dbClient)) //动态记录表的初始化
+            {
+                ConsoleLog.Warning("数据库初始化", "未找到动态记录表 - 创建一个新表");
+                SugarUtils.CreateTable<BiliSubscription>(dbClient);
+            }
         }
     }
 }

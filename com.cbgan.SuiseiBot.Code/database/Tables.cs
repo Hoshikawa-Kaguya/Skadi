@@ -194,10 +194,12 @@ namespace com.cbgan.SuiseiBot.Code.Database
     [SugarTable("bili_subscription")]
     internal class BiliSubscription
     {
-        [SugarColumn(ColumnName = "gid",ColumnDataType = "VARCHAR",IsPrimaryKey = true)]
+        [SugarColumn(ColumnName = "gid", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
         public long Gid { set; get; }
-
-        public long User { set; get; }
+        [SugarColumn(ColumnName = "subscription_id", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public long SubscriptionId { set; get; }
+        [SugarColumn(ColumnName = "update_time", ColumnDataType = "VARCHAR")]
+        public long UpdateTime { set; get; }
     }
     #endregion
 }

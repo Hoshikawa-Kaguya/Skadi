@@ -27,7 +27,6 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
         /// </summary>
         /// <param name="sender">sender object</param>
         /// <param name="eventArgs">CQAppEnableEventArgs类</param>
-        /// <param name="time">触发时间</param>
         public SuiseiDBHelper(object sender, CQGroupMessageEventArgs eventArgs)
         {
             this.QQID = eventArgs.FromQQ.Id;

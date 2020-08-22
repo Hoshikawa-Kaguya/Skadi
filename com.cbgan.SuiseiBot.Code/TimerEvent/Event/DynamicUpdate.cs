@@ -6,6 +6,7 @@ using BilibiliApi.Dynamic;
 using BilibiliApi.Dynamic.CardEnum;
 using BilibiliApi.Dynamic.DynamicData;
 using BilibiliApi.Dynamic.DynamicData.Card;
+using com.cbgan.SuiseiBot.Code.Database.Helpers;
 using com.cbgan.SuiseiBot.Code.IO.Config;
 using com.cbgan.SuiseiBot.Code.Tool.Log;
 using Native.Sdk.Cqp;
@@ -25,19 +26,26 @@ namespace com.cbgan.SuiseiBot.Code.TimerEvent.Event
             ConfigIO                config        = new ConfigIO(cqApi.GetLoginQQ().Id);
             Module                  moduleEnable  = config.LoadedConfig.ModuleSwitch;
             List<GroupSubscription> Subscriptions = config.LoadedConfig.SubscriptionConfig.GroupsConfig;
+            //数据库
+            SubscriptionDBHelper dbHelper = new SubscriptionDBHelper(cqApi);
             //检查模块是否启用
             if (!moduleEnable.Bili_Subscription) return;
-            //List<GroupInfo> groupList = cqApi.GetGroupList().GetGroupInfos();
             foreach (GroupSubscription subscription in Subscriptions)
             {
+                //PCR动态订阅
+                if (subscription.PCR_Subscription)
+                {
+                    await GetDynamic(cqApi, 353840826, subscription.GroupId, dbHelper);
+                }
+                //臭DD的订阅
                 foreach (long biliUser in subscription.SubscriptionId)
                 {
-                    await GetDynamic(cqApi, biliUser, subscription.GroupId);
+                    await GetDynamic(cqApi, biliUser, subscription.GroupId, dbHelper);
                 }
             }
         }
 
-        private static Task GetDynamic(CQApi cqApi, long biliUser, List<long> groupId)
+        private static Task GetDynamic(CQApi cqApi, long biliUser, List<long> groupId, SubscriptionDBHelper dbHelper)
         {
             string  message;
             Dynamic biliDynamic;
@@ -59,11 +67,47 @@ namespace com.cbgan.SuiseiBot.Code.TimerEvent.Event
                     biliDynamic                = textAndPicCard;
                     break;
                 default:
+                    ConsoleLog.Debug("动态获取", $"ID:{biliUser}的动态获取成功，动态类型未知");
                     return Task.CompletedTask;
             }
             //获取用户信息
             UserInfo sender = biliDynamic.GetUserInfo();
             ConsoleLog.Info("动态获取", $"{sender.UserName}的动态获取成功");
+            //检查是否是最新的
+            
+            List<long> targetGroups = new List<long>();
+            foreach (long group in groupId)
+            {
+                //检查是否已经发送过消息
+                if (!dbHelper.IsLatest(group, sender.Uid, biliDynamic.UpdateTime))
+                    targetGroups.Add(group);
+            }
+            //没有群需要发送消息
+            if(targetGroups.Count == 0)
+            {
+                ConsoleLog.Info("动态获取", $"{sender.UserName}的动态已是最新");
+                return Task.CompletedTask;
+            }
+            //向未发生消息的群发送消息
+            string messageToSend = msgBuilder(sender, message, biliDynamic);
+            foreach (long targetGroup in targetGroups)
+            {
+                ConsoleLog.Info("动态获取", $"向群{targetGroup}发送动态信息");
+                cqApi.SendGroupMessage(targetGroup, messageToSend);
+                dbHelper.Update(targetGroup, sender.Uid, biliDynamic.UpdateTime);
+            }
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// 生成格式化信息
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="message">文字信息</param>
+        /// <param name="biliDynamic">动态实例</param>
+        /// <returns></returns>
+        private static string msgBuilder(UserInfo sender,string message,Dynamic biliDynamic)
+        {
             //格式化动态信息
             StringBuilder sendMessageBuilder = new StringBuilder();
             sendMessageBuilder.Append("获取到了来自 ");
@@ -75,11 +119,7 @@ namespace com.cbgan.SuiseiBot.Code.TimerEvent.Event
             //因为可能会被腾讯误杀所以暂不发送链接
             // sendMessageBuilder.Append("\r\n动态链接：");
             // sendMessageBuilder.Append(biliDynamic.GetDynamicUrl());
-            foreach (long group in groupId)
-            {
-                cqApi.SendGroupMessage(group, sendMessageBuilder.ToString());
-            }
-            return Task.CompletedTask;
+            return sendMessageBuilder.ToString();
         }
     }
 }

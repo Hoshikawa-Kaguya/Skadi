@@ -95,7 +95,7 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
                 //当读取到文件时直接返回
                 if (File.Exists(Path) && LoadConfig())
                 {
-                    ConsoleLog.Info("ConfigIO", "读取配置文件");
+                    ConsoleLog.Debug("ConfigIO", "读取配置文件");
                     return;
                 }
                 //没读取到文件时创建新的文件

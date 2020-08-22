@@ -49,7 +49,10 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             KeywordCmd.SpecialKeywordsInit();
 
             //初始化定时器线程
-            timer = new TimerInit(e.CQApi);
+            if (config.LoadedConfig.ModuleSwitch.Bili_Subscription || config.LoadedConfig.ModuleSwitch.PCR_Subscription)
+            {
+                timer = new TimerInit(e.CQApi, config.LoadedConfig.SubscriptionConfig.FlashTime);
+            }
             e.Handler = true;
         }
     }

@@ -22,7 +22,7 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             this.eventArgs = e;
             ConsoleLog.Info($"收到信息[群:{eventArgs.FromGroup.Id}]",$"{(eventArgs.Message.Text).Replace("\r\n", "\\r\\n")}");
             //读取配置文件
-            ConfigIO config = new ConfigIO(eventArgs.CQApi.GetLoginQQ().Id,false);
+            ConfigIO config = new ConfigIO(eventArgs.CQApi.GetLoginQQ().Id);
             //Module moduleEnable = config.LoadedConfig.ModuleSwitch;
 
             //以#开头的消息全部交给PCR处理

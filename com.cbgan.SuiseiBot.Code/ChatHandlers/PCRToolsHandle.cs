@@ -66,6 +66,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
                     QQGroup.SendGroupMessage("有多余参数");
                     return;
             }
+            //TODO 查询Cache
             //获取网络响应
             try
             {
