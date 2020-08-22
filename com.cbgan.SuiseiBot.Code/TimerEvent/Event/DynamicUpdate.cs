@@ -1,4 +1,8 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using BilibiliApi;
 using BilibiliApi.Dynamic;
 using BilibiliApi.Dynamic.CardEnum;
@@ -9,32 +13,33 @@ using com.cbgan.SuiseiBot.Code.Tool.Log;
 using Native.Sdk.Cqp;
 using Newtonsoft.Json.Linq;
 
-namespace com.cbgan.SuiseiBot.Code.TimerEvent.DD
+namespace com.cbgan.SuiseiBot.Code.TimerEvent.Event
 {
-    internal class DDHelper
+    internal class DynamicUpdate
     {
         /// <summary>
         /// 自动获取B站动态
         /// </summary>
         /// <param name="cqApi">CQApi</param>
-        public static void TimeToDD(CQApi cqApi)
+        public static async void BiliUpdateCheck(CQApi cqApi)
         {
-            //TODO 配置文件读取改到定时器中
             //读取配置文件
-            ConfigIO config       = new ConfigIO(cqApi.GetLoginQQ().Id);
-            Module   moduleEnable = config.LoadedConfig.ModuleSwitch;
-            TimeToDD DDConfig     = config.LoadedConfig.DD_Config;
-            //检查模块是否启用或是否有订阅
-            if (!moduleEnable.DDHelper || DDConfig.Users.Length == 0) return;
-
-            foreach (long user in DDConfig.Users)
+            ConfigIO                config        = new ConfigIO(cqApi.GetLoginQQ().Id);
+            Module                  moduleEnable  = config.LoadedConfig.ModuleSwitch;
+            List<GroupSubscription> Subscriptions = config.LoadedConfig.SubscriptionConfig.GroupsConfig;
+            //检查模块是否启用
+            if (!moduleEnable.TimeToDD) return;
+            //List<GroupInfo> groupList = cqApi.GetGroupList().GetGroupInfos();
+            foreach (GroupSubscription subscription in Subscriptions)
             {
-                debug(cqApi, 883740678,user);
+                foreach (long user in subscription.Users)
+                {
+                    await GetDynamic(cqApi, user, subscription.GroupId);
+                }
             }
         }
 
-        //TODO 修改到公共函数中
-        private static void debug(CQApi cqApi, long groupId, long uid)
+        private static Task GetDynamic(CQApi cqApi, long uid, List<long> groupId)
         {
             string  message;
             Dynamic biliDynamic;
@@ -56,7 +61,7 @@ namespace com.cbgan.SuiseiBot.Code.TimerEvent.DD
                     biliDynamic                = textAndPicCard;
                     break;
                 default:
-                    return;
+                    return Task.CompletedTask;
             }
             //获取用户信息
             UserInfo sender = biliDynamic.GetUserInfo();
@@ -69,9 +74,14 @@ namespace com.cbgan.SuiseiBot.Code.TimerEvent.DD
             sendMessageBuilder.Append(message);
             sendMessageBuilder.Append("\r\n更新时间：");
             sendMessageBuilder.Append(biliDynamic.UpdateTime);
-            sendMessageBuilder.Append("\r\n动态链接：");
-            sendMessageBuilder.Append(biliDynamic.GetDynamicUrl());
-            cqApi.SendGroupMessage(groupId, sendMessageBuilder.ToString());
+            //因为可能会被腾讯误杀所以暂不发送链接
+            // sendMessageBuilder.Append("\r\n动态链接：");
+            // sendMessageBuilder.Append(biliDynamic.GetDynamicUrl());
+            foreach (long group in groupId)
+            {
+                cqApi.SendGroupMessage(group, sendMessageBuilder.ToString());
+            }
+            return Task.CompletedTask;
         }
     }
 }
