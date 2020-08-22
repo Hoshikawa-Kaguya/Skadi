@@ -29,7 +29,7 @@ namespace com.cbgan.SuiseiBot.Code.TimerEvent.Event
             //数据库
             SubscriptionDBHelper dbHelper = new SubscriptionDBHelper(cqApi);
             //检查模块是否启用
-            if (!moduleEnable.Bili_Subscription) return;
+            if (!moduleEnable.Bili_Subscription || !moduleEnable.PCR_Subscription) return;
             foreach (GroupSubscription subscription in Subscriptions)
             {
                 //PCR动态订阅
