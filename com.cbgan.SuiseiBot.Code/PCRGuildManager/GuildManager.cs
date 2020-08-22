@@ -340,7 +340,27 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                                                  " 你没有权限这样做~");
                         return;
                     }
-                    dbAction.EmptyMember(QQgroup.Id);
+                    int retCode= dbAction.EmptyMember(QQgroup.Id);
+                    switch (retCode)
+                    {
+                        case 0:
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
+                                                     " 清空成功~");
+                            break;
+                        case 1:
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
+                                                     " 该群并没有建立公会或公会里没有任何成员~");
+                            break;
+                        case 2:
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
+                                                     " 清空时发生错误！");
+                            break;
+                        default:
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
+                                                     " 未知错误！返回值异常！");
+                            break;
+                    }
+                    
                     break;
                 case PCRGuildCmdType.JoinAll: //一键入会
                     if (!isAdminAction)

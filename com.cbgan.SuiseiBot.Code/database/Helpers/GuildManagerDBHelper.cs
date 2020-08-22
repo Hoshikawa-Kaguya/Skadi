@@ -120,11 +120,11 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
         /// <summary>
         /// 移除所有成员
         /// </summary>
-        /// <param name="qqid">成员QQ号</param>
-        /// <param name="groupid">成员所在群号</param>
+        /// <param name="groupid">公会所在群号</param>
         /// <returns>状态值
         /// 0：正常移除
-        /// 1：该成员并不在公会内
+        /// 1：公会不存在
+        /// 2：删除时发生错误
         /// </returns>
         public int EmptyMember(long groupid)
         {
@@ -132,12 +132,19 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
             var data = dbClient.Queryable<MemberData>().Where(i => i.Gid == groupid);
             if (data.Any())
             {
-               dbClient.Deleteable<MemberData>().Where(i => i.Gid == groupid).ExecuteCommand();
-               return 1;
+                if (dbClient.Deleteable<MemberData>().Where(i => i.Gid == groupid).ExecuteCommandHasChange())
+                {
+                    return 0;
+                }
+                else
+                {
+                    return 2;
+                }
+
             }
             else
             {
-                return 0;
+                return 1;
             }
         }
 
