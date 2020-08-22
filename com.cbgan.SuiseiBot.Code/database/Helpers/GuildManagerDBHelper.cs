@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using com.cbgan.SuiseiBot.Code.SqliteTool;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
@@ -96,16 +97,50 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
 
         #endregion
 
-        #region 指令响应函数
-        public void AllJoin()
+        #region 查询函数
+
+        public string getGuildName(long groupid)
         {
-            throw new NotImplementedException();
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            var data = dbClient.Queryable<GuildData>().Where(i => i.Gid == groupid);
+            if (data.Any())
+            {
+                return data.First().GuildName;
+            }
+            else
+            {
+                return "公会不存在";
+            }
         }
 
-        public void EmptyMember()
+        #endregion
+
+        #region 指令响应函数
+
+        /// <summary>
+        /// 移除所有成员
+        /// </summary>
+        /// <param name="qqid">成员QQ号</param>
+        /// <param name="groupid">成员所在群号</param>
+        /// <returns>状态值
+        /// 0：正常移除
+        /// 1：该成员并不在公会内
+        /// </returns>
+        public int EmptyMember(long groupid)
         {
-            throw new NotImplementedException();
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            var data = dbClient.Queryable<MemberData>().Where(i => i.Gid == groupid);
+            if (data.Any())
+            {
+               dbClient.Deleteable<MemberData>().Where(i => i.Gid == groupid).ExecuteCommand();
+               return 1;
+            }
+            else
+            {
+                return 0;
+            }
         }
+
         /// <summary>
         /// 移除一名成员
         /// </summary>
@@ -115,14 +150,14 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
         /// 0：正常移除
         /// 1：该成员并不在公会内
         /// </returns>
-        public int LeaveGuild(long qqid,long groupid)
+        public int LeaveGuild(long qqid, long groupid)
         {
             int                  retCode  = -1;
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            if (dbClient.Queryable<MemberData>().Where(i => i.Uid == qqid && GroupId == groupid).Any())
+            if (dbClient.Queryable<MemberData>().Where(i => i.Uid == qqid && i.Gid == groupid).Any())
             {
                 retCode = 0;
-                dbClient.Deleteable<MemberData>().Where(i => i.Uid == qqid && GroupId == groupid).ExecuteCommand();
+                dbClient.Deleteable<MemberData>().Where(i => i.Uid == qqid && i.Gid == groupid).ExecuteCommand();
             }
             else
             {
@@ -132,9 +167,10 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
             return retCode;
         }
 
-        public void ShowMembers()
+        public List<MemberData> ShowMembers(long groupid)
         {
-            throw new NotImplementedException();
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            return dbClient.Queryable<MemberData>().Where(i => i.Gid == groupid).ToList();
         }
 
         /// <summary>
@@ -147,11 +183,11 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
         /// 0：正常添加
         /// 1：该成员已存在，更新信息
         /// </returns>
-        public int JoinToGuild(long qqid,long groupid, string nickName)
+        public int JoinToGuild(long qqid, long groupid, string nickName)
         {
             try
             {
-                int retCode = -1;
+                int                  retCode  = -1;
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 var data = new MemberData()
                 {
@@ -159,10 +195,11 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
                     Uid      = qqid,
                     Gid      = groupid
                 };
-                if (dbClient.Queryable<MemberData>().Where(i => i.Uid == qqid && GroupId == groupid).Any())
+                if (dbClient.Queryable<MemberData>().Where(i => i.Uid == qqid && i.Gid == groupid).Any())
                 {
                     retCode = 1;
-                    dbClient.Updateable<MemberData>(data).Where(i => i.Uid == qqid && GroupId == groupid).ExecuteCommand();
+                    dbClient.Updateable<MemberData>(data).Where(i => i.Uid == qqid && i.Gid == groupid)
+                            .ExecuteCommand();
                 }
                 else
                 {
@@ -218,10 +255,29 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
         /// 0：正常创建
         /// 1：该群公会已存在，更新信息
         /// </returns>
-        public int createGuild(string gArea, string gName)
+        public int createGuild(string gArea, string gName, long gId)
         {
             try
             {
+                int                  retCode  = -1;
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                var data = new GuildData()
+                {
+                    GuildName  = gName,
+                    ServerArea = gArea,
+                    Gid        = gId
+                };
+                if (dbClient.Queryable<GuildData>().Where(i => i.Gid == gId).Any())
+                {
+                    retCode = 1;
+                    dbClient.Updateable<GuildData>(data).Where(i => i.Gid == gId).ExecuteCommand();
+                }
+                else
+                {
+                    retCode = 0;
+                    dbClient.Insertable<GuildData>(data).ExecuteCommand();
+                }
+
                 //TODO 改用ORM
                 // SQLiteHelper dbHelper = new SQLiteHelper(DBPath);
                 // dbHelper.OpenDB();
@@ -245,13 +301,14 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
                 //     dbHelper.CloseDB();
                 //     return 0;
                 // }
-                return 0;
+                return retCode;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
         #endregion
     }
 }
