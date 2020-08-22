@@ -102,6 +102,7 @@
     <Compile Include="CQInterface\PrivateMessageInterface.cs" />
     <Compile Include="Database\Helpers\BossDBHelper.cs" />
     <Compile Include="Database\Helpers\GuildBattleMgrDBHelper.cs" />
+    <Compile Include="Database\Helpers\SubscriptionDBHelper.cs" />
     <Compile Include="Database\Tables.cs" />
     <Compile Include="IO\Config\ConfigIO.cs" />
     <Compile Include="IO\IOUtils.cs" />

@@ -189,4 +189,15 @@ namespace com.cbgan.SuiseiBot.Code.Database
         public string Comment { get; set; }
     }
     #endregion
+
+    #region 阿B订阅数据表定义
+    [SugarTable("bili_subscription")]
+    internal class BiliSubscription
+    {
+        [SugarColumn(ColumnName = "gid",ColumnDataType = "VARCHAR",IsPrimaryKey = true)]
+        public long Gid { set; get; }
+
+        public long User { set; get; }
+    }
+    #endregion
 }

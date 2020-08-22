@@ -1,4 +1,4 @@
-﻿using Native.Sdk.Cqp.Expand;
+using Native.Sdk.Cqp.Expand;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -57,6 +57,15 @@ namespace Native.Sdk.Cqp.Model
 		{
 			return this.GetEnumerator ();
 		}
+
+		/// <summary>
+		/// 获取群列表
+		/// </summary>
+		/// <returns>List[GroupInfo]</returns>
+		public List<GroupInfo> GetGroupInfos()
+        {
+            return this._list;
+        }
 		/// <summary>
 		/// 指示当前对象是否等于同一类型的另一个对象
 		/// </summary>

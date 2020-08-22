@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using com.cbgan.SuiseiBot.Code.Tool.Log;
@@ -14,11 +15,37 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
         #endregion
 
         #region 构造函数
-        public ConfigIO(long LoginQQ)
+        /// <summary>
+        /// ConfigIO构造函数，默认构造时加载本地配置文件
+        /// </summary>
+        /// <param name="loginQQ"></param>
+        /// <param name="initConfig"></param>
+        public ConfigIO(long loginQQ, bool initConfig = true)
         {
-            this.Path = IOUtils.GetConfigPath(LoginQQ.ToString());
-            //执行一次初始化
-            ConfigFileInit();
+            this.Path = IOUtils.GetConfigPath(loginQQ.ToString());
+            //执行一次加载
+            if (initConfig) ConfigFileInit();
+        }
+        #endregion
+
+        #region 公有方法
+        /// <summary>
+        /// 加载配置文件
+        /// </summary>
+        public bool LoadConfig()
+        {
+            try
+            {
+                Serializer       serializer = new Serializer();
+                using TextReader reader     = File.OpenText(Path);
+                LoadedConfig = serializer.Deserialize<ConfigClass>(reader);
+                return true;
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("ConfigIO ERROR", ConsoleLog.ErrorLogBuilder(e));
+                return false;
+            }
         }
         #endregion
 
@@ -35,38 +62,28 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
                 LogLevel              = LogLevel.Info,
                 ModuleSwitch = new Module
                 {
-                    DDHelper         = false,
-                    Debug            = false,
-                    HaveFun          = true,
-                    PCR_GuildManager = false,
-                    PCR_GuildRank    = false,
-                    PCR_Dynamic      = false,
-                    Suisei           = false
+                    Bili_Subscription = false,
+                    Debug             = false,
+                    HaveFun           = true,
+                    PCR_GuildManager  = false,
+                    PCR_GuildRank     = false,
+                    PCR_Subscription  = false,
+                    Suisei            = false
                 },
-                DD_Config = new TimeToDD
+                SubscriptionConfig = new BiliSubscription
                 {
                     FlashTime = 3600,
-                    Users     = new long[]{}
+                    GroupsConfig = new List<GroupSubscription>
+                    {
+                        new GroupSubscription()
+                        {
+                            GroupId          = new List<long>(),
+                            PCR_Subscription = false,
+                            SubscriptionId   = new List<long>()
+                        }
+                    }
                 }
             };
-        }
-        /// <summary>
-        /// 加载配置文件
-        /// </summary>
-        private bool LoadConfig()
-        {
-            try
-            {
-                Serializer serializer = new Serializer();
-                using TextReader reader = File.OpenText(Path);
-                LoadedConfig = serializer.Deserialize<ConfigClass>(reader);
-                return true;
-            }
-            catch (Exception e)
-            {
-                ConsoleLog.Debug("无法读取配置文件", ConsoleLog.ErrorLogBuilder(e));
-                return false;
-            }
         }
         /// <summary>
         /// 初始化配置文件并返回当前配置文件内容
@@ -78,11 +95,12 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
                 //当读取到文件时直接返回
                 if (File.Exists(Path) && LoadConfig())
                 {
-                    ConsoleLog.Warning("初始化", "读取配置文件");
+                    ConsoleLog.Info("ConfigIO", "读取配置文件");
                     return;
                 }
                 //没读取到文件时创建新的文件
-                ConsoleLog.Warning("初始化", "未找到配置文件");
+                ConsoleLog.Warning("ConfigIO", "未找到配置文件");
+                ConsoleLog.Info("ConfigIO", "创建新的配置文件");
                 Serializer       serializer = new Serializer(new SerializerSettings { });
                 ConfigClass      config     = getInitConfigClass();
                 string           configText = serializer.Serialize(config);
@@ -92,7 +110,7 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
             }
             catch (Exception e)
             {
-                ConsoleLog.Fatal("初始化错误", ConsoleLog.ErrorLogBuilder(e));
+                ConsoleLog.Fatal("ConfigIO ERROR", ConsoleLog.ErrorLogBuilder(e));
                 Thread.Sleep(5000);
                 Environment.Exit(-1);
             }

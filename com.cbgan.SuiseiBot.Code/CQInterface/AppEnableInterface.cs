@@ -37,14 +37,6 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             //在控制台显示启用模块
             ConsoleLog.Info("已启用的模块",
                             $"\n{config.LoadedConfig.ModuleSwitch.ToString()}");
-            //显示DD的人
-            if (config.LoadedConfig.ModuleSwitch.DDHelper)
-            {
-                foreach (long user in config.LoadedConfig.DD_Config.Users)
-                {
-                    ConsoleLog.Info("Time to DD!", $"Load user by id:{user}");
-                }
-            }
 
             //数据库初始化
             ConsoleLog.Info("初始化", "SuiseiBot初始化");

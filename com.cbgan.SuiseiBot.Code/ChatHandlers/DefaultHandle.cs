@@ -1,5 +1,5 @@
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
-using com.cbgan.SuiseiBot.Code.TimerEvent.DD;
+using com.cbgan.SuiseiBot.Code.TimerEvent.Event;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 
@@ -50,7 +50,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         {
             Group  QQgroup = eventArgs.FromGroup;
             //测试用代码
-            DDHelper.TimeToDD(eventArgs.CQApi);
+            DynamicUpdate.BiliUpdateCheck(eventArgs.CQApi);
         }
         #endregion
     }

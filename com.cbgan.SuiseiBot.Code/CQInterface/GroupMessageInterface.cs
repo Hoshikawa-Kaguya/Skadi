@@ -22,26 +22,42 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             this.eventArgs = e;
             ConsoleLog.Info($"收到信息[群:{eventArgs.FromGroup.Id}]",$"{(eventArgs.Message.Text).Replace("\r\n", "\\r\\n")}");
             //读取配置文件
-            ConfigIO config = new ConfigIO(eventArgs.CQApi.GetLoginQQ().Id);
-            Module moduleEnable = config.LoadedConfig.ModuleSwitch;
+            ConfigIO config = new ConfigIO(eventArgs.CQApi.GetLoginQQ().Id,false);
+            //Module moduleEnable = config.LoadedConfig.ModuleSwitch;
 
             //以#开头的消息全部交给PCR处理
-            if (eventArgs.Message.Text.Trim().StartsWith("#") && moduleEnable.PCR_GuildManager)
+            if (eventArgs.Message.Text.Trim().StartsWith("#") && //检查指令开头
+                config.LoadConfig()                              //加载配置文件
+            )
             {
-                PCRGuildHandle pcrGuild =new PCRGuildHandle(sender,eventArgs);
+                //检查模块使能
+                if (!config.LoadedConfig.ModuleSwitch.PCR_GuildManager)
+                {
+                    SendDisableMessage();
+                    return;
+                }
+                PCRGuildHandle pcrGuild = new PCRGuildHandle(sender, eventArgs);
                 pcrGuild.GetChat();
                 return;
             }
 
             //全字指令匹配
             WholeMatchCmd.KeyWords.TryGetValue(eventArgs.Message, out WholeMatchCmdType cmdType); //查找关键字
-            if (cmdType != 0) ConsoleLog.Info("触发关键词", $"消息类型={cmdType}");
+            if (cmdType != 0)
+            {
+                ConsoleLog.Info("触发关键词", $"消息类型={cmdType}");
+                //加载配置文件
+                if(!config.LoadConfig()) return;
+            }
             switch (cmdType)
             {
                 //输入debug
                 case WholeMatchCmdType.Debug:
-                    CheckEnable(moduleEnable.Debug);
-                    if(!moduleEnable.Debug) return;
+                    if(!config.LoadedConfig.ModuleSwitch.Debug)
+                    {
+                        SendDisableMessage();
+                        return;
+                    }
                     DefaultHandle dh = new DefaultHandle(sender, eventArgs);
                     dh.GetChat(cmdType);
                     return;
@@ -50,15 +66,21 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
                 case WholeMatchCmdType.SurpriseMFK_Ban:
                 case WholeMatchCmdType.SurpriseMFK_RedTea:
                 case WholeMatchCmdType.SurpriseMFK_24YearsOld:
-                    CheckEnable(moduleEnable.HaveFun);
-                    if (!moduleEnable.HaveFun) return;
+                    if (!config.LoadedConfig.ModuleSwitch.HaveFun)
+                    {
+                        SendDisableMessage();
+                        return;
+                    }
                     SurpriseMFKHandle smfh = new SurpriseMFKHandle(sender, eventArgs);
                     smfh.GetChat(cmdType);
                     return;
                 //慧酱签到啦
                 case WholeMatchCmdType.Suisei_SignIn:
-                    CheckEnable(moduleEnable.Suisei);
-                    if (!moduleEnable.Suisei) return;
+                    if (!config.LoadedConfig.ModuleSwitch.Suisei)
+                    {
+                        SendDisableMessage();
+                        return;
+                    }
                     SuiseiHanlde suisei = new SuiseiHanlde(sender, eventArgs);
                     suisei.GetChat(cmdType);
                     return;
@@ -72,8 +94,11 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             switch (keywordType)
             {
                 case KeywordCmdType.PCRTools_GetGuildRank:
-                    CheckEnable(moduleEnable.PCR_GuildRank);
-                    if (!moduleEnable.PCR_GuildRank) return;
+                    if (!config.LoadedConfig.ModuleSwitch.PCR_GuildRank)
+                    {
+                        SendDisableMessage();
+                        return;
+                    }
                     PCRToolsHandle pcrTools = new PCRToolsHandle(sender, eventArgs);
                     pcrTools.GetChat(keywordType);
                     return;
@@ -85,13 +110,8 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
         }
 
         #region 模块启用检查
-        private void CheckEnable(bool module)
-        {
-            if (!module)
-            {
-                this.eventArgs.FromGroup.SendGroupMessage("此模块未启用");
-            }
-        }
+        private void SendDisableMessage()
+            => this.eventArgs.FromGroup.SendGroupMessage("此模块未启用");
         #endregion
     }
 }

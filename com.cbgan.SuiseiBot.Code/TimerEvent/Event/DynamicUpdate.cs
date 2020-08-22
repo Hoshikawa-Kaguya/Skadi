@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using BilibiliApi;
 using BilibiliApi.Dynamic;
@@ -28,23 +26,23 @@ namespace com.cbgan.SuiseiBot.Code.TimerEvent.Event
             Module                  moduleEnable  = config.LoadedConfig.ModuleSwitch;
             List<GroupSubscription> Subscriptions = config.LoadedConfig.SubscriptionConfig.GroupsConfig;
             //检查模块是否启用
-            if (!moduleEnable.TimeToDD) return;
+            if (!moduleEnable.Bili_Subscription) return;
             //List<GroupInfo> groupList = cqApi.GetGroupList().GetGroupInfos();
             foreach (GroupSubscription subscription in Subscriptions)
             {
-                foreach (long user in subscription.Users)
+                foreach (long biliUser in subscription.SubscriptionId)
                 {
-                    await GetDynamic(cqApi, user, subscription.GroupId);
+                    await GetDynamic(cqApi, biliUser, subscription.GroupId);
                 }
             }
         }
 
-        private static Task GetDynamic(CQApi cqApi, long uid, List<long> groupId)
+        private static Task GetDynamic(CQApi cqApi, long biliUser, List<long> groupId)
         {
             string  message;
             Dynamic biliDynamic;
             //获取动态文本
-            JObject cardData = NetUtils.GetBiliDynamicJson(uid, out CardType cardType);
+            JObject cardData = NetUtils.GetBiliDynamicJson(biliUser, out CardType cardType);
             //检查动态类型
             switch (cardType)
             {

@@ -21,7 +21,7 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
         /// <summary>
         /// 自动动态刷新参数设置
         /// </summary>
-        public TimeToDD DD_Config { set; get; }
+        public BiliSubscription SubscriptionConfig { set; get; }
     }
 
     internal class Module
@@ -49,8 +49,11 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
         /// <summary>
         /// 
         /// </summary>
-        public bool PCR_Dynamic { set; get; }
-        public bool DDHelper { set; get; }
+        public bool PCR_Subscription { set; get; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool Bili_Subscription { set; get; }
 
         #region 将已启用的模块名转为字符串
         public override string ToString()
@@ -69,9 +72,16 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
         #endregion
     }
 
-    internal class TimeToDD
+    internal class BiliSubscription
     {
         public int FlashTime { set; get; }
-        public long[] Users { set; get; }
+        public List<GroupSubscription> GroupsConfig { set; get; }
+    }
+
+    internal class GroupSubscription
+    {
+        public List<long> GroupId { set; get; }
+        public bool PCR_Subscription { set; get; }
+        public List<long> SubscriptionId { set; get; }
     }
 }
