@@ -123,7 +123,7 @@
     <Compile Include="SqliteTool\SugarColUtils.cs" />
     <Compile Include="SqliteTool\SugarTableUtils.cs" />
     <Compile Include="SqliteTool\SugarUtils.cs" />
-    <Compile Include="TimerEvent\DD\DDHelper.cs" />
+    <Compile Include="TimerEvent\Event\DynamicUpdate.cs" />
     <Compile Include="TimerEvent\TimerInit.cs" />
     <Compile Include="Tool\CheckInCD.cs" />
     <Compile Include="Tool\Log\ConsoleLog.cs" />
