@@ -43,6 +43,7 @@
 
 - [ ] 来点色图！
 - [ ] 更新API库以支持更多的动态类型
+- [ ] 公会战管理模块(由 [XiaoHe321](https://github.com/orgs/Suisei-Kawaii/people/xh321) 进行模块的开发)
 
 ## 可能会基于[OneBot协议](https://github.com/howmanybots/onebot)对项目进行重构（虽说并没有找到适配框架）
 
