@@ -38,14 +38,14 @@ namespace com.cbgan.SuiseiBot.Code.TimerEvent.Event
                     await GetDynamic(cqApi, 353840826, subscription.GroupId, dbHelper);
                 }
                 //臭DD的订阅
-                foreach (long biliUser in subscription.SubscriptionId)
+                foreach (ulong biliUser in subscription.SubscriptionId)
                 {
                     await GetDynamic(cqApi, biliUser, subscription.GroupId, dbHelper);
                 }
             }
         }
 
-        private static Task GetDynamic(CQApi cqApi, long biliUser, List<long> groupId, SubscriptionDBHelper dbHelper)
+        private static Task GetDynamic(CQApi cqApi, ulong biliUser, List<ulong> groupId, SubscriptionDBHelper dbHelper)
         {
             string  message;
             Dynamic biliDynamic;

@@ -77,9 +77,9 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
                     {
                         new GroupSubscription()
                         {
-                            GroupId          = new List<long>(),
+                            GroupId          = new List<ulong>(),
                             PCR_Subscription = false,
-                            SubscriptionId   = new List<long>()
+                            SubscriptionId   = new List<ulong>()
                         }
                     }
                 }
