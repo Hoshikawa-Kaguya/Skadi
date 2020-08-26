@@ -614,7 +614,7 @@ namespace Native.App.Export
 		/// <summary>
 		/// native插件信息
 		/// </summary>
-        [DllExport(ExportName = "pluginInfo", CallingConvention = CallingConvention.StdCall)]
+        [DllExport (ExportName = "pluginInfo", CallingConvention = CallingConvention.StdCall)]
 		public static IntPtr pluginInfo()
         {
             return Marshal.StringToHGlobalAnsi(JsonConvert.SerializeObject(new PluginInfo()));

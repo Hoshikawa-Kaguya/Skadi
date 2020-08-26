@@ -24,14 +24,15 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             //ConsoleLog.AllocConsole();
             //Console.Title = "SuiseiBot(请勿关闭此窗口)";
 
-            //修改环境文件夹，初始化环境
-            ConsoleLog.Info("获取到环境路径", Directory.GetCurrentDirectory());
-            System.Environment.SetEnvironmentVariable("Path", Directory.GetCurrentDirectory());
-
             //初始化配置文件
             ConfigIO config = new ConfigIO(e.CQApi.GetLoginQQ().Id);
             //设置Log等级
             ConsoleLog.SetLogLevel(config.LoadedConfig.LogLevel);
+            //读取应用信息
+            ConsoleLog.Debug("APP AuthCode(native plugin ID)", e.CQApi.AppInfo.AuthCode);
+            //修改环境文件夹，初始化环境
+            ConsoleLog.Info("获取到环境路径", Directory.GetCurrentDirectory());
+            System.Environment.SetEnvironmentVariable("Path", Directory.GetCurrentDirectory());
             //显示Log等级
             ConsoleLog.Debug("Log Level", config.LoadedConfig.LogLevel);
             //在控制台显示启用模块
