@@ -1,6 +1,9 @@
 using System;
+using System.IO;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using com.cbgan.SuiseiBot.Code.IO;
 using com.cbgan.SuiseiBot.Code.Network;
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
@@ -15,8 +18,8 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
     {
         #region 属性
 
-        public object                  sender    { private set; get; }
-        public CQGroupMessageEventArgs eventArgs { private set; get; }
+        public object                  Sender    { private set; get; }
+        public CQGroupMessageEventArgs DebugEventArgs { private set; get; }
 
         #endregion
 
@@ -24,8 +27,8 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
 
         public DefaultHandle(object sender, CQGroupMessageEventArgs e)
         {
-            this.eventArgs = e;
-            this.sender    = sender;
+            this.DebugEventArgs = e;
+            this.Sender    = sender;
         }
 
         #endregion
@@ -38,7 +41,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         /// <param name="keywordType"></param>
         public void GetChat(WholeMatchCmdType keywordType) //消息接收并判断是否响应
         {
-            if (eventArgs == null || sender == null) return;
+            if (DebugEventArgs == null || Sender == null) return;
             switch (keywordType)
             {
                 case WholeMatchCmdType.Debug:
@@ -54,8 +57,9 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         /// </summary>
         public async void Test() //功能响应
         {
+            //DebugEventArgs.FromGroup.SendGroupMessage(CQApi.CQCode_Image("/hso/75603102_p0.png"));
             //测试用代码
-            await GiveMeSetu(SetuSourceType.Mix);
+            await GiveMeSetu(SetuSourceType.Local);
         }
 
         /// <summary>
@@ -67,14 +71,16 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         /// <param name="yukariToken">yukari token</param>
         private Task GiveMeSetu(SetuSourceType setuSource, string loliconToken = null, string yukariToken = null)
         {
+            string localPicPath;
+            string response;
             StringBuilder urlBuilder = new StringBuilder();
             //源选择
             switch (setuSource)
             {
                 //混合源
                 case SetuSourceType.Mix:
-                    Random rand = new Random();
-                    if (rand.Next(1, 100) > 50)
+                    Random randSource = new Random();
+                    if (randSource.Next(1, 100) > 50)
                     {
                         urlBuilder.Append("https://api.lolicon.app/setu/");
                         if (!string.IsNullOrEmpty(loliconToken)) urlBuilder.Append($"?token={loliconToken}");
@@ -99,8 +105,13 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
                     if (!string.IsNullOrEmpty(yukariToken)) urlBuilder.Append($"?token={yukariToken}");
                     ConsoleLog.Debug("色图源", "Yukari");
                     break;
+                case SetuSourceType.Local:
+                    string[] picNames = Directory.GetFiles(IOUtils.GetHsoPath());
+                    Random randFile = new Random();
+                    localPicPath = $"{picNames[randFile.Next(0, picNames.Length - 1)]}";//.Replace('\\','/');
+                    DebugEventArgs.FromGroup.SendGroupMessage(CQApi.CQCode_Image(localPicPath));
+                    return Task.CompletedTask;
             }
-            string response;
             //网络部分
             try
             {
@@ -111,13 +122,13 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
                 if (string.IsNullOrEmpty(response))
                 {
                     ConsoleLog.Error("网络错误","获取到的响应数据为空");
-                    eventArgs.FromGroup.SendGroupMessage("哇哦~发生了网络错误，请联系机器人所在服务器管理员");
+                    DebugEventArgs.FromGroup.SendGroupMessage("哇哦~发生了网络错误，请联系机器人所在服务器管理员");
                     return Task.CompletedTask;
                 }
             }
             catch (Exception e)
             {
-                eventArgs.FromGroup.SendGroupMessage("哇哦~发生了网络错误，请联系机器人所在服务器管理员");
+                DebugEventArgs.FromGroup.SendGroupMessage("哇哦~发生了网络错误，请联系机器人所在服务器管理员");
                 ConsoleLog.Error("网络发生错误", ConsoleLog.ErrorLogBuilder(e));
                 return Task.CompletedTask;
             }
@@ -128,22 +139,68 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
                 if ((int)picJson["code"] == 0)
                 {
                     string picUrl = picJson["data"]?[0]?["url"]?.ToString();
-                    if (!string.IsNullOrEmpty(picUrl)) eventArgs.FromGroup.SendGroupMessage(CQApi.Mirai_UrlImage(picUrl));
+                    localPicPath = $"{IOUtils.GetHsoPath()}/{Path.GetFileName(picUrl)}";
+                    if (File.Exists(localPicPath))
+                        DebugEventArgs.FromGroup.SendGroupMessage(CQApi.CQCode_Image(localPicPath));
+                    else
+                        DownloadFileFromURL(picUrl, localPicPath);
                     ConsoleLog.Debug("Setu Url", picUrl);
-                }
-                else
-                {
-                    eventArgs.FromGroup.SendGroupMessage("哇哦~没有色图了，请联系机器人所在服务器管理员");
-                    ConsoleLog.Warning("Setu API Token",$"图片源Token可能已经失效,目前色图模式为{setuSource}");
                     return Task.CompletedTask;
                 }
+                if (((int) picJson["code"] == 401 || (int) picJson["code"] == 429)&&setuSource == SetuSourceType.Lolicon)
+                    ConsoleLog.Warning("API Token 失效",$"code:{picJson["code"]}");
+                else
+                    ConsoleLog.Warning("没有找到图片信息","服务器拒绝提供信息");
+                DebugEventArgs.FromGroup.SendGroupMessage("哇奧色图不见了\n请联系机器人服务器管理员");
+                return Task.CompletedTask;
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                ConsoleLog.Error("色图下载失败", $"网络下载数据错误\n{ConsoleLog.ErrorLogBuilder(e)}");
+                return Task.CompletedTask;
             }
-            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// 下载图片保存到本地
+        /// </summary>
+        /// <param name="url">目标URL</param>
+        /// <param name="receivePath">接收文件的地址</param>
+        private void DownloadFileFromURL(string url, string receivePath)
+        {
+            try
+            {
+                int      progressPercentage = 0;
+                long     bytesReceived      = 0;
+                DateTime flashTime          = DateTime.Now;
+                Console.WriteLine("开始从网络下载文件");
+                WebClient client = new WebClient();
+                //文件下载
+                client.DownloadProgressChanged += (sender, args) =>
+                                                  {
+                                                      if (progressPercentage != args.ProgressPercentage)
+                                                      {
+                                                          progressPercentage = args.ProgressPercentage;
+                                                          ConsoleLog
+                                                              .Debug("Download Pic",$"Downloading {args.ProgressPercentage}% " +
+                                                                         $"({(args.BytesReceived - bytesReceived) / 1024.0 / (DateTime.Now - flashTime).TotalSeconds}KB/s) ");
+                                                          flashTime     = DateTime.Now;
+                                                          bytesReceived = args.BytesReceived;
+                                                      }
+                                                  };
+                //文件下载完成
+                client.DownloadFileCompleted += (sender, args) =>
+                                                {
+                                                    ConsoleLog.Info("Hso","下载数据成功,发送图片");
+                                                    DebugEventArgs
+                                                        .FromGroup.SendGroupMessage(CQApi.CQCode_Image(receivePath));
+                                                };
+                client.DownloadFileAsync(new Uri(url), receivePath);
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("色图下载失败",$"网络下载数据错误\n{ConsoleLog.ErrorLogBuilder(e)}");
+            }
         }
         #endregion
     }

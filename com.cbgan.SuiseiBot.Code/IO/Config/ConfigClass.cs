@@ -80,8 +80,8 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
 
     internal class GroupSubscription
     {
-        public List<ulong> GroupId { set; get; }
+        public List<long> GroupId { set; get; }
         public bool PCR_Subscription { set; get; }
-        public List<ulong> SubscriptionId { set; get; }
+        public List<long> SubscriptionId { set; get; }
     }
 }

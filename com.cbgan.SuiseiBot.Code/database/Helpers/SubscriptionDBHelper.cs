@@ -1,14 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BilibiliApi.Dynamic.DynamicData;
 using com.cbgan.SuiseiBot.Code.SqliteTool;
 using com.cbgan.SuiseiBot.Code.Tool;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
 using Native.Sdk.Cqp;
-using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
 
 namespace com.cbgan.SuiseiBot.Code.Database.Helpers

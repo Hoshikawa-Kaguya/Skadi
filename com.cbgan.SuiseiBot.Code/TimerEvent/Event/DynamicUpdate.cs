@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,37 +39,47 @@ namespace com.cbgan.SuiseiBot.Code.TimerEvent.Event
                     await GetDynamic(cqApi, 353840826, subscription.GroupId, dbHelper);
                 }
                 //臭DD的订阅
-                foreach (ulong biliUser in subscription.SubscriptionId)
+                foreach (long biliUser in subscription.SubscriptionId)
                 {
                     await GetDynamic(cqApi, biliUser, subscription.GroupId, dbHelper);
                 }
             }
         }
 
-        private static Task GetDynamic(CQApi cqApi, ulong biliUser, List<ulong> groupId, SubscriptionDBHelper dbHelper)
+        private static Task GetDynamic(CQApi cqApi, long biliUser, List<long> groupId, SubscriptionDBHelper dbHelper)
         {
             string  message;
+            JObject cardData;
             Dynamic biliDynamic;
+            CardType cardType;
             //获取动态文本
-            JObject cardData = NetUtils.GetBiliDynamicJson(biliUser, out CardType cardType);
-            //检查动态类型
-            switch (cardType)
+            try
             {
-                case CardType.PlainText:
-                    PlainTextCard plainTextCard = new PlainTextCard(cardData);
-                    plainTextCard.ContentType = ContentType.CQCode;
-                    message                   = plainTextCard.ToString();
-                    biliDynamic               = plainTextCard;
-                    break;
-                case CardType.TextAndPic:
-                    TextAndPicCard textAndPicCard = new TextAndPicCard(cardData);
-                    textAndPicCard.ContentType = ContentType.CQCode;
-                    message                    = textAndPicCard.ToString();
-                    biliDynamic                = textAndPicCard;
-                    break;
-                default:
-                    ConsoleLog.Debug("动态获取", $"ID:{biliUser}的动态获取成功，动态类型未知");
-                    return Task.CompletedTask;
+                cardData = NetUtils.GetBiliDynamicJson((ulong)biliUser, out cardType);
+                switch (cardType)
+                {
+                    //检查动态类型
+                    case CardType.PlainText:
+                        PlainTextCard plainTextCard = new PlainTextCard(cardData);
+                        plainTextCard.ContentType = ContentType.CQCode;
+                        message                   = plainTextCard.ToString();
+                        biliDynamic               = plainTextCard;
+                        break;
+                    case CardType.TextAndPic:
+                        TextAndPicCard textAndPicCard = new TextAndPicCard(cardData);
+                        textAndPicCard.ContentType = ContentType.CQCode;
+                        message                    = textAndPicCard.ToString();
+                        biliDynamic                = textAndPicCard;
+                        break;
+                    default:
+                        ConsoleLog.Debug("动态获取", $"ID:{biliUser}的动态获取成功，动态类型未知");
+                        return Task.CompletedTask;
+                }
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("获取动态更新时发生错误",ConsoleLog.ErrorLogBuilder(e));
+                return Task.CompletedTask;
             }
             //获取用户信息
             UserInfo sender = biliDynamic.GetUserInfo();
