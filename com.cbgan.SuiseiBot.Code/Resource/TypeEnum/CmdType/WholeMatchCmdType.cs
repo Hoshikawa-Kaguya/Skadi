@@ -14,6 +14,10 @@ namespace com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType
         /// </summary>
         Suisei_SignIn = 50,
         /// <summary>
+        /// 来点色图！
+        /// </summary>
+        Setu = 60,
+        /// <summary>
         /// 调试
         /// </summary>
         Debug = 200

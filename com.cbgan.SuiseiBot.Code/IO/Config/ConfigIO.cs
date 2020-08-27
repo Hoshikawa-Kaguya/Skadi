@@ -58,7 +58,6 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
         {
             return new ConfigClass
             {
-                GlobalCommandStartStr = string.Empty,
                 LogLevel              = LogLevel.Info,
                 ModuleSwitch = new Module
                 {
@@ -68,7 +67,8 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
                     PCR_GuildManager  = false,
                     PCR_GuildRank     = false,
                     PCR_Subscription  = false,
-                    Suisei            = false
+                    Suisei            = false,
+                    Setu              = false
                 },
                 SubscriptionConfig = new BiliSubscription
                 {

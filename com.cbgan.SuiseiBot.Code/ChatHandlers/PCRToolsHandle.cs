@@ -57,10 +57,10 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
             switch (Utils.CheckForLength(commandArgs, 1))
             {
                 case LenType.Illegal:
-                    await BiliWiki(QQGroup.GetGroupInfo().Name);
+                    await BiliWikiRank(QQGroup.GetGroupInfo().Name);
                     break;
                 case LenType.Legitimate:
-                    await BiliWiki(commandArgs[1]);
+                    await BiliWikiRank(commandArgs[1]);
                     break;
                 default:
                 case LenType.Extra:
@@ -72,14 +72,14 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         /// <summary>
         /// 从比利比利源查询排名
         /// </summary>
-        private Task BiliWiki(string guildName)
+        private Task BiliWikiRank(string guildName)
         {
             string response;
             //获取响应
             try
             {
                 //获取查询结果
-                ConsoleLog.Info("NET", "尝试查询结果");
+                ConsoleLog.Info("NET", $"尝试查询{guildName}会站排名");
                 QQGroup.SendGroupMessage("查询中...");
                 response =
                     HTTPUtils
@@ -140,7 +140,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         /// 此方法暂时弃用改用比利比利源
         /// </summary>
         [Obsolete]
-        private void Kyouka(string guildName)
+        private void KyoukaRank(string guildName)
         {
             //网络响应
             string response;

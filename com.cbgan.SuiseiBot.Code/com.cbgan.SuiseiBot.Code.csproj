@@ -123,6 +123,7 @@
     <Compile Include="Resource\Commands\KeywordCmd.cs" />
     <Compile Include="Resource\TypeEnum\CmdType\KeywordCmdType.cs" />
     <Compile Include="Resource\TypeEnum\LenType.cs" />
+    <Compile Include="Resource\TypeEnum\SetuSourceType.cs" />
     <Compile Include="SqliteTool\SugarColUtils.cs" />
     <Compile Include="SqliteTool\SugarTableUtils.cs" />
     <Compile Include="SqliteTool\SugarUtils.cs" />

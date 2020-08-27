@@ -11,10 +11,6 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
         /// </summary>
         public LogLevel LogLevel { set; get; }
         /// <summary>
-        /// 全局指令开头字符或字符串
-        /// </summary>
-        public string GlobalCommandStartStr { set; get; }
-        /// <summary>
         /// 各模块的控制开关
         /// </summary>
         public Module ModuleSwitch { set; get; }
@@ -47,13 +43,17 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
         /// </summary>
         public bool PCR_GuildRank { set; get; }
         /// <summary>
-        /// 
+        /// PCR国服动态订阅
         /// </summary>
         public bool PCR_Subscription { set; get; }
         /// <summary>
-        /// 
+        /// B站UP主动态订阅
         /// </summary>
         public bool Bili_Subscription { set; get; }
+        /// <summary>
+        /// 来点色图
+        /// </summary>
+        public bool Setu { set; get; }
 
         #region 将已启用的模块名转为字符串
         public override string ToString()

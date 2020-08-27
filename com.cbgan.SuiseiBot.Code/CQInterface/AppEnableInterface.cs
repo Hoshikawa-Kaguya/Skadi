@@ -47,7 +47,7 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             WholeMatchCmd.KeywordInit();
             PCRGuildCmd.PCRGuildCommandInit();
             GuildCommandHelp.InitHelpText();
-            KeywordCmd.SpecialKeywordsInit();
+            KeywordCmd.SpecialKeywordsInit(e.CQApi);
 
             //初始化定时器线程
             if (config.LoadedConfig.ModuleSwitch.Bili_Subscription || config.LoadedConfig.ModuleSwitch.PCR_Subscription)

@@ -22,7 +22,7 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             this.eventArgs = e;
             ConsoleLog.Info($"收到信息[群:{eventArgs.FromGroup.Id}]",$"{(eventArgs.Message.Text).Replace("\r\n", "\\r\\n")}");
             //读取配置文件
-            ConfigIO config = new ConfigIO(eventArgs.CQApi.GetLoginQQ().Id);
+            ConfigIO config = new ConfigIO(eventArgs.CQApi.GetLoginQQ().Id,false);
             //Module moduleEnable = config.LoadedConfig.ModuleSwitch;
 
             //以#开头的消息全部交给PCR处理
@@ -84,13 +84,26 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
                     SuiseiHanlde suisei = new SuiseiHanlde(sender, eventArgs);
                     suisei.GetChat(cmdType);
                     return;
+                //来点色图！
+                case WholeMatchCmdType.Setu:
+                    if (!config.LoadedConfig.ModuleSwitch.Setu)
+                    {
+                        SendDisableMessage();
+                        return;
+                    }
+                    return;
                 default:
                     break;
             }
 
             //参数指令匹配
             KeywordCmdType keywordType = KeywordCmd.TryGetKeywordType(eventArgs.Message.Text);
-            if (keywordType != 0) ConsoleLog.Info("触发关键词", $"消息类型={cmdType}");
+            if (keywordType != 0)
+            {
+                ConsoleLog.Info("触发关键词", $"消息类型={cmdType}");
+                //加载配置文件
+                if (!config.LoadConfig()) return;
+            }
             switch (keywordType)
             {
                 case KeywordCmdType.PCRTools_GetGuildRank:
@@ -102,6 +115,9 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
                     PCRToolsHandle pcrTools = new PCRToolsHandle(sender, eventArgs);
                     pcrTools.GetChat(keywordType);
                     return;
+                case KeywordCmdType.At_Bot:
+                    ConsoleLog.Info("机器人事件","机器人被AT");
+                    break;
                 default:
                     break;
             }
