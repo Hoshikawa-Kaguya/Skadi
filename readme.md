@@ -4,7 +4,7 @@
    	<img width="400" src="https://i.loli.net/2020/08/28/VqPKcFN6m3oZ5bB.png" alt="SUISEI">
     </br>
     <font size="-6" color="#707070">
-        Author:Disco
+        图片作者:Disco
 	</font></br>
 一个为服务PCR玩家设计的机器人，其实还有一些奇奇怪怪的功能(不是)</br>
 </div>
