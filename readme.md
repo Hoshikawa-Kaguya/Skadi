@@ -14,18 +14,6 @@
 
 ![AGPL](https://img.shields.io/github/license/CBGan/SuiseiBot?style=for-the-badge)
 
-## 对Mirai的适配
-
-[Mirai](https://github.com/mamoe/mirai)已经恢复维护和更新，其主分支也已切换至master
-
-本项目将会基于[mirai-native](https://github.com/iTXTech/mirai-native)继续进行开发
-
-## 迁移至Discord
-
-项目随时可能迁移至Discord进行开发
-
-所使用框架：[Discord.Net](https://github.com/discord-net/Discord.Net)
-
 ## 进度
 
 - [x] 会站排名查询
@@ -46,6 +34,12 @@
 - [ ] 来点色图！
 - [ ] 更新API库以支持更多的动态类型
 - [ ] 公会战管理模块(由 [XiaoHe321](https://github.com/orgs/Suisei-Kawaii/people/xh321) 进行模块的开发)
+
+## 注意
+
+项目随时可能迁移至Discord进行开发
+
+所使用框架：[Discord.Net](https://github.com/discord-net/Discord.Net)
 
 ## 可能会基于[OneBot协议](https://github.com/howmanybots/onebot)对项目进行重构
 
