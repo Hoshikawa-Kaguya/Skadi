@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text;
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
 using Native.Sdk.Cqp;

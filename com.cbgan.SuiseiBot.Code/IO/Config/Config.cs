@@ -2,16 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using com.cbgan.SuiseiBot.Code.IO.Config.ConfigFile;
+using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
 using com.cbgan.SuiseiBot.Code.Tool.Log;
 using SharpYaml.Serialization;
 
 namespace com.cbgan.SuiseiBot.Code.IO.Config
 {
-    internal class ConfigIO
+    internal class Config
     {
         #region 属性
         private string Path { set; get; }
-        public ConfigClass LoadedConfig { private set; get; }
+        public MainConfig LoadedConfig { private set; get; }
         #endregion
 
         #region 构造函数
@@ -20,7 +22,7 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
         /// </summary>
         /// <param name="loginQQ"></param>
         /// <param name="initConfig"></param>
-        public ConfigIO(long loginQQ, bool initConfig = true)
+        public Config(long loginQQ, bool initConfig = true)
         {
             this.Path = IOUtils.GetConfigPath(loginQQ.ToString());
             //执行一次加载
@@ -38,7 +40,7 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
             {
                 Serializer       serializer = new Serializer();
                 using TextReader reader     = File.OpenText(Path);
-                LoadedConfig = serializer.Deserialize<ConfigClass>(reader);
+                LoadedConfig = serializer.Deserialize<MainConfig>(reader);
                 return true;
             }
             catch (Exception e)
@@ -54,11 +56,11 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
         /// 初始化配置文件
         /// </summary>
         /// <returns>ConfigClass</returns>
-        private ConfigClass getInitConfigClass()
+        private MainConfig getInitConfig()
         {
-            return new ConfigClass
+            return new MainConfig
             {
-                LogLevel              = LogLevel.Info,
+                LogLevel = LogLevel.Info,
                 ModuleSwitch = new Module
                 {
                     Bili_Subscription = false,
@@ -68,7 +70,7 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
                     PCR_GuildRank     = false,
                     PCR_Subscription  = false,
                     Suisei            = false,
-                    Setu              = false
+                    Hso               = false
                 },
                 SubscriptionConfig = new BiliSubscription
                 {
@@ -82,6 +84,12 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
                             SubscriptionId   = new List<long>()
                         }
                     }
+                },
+                HsoConfig = new HsoConfig
+                {
+                    Source       = SetuSourceType.Local,
+                    LoliconToken = null,
+                    YukariToken  = null
                 }
             };
         }
@@ -102,7 +110,7 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
                 ConsoleLog.Warning("ConfigIO", "未找到配置文件");
                 ConsoleLog.Info("ConfigIO", "创建新的配置文件");
                 Serializer       serializer = new Serializer(new SerializerSettings { });
-                ConfigClass      config     = getInitConfigClass();
+                ConfigFile.MainConfig      config     = getInitConfig();
                 string           configText = serializer.Serialize(config);
                 using TextWriter writer     = File.CreateText(Path);
                 writer.Write(configText);

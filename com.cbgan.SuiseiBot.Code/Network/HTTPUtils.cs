@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using com.cbgan.SuiseiBot.Code.Tool.Log;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

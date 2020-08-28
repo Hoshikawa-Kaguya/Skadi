@@ -16,7 +16,7 @@ namespace com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType
         /// <summary>
         /// 来点色图！
         /// </summary>
-        Setu = 60,
+        Hso = 60,
         /// <summary>
         /// 调试
         /// </summary>

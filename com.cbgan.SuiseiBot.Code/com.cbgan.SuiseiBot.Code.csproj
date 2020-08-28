@@ -107,6 +107,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChatHandlers\Hso.cs" />
     <Compile Include="ChatHandlers\PCRGuildHandle.cs" />
     <Compile Include="ChatHandlers\PCRToolsHandle.cs" />
     <Compile Include="CQInterface\AppEnableInterface.cs" />
@@ -116,7 +117,9 @@
     <Compile Include="Database\Helpers\GuildBattleMgrDBHelper.cs" />
     <Compile Include="Database\Helpers\SubscriptionDBHelper.cs" />
     <Compile Include="Database\Tables.cs" />
-    <Compile Include="IO\Config\ConfigIO.cs" />
+    <Compile Include="IO\Config\ConfigFile\BiliSubscription.cs" />
+    <Compile Include="IO\Config\Config.cs" />
+    <Compile Include="IO\Config\ConfigFile\HsoConfig.cs" />
     <Compile Include="IO\IOUtils.cs" />
     <Compile Include="Network\DownloadFileUtils.cs" />
     <Compile Include="Network\HTTPUtils.cs" />
@@ -127,7 +130,7 @@
     <Compile Include="PCRGuildManager\GuildManager.cs" />
     <Compile Include="Resource\CommandHelp\GuildCommandHelp.cs" />
     <Compile Include="Resource\Commands\PCRGuildCmd.cs" />
-    <Compile Include="IO\Config\ConfigClass.cs" />
+    <Compile Include="IO\Config\ConfigFile\MainConfig.cs" />
     <Compile Include="Resource\TypeEnum\CmdType\WholeMatchCmdType.cs" />
     <Compile Include="Resource\TypeEnum\CmdType\PCRGuildCmdType.cs" />
     <Compile Include="Resource\Commands\KeywordCmd.cs" />

@@ -25,7 +25,7 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             //Console.Title = "SuiseiBot(请勿关闭此窗口)";
 
             //初始化配置文件
-            ConfigIO config = new ConfigIO(e.CQApi.GetLoginQQ().Id);
+            Config config = new Config(e.CQApi.GetLoginQQ().Id);
             //设置Log等级
             ConsoleLog.SetLogLevel(config.LoadedConfig.LogLevel);
             //读取应用信息

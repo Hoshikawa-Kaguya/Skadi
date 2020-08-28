@@ -21,7 +21,9 @@ namespace com.cbgan.SuiseiBot.Code.Resource.Commands
             //3 公主连结小功能
             //暂无(不是)
             //4 来点色图！
-            KeyWords.Add("来点色图",WholeMatchCmdType.Setu);
+            KeyWords.Add("来点色图",WholeMatchCmdType.Hso);
+            KeyWords.Add("来点涩图",WholeMatchCmdType.Hso);
+
             KeyWords.Add("debug", WholeMatchCmdType.Debug);
         }
     }
