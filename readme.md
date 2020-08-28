@@ -47,6 +47,6 @@
 
 ## 可能会基于[OneBot协议](https://github.com/howmanybots/onebot)对项目进行重构
 
-协议版本：[OneBot](https://github.com/howmanybots/onebot)标准：![OneBot](https://img.shields.io/static/v1?label=OneBot&message=v11&color=blueviolet&style=for-the-badge)
+协议版本：![OneBot](https://img.shields.io/static/v1?label=OneBot&message=v11&color=blueviolet&style=for-the-badge)
 
 目前暂无重构计划
