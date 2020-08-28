@@ -45,8 +45,8 @@
 - [ ] 更新API库以支持更多的动态类型
 - [ ] 公会战管理模块(由 [XiaoHe321](https://github.com/orgs/Suisei-Kawaii/people/xh321) 进行模块的开发)
 
-## 可能会基于[OneBot协议](https://github.com/howmanybots/onebot)对项目进行重构（虽说并没有找到适配框架）
+## 可能会基于[OneBot协议](https://github.com/howmanybots/onebot)对项目进行重构
 
-今后可能会适配[OneBot](https://github.com/howmanybots/onebot)标准：![OneBot](https://img.shields.io/static/v1?label=OneBot&message=v11&color=blueviolet&style=for-the-badge)
+协议版本：[OneBot](https://github.com/howmanybots/onebot)标准：![OneBot](https://img.shields.io/static/v1?label=OneBot&message=v11&color=blueviolet&style=for-the-badge)
 
-暂未找到合适的.net OneBot(CQHTTP)框架，并不打算自行封装，等待现有框架更新适配OneBot协议
+目前暂无重构计划
