@@ -1,6 +1,7 @@
 # ☄ SuiseiBot
 <div align="center">
    <img width="400" src="https://i.loli.net/2020/08/28/VqPKcFN6m3oZ5bB.png" alt="SUISEI"></br>
+</div>
 
 -----
 这个项目的名字来源于 [星街彗星](https://space.bilibili.com/9034870)
