@@ -1,12 +1,13 @@
-# 正在开发中的PCR机器人
+# ☄ SuiseiBot
+<div align="center">
+   <img width="400" src="https://i.loli.net/2020/08/28/VqPKcFN6m3oZ5bB.png" alt="SUISEI"></br>
 
-![我裂开了](https://i.loli.net/2020/08/16/gm6WAdRyEvThZUG.gif)
+-----
+这个项目的名字来源于 [星街彗星](https://space.bilibili.com/9034870)
 
-机器人将会继续开发
+由[mirai-native](https://github.com/iTXTech/mirai-native)和[mirai](https://github.com/mamoe/mirai)提供强力驱动
 
-完成后的发布将会把插件和外部动态库一起打包
-
-可能会写readme的吧 ~~反正没人看~~
+本项目仍处于开发阶段，不会提供任何发行版和预览版
 
 ## 开源协议
 
