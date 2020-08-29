@@ -9,11 +9,8 @@
 一个有点机器人的神经(不是)</br>
 </div>
 
-
-
-
-
 -----
+
 本项目的名字来源于 [星街彗星](https://space.bilibili.com/9034870)
 
 由[mirai-native](https://github.com/iTXTech/mirai-native)和[mirai](https://github.com/mamoe/mirai)提供强力驱动
@@ -23,6 +20,10 @@
 ## 开源协议
 
 ![AGPL](https://img.shields.io/github/license/CBGan/SuiseiBot?style=for-the-badge)
+
+## 环境要求
+
+Microsoft Visual C++ 2015-2019 Redistributable
 
 ## 进度
 
