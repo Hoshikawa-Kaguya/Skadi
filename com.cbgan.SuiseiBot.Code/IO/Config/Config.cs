@@ -70,7 +70,8 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
                     PCR_GuildRank     = false,
                     PCR_Subscription  = false,
                     Suisei            = false,
-                    Hso               = false
+                    Hso               = false,
+                    Cheru             = false
                 },
                 SubscriptionConfig = new BiliSubscription
                 {

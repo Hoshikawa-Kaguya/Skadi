@@ -1,10 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Reflection;
 using System.Text;
-using com.cbgan.SuiseiBot.Code.ChatHandlers;
+using com.cbgan.SuiseiBot.Code.ChatHandle.PCRHandle;
 using com.cbgan.SuiseiBot.Code.Database.Helpers;
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;

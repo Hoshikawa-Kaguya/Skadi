@@ -58,6 +58,10 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config.ConfigFile
         /// 来点色图
         /// </summary>
         public bool Hso { set; get; }
+        /// <summary>
+        /// 切噜翻译
+        /// </summary>
+        public bool Cheru { set; get; }
 
         #region 将已启用的模块名转为字符串
         public override string ToString()

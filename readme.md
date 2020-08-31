@@ -33,6 +33,7 @@ Microsoft Visual C++ 2015-2019 Redistributable
 - [x] 自动更新B站官方的动态，同时也可以自定义获取其他UP的动态（使用库[BilibiliApi](https://github.com/CBGan/BilibiliApi)）
 - [x] 通过配置文件来控制log等级和模块是否启用
 - [x] 来点色图！
+- [x] 切噜~♪
 - [ ] JJC/PJJC查询(由[公主连结Re: Dive Fan Club](https://pcrdfans.com/)提供的查询功能)
 - [ ] 抽卡模拟(沉船模拟)
 - [ ] PCR公会战管理

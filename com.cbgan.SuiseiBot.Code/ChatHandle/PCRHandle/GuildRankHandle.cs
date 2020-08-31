@@ -10,9 +10,9 @@ using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 using Newtonsoft.Json.Linq;
 
-namespace com.cbgan.SuiseiBot.Code.ChatHandlers
+namespace com.cbgan.SuiseiBot.Code.ChatHandle.PCRHandle
 {
-    internal class PCRToolsHandle
+    internal class GuildRankHandle
     {
         #region 参数
         public object                  Sender       { private set; get; }
@@ -21,7 +21,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         #endregion
 
         #region 构造函数
-        public PCRToolsHandle(object sender, CQGroupMessageEventArgs e)
+        public GuildRankHandle(object sender, CQGroupMessageEventArgs e)
         {
             this.PCREventArgs = e;
             this.Sender       = sender;
@@ -52,7 +52,6 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         #region 私有方法
         private async void GetGuildRank(string[] commandArgs)
         {
-            
             //检查参数
             switch (Utils.CheckForLength(commandArgs, 1))
             {

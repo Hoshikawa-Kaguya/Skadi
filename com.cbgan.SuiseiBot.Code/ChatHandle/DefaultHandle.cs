@@ -1,20 +1,8 @@
-using System;
-using System.IO;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using com.cbgan.SuiseiBot.Code.IO;
-using com.cbgan.SuiseiBot.Code.IO.Config;
-using com.cbgan.SuiseiBot.Code.IO.Config.ConfigFile;
-using com.cbgan.SuiseiBot.Code.Network;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.EventArgs;
-using Newtonsoft.Json.Linq;
 
-namespace com.cbgan.SuiseiBot.Code.ChatHandlers
+namespace com.cbgan.SuiseiBot.Code.ChatHandle
 {
     internal class DefaultHandle
     {

@@ -1,6 +1,7 @@
+using com.cbgan.SuiseiBot.Code.ChatHandle;
+using com.cbgan.SuiseiBot.Code.ChatHandle.PCRHandle;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
-using com.cbgan.SuiseiBot.Code.ChatHandlers;
 using com.cbgan.SuiseiBot.Code.IO.Config;
 using com.cbgan.SuiseiBot.Code.Resource.Commands;
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
@@ -91,7 +92,7 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
                         SendDisableMessage();
                         return;
                     }
-                    Hso hso = new Hso(sender, eventArgs);
+                    HsoHandle hso = new HsoHandle(sender, eventArgs);
                     hso.GetChat(cmdType);
                     return;
                 default:
@@ -114,11 +115,21 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
                         SendDisableMessage();
                         return;
                     }
-                    PCRToolsHandle pcrTools = new PCRToolsHandle(sender, eventArgs);
+                    GuildRankHandle pcrTools = new GuildRankHandle(sender, eventArgs);
                     pcrTools.GetChat(keywordType);
                     return;
                 case KeywordCmdType.At_Bot:
                     ConsoleLog.Info("机器人事件","机器人被AT");
+                    break;
+                case KeywordCmdType.Cheru_Encode:
+                case KeywordCmdType.Cheru_Decode:
+                    if (!config.LoadedConfig.ModuleSwitch.Cheru)
+                    {
+                        SendDisableMessage();
+                        return;
+                    }
+                    CheruHandle cheru = new CheruHandle(sender,eventArgs);
+                    cheru.GetChat(keywordType);
                     break;
                 default:
                     break;

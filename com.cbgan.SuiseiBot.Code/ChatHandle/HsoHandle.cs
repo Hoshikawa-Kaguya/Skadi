@@ -15,9 +15,9 @@ using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 using Newtonsoft.Json.Linq;
 
-namespace com.cbgan.SuiseiBot.Code.ChatHandlers
+namespace com.cbgan.SuiseiBot.Code.ChatHandle
 {
-    internal class Hso
+    internal class HsoHandle
     {
         #region 属性
         public object                  Sender       { private set; get; }
@@ -26,7 +26,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         #endregion
 
         #region 构造函数
-        public Hso(object sender, CQGroupMessageEventArgs e)
+        public HsoHandle(object sender, CQGroupMessageEventArgs e)
         {
             this.HsoEventArgs = e;
             this.Sender       = sender;
