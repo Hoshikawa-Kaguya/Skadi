@@ -8,6 +8,11 @@ using Native.Sdk.Cqp.EventArgs;
 
 namespace com.cbgan.SuiseiBot.Code.ChatHandle.PCRHandle
 {
+    /// <summary>
+    /// 切噜语转换
+    /// 参考自HoshinoBot
+    /// 对原算法有所改进
+    /// </summary>
     internal class CheruHandle
     {
         #region 字符集常量
