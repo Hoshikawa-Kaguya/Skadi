@@ -324,7 +324,7 @@ namespace com.cbgan.SuiseiBot.Code.Database
         public Server ServerId { set; get; }
 
         /// <summary>
-        /// scale用于记录boss属性强化倍率
+        /// boss属性：属性强化倍率
         /// </summary>
         [SugarColumn(ColumnName = "scale", ColumnDataType = "FLOAT", IsNullable = true)]
         public float? Scale { get; set; }
