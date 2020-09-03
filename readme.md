@@ -47,3 +47,7 @@ Microsoft Visual C++ 2015-2019 Redistributable
 - [ ] 买药小助手
 - [ ] 更新API库以支持更多的动态类型
 - [ ] 公会战管理模块(由 [XiaoHe321](https://github.com/orgs/Suisei-Kawaii/people/xh321) 进行模块的开发)
+
+## 注意
+
+由于Mirai项目的特殊性，本项目随时可能会迁移至Discord平台[Discord](https://discord.com/)
