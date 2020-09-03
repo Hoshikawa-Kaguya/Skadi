@@ -1,6 +1,7 @@
+using com.cbgan.SuiseiBot.Code.ChatHandle;
+using com.cbgan.SuiseiBot.Code.ChatHandle.PCRHandle;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
-using com.cbgan.SuiseiBot.Code.ChatHandlers;
 using com.cbgan.SuiseiBot.Code.IO.Config;
 using com.cbgan.SuiseiBot.Code.Resource.Commands;
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
@@ -22,7 +23,7 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             this.eventArgs = e;
             ConsoleLog.Info($"收到信息[群:{eventArgs.FromGroup.Id}]",$"{(eventArgs.Message.Text).Replace("\r\n", "\\r\\n")}");
             //读取配置文件
-            ConfigIO config = new ConfigIO(eventArgs.CQApi.GetLoginQQ().Id,false);
+            Config config = new Config(eventArgs.CQApi.GetLoginQQ().Id,false);
             //Module moduleEnable = config.LoadedConfig.ModuleSwitch;
 
             //以#开头的消息全部交给PCR处理
@@ -84,13 +85,28 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
                     SuiseiHanlde suisei = new SuiseiHanlde(sender, eventArgs);
                     suisei.GetChat(cmdType);
                     return;
+                //来点色图！
+                case WholeMatchCmdType.Hso:
+                    if (!config.LoadedConfig.ModuleSwitch.Hso)
+                    {
+                        SendDisableMessage();
+                        return;
+                    }
+                    HsoHandle hso = new HsoHandle(sender, eventArgs);
+                    hso.GetChat(cmdType);
+                    return;
                 default:
                     break;
             }
 
             //参数指令匹配
             KeywordCmdType keywordType = KeywordCmd.TryGetKeywordType(eventArgs.Message.Text);
-            if (keywordType != 0) ConsoleLog.Info("触发关键词", $"消息类型={cmdType}");
+            if (keywordType != 0)
+            {
+                ConsoleLog.Info("触发关键词", $"消息类型={cmdType}");
+                //加载配置文件
+                if (!config.LoadConfig()) return;
+            }
             switch (keywordType)
             {
                 case KeywordCmdType.PCRTools_GetGuildRank:
@@ -99,9 +115,22 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
                         SendDisableMessage();
                         return;
                     }
-                    PCRToolsHandle pcrTools = new PCRToolsHandle(sender, eventArgs);
+                    GuildRankHandle pcrTools = new GuildRankHandle(sender, eventArgs);
                     pcrTools.GetChat(keywordType);
                     return;
+                case KeywordCmdType.At_Bot:
+                    ConsoleLog.Info("机器人事件","机器人被AT");
+                    break;
+                case KeywordCmdType.Cheru_Encode:
+                case KeywordCmdType.Cheru_Decode:
+                    if (!config.LoadedConfig.ModuleSwitch.Cheru)
+                    {
+                        SendDisableMessage();
+                        return;
+                    }
+                    CheruHandle cheru = new CheruHandle(sender,eventArgs);
+                    cheru.GetChat(keywordType);
+                    break;
                 default:
                     break;
             }

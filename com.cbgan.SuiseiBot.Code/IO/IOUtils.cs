@@ -39,6 +39,19 @@ namespace com.cbgan.SuiseiBot.Code.IO
         }
 
         /// <summary>
+        /// 获取应用色图文件的绝对路径
+        /// </summary>
+        public static string GetHsoPath()
+        {
+            StringBuilder dbPath = new StringBuilder();
+            dbPath.Append(Environment.CurrentDirectory.Replace('\\', '/'));
+            dbPath.Append("/data/image/hso");
+            //检查目录是否存在，不存在则新建一个
+            Directory.CreateDirectory(dbPath.ToString());
+            return dbPath.ToString();
+        }
+
+        /// <summary>
         /// 创建错误报告文件
         /// </summary>
         /// <param name="errorMessage">错误信息</param>

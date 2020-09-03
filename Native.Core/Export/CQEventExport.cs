@@ -13,6 +13,7 @@ using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
 using Native.Sdk.Cqp.Expand;
 using Native.Sdk.Cqp.Model;
+using Newtonsoft.Json;
 using Unity;
 using Unity.Injection;
 
@@ -608,8 +609,16 @@ namespace Native.App.Export
 				Event_eventDisableHandler (typeof (CQEventExport), args);	
 			}	
 			return 0;	
-		}	
-		
-		#endregion	
+		}
+
+		/// <summary>
+		/// native插件信息
+		/// </summary>
+        [DllExport (ExportName = "pluginInfo", CallingConvention = CallingConvention.StdCall)]
+		public static IntPtr pluginInfo()
+        {
+            return Marshal.StringToHGlobalAnsi(JsonConvert.SerializeObject(new PluginInfo()));
+		}
+		#endregion
 	}	
 }

@@ -2,18 +2,14 @@ using System.Collections.Generic;
 using System.Reflection;
 using com.cbgan.SuiseiBot.Code.Tool.Log;
 
-namespace com.cbgan.SuiseiBot.Code.IO.Config
+namespace com.cbgan.SuiseiBot.Code.IO.Config.ConfigFile
 {
-    internal class ConfigClass
+    internal class MainConfig
     {
         /// <summary>
         /// 日志等级
         /// </summary>
         public LogLevel LogLevel { set; get; }
-        /// <summary>
-        /// 全局指令开头字符或字符串
-        /// </summary>
-        public string GlobalCommandStartStr { set; get; }
         /// <summary>
         /// 各模块的控制开关
         /// </summary>
@@ -22,6 +18,10 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
         /// 自动动态刷新参数设置
         /// </summary>
         public BiliSubscription SubscriptionConfig { set; get; }
+        /// <summary>
+        /// 色图相关设置
+        /// </summary>
+        public HsoConfig HsoConfig { set; get; }
     }
 
     internal class Module
@@ -47,13 +47,21 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
         /// </summary>
         public bool PCR_GuildRank { set; get; }
         /// <summary>
-        /// 
+        /// PCR国服动态订阅
         /// </summary>
         public bool PCR_Subscription { set; get; }
         /// <summary>
-        /// 
+        /// B站UP主动态订阅
         /// </summary>
         public bool Bili_Subscription { set; get; }
+        /// <summary>
+        /// 来点色图
+        /// </summary>
+        public bool Hso { set; get; }
+        /// <summary>
+        /// 切噜翻译
+        /// </summary>
+        public bool Cheru { set; get; }
 
         #region 将已启用的模块名转为字符串
         public override string ToString()
@@ -70,18 +78,5 @@ namespace com.cbgan.SuiseiBot.Code.IO.Config
             return string.Join("\n",ret);
         }
         #endregion
-    }
-
-    internal class BiliSubscription
-    {
-        public int FlashTime { set; get; }
-        public List<GroupSubscription> GroupsConfig { set; get; }
-    }
-
-    internal class GroupSubscription
-    {
-        public List<long> GroupId { set; get; }
-        public bool PCR_Subscription { set; get; }
-        public List<long> SubscriptionId { set; get; }
     }
 }

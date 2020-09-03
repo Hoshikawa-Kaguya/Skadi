@@ -19,7 +19,11 @@ namespace com.cbgan.SuiseiBot.Code.Resource.Commands
             //2 奇奇怪怪的签到
             KeyWords.Add("彗酱今天也很可爱", WholeMatchCmdType.Suisei_SignIn);
             //3 公主连结小功能
-            //暂无只需要关键词的功能
+            //暂无(不是)
+            //4 来点色图！
+            KeyWords.Add("来点色图",WholeMatchCmdType.Hso);
+            KeyWords.Add("来点涩图",WholeMatchCmdType.Hso);
+
             KeyWords.Add("debug", WholeMatchCmdType.Debug);
         }
     }

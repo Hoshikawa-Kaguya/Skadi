@@ -1,16 +1,15 @@
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
-using com.cbgan.SuiseiBot.Code.TimerEvent.Event;
+using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.EventArgs;
-using Native.Sdk.Cqp.Model;
 
-namespace com.cbgan.SuiseiBot.Code.ChatHandlers
+namespace com.cbgan.SuiseiBot.Code.ChatHandle
 {
     internal class DefaultHandle
     {
         #region 属性
 
-        public object                  sender    { private set; get; }
-        public CQGroupMessageEventArgs eventArgs { private set; get; }
+        public object                  Sender    { private set; get; }
+        public CQGroupMessageEventArgs DebugEventArgs { private set; get; }
 
         #endregion
 
@@ -18,8 +17,8 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
 
         public DefaultHandle(object sender, CQGroupMessageEventArgs e)
         {
-            this.eventArgs = e;
-            this.sender    = sender;
+            this.DebugEventArgs = e;
+            this.Sender    = sender;
         }
 
         #endregion
@@ -32,7 +31,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         /// <param name="keywordType"></param>
         public void GetChat(WholeMatchCmdType keywordType) //消息接收并判断是否响应
         {
-            if (eventArgs == null || sender == null) return;
+            if (DebugEventArgs == null || Sender == null) return;
             switch (keywordType)
             {
                 case WholeMatchCmdType.Debug:
@@ -46,11 +45,14 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandlers
         /// <summary>
         /// 响应函数
         /// </summary>
-        private void Test() //功能响应
+        public void Test() //功能响应
         {
-            Group  QQgroup = eventArgs.FromGroup;
-            //测试用代码
-            DynamicUpdate.BiliUpdateCheck(eventArgs.CQApi);
+            //此区域代码均只用于测试
+#if DEBUG
+            DebugEventArgs.FromGroup.SendGroupMessage(CQApi.CQCode_Image("/hso/75603102_p0.png"));
+#else
+            DebugEventArgs.FromGroup.SendGroupMessage("哇哦");
+#endif
         }
         #endregion
     }
