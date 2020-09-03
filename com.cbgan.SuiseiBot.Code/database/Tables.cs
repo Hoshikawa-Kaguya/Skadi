@@ -128,12 +128,49 @@ namespace com.cbgan.SuiseiBot.Code.Database
     
 #region 会战Boss相关数据
 
+    #region 每个公会的会战数据
+    [SugarTable("guild_battle_data")]
+    internal class GuildBattleData
+    {
+        /// <summary>
+        /// 公会所属群号
+        /// </summary>
+        [SugarColumn(ColumnName = "gid",ColumnDataType = "INTEGER",IsPrimaryKey = true)]
+        public long Gid { get; set; }
+
+        /// <summary>
+        /// 当前公会正在进行的会战数据id（与ClanBattleInfo的会战ID相同）
+        /// boss血量数据均由此ID进行查找
+        /// </summary>
+        [SugarColumn(ColumnName = "clan_battle_id",ColumnDataType = "INTEGER")]
+        public long ClanBattleId { get; set; }
+
+        /// <summary>
+        /// 当前boss的血量
+        /// </summary>
+        [SugarColumn(ColumnName = "hp",ColumnDataType = "INTEGER")]
+        public long HP { get; set; }
+
+        /// <summary>
+        /// 当前boss的总血量
+        /// </summary>
+        [SugarColumn(ColumnName = "total_hp",ColumnDataType = "INTEGER")]
+        public long TotalHP { get; set; }
+
+        /// <summary>
+        /// 当前公会所在周目
+        /// </summary>
+        [SugarColumn(ColumnName = "round",ColumnDataType = "INTEGER")]
+        public int Round { get; set; }
+    }
+    #endregion
+
     #region 会战数据表定义
     [SugarTable("clan_battle_info")]
     internal class ClanBattleInfo
     {
         /// <summary>
-        /// 当前会战的ID
+        /// 会战ID
         /// </summary>
         [SugarColumn(ColumnName = "clan_battle_id", ColumnDataType = "INTEGER", IsIdentity = true)]
         public long ClanBattleId { get; set; }
@@ -287,16 +324,10 @@ namespace com.cbgan.SuiseiBot.Code.Database
         public Server ServerId { set; get; }
 
         /// <summary>
-        /// score_coefficient用于记录boss分数倍率
-        /// </summary>
-        [SugarColumn(ColumnName = "score_coefficient", ColumnDataType = "FLOAT")]
-        public float ScoceRatio { get; set; }
-
-        /// <summary>
         /// scale用于记录boss属性强化倍率
         /// </summary>
         [SugarColumn(ColumnName = "scale", ColumnDataType = "FLOAT", IsNullable = true)]
-        public float Scale { get; set; }
+        public float? Scale { get; set; }
 
         /// <summary>
         /// boss属性：名称
@@ -307,32 +338,32 @@ namespace com.cbgan.SuiseiBot.Code.Database
         /// <summary>
         /// boss属性：血量
         /// </summary>
-        [SugarColumn(ColumnName = "hp", ColumnDataType = "INTEGER", IsNullable = true)]
+        [SugarColumn(ColumnName = "hp", ColumnDataType = "INTEGER")]
         public long HP { get; set; }
 
         /// <summary>
         /// boss属性：物攻
         /// </summary>
         [SugarColumn(ColumnName = "atk", ColumnDataType = "INTEGER", IsNullable = true)]
-        public int ATK { get; set; }
+        public int? ATK { get; set; }
 
         /// <summary>
         /// boss属性：法攻
         /// </summary>
         [SugarColumn(ColumnName = "magic_atk", ColumnDataType = "INTEGER", IsNullable = true)]
-        public int MagicATK { get; set; }
+        public int? MagicATK { get; set; }
 
         /// <summary>
         /// boss属性：物防
         /// </summary>
         [SugarColumn(ColumnName = "def", ColumnDataType = "INTEGER", IsNullable = true)]
-        public int DEF { get; set; }
+        public int? DEF { get; set; }
 
         /// <summary>
         /// boss属性：法防
         /// </summary>
         [SugarColumn(ColumnName = "magic_def", ColumnDataType = "INTEGER", IsNullable = true)]
-        public int MagicDEF { get; set; }
+        public int? MagicDEF { get; set; }
 
         /// <summary>
         /// 用于记录boss描述
