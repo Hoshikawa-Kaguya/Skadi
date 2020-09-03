@@ -1,4 +1,4 @@
-namespace com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType
+namespace SuiseiBot.TypeEnum.CmdType
 {
     internal enum KeywordCmdType : int
     {

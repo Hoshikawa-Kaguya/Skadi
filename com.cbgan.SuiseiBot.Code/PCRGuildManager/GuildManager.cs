@@ -1,9 +1,10 @@
-using com.cbgan.SuiseiBot.Code.ChatHandlers;
-using com.cbgan.SuiseiBot.Code.Database.Helpers;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
-using com.cbgan.SuiseiBot.Code.Tool;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
+
+using SuiseiBot.PCRHandle;
+using SuiseiBot.Database.Helpers;
+using SuiseiBot.TypeEnum;
+using SuiseiBot.TypeEnum.CmdType;
+using SuiseiBot.Tool;
+using SuiseiBot.Tool.Log;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.EventArgs;
@@ -12,7 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
+namespace SuiseiBot.PCRGuildManager
 {
     internal static class PCRHandler
     {

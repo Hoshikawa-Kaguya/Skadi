@@ -1,8 +1,8 @@
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
+using SuiseiBot.TypeEnum.CmdType;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.EventArgs;
 
-namespace com.cbgan.SuiseiBot.Code.ChatHandle
+namespace SuiseiBot.IO.ChatHandle
 {
     internal class DefaultHandle
     {

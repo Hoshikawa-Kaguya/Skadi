@@ -1,4 +1,4 @@
-namespace com.cbgan.SuiseiBot.Code.Tool.Log
+namespace SuiseiBot.Tool.Log
 {
     internal enum LogLevel
     {

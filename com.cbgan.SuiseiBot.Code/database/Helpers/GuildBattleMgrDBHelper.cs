@@ -1,21 +1,24 @@
-using com.cbgan.SuiseiBot.Code.SqliteTool;
-using com.cbgan.SuiseiBot.Code.Tool;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
+using SuiseiBot.SqliteTool;
+using SuiseiBot.Tool;
+using SuiseiBot.Tool.Log;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
 using System.Linq;
 
-namespace com.cbgan.SuiseiBot.Code.Database.Helpers
+namespace SuiseiBot.Database.Helpers
 {
     internal class GuildBattleMgrDBHelper
     {
         private long   GroupId { get; set; }
         private string DBPath  { get; set; }
 
+        private string TableName { get; set; }
+
         public GuildBattleMgrDBHelper(object sender, CQGroupMessageEventArgs eventArgs)
         {
-            GroupId = eventArgs.FromGroup.Id;
-            DBPath  = SugarUtils.GetDBPath(eventArgs.CQApi.GetLoginQQ().Id.ToString());
+            GroupId   = eventArgs.FromGroup.Id;
+            DBPath    = SugarUtils.GetDBPath(eventArgs.CQApi.GetLoginQQ().Id.ToString());
+            TableName = $"{SugarTableUtils.GetTableName<GuildBattle>()}_{GroupId}";
         }
 
         public bool GuildExists()
@@ -41,16 +44,14 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
         public int StartBattle()
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            if (SugarUtils.TableExists<GuildBattle>(dbClient,
-                                                    $"{SugarTableUtils.GetTableName<GuildBattle>()}_{GroupId}"))
+            if (SugarUtils.TableExists<GuildBattle>(dbClient, TableName))
             {
                 ConsoleLog.Error("会战管理数据库", "会战表已经存在，请检查是否未结束上次会战统计");
                 return -1;
             }
             else
             {
-                SugarUtils.CreateTable<GuildBattle>(dbClient,
-                                                    $"{SugarTableUtils.GetTableName<GuildBattle>()}_{GroupId}");
+                SugarUtils.CreateTable<GuildBattle>(dbClient, TableName);
                 ConsoleLog.Info("会战管理数据库", "开始新的一期会战统计");
                 return 0;
             }
@@ -63,8 +64,7 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
         public int EndBattle()
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            if (SugarUtils.TableExists<GuildBattle>(dbClient,
-                                                    $"{SugarTableUtils.GetTableName<GuildBattle>()}_{GroupId}"))
+            if (SugarUtils.TableExists<GuildBattle>(dbClient,TableName))
             {
                 ConsoleLog.Error("会战管理数据库", "结束一期会战，开始输出数据");
                 //TODO: EXCEL导出公会战数据
@@ -88,14 +88,15 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
         public int Attack(int uid, int gid, int dmg, int attackType)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            var data = dbClient.Queryable<MemberStatus>().Where(i => i.Uid == uid && i.Gid == gid).ToList();
+            var data = dbClient.Queryable<MemberStatus>()
+                               .Where(i => i.Uid == uid && i.Gid == gid)
+                               .ToList();
             if (data.Any())
             {
                 switch (data.First().Flag)
                 {
                     //当前并未开始出刀，请先申请出刀=>返回
                     case 0:
-                    case 2:
                         return -3;
                     //进入出刀判断
                     case 1:
@@ -112,14 +113,7 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
 
                 long requestTime = data.First().Time;
 
-                //更新成员信息
-                var memberStatus = new MemberStatus()
-                {
-                    Flag = 0,
-                    Info = "",
-                    Time = Utils.GetNowTimeStamp,
-                };
-                bool succUpdate = dbClient.Updateable(memberStatus).ExecuteCommandHasChange();
+
                 //插入一刀数据
                 var insertData = new GuildBattle()
                 {
@@ -129,16 +123,29 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
                     Damage = realDamage,
                     Flag   = attackType
                 };
-                bool succInsert = dbClient.Insertable<GuildBattle>(insertData).ExecuteCommand() > 0;
-
+                bool succInsert = dbClient.Insertable<GuildBattle>(insertData)
+                                          .AS(TableName)
+                                          .ExecuteCommand() > 0;
                 //如果是尾刀
                 if (attackType == 1)
                 {
                     //全部下树，出刀中取消出刀状态
-                    dbClient.Updateable(new MemberStatus() {Flag = 0}).Where(i => i.Flag == 3 || i.Flag == 1)
-                            .UpdateColumns(i => new {i.Flag}).ExecuteCommand();
+                    dbClient.Updateable(new MemberStatus() {Flag = 0})
+                            .Where(i => i.Flag == 3 || i.Flag == 1)
+                            .UpdateColumns(i => new {i.Flag})
+                            .ExecuteCommand();
                     //TODO: 预约中取消BOSS预约
                 }
+
+                //更新成员信息，报刀后变空闲
+                var memberStatus = new MemberStatus()
+                {
+                    Flag = 0,
+                    Info = "",
+                    Time = Utils.GetNowTimeStamp,
+                };
+                bool succUpdate = dbClient.Updateable(memberStatus)
+                                          .ExecuteCommandHasChange();
 
                 return succUpdate && succInsert ? 0 : -99;
             }
@@ -158,7 +165,9 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             var currSL =
-                dbClient.Queryable<MemberStatus>().Where(i => i.Uid == uid && i.Gid == gid).ToList();
+                dbClient.Queryable<MemberStatus>()
+                        .Where(i => i.Uid == uid && i.Gid == gid)
+                        .ToList();
             if (currSL.Any())
             {
                 if (currSL.FirstOrDefault()?.SL == 1)
@@ -171,8 +180,10 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
                     return -3;
                 }
 
-                return dbClient.Updateable(new MemberStatus() {Flag = 0, SL = 1}).UpdateColumns(i => new {i.Flag, i.SL})
-                               .ExecuteCommandHasChange()
+                return dbClient
+                       .Updateable(new MemberStatus() {Flag = 0, SL = Utils.GetNowTimeStamp})
+                       .UpdateColumns(i => new {i.Flag, i.SL})
+                       .ExecuteCommandHasChange()
                     ? 0
                     : -99;
             }
@@ -192,7 +203,9 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             var currSL =
-                dbClient.Queryable<MemberStatus>().Where(i => i.Uid == uid && i.Gid == gid).ToList();
+                dbClient.Queryable<MemberStatus>()
+                        .Where(i => i.Uid == uid && i.Gid == gid)
+                        .ToList();
             if (currSL.Any())
             {
                 if (currSL.FirstOrDefault()?.SL == 0)
@@ -200,7 +213,8 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
                     return -2;
                 }
 
-                return dbClient.Updateable(new MemberStatus() {SL = 0}).UpdateColumns(i => new {i.SL})
+                return dbClient.Updateable(new MemberStatus() {SL = 0})
+                               .UpdateColumns(i => new {i.SL})
                                .ExecuteCommandHasChange()
                     ? 0
                     : -99;
@@ -222,7 +236,9 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             var member =
-                dbClient.Queryable<MemberStatus>().Where(i => i.Uid == uid && i.Gid == gid).ToList();
+                dbClient.Queryable<MemberStatus>()
+                        .Where(i => i.Uid == uid && i.Gid == gid)
+                        .ToList();
             //成员是否存在 
             if (member.Any())
             {
@@ -230,8 +246,8 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
                 flag = member.FirstOrDefault().Flag;
                 switch (member.FirstOrDefault()?.Flag)
                 {
+                    //空闲可以出刀
                     case 0:
-                    case 2:
                         break;
                     //重复出刀
                     case 1:
@@ -244,11 +260,13 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
                 //出刀数判断
                 var AttackHistory =
                     dbClient.Queryable<GuildBattle>()
+                            .AS(TableName)
                             //今天零点之后出刀的
                             .Where(i => i.Uid == uid && i.Time > Utils.GetTodayStamp)
                             .GroupBy(i => i.Uid)
                             //筛选出刀总数
                             .Select(i => new {id = i.Uid, times = SqlFunc.AggregateCount(i.Uid)}).ToList();
+                //一天只能3刀
                 if (AttackHistory.Any() && AttackHistory.FirstOrDefault()?.times >= 3)
                 {
                     return -3;
@@ -276,16 +294,18 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
         /// <param name="AttackId">出刀编号</param>
         /// <param name="IsBossChanged">BOSS是否已经变更</param>
         /// <returns>0：正常 | -1：未找到该出刀编号 | -99：数据库出错</returns>
-        public int DeleteAttack(int AttackId,out bool IsBossChanged)
+        public int DeleteAttack(int gid, int AttackId, out bool IsBossChanged)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             var attackInfo =
                 dbClient.Queryable<GuildBattle>()
+                        .AS(TableName)
                         .Where(i => i.Bid == AttackId)
                         .ToList();
             if (attackInfo.Any())
             {
                 bool succDelete = dbClient.Deleteable<GuildBattle>()
+                                          .AS(TableName)
                                           .Where(i => i.Bid == AttackId)
                                           .ExecuteCommandHasChange();
                 //TODO: 重新计算boss的血量，并判断是否为当前boss
@@ -312,7 +332,5 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
             //TODO: 读取JSON中当前boss代号和血量
             return -1;
         }
-
-
     }
 }

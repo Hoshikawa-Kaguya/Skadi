@@ -1,12 +1,13 @@
 using System;
-using com.cbgan.SuiseiBot.Code.PCRGuildManager;
-using com.cbgan.SuiseiBot.Code.Resource.CommandHelp;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
+using SuiseiBot.PCRGuildManager;
+using SuiseiBot.CommandHelp;
+using SuiseiBot.Commands;
+using SuiseiBot.TypeEnum.CmdType;
+using SuiseiBot.Tool.Log;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.EventArgs;
 
-namespace com.cbgan.SuiseiBot.Code.ChatHandle.PCRHandle
+namespace SuiseiBot.PCRHandle
 {
     internal class PCRGuildHandle
     {
@@ -33,7 +34,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandle.PCRHandle
                 //获取第二个字符开始到空格为止的PCR命令
                 PCRGuildCommand = PCRGuildEventArgs.Message.Text.Substring(1).Split(' ')[0];
                 //获取指令类型
-                Resource.Commands.PCRGuildCmd.PCRGuildCommands.TryGetValue(PCRGuildCommand, out PCRGuildCmdType commandType);
+                PCRGuildCmd.PCRGuildCommands.TryGetValue(PCRGuildCommand, out PCRGuildCmdType commandType);
                 this.CommandType = commandType;
                 //未知指令
                 if (CommandType == 0)

@@ -1,7 +1,7 @@
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
+using SuiseiBot.TypeEnum;
 using SqlSugar;
 
-namespace com.cbgan.SuiseiBot.Code.Database
+namespace SuiseiBot.Database
 {
     #region 成员表定义
     /// <summary>

@@ -1,21 +1,20 @@
+using Native.Sdk.Cqp;
+using Native.Sdk.Cqp.EventArgs;
+using Native.Sdk.Cqp.Model;
+using Newtonsoft.Json.Linq;
+using SuiseiBot.Config.ConfigFile;
+using SuiseiBot.IO.Code.IO;
+using SuiseiBot.Network;
+using SuiseiBot.Tool.Log;
+using SuiseiBot.TypeEnum;
+using SuiseiBot.TypeEnum.CmdType;
 using System;
 using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using com.cbgan.SuiseiBot.Code.IO;
-using com.cbgan.SuiseiBot.Code.IO.Config;
-using com.cbgan.SuiseiBot.Code.IO.Config.ConfigFile;
-using com.cbgan.SuiseiBot.Code.Network;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
-using Native.Sdk.Cqp;
-using Native.Sdk.Cqp.EventArgs;
-using Native.Sdk.Cqp.Model;
-using Newtonsoft.Json.Linq;
 
-namespace com.cbgan.SuiseiBot.Code.ChatHandle
+namespace SuiseiBot.IO.ChatHandle
 {
     internal class HsoHandle
     {
@@ -41,7 +40,7 @@ namespace com.cbgan.SuiseiBot.Code.ChatHandle
         /// <param name="cmdType">指令类型</param>
         public async void GetChat(WholeMatchCmdType cmdType)
         {
-            Config config = new Config(HsoEventArgs.CQApi.GetLoginQQ().Id);
+            Config.Config config = new Config.Config(HsoEventArgs.CQApi.GetLoginQQ().Id);
             switch (cmdType)
             {
                 case WholeMatchCmdType.Hso:

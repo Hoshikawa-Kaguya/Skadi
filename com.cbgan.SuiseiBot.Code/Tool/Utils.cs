@@ -1,4 +1,4 @@
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
+using SuiseiBot.TypeEnum;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.Model;
@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace com.cbgan.SuiseiBot.Code.Tool
+namespace SuiseiBot.Tool
 {
     internal static class Utils
     {
@@ -67,18 +67,28 @@ namespace com.cbgan.SuiseiBot.Code.Tool
                 return LenType.Illegal;
             }
         }
+        /// <summary>
+        /// 获取当前时间戳
+        /// 时间戳单位(毫秒)
+        /// </summary>
+        public static long GetNowTimeStampLong => (DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
 
+        /// <summary>
+        /// 获取今天零点的时间戳
+        /// 时间戳单位(毫秒)
+        /// </summary>
+        public static long GetTodayStampLong => (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
         /// <summary>
         /// 获取当前时间戳
         /// 时间戳单位(秒)
         /// </summary>
-        public static long GetNowTimeStamp => (DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
+        public static int GetNowTimeStamp => (DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
 
         /// <summary>
         /// 获取今天零点的时间戳
         /// 时间戳单位(秒)
         /// </summary>
-        public static long GetTodayStamp => (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
+        public static int GetTodayStamp => (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
 
         /// <summary>
         /// 将long类型13位时间戳转换为DateTime

@@ -1,10 +1,10 @@
 using System;
-using com.cbgan.SuiseiBot.Code.SqliteTool;
-using com.cbgan.SuiseiBot.Code.Tool;
+using SuiseiBot.SqliteTool;
+using SuiseiBot.Tool;
 using Native.Sdk.Cqp;
 using SqlSugar;
 
-namespace com.cbgan.SuiseiBot.Code.Database.Helpers
+namespace SuiseiBot.Database.Helpers
 {
     internal class SubscriptionDBHelper
     {

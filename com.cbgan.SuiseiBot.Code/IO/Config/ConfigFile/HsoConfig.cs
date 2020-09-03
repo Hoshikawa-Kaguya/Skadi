@@ -1,6 +1,6 @@
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
+using SuiseiBot.TypeEnum;
 
-namespace com.cbgan.SuiseiBot.Code.IO.Config.ConfigFile
+namespace SuiseiBot.Config.ConfigFile
 {
     internal class HsoConfig
     {

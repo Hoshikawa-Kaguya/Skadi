@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
+using SuiseiBot.TypeEnum.CmdType;
 using Native.Sdk.Cqp;
 
-namespace com.cbgan.SuiseiBot.Code.Resource.Commands
+namespace SuiseiBot.Commands
 {
     /// <summary>
     /// 存放需要参数的关键词

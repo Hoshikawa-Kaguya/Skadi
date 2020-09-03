@@ -1,9 +1,9 @@
 using System;
 using System.Threading;
-using com.cbgan.SuiseiBot.Code.TimerEvent.Event;
 using Native.Sdk.Cqp;
+using SuiseiBot.IO.Code.TimerEvent.Event;
 
-namespace com.cbgan.SuiseiBot.Code.TimerEvent
+namespace SuiseiBot.IO.Code.TimerEvent
 {
     internal class TimerInit
     {

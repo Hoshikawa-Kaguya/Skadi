@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace com.cbgan.SuiseiBot.Code.Tool.Log
+namespace SuiseiBot.Tool.Log
 {
     /// <summary>
     /// 用来格式化输出的控制台Log的通用代码

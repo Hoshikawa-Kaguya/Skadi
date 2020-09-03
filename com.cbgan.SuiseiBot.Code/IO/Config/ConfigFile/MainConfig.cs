@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Reflection;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
+using SuiseiBot.Tool.Log;
 
-namespace com.cbgan.SuiseiBot.Code.IO.Config.ConfigFile
+namespace SuiseiBot.Config.ConfigFile
 {
     internal class MainConfig
     {

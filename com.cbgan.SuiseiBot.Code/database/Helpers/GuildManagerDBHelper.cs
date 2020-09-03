@@ -1,10 +1,10 @@
-using com.cbgan.SuiseiBot.Code.SqliteTool;
+using SuiseiBot.SqliteTool;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
 
-namespace com.cbgan.SuiseiBot.Code.Database.Helpers
+namespace SuiseiBot.Database.Helpers
 {
     internal class GuildManagerDBHelper
     {

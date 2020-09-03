@@ -1,14 +1,14 @@
-using com.cbgan.SuiseiBot.Code.Database;
-using com.cbgan.SuiseiBot.Code.TimerEvent;
+using SuiseiBot.Database;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
 using System.IO;
-using com.cbgan.SuiseiBot.Code.IO.Config;
-using com.cbgan.SuiseiBot.Code.Resource.CommandHelp;
-using com.cbgan.SuiseiBot.Code.Resource.Commands;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
+using SuiseiBot.Config;
+using SuiseiBot.CommandHelp;
+using SuiseiBot.Commands;
+using SuiseiBot.IO.Code.TimerEvent;
+using SuiseiBot.Tool.Log;
 
-namespace com.cbgan.SuiseiBot.Code.CQInterface
+namespace SuiseiBot.IO.Code.CQInterface
 {
     public class AppEnableInterface : IAppEnable
     {
@@ -25,7 +25,7 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             //Console.Title = "SuiseiBot(请勿关闭此窗口)";
 
             //初始化配置文件
-            Config config = new Config(e.CQApi.GetLoginQQ().Id);
+            Config.Config config = new Config.Config(e.CQApi.GetLoginQQ().Id);
             //设置Log等级
             ConsoleLog.SetLogLevel(config.LoadedConfig.LogLevel);
             //读取应用信息

@@ -1,11 +1,11 @@
-using com.cbgan.SuiseiBot.Code.Database;
-using com.cbgan.SuiseiBot.Code.Database.Helpers;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
+using SuiseiBot.Database;
+using SuiseiBot.Database.Helpers;
+using SuiseiBot.Tool.Log;
+using SuiseiBot.TypeEnum.CmdType;
 
-namespace com.cbgan.SuiseiBot.Code.ChatHandle
+namespace SuiseiBot.IO.ChatHandle
 {
     internal class SuiseiHanlde
     {

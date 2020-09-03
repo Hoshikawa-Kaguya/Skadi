@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace com.cbgan.SuiseiBot.Code.IO.Config.ConfigFile
+namespace SuiseiBot.Config.ConfigFile
 {
     internal class BiliSubscription
     {
