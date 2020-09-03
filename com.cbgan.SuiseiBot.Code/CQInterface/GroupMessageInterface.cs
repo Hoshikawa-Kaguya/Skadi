@@ -1,13 +1,12 @@
-using com.cbgan.SuiseiBot.Code.ChatHandle;
-using com.cbgan.SuiseiBot.Code.ChatHandle.PCRHandle;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
-using com.cbgan.SuiseiBot.Code.IO.Config;
-using com.cbgan.SuiseiBot.Code.Resource.Commands;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
+using SuiseiBot.Commands;
+using SuiseiBot.IO.ChatHandle;
+using SuiseiBot.PCRHandle;
+using SuiseiBot.Tool.Log;
+using SuiseiBot.TypeEnum.CmdType;
 
-namespace com.cbgan.SuiseiBot.Code.CQInterface
+namespace SuiseiBot.IO.Code.CQInterface
 {
     public class GroupMessageInterface : IGroupMessage
     {
@@ -23,7 +22,7 @@ namespace com.cbgan.SuiseiBot.Code.CQInterface
             this.eventArgs = e;
             ConsoleLog.Info($"收到信息[群:{eventArgs.FromGroup.Id}]",$"{(eventArgs.Message.Text).Replace("\r\n", "\\r\\n")}");
             //读取配置文件
-            Config config = new Config(eventArgs.CQApi.GetLoginQQ().Id,false);
+            Config.Config config = new Config.Config(eventArgs.CQApi.GetLoginQQ().Id,false);
             //Module moduleEnable = config.LoadedConfig.ModuleSwitch;
 
             //以#开头的消息全部交给PCR处理

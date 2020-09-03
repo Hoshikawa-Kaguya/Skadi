@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SuiseiBot.Tool.Log;
 
-namespace com.cbgan.SuiseiBot.Code.Tool
+namespace SuiseiBot.Tool
 {
     class JsonUtils
     {

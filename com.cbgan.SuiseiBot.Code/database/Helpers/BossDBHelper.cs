@@ -1,8 +1,8 @@
-using com.cbgan.SuiseiBot.Code.SqliteTool;
+using SuiseiBot.SqliteTool;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
 
-namespace com.cbgan.SuiseiBot.Code.Database.Helpers
+namespace SuiseiBot.Database.Helpers
 {
     class BossDBHelper
     {

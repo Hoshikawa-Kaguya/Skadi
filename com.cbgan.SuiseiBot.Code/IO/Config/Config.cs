@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using com.cbgan.SuiseiBot.Code.IO.Config.ConfigFile;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
+using SuiseiBot.IO.Code.IO;
+using SuiseiBot.TypeEnum;
+using SuiseiBot.Tool.Log;
 using SharpYaml.Serialization;
+using SuiseiBot.Config.ConfigFile;
 
-namespace com.cbgan.SuiseiBot.Code.IO.Config
+namespace SuiseiBot.Config
 {
     internal class Config
     {

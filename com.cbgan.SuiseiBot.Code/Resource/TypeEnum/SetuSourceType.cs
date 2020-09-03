@@ -1,4 +1,4 @@
-namespace com.cbgan.SuiseiBot.Code.Resource.TypeEnum
+namespace SuiseiBot.TypeEnum
 {
     internal enum SetuSourceType : int
     {

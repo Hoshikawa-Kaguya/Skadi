@@ -1,11 +1,11 @@
-using System;
-using com.cbgan.SuiseiBot.Code.SqliteTool;
-using com.cbgan.SuiseiBot.Code.Tool;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
+using SuiseiBot.SqliteTool;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
+using SuiseiBot.Tool;
+using SuiseiBot.Tool.Log;
+using System;
 
-namespace com.cbgan.SuiseiBot.Code.Database.Helpers
+namespace SuiseiBot.Database.Helpers
 {
     internal class SuiseiDBHelper
     {
@@ -33,7 +33,7 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
             this.GroupId = eventArgs.FromGroup.Id;
             this.Sender = sender;
             this.SuiseiGroupMessageEventArgs = eventArgs;
-            this.TriggerTime = Utils.GetTodayStamp();//触发日期
+            this.TriggerTime = Utils.GetTodayStamp;//触发日期
             DBPath = SugarUtils.GetDBPath(eventArgs.CQApi.GetLoginQQ().Id.ToString());
         }
         #endregion

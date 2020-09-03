@@ -1,8 +1,8 @@
-using com.cbgan.SuiseiBot.Code.Tool.Log;
+using SuiseiBot.Tool.Log;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
 
-namespace com.cbgan.SuiseiBot.Code.CQInterface
+namespace SuiseiBot.IO.Code.CQInterface
 {
     public class PrivateMessageInterface : IPrivateMessage
     {

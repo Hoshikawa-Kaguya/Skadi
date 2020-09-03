@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
+using SuiseiBot.TypeEnum;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.Model;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace com.cbgan.SuiseiBot.Code.Tool
+namespace SuiseiBot.Tool
 {
     internal static class Utils
     {
@@ -67,34 +67,58 @@ namespace com.cbgan.SuiseiBot.Code.Tool
                 return LenType.Illegal;
             }
         }
+        /// <summary>
+        /// 获取当前时间戳
+        /// 时间戳单位(毫秒)
+        /// </summary>
+        public static long GetNowTimeStampLong => (DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
 
+        /// <summary>
+        /// 获取今天零点的时间戳
+        /// 时间戳单位(毫秒)
+        /// </summary>
+        public static long GetTodayStampLong => (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
         /// <summary>
         /// 获取当前时间戳
         /// 时间戳单位(秒)
         /// </summary>
-        public static long GetNowTimeStamp() 
-            => (long)(DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;
+        public static int GetNowTimeStamp => (DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
 
         /// <summary>
         /// 获取今天零点的时间戳
         /// 时间戳单位(秒)
         /// </summary>
-        public static long GetTodayStamp() 
-            => (long)(DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;
+        public static int GetTodayStamp => (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
 
         /// <summary>
-        /// 将long类型时间戳转换为DateTime
-        /// 时间戳单位(秒)
+        /// 将long类型13位时间戳转换为DateTime
+        /// 时间戳单位(毫秒)
         /// </summary>
-        public static DateTime TimeStampToDateTime(long TimeStamp)
-            => new System.DateTime(1970, 1, 1, 8, 0, 0, 0).AddSeconds(TimeStamp);
+        public static System.DateTime TimeStampToDateTime(long TimeStamp) =>
+            new System.DateTime(1970, 1, 1, 8, 0, 0, 0).AddMilliseconds(TimeStamp);
 
         /// <summary>
-        /// 将DateTime转换为long时间戳
+        /// 将int类型11位时间戳转换为DateTime
         /// 时间戳单位(秒)
         /// </summary>
-        public static long DateTimeToTimeStamp(DateTime dateTime)
-            => (long)(dateTime - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;
+        public static System.DateTime TimeStampToDateTime(int TimeStamp) =>
+            new System.DateTime(1970, 1, 1, 8, 0, 0, 0).AddSeconds(TimeStamp);
+
+        /// <summary>
+        /// 将DateTime转换为13位long时间戳
+        /// 时间戳单位(秒)
+        /// </summary>
+        public static long DateTimeToTimeStampLong(System.DateTime dateTime) =>
+            (dateTime - (new System.DateTime(1970, 1, 1, 8, 0, 0, 0))).Milliseconds;
+
+
+        /// <summary>
+        /// 将DateTime转换为11位int时间戳
+        /// 时间戳单位(秒)
+        /// </summary>
+        public static int DateTimeToTimeStamp(System.DateTime dateTime) =>
+            (dateTime - (new System.DateTime(1970, 1, 1, 8, 0, 0, 0))).Seconds;
+
         #endregion
 
         #region 群成员处理

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
+using SuiseiBot.TypeEnum.CmdType;
 
-namespace com.cbgan.SuiseiBot.Code.Resource.Commands
+namespace SuiseiBot.Commands
 {
     internal static class WholeMatchCmd
     {

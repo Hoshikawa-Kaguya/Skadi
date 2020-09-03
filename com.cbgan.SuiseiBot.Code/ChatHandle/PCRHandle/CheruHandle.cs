@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
-using com.cbgan.SuiseiBot.Code.Tool;
+using SuiseiBot.TypeEnum;
+using SuiseiBot.TypeEnum.CmdType;
+using SuiseiBot.Tool;
 using Native.Sdk.Cqp.EventArgs;
 
-namespace com.cbgan.SuiseiBot.Code.ChatHandle.PCRHandle
+namespace SuiseiBot.PCRHandle
 {
     /// <summary>
     /// 切噜语转换

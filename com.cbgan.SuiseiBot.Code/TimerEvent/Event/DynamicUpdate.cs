@@ -1,20 +1,20 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using BilibiliApi;
 using BilibiliApi.Dynamic;
 using BilibiliApi.Dynamic.CardEnum;
 using BilibiliApi.Dynamic.DynamicData;
 using BilibiliApi.Dynamic.DynamicData.Card;
-using com.cbgan.SuiseiBot.Code.Database.Helpers;
-using com.cbgan.SuiseiBot.Code.IO.Config;
-using com.cbgan.SuiseiBot.Code.IO.Config.ConfigFile;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
+using SuiseiBot.Database.Helpers;
+using SuiseiBot.Config;
+using SuiseiBot.Config.ConfigFile;
+using SuiseiBot.Tool.Log;
 using Native.Sdk.Cqp;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace com.cbgan.SuiseiBot.Code.TimerEvent.Event
+namespace SuiseiBot.IO.Code.TimerEvent.Event
 {
     internal class DynamicUpdate
     {
@@ -25,7 +25,7 @@ namespace com.cbgan.SuiseiBot.Code.TimerEvent.Event
         public static async void BiliUpdateCheck(CQApi cqApi)
         {
             //读取配置文件
-            Config                  config        = new Config(cqApi.GetLoginQQ().Id);
+            Config.Config           config        = new Config.Config(cqApi.GetLoginQQ().Id);
             Module                  moduleEnable  = config.LoadedConfig.ModuleSwitch;
             List<GroupSubscription> Subscriptions = config.LoadedConfig.SubscriptionConfig.GroupsConfig;
             //数据库

@@ -1,16 +1,16 @@
 using System;
 using System.Threading.Tasks;
 using System.Web;
-using com.cbgan.SuiseiBot.Code.Network;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
-using com.cbgan.SuiseiBot.Code.Tool;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
+using SuiseiBot.Network;
+using SuiseiBot.TypeEnum;
+using SuiseiBot.TypeEnum.CmdType;
+using SuiseiBot.Tool;
+using SuiseiBot.Tool.Log;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 using Newtonsoft.Json.Linq;
 
-namespace com.cbgan.SuiseiBot.Code.ChatHandle.PCRHandle
+namespace SuiseiBot.PCRHandle
 {
     internal class GuildRankHandle
     {

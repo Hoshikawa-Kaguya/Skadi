@@ -1,10 +1,10 @@
 using System;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
-using com.cbgan.SuiseiBot.Code.Tool;
+using SuiseiBot.TypeEnum.CmdType;
+using SuiseiBot.Tool;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 
-namespace com.cbgan.SuiseiBot.Code.ChatHandle
+namespace SuiseiBot.IO.ChatHandle
 {
     internal class SurpriseMFKHandle
     {

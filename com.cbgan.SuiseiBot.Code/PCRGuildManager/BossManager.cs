@@ -1,9 +1,9 @@
 using System;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
+using SuiseiBot.TypeEnum.CmdType;
 using Native.Sdk.Cqp.Model;
 using Native.Sdk.Cqp.EventArgs;
 
-namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
+namespace SuiseiBot.PCRGuildManager
 {
     internal class BossManager
     {

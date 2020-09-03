@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
+using SuiseiBot.Tool.Log;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace com.cbgan.SuiseiBot.Code.Network
+namespace SuiseiBot.Network
 {
     internal class HTTPUtils
     {

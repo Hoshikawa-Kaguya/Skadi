@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace com.cbgan.SuiseiBot.Code.Resource.TypeEnum
+namespace SuiseiBot.TypeEnum
 {
     #region 区服标识
     internal enum Server

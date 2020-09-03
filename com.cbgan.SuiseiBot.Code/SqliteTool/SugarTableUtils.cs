@@ -2,7 +2,7 @@ using System;
 using System.Reflection;
 using SqlSugar;
 
-namespace com.cbgan.SuiseiBot.Code.SqliteTool
+namespace SuiseiBot.SqliteTool
 {
     internal class SugarTableUtils : Attribute
     {

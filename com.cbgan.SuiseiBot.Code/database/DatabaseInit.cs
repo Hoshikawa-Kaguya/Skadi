@@ -1,10 +1,10 @@
-using com.cbgan.SuiseiBot.Code.SqliteTool;
+using SuiseiBot.SqliteTool;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
 using System.IO;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
+using SuiseiBot.Tool.Log;
 
-namespace com.cbgan.SuiseiBot.Code.Database
+namespace SuiseiBot.Database
 {
     internal static class DatabaseInit//数据库初始化类
     {

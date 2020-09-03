@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
+using SuiseiBot.Tool.Log;
 
-namespace com.cbgan.SuiseiBot.Code.Network
+namespace SuiseiBot.Network
 {
     internal class NetServiceUtils
     {

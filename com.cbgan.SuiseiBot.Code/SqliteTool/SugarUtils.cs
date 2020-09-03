@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using SqlSugar;
 
-namespace com.cbgan.SuiseiBot.Code.SqliteTool
+namespace SuiseiBot.SqliteTool
 {
     /// <summary>
     /// SQLite数据库ORM工具类

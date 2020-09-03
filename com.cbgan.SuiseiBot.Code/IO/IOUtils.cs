@@ -2,11 +2,11 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Text;
-using com.cbgan.SuiseiBot.Code.Tool.Log;
+using SuiseiBot.Tool.Log;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace com.cbgan.SuiseiBot.Code.IO
+namespace SuiseiBot.IO.Code.IO
 {
     internal static class IOUtils
     {

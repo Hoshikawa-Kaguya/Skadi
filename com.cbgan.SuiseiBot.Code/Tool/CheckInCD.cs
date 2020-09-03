@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Native.Sdk.Cqp.EventArgs;
 
-namespace com.cbgan.SuiseiBot.Code.Tool
+namespace SuiseiBot.Tool
 {
     internal class CheckInCD
     {

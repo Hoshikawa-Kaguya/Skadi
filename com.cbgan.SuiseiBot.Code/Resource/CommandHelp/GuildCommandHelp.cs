@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
+using SuiseiBot.TypeEnum.CmdType;
 
-namespace com.cbgan.SuiseiBot.Code.Resource.CommandHelp
+namespace SuiseiBot.CommandHelp
 {
     /// <summary>
     /// 大佬快教教我这个指令怎么用.jpg
