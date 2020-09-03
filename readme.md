@@ -50,4 +50,4 @@ Microsoft Visual C++ 2015-2019 Redistributable
 
 ## 注意
 
-由于Mirai项目的特殊性，本项目随时可能会迁移至Discord平台[Discord](https://discord.com/)
+由于Mirai项目的特殊性，本项目随时可能会迁移至[Discord](https://discord.com/)平台
