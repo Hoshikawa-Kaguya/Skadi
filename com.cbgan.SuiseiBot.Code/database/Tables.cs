@@ -199,21 +199,21 @@ namespace com.cbgan.SuiseiBot.Code.Database
         /// <summary>
         /// 用于记录一阶段boss组所属分组的id
         /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id", ColumnDataType = "INTEGER")]
+        [SugarColumn(ColumnName = "boss_group_id_1", ColumnDataType = "INTEGER")]
         public long BossGroupId1 { get; set; }
 
         /// <summary>
         /// 用于记录一阶段boss组所属分组在远程数据库中的id
         /// 为空时则是本地数据
         /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id_cloud", ColumnDataType = "INTEGER", IsNullable = true)]
+        [SugarColumn(ColumnName = "boss_group_id_cloud_1", ColumnDataType = "INTEGER", IsNullable = true)]
         public long? GroupIdCloud1 { get; set; }
 
         /// <summary>
         /// 用于记录一阶段boss组该阶段的周目数
         /// -1则为无限周目数，不再进入下一阶段
         /// </summary>
-        [SugarColumn(ColumnName = "round", ColumnDataType = "INTEGER")]
+        [SugarColumn(ColumnName = "round_1", ColumnDataType = "INTEGER")]
         public int Round1 { get; set; }
 
         #endregion
@@ -223,21 +223,21 @@ namespace com.cbgan.SuiseiBot.Code.Database
         /// <summary>
         /// 用于记录二阶段boss组所属分组的id
         /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id", ColumnDataType = "INTEGER")]
+        [SugarColumn(ColumnName = "boss_group_id_2", ColumnDataType = "INTEGER")]
         public long BossGroupId2 { get; set; }
 
         /// <summary>
         /// 用于记录二阶段boss组所属分组在远程数据库中的id
         /// 为空时则是本地数据
         /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id_cloud", ColumnDataType = "INTEGER", IsNullable = true)]
+        [SugarColumn(ColumnName = "boss_group_id_cloud_2", ColumnDataType = "INTEGER", IsNullable = true)]
         public long? GroupIdCloud2 { get; set; }
 
         /// <summary>
         /// 用于记录二阶段boss组该阶段的周目数
         /// -1则为无限周目数，不再进入下一阶段
         /// </summary>
-        [SugarColumn(ColumnName = "round", ColumnDataType = "INTEGER")]
+        [SugarColumn(ColumnName = "round_2", ColumnDataType = "INTEGER")]
         public int Round2 { get; set; }
 
         #endregion
@@ -249,21 +249,21 @@ namespace com.cbgan.SuiseiBot.Code.Database
         /// <summary>
         /// 用于记录三阶段boss组所属分组的id
         /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id", ColumnDataType = "INTEGER", IsNullable = true)]
+        [SugarColumn(ColumnName = "boss_group_id_3", ColumnDataType = "INTEGER", IsNullable = true)]
         public long? BossGroupId3 { get; set; }
 
         /// <summary>
         /// 用于记录三阶段boss组所属分组在远程数据库中的id
         /// 为空时则是本地数据
         /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id_cloud", ColumnDataType = "INTEGER", IsNullable = true)]
+        [SugarColumn(ColumnName = "boss_group_id_cloud_3", ColumnDataType = "INTEGER", IsNullable = true)]
         public long? GroupIdCloud3 { get; set; }
 
         /// <summary>
         /// 用于记录三阶段boss组该阶段的周目数
         /// -1则为无限周目数，不再进入下一阶段
         /// </summary>
-        [SugarColumn(ColumnName = "round", ColumnDataType = "INTEGER", IsNullable = true)]
+        [SugarColumn(ColumnName = "round_3", ColumnDataType = "INTEGER", IsNullable = true)]
         public int? Round3 { get; set; }
 
         #endregion
@@ -273,21 +273,21 @@ namespace com.cbgan.SuiseiBot.Code.Database
         /// <summary>
         /// 用于记录三阶段boss组所属分组的id
         /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id", ColumnDataType = "INTEGER", IsNullable = true)]
+        [SugarColumn(ColumnName = "boss_group_id_4", ColumnDataType = "INTEGER", IsNullable = true)]
         public long? BossGroupId4 { get; set; }
 
         /// <summary>
         /// 用于记录三阶段boss组所属分组在远程数据库中的id
         /// 为空时则是本地数据
         /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id_cloud", ColumnDataType = "INTEGER", IsNullable = true)]
+        [SugarColumn(ColumnName = "boss_group_id_cloud_4", ColumnDataType = "INTEGER", IsNullable = true)]
         public long? GroupIdCloud4 { get; set; }
 
         /// <summary>
         /// 用于记录三阶段boss组该阶段的周目数
         /// -1则为无限周目数，不再进入下一阶段
         /// </summary>
-        [SugarColumn(ColumnName = "round", ColumnDataType = "INTEGER", IsNullable = true)]
+        [SugarColumn(ColumnName = "round_4", ColumnDataType = "INTEGER", IsNullable = true)]
         public int? Round4 { get; set; }
 
         #endregion
