@@ -1,18 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using com.cbgan.SuiseiBot.Code.ChatHandlers;
 using com.cbgan.SuiseiBot.Code.Database.Helpers;
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
 using com.cbgan.SuiseiBot.Code.Resource.TypeEnum.CmdType;
 using com.cbgan.SuiseiBot.Code.Tool;
+using com.cbgan.SuiseiBot.Code.Tool.Log;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
 {
@@ -36,10 +34,11 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
 
             int result = -2;
 
-            
+
             QQGroupMemberType fromQQMemberType = QQgroup.GetGroupMemberInfo(GMgrEventArgs.FromQQ.Id).MemberType;
             //指示是否是管理员操作的
-            bool isAdminAction = (fromQQMemberType == QQGroupMemberType.Manage || fromQQMemberType==QQGroupMemberType.Creator);
+            bool isAdminAction = (fromQQMemberType == QQGroupMemberType.Manage ||
+                                  fromQQMemberType == QQGroupMemberType.Creator);
             switch (commandType)
             {
                 //参数1 服务器地区，参数2 公会名（可选，缺省为群名）
@@ -48,8 +47,10 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                     {
                         QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
                                                  " 你没有权限这样做~");
+                        ConsoleLog.Warning($"会战[群:{QQgroup.Id}]", $"群成员{QQgroup.GetGroupMemberInfo(GMgrEventArgs.FromQQ.Id).Nick}正在尝试执行指令{commandType}");
                         return;
                     }
+
                     if (Utils.CheckForLength(commandArgs, 1, QQgroup, GMgrEventArgs.FromQQ.Id) == LenType.Legitimate)
                     {
                         if (commandArgs.Length == 3)
@@ -64,6 +65,11 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
 
                     switch (result)
                     {
+                        case -1:
+                            QQgroup.SendGroupMessage(
+                                                     CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
+                                                     $" 公会[{GMgrEventArgs.CQApi.GetGroupInfo(GMgrEventArgs.FromGroup.Id).Name}]创建失败：数据库错误。");
+                            break;
                         case 0:
                             QQgroup.SendGroupMessage(
                                                      CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
@@ -81,8 +87,10 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                     {
                         QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
                                                  " 你没有权限这样做~");
+                        ConsoleLog.Warning($"会战[群:{QQgroup.Id}]", $"群成员{QQgroup.GetGroupMemberInfo(GMgrEventArgs.FromQQ.Id).Nick}正在尝试执行指令{commandType}");
                         return;
                     }
+
                     Dictionary<long, int> addedQQList = new Dictionary<long, int>(); //已经入会的QQ号列表
                     var checkRet = Utils.CheckForLength(commandArgs, 1, QQgroup, GMgrEventArgs.FromQQ.Id);
                     if (checkRet == LenType.Extra || checkRet == LenType.Legitimate)
@@ -103,9 +111,9 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                                 addedQQList.Add(qqid,
                                                 dbAction.JoinToGuild(qqid, QQgroup.Id,
                                                                      Utils.getNick(GMgrEventArgs
-                                                                                   .CQApi
-                                                                                   .GetGroupMemberInfo(GMgrEventArgs.FromGroup,
-                                                                                                       qqid))));
+                                                                         .CQApi
+                                                                         .GetGroupMemberInfo(GMgrEventArgs.FromGroup,
+                                                                             qqid))));
                             }
 
                             //如果只存在需要添加的成员，而没有需要更新的成员
@@ -123,22 +131,69 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                         {
                             result = dbAction.JoinToGuild(GMgrEventArgs.FromQQ, QQgroup.Id,
                                                           Utils.getNick(GMgrEventArgs
-                                                              .CQApi.GetGroupMemberInfo(GMgrEventArgs.FromGroup,
-                                                                                        GMgrEventArgs.FromQQ)));
+                                                                        .CQApi
+                                                                        .GetGroupMemberInfo(GMgrEventArgs.FromGroup,
+                                                                            GMgrEventArgs.FromQQ)));
                         }
                     }
                     else
                     {
                         return;
                     }
-
+                    if (addedQQList.Where(x => x.Value == -1).ToList().Count > 0)
+                    {
+                        result = -1;
+                    }
                     switch (result)
                     {
                         case -2: //不可能进入，但防御性编程，需要处理
                             QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 未定义行为，请检查代码。");
                             break;
                         case -1: //一般情况下不可能非法，但也要处理
-                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " QQ号输入非法。");
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 操作过程中数据库出现错误。");
+                            StringBuilder sb11 = new StringBuilder();
+                            //筛选出所有返回值为1的操作，也即更新了的成员
+                            foreach (long qqNumber in addedQQList
+                                                      .Where(x => x.Value == 1)
+                                                      .ToDictionary(x => x.Key, x => x.Value)
+                                                      .Keys)
+                                sb11.Append(CQApi.CQCode_At(qqNumber).ToSendString());
+
+                            StringBuilder sb12 = new StringBuilder();
+                            //如果有操作返回值为0，说明存在新添加的成员
+                            if (addedQQList.Where(x => x.Value == 0).ToDictionary(x => x.Key, x => x.Value).Count >
+                                0)
+                            {
+                                foreach (long qqNumber in addedQQList
+                                                          .Where(x => x.Value == 0)
+                                                          .ToDictionary(x => x.Key, x => x.Value).Keys)
+                                    sb12.Append(CQApi.CQCode_At(qqNumber).ToSendString());
+                            }
+                            StringBuilder sb13 = new StringBuilder();
+                            if (addedQQList.Where(x => x.Value == -1).ToDictionary(x => x.Key, x => x.Value).Count >
+                                0)
+                            {
+                                foreach (long qqNumber in addedQQList
+                                                          .Where(x => x.Value == -1)
+                                                          .ToDictionary(x => x.Key, x => x.Value).Keys)
+                                    sb13.Append(CQApi.CQCode_At(qqNumber).ToSendString());
+                            }
+
+                            if (sb11.ToString() != "" || sb12.ToString() != "" || sb13.ToString() != "")
+                            {
+                                QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 结果如下，",
+                                                         sb11.ToString() != ""
+                                                             ? ("以下成员已经更新：\r\n" + sb11.ToString())
+                                                             : "",
+                                                         sb12.ToString() != ""
+                                                             ? ("\r\n以下成员已添加\r\n" + sb12.ToString())
+                                                             : "" /*只有存在新添加成员的情况下才需要显示这一句*/,
+                                                         sb13.ToString() != ""
+                                                             ? ("\r\n以下成员操作时发生错误\r\n" + sb13.ToString())
+                                                             : ""
+                                                         );
+                            }
+
                             break;
                         case 0: //只存在新添加的成员
 
@@ -186,11 +241,11 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                     var list = dbAction.ShowMembers(QQgroup.Id);
                     if (list.Any())
                     {
-                        StringBuilder sb              = new StringBuilder();
-                        double           maxLenghtOfQQ   = 0; //最长的QQ号长度，用于Pad对齐
-                        double maxLenghtOfNick = 0; //最长的昵称长度，用于Pad对齐
-                        int maxLenghtOfQQint   = 0; //最长的QQ号长度，用于Pad对齐
-                        int maxLenghtOfNickint = 0; //最长的昵称长度，用于Pad对齐
+                        StringBuilder sb                 = new StringBuilder();
+                        double        maxLenghtOfQQ      = 0; //最长的QQ号长度，用于Pad对齐
+                        double        maxLenghtOfNick    = 0; //最长的昵称长度，用于Pad对齐
+                        int           maxLenghtOfQQint   = 0; //最长的QQ号长度，用于Pad对齐
+                        int           maxLenghtOfNickint = 0; //最长的昵称长度，用于Pad对齐
                         list.ForEach(i =>
                                      {
                                          if (Utils.getQQStrLength(i.Uid.ToString()) > maxLenghtOfQQ)
@@ -213,14 +268,16 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                                              maxLenghtOfNickint = i.NickName.ToString().Length;
                                          }
                                      });
-                        maxLenghtOfQQ++; maxLenghtOfQQ++;
-                        list.ForEach(i => sb.Append("\n" + Utils.PadRightQQ(i.Uid.ToString(),maxLenghtOfQQ) + "  |   " +
+                        maxLenghtOfQQ++;
+                        maxLenghtOfQQ++;
+                        list.ForEach(i => sb.Append("\n"     + Utils.PadRightQQ(i.Uid.ToString(), maxLenghtOfQQ) +
+                                                    "  |   " +
                                                     i.NickName));
 
                         string listHeader = "\n\t" + dbAction.getGuildName(QQgroup.Id);
                         listHeader += "\n\t公会成员列表";
                         listHeader += "\n".PadRight(maxLenghtOfNickint + maxLenghtOfQQint + 6, '=');
-                        listHeader += "\n" + Utils.PadRightQQ("QQ号",maxLenghtOfQQ) + "  |   昵称";
+                        listHeader += "\n" + Utils.PadRightQQ("QQ号", maxLenghtOfQQ) + "  |   昵称";
                         QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), listHeader, sb.ToString());
                     }
                     else
@@ -235,8 +292,10 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                     {
                         QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
                                                  " 你没有权限这样做~");
+                        ConsoleLog.Warning($"会战[群:{QQgroup.Id}]", $"群成员{QQgroup.GetGroupMemberInfo(GMgrEventArgs.FromQQ.Id).Nick}正在尝试执行指令{commandType}");
                         return;
                     }
+
                     Dictionary<long, int> deletedQQList = new Dictionary<long, int>(); //已经入会的QQ号列表
                     var lengthRet = Utils.CheckForLength(commandArgs, 1, QQgroup, GMgrEventArgs.FromQQ.Id);
                     if (lengthRet == LenType.Legitimate || lengthRet == LenType.Extra)
@@ -274,13 +333,61 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                         }
                     }
 
+                    if (deletedQQList.Where(x => x.Value == -1).ToList().Count > 0)
+                    {
+                        result = -1;
+                    }
+
                     switch (result)
                     {
                         case -2: //不可能进入，但防御性编程，需要处理
                             QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 未定义行为，请检查代码。");
                             break;
-                        case -1: //一般情况下不可能非法，但也要处理
-                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " QQ号输入非法。");
+                        case -1: //数据库出错
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 操作过程中数据库出现错误。");
+                            StringBuilder sb11 = new StringBuilder();
+                            //筛选出所有返回值为1的操作，也即未在公会的成员
+                            foreach (long qqNumber in deletedQQList
+                                                      .Where(x => x.Value == 1)
+                                                      .ToDictionary(x => x.Key, x => x.Value)
+                                                      .Keys)
+                                sb11.Append(CQApi.CQCode_At(qqNumber).ToSendString());
+
+                            StringBuilder sb12 = new StringBuilder();
+                            //如果有操作返回值为0，说明是成功退会的
+                            if (deletedQQList.Where(x => x.Value == 0).ToDictionary(x => x.Key, x => x.Value).Count >
+                                0)
+                            {
+                                foreach (long qqNumber in deletedQQList
+                                                          .Where(x => x.Value == 0)
+                                                          .ToDictionary(x => x.Key, x => x.Value).Keys)
+                                    sb12.Append(CQApi.CQCode_At(qqNumber).ToSendString());
+                            }
+                            StringBuilder sb13 = new StringBuilder();
+                            if (deletedQQList.Where(x => x.Value == -1).ToDictionary(x => x.Key, x => x.Value).Count >
+                                0)
+                            {
+                                foreach (long qqNumber in deletedQQList
+                                                          .Where(x => x.Value == -1)
+                                                          .ToDictionary(x => x.Key, x => x.Value).Keys)
+                                    sb13.Append(CQApi.CQCode_At(qqNumber).ToSendString());
+                            }
+
+                            if (sb11.ToString() != "" || sb12.ToString() != "" || sb13.ToString() != "")
+                            {
+                                QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 结果如下，",
+                                                         sb11.ToString() != ""
+                                                             ? ("以下成员未在公会：\r\n" + sb11.ToString())
+                                                             : "",
+                                                         sb12.ToString() != ""
+                                                             ? ("\r\n以下成员成功退会\r\n" + sb12.ToString())
+                                                             : "" /*只有存在新添加成员的情况下才需要显示这一句*/,
+                                                         sb13.ToString() != ""
+                                                             ? ("\r\n以下成员操作时发生错误\r\n" + sb13.ToString())
+                                                             : ""
+                                                         );
+                            }
+
                             break;
                         case 0: //QQ号全部成功退会
                             //如果是自己退会
@@ -338,11 +445,17 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                     {
                         QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
                                                  " 你没有权限这样做~");
+                        ConsoleLog.Warning($"会战[群:{QQgroup.Id}]", $"群成员{QQgroup.GetGroupMemberInfo(GMgrEventArgs.FromQQ.Id).Nick}正在尝试执行指令{commandType}");
                         return;
                     }
-                    int retCode= dbAction.EmptyMember(QQgroup.Id);
+
+                    int retCode = dbAction.EmptyMember(QQgroup.Id);
                     switch (retCode)
                     {
+                        case -1:
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
+                                                     " 数据库发生错误~");
+                            break;
                         case 0:
                             QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
                                                      " 清空成功~");
@@ -360,7 +473,7 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                                                      " 未知错误！返回值异常！");
                             break;
                     }
-                    
+
                     break;
                 case PCRGuildCmdType.JoinAll: //一键入会
                     if (!isAdminAction)
@@ -369,11 +482,13 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                                                  " 你没有权限这样做~");
                         return;
                     }
+
                     Dictionary<long, int> addedQQsList = new Dictionary<long, int>(); //已经入会的QQ号列表
                     foreach (GroupMemberInfo member in QQgroup.GetGroupMemberList())
                     {
                         //需要添加为成员的QQ号列表和对应操作的返回值
-                        addedQQsList.Add(member.QQ.Id, dbAction.JoinToGuild(member.QQ.Id, QQgroup.Id, Utils.getNick(member)));
+                        addedQQsList.Add(member.QQ.Id,
+                                         dbAction.JoinToGuild(member.QQ.Id, QQgroup.Id, Utils.getNick(member)));
                     }
 
                     //如果只存在需要添加的成员，而没有需要更新的成员
@@ -387,14 +502,61 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
                         result = 2;
                     }
 
+                    if (addedQQsList.Where(x => x.Value == -1).ToList().Count > 0)
+                    {
+                        result = -1;
+                    }
 
                     switch (result)
                     {
                         case -2: //不可能进入，但防御性编程，需要处理
                             QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 未定义行为，请检查代码。");
                             break;
-                        case -1: //一般情况下不可能非法，但也要处理
-                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " QQ号输入非法。");
+                        case -1: //数据库出错
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 操作过程中数据库出现错误。");
+                            StringBuilder sb11 = new StringBuilder();
+                            //筛选出所有返回值为1的操作，也即更新了的成员
+                            foreach (long qqNumber in addedQQsList
+                                                      .Where(x => x.Value == 1)
+                                                      .ToDictionary(x => x.Key, x => x.Value)
+                                                      .Keys)
+                                sb11.Append(CQApi.CQCode_At(qqNumber).ToSendString());
+
+                            StringBuilder sb12 = new StringBuilder();
+                            //如果有操作返回值为0，说明存在新添加的成员
+                            if (addedQQsList.Where(x => x.Value == 0).ToDictionary(x => x.Key, x => x.Value).Count >
+                                0)
+                            {
+                                foreach (long qqNumber in addedQQsList
+                                                          .Where(x => x.Value == 0)
+                                                          .ToDictionary(x => x.Key, x => x.Value).Keys)
+                                    sb12.Append(CQApi.CQCode_At(qqNumber).ToSendString());
+                            }
+                            StringBuilder sb13 = new StringBuilder();
+                            if (addedQQsList.Where(x => x.Value == -1).ToDictionary(x => x.Key, x => x.Value).Count >
+                                0)
+                            {
+                                foreach (long qqNumber in addedQQsList
+                                                          .Where(x => x.Value == -1)
+                                                          .ToDictionary(x => x.Key, x => x.Value).Keys)
+                                    sb13.Append(CQApi.CQCode_At(qqNumber).ToSendString());
+                            }
+
+                            if (sb11.ToString() != "" || sb12.ToString() != "" || sb13.ToString() != "")
+                            {
+                                QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 结果如下，",
+                                                         sb11.ToString() != ""
+                                                             ? ("以下成员已经更新：\r\n" + sb11.ToString())
+                                                             : "",
+                                                         sb12.ToString() != ""
+                                                             ? ("\r\n以下成员已添加\r\n" + sb12.ToString())
+                                                             : "" /*只有存在新添加成员的情况下才需要显示这一句*/,
+                                                         sb13.ToString() != ""
+                                                             ? ("\r\n以下成员操作时发生错误\r\n" + sb13.ToString())
+                                                             : ""
+                                                         );
+                            }
+
                             break;
                         case 0: //只存在新添加的成员
 
@@ -445,10 +607,9 @@ namespace com.cbgan.SuiseiBot.Code.PCRGuildManager
 
                 default: //不可能发生，防御性处理
                     PCRGuildHandle.GetUnknowCommand(GMgrEventArgs);
+                    ConsoleLog.Warning($"会战[群:{QQgroup.Id}]", $"接到未知指令{commandType}");
                     break;
             }
         }
-
-        
     }
 }

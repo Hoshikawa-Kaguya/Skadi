@@ -1,8 +1,8 @@
-using System;
-using System.Collections.Generic;
 using com.cbgan.SuiseiBot.Code.SqliteTool;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
+using System;
+using System.Collections.Generic;
 
 namespace com.cbgan.SuiseiBot.Code.Database.Helpers
 {
@@ -102,7 +102,7 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
         public string getGuildName(long groupid)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            var data = dbClient.Queryable<GuildData>().Where(i => i.Gid == groupid);
+            var                  data     = dbClient.Queryable<GuildData>().Where(i => i.Gid == groupid);
             if (data.Any())
             {
                 return data.First().GuildName;
@@ -124,12 +124,12 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
         /// <returns>状态值
         /// 0：正常移除
         /// 1：公会不存在
-        /// 2：删除时发生错误
+        /// -1：删除时发生错误
         /// </returns>
         public int EmptyMember(long groupid)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            var data = dbClient.Queryable<MemberData>().Where(i => i.Gid == groupid);
+            var                  data     = dbClient.Queryable<MemberData>().Where(i => i.Gid == groupid);
             if (data.Any())
             {
                 if (dbClient.Deleteable<MemberData>().Where(i => i.Gid == groupid).ExecuteCommandHasChange())
@@ -138,9 +138,8 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
                 }
                 else
                 {
-                    return 2;
+                    return -1;
                 }
-
             }
             else
             {
@@ -156,6 +155,7 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
         /// <returns>状态值
         /// 0：正常移除
         /// 1：该成员并不在公会内
+        /// -1：数据库出错
         /// </returns>
         public int LeaveGuild(long qqid, long groupid)
         {
@@ -163,8 +163,10 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             if (dbClient.Queryable<MemberData>().Where(i => i.Uid == qqid && i.Gid == groupid).Any())
             {
-                retCode = 0;
-                dbClient.Deleteable<MemberData>().Where(i => i.Uid == qqid && i.Gid == groupid).ExecuteCommand();
+                retCode = dbClient.Deleteable<MemberData>().Where(i => i.Uid == qqid && i.Gid == groupid)
+                                  .ExecuteCommandHasChange()
+                    ? 0
+                    : -1;
             }
             else
             {
@@ -189,6 +191,7 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
         /// <returns>状态值
         /// 0：正常添加
         /// 1：该成员已存在，更新信息
+        /// -1：数据库出错
         /// </returns>
         public int JoinToGuild(long qqid, long groupid, string nickName)
         {
@@ -204,14 +207,14 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
                 };
                 if (dbClient.Queryable<MemberData>().Where(i => i.Uid == qqid && i.Gid == groupid).Any())
                 {
-                    retCode = 1;
-                    dbClient.Updateable<MemberData>(data).Where(i => i.Uid == qqid && i.Gid == groupid)
-                            .ExecuteCommand();
+                    retCode = dbClient.Updateable<MemberData>(data).Where(i => i.Uid == qqid && i.Gid == groupid)
+                                      .ExecuteCommandHasChange()
+                        ? 1
+                        : -1;
                 }
                 else
                 {
-                    retCode = 0;
-                    dbClient.Insertable<MemberData>(data).ExecuteCommand();
+                    retCode = dbClient.Insertable<MemberData>(data).ExecuteCommand() > 0 ? 0 : -1;
                 }
 
 
@@ -261,6 +264,7 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
         /// <returns>状态值
         /// 0：正常创建
         /// 1：该群公会已存在，更新信息
+        /// -1:数据库出错
         /// </returns>
         public int createGuild(string gArea, string gName, long gId)
         {
@@ -276,13 +280,13 @@ namespace com.cbgan.SuiseiBot.Code.Database.Helpers
                 };
                 if (dbClient.Queryable<GuildData>().Where(i => i.Gid == gId).Any())
                 {
-                    retCode = 1;
-                    dbClient.Updateable<GuildData>(data).Where(i => i.Gid == gId).ExecuteCommand();
+                    retCode = dbClient.Updateable<GuildData>(data)
+                                      .Where(i => i.Gid == gId)
+                                      .ExecuteCommandHasChange()?1:-1;
                 }
                 else
                 {
-                    retCode = 0;
-                    dbClient.Insertable<GuildData>(data).ExecuteCommand();
+                    retCode = dbClient.Insertable<GuildData>(data).ExecuteCommand()>0?0:-1;
                 }
 
                 //TODO 改用ORM
