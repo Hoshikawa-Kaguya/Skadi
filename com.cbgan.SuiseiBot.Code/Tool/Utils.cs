@@ -77,21 +77,21 @@ namespace com.cbgan.SuiseiBot.Code.Tool
 
         /// <summary>
         /// 获取今天零点的时间戳
-        /// 时间戳单位(毫秒)
+        /// 时间戳单位(秒)
         /// </summary>
         public static long GetTodayStamp() 
             => (long)(DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;
 
         /// <summary>
         /// 将long类型时间戳转换为DateTime
-        /// 时间戳单位(毫秒)
+        /// 时间戳单位(秒)
         /// </summary>
         public static DateTime TimeStampToDateTime(long TimeStamp)
             => new System.DateTime(1970, 1, 1, 8, 0, 0, 0).AddSeconds(TimeStamp);
 
         /// <summary>
         /// 将DateTime转换为long时间戳
-        /// 时间戳单位(毫秒)
+        /// 时间戳单位(秒)
         /// </summary>
         public static long DateTimeToTimeStamp(DateTime dateTime)
             => (long)(dateTime - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;

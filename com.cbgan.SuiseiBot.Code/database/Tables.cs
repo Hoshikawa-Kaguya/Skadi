@@ -1,3 +1,4 @@
+using com.cbgan.SuiseiBot.Code.Resource.TypeEnum;
 using SqlSugar;
 
 namespace com.cbgan.SuiseiBot.Code.Database
@@ -112,84 +113,6 @@ namespace com.cbgan.SuiseiBot.Code.Database
     }
     #endregion
 
-    #region BOSS信息表定义
-    [SugarTable("clan_battle_boss_info")]
-    internal class BossInfo
-    {
-        /// <summary>
-        /// phase_id用于标识boss的阶段
-        /// </summary>
-        [SugarColumn(ColumnName = "phase_id", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
-        public int Phaseid { get; set; }
-
-        /// <summary>
-        /// order用于标识boss的序号(1-5)
-        /// </summary>
-        [SugarColumn(ColumnName = "order_num", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
-        public int Order { get; set; }
-
-        /// <summary>
-        /// scale用于记录boss属性强化倍率
-        /// </summary>
-        [SugarColumn(ColumnName = "scale", ColumnDataType = "INTEGER")]
-        public double Scale { get; set; }
-
-        /// <summary>
-        /// scale用于记录boss属性强化倍率
-        /// </summary>
-        [SugarColumn(ColumnName = "score_coefficient", ColumnDataType = "INTEGER")]
-        public double ScoceRatio { get; set; }
-
-        /// <summary>
-        /// GroupId用于记录boss所属分组的id
-        /// </summary>
-        [SugarColumn(ColumnName = "group_id", ColumnDataType = "INTEGER")]
-        public double GroupId { get; set; }
-
-        /// <summary>
-        /// boss属性：名称
-        /// </summary>
-        [SugarColumn(ColumnName = "name", ColumnDataType = "VARCHAR")]
-        public string Name { get; set; }
-
-        /// <summary>
-        /// boss属性：血量
-        /// </summary>
-        [SugarColumn(ColumnName = "hp", ColumnDataType = "INTEGER")]
-        public long HP { get; set; }
-
-        /// <summary>
-        /// boss属性：物攻
-        /// </summary>
-        [SugarColumn(ColumnName = "atk", ColumnDataType = "INTEGER")]
-        public int ATK { get; set; }
-
-        /// <summary>
-        /// boss属性：法攻
-        /// </summary>
-        [SugarColumn(ColumnName = "magic_atk", ColumnDataType = "INTEGER")]
-        public int MagicATK { get; set; }
-
-        /// <summary>
-        /// boss属性：物防
-        /// </summary>
-        [SugarColumn(ColumnName = "def", ColumnDataType = "INTEGER")]
-        public int DEF { get; set; }
-
-        /// <summary>
-        /// boss属性：法防
-        /// </summary>
-        [SugarColumn(ColumnName = "magic_def", ColumnDataType = "INTEGER")]
-        public int MagicDEF { get; set; }
-
-        /// <summary>
-        /// 用于记录boss描述
-        /// </summary>
-        [SugarColumn(ColumnName = "comment", ColumnDataType = "VARCHAR")]
-        public string Comment { get; set; }
-    }
-    #endregion
-
     #region 阿B订阅数据表定义
     [SugarTable("bili_subscription")]
     internal class BiliSubscription
@@ -202,4 +125,117 @@ namespace com.cbgan.SuiseiBot.Code.Database
         public long UpdateTime { set; get; }
     }
     #endregion
+    
+#region 会战Boss相关数据
+
+    #region 阶段表定义
+    [SugarTable("clan_battle_phase_info")]
+    internal class PhaseInfo
+    {
+        /// <summary>
+        /// phase_id用于标识当前boss组的阶段
+        /// </summary>
+        [SugarColumn(ColumnName = "phase_id", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public int PhaseId { get; set; }
+
+        /// <summary>
+        /// server用于标识当前boss组信息的所在区服
+        /// </summary>
+        [SugarColumn(ColumnName = "server", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public Server ServerId { set; get; }
+
+        /// <summary>
+        /// GroupId用于记录当前boss组所属分组的id
+        /// </summary>
+        [SugarColumn(ColumnName = "boss_group_id", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public long BossGroupId { get; set; }
+
+        /// <summary>
+        /// round用于记录当前boss组该阶段的周目数
+        /// -1则为无限周目数
+        /// </summary>
+        [SugarColumn(ColumnName = "round", ColumnDataType = "INTEGER")]
+        public int Round { get; set; }
+    }
+    #endregion
+
+    #region BOSS信息表定义
+    [SugarTable("clan_battle_boss_info")]
+    internal class BossInfo
+    {
+        /// <summary>
+        /// GroupId用于记录该boss所属分组的id
+        /// </summary>
+        [SugarColumn(ColumnName = "boss_group_id", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public long BossGroupId { get; set; }
+
+        /// <summary>
+        /// order用于标识boss的序号(1-5)
+        /// </summary>
+        [SugarColumn(ColumnName = "order_num", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public int Order { get; set; }
+
+        /// <summary>
+        /// server用于标识boss信息的所在区服
+        /// </summary>
+        [SugarColumn(ColumnName = "server", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public Server ServerId { set; get; }
+
+        /// <summary>
+        /// score_coefficient用于记录boss分数倍率
+        /// </summary>
+        [SugarColumn(ColumnName = "score_coefficient", ColumnDataType = "FLOAT")]
+        public float ScoceRatio { get; set; }
+
+        /// <summary>
+        /// scale用于记录boss属性强化倍率
+        /// </summary>
+        [SugarColumn(ColumnName = "scale", ColumnDataType = "FLOAT", IsNullable = true)]
+        public float Scale { get; set; }
+
+        /// <summary>
+        /// boss属性：名称
+        /// </summary>
+        [SugarColumn(ColumnName = "name", ColumnDataType = "VARCHAR", IsNullable = true)]
+        public string Name { get; set; }
+
+        /// <summary>
+        /// boss属性：血量
+        /// </summary>
+        [SugarColumn(ColumnName = "hp", ColumnDataType = "INTEGER", IsNullable = true)]
+        public long HP { get; set; }
+
+        /// <summary>
+        /// boss属性：物攻
+        /// </summary>
+        [SugarColumn(ColumnName = "atk", ColumnDataType = "INTEGER", IsNullable = true)]
+        public int ATK { get; set; }
+
+        /// <summary>
+        /// boss属性：法攻
+        /// </summary>
+        [SugarColumn(ColumnName = "magic_atk", ColumnDataType = "INTEGER", IsNullable = true)]
+        public int MagicATK { get; set; }
+
+        /// <summary>
+        /// boss属性：物防
+        /// </summary>
+        [SugarColumn(ColumnName = "def", ColumnDataType = "INTEGER", IsNullable = true)]
+        public int DEF { get; set; }
+
+        /// <summary>
+        /// boss属性：法防
+        /// </summary>
+        [SugarColumn(ColumnName = "magic_def", ColumnDataType = "INTEGER", IsNullable = true)]
+        public int MagicDEF { get; set; }
+
+        /// <summary>
+        /// 用于记录boss描述
+        /// </summary>
+        [SugarColumn(ColumnName = "comment", ColumnDataType = "VARCHAR", IsNullable = true)]
+        public string Comment { get; set; }
+    }
+#endregion
+
+#endregion
 }
