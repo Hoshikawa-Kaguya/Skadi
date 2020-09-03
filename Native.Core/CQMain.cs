@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Unity;
 using Native.Sdk.Cqp.Interface;
-using SuiseiBot.IO.Code.CQInterface;
+using SuiseiBot.Code.CQInterface;
 
 namespace Native.Core
 {
