@@ -128,34 +128,132 @@ namespace com.cbgan.SuiseiBot.Code.Database
     
 #region 会战Boss相关数据
 
-    #region 阶段表定义
-    [SugarTable("clan_battle_phase_info")]
-    internal class PhaseInfo
+    #region 会战数据表定义
+    [SugarTable("clan_battle_info")]
+    internal class ClanBattleInfo
     {
         /// <summary>
-        /// phase_id用于标识当前boss组的阶段
+        /// 当前会战的ID
         /// </summary>
-        [SugarColumn(ColumnName = "phase_id", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
-        public int PhaseId { get; set; }
+        [SugarColumn(ColumnName = "clan_battle_id", ColumnDataType = "INTEGER", IsIdentity = true)]
+        public long ClanBattleId { get; set; }
+
+        /// <summary>
+        /// 当前会战在远程数据库中的id
+        /// 为空时则是本地数据
+        /// </summary>
+        [SugarColumn(ColumnName = "clan_battle_id_cloud", ColumnDataType = "INTEGER", IsNullable = true)]
+        public long? ClanBattleIdCloud { get; set; }
 
         /// <summary>
         /// server用于标识当前boss组信息的所在区服
         /// </summary>
-        [SugarColumn(ColumnName = "server", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        [SugarColumn(ColumnName = "server", ColumnDataType = "INTEGER")]
         public Server ServerId { set; get; }
 
         /// <summary>
-        /// GroupId用于记录当前boss组所属分组的id
+        /// 当前会战数据的更新时间
         /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
-        public long BossGroupId { get; set; }
+        [SugarColumn(ColumnName = "update_time", ColumnDataType = "INTEGER")]
+        public long UpdateTime { get; set; }
+
+        #region 一阶段
 
         /// <summary>
-        /// round用于记录当前boss组该阶段的周目数
-        /// -1则为无限周目数
+        /// 用于记录一阶段boss组所属分组的id
+        /// </summary>
+        [SugarColumn(ColumnName = "boss_group_id", ColumnDataType = "INTEGER")]
+        public long BossGroupId1 { get; set; }
+
+        /// <summary>
+        /// 用于记录一阶段boss组所属分组在远程数据库中的id
+        /// 为空时则是本地数据
+        /// </summary>
+        [SugarColumn(ColumnName = "boss_group_id_cloud", ColumnDataType = "INTEGER", IsNullable = true)]
+        public long? GroupIdCloud1 { get; set; }
+
+        /// <summary>
+        /// 用于记录一阶段boss组该阶段的周目数
+        /// -1则为无限周目数，不再进入下一阶段
         /// </summary>
         [SugarColumn(ColumnName = "round", ColumnDataType = "INTEGER")]
-        public int Round { get; set; }
+        public int Round1 { get; set; }
+
+        #endregion
+
+        #region 二阶段
+
+        /// <summary>
+        /// 用于记录二阶段boss组所属分组的id
+        /// </summary>
+        [SugarColumn(ColumnName = "boss_group_id", ColumnDataType = "INTEGER")]
+        public long BossGroupId2 { get; set; }
+
+        /// <summary>
+        /// 用于记录二阶段boss组所属分组在远程数据库中的id
+        /// 为空时则是本地数据
+        /// </summary>
+        [SugarColumn(ColumnName = "boss_group_id_cloud", ColumnDataType = "INTEGER", IsNullable = true)]
+        public long? GroupIdCloud2 { get; set; }
+
+        /// <summary>
+        /// 用于记录二阶段boss组该阶段的周目数
+        /// -1则为无限周目数，不再进入下一阶段
+        /// </summary>
+        [SugarColumn(ColumnName = "round", ColumnDataType = "INTEGER")]
+        public int Round2 { get; set; }
+
+        #endregion
+
+        //第三/四阶段均为可空字段，当不存在三/四阶段时需要置空
+
+        #region 三阶段
+
+        /// <summary>
+        /// 用于记录三阶段boss组所属分组的id
+        /// </summary>
+        [SugarColumn(ColumnName = "boss_group_id", ColumnDataType = "INTEGER", IsNullable = true)]
+        public long? BossGroupId3 { get; set; }
+
+        /// <summary>
+        /// 用于记录三阶段boss组所属分组在远程数据库中的id
+        /// 为空时则是本地数据
+        /// </summary>
+        [SugarColumn(ColumnName = "boss_group_id_cloud", ColumnDataType = "INTEGER", IsNullable = true)]
+        public long? GroupIdCloud3 { get; set; }
+
+        /// <summary>
+        /// 用于记录三阶段boss组该阶段的周目数
+        /// -1则为无限周目数，不再进入下一阶段
+        /// </summary>
+        [SugarColumn(ColumnName = "round", ColumnDataType = "INTEGER", IsNullable = true)]
+        public int? Round3 { get; set; }
+
+        #endregion
+
+        #region 四阶段
+
+        /// <summary>
+        /// 用于记录三阶段boss组所属分组的id
+        /// </summary>
+        [SugarColumn(ColumnName = "boss_group_id", ColumnDataType = "INTEGER", IsNullable = true)]
+        public long? BossGroupId4 { get; set; }
+
+        /// <summary>
+        /// 用于记录三阶段boss组所属分组在远程数据库中的id
+        /// 为空时则是本地数据
+        /// </summary>
+        [SugarColumn(ColumnName = "boss_group_id_cloud", ColumnDataType = "INTEGER", IsNullable = true)]
+        public long? GroupIdCloud4 { get; set; }
+
+        /// <summary>
+        /// 用于记录三阶段boss组该阶段的周目数
+        /// -1则为无限周目数，不再进入下一阶段
+        /// </summary>
+        [SugarColumn(ColumnName = "round", ColumnDataType = "INTEGER", IsNullable = true)]
+        public int? Round4 { get; set; }
+
+        #endregion
     }
     #endregion
 
@@ -168,6 +266,13 @@ namespace com.cbgan.SuiseiBot.Code.Database
         /// </summary>
         [SugarColumn(ColumnName = "boss_group_id", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
         public long BossGroupId { get; set; }
+
+        /// <summary>
+        /// GroupIdCloud用于记录当前boss组所属分组在远程数据中的id
+        /// 为空时则是本地数据
+        /// </summary>
+        [SugarColumn(ColumnName = "boss_group_id_cloud", ColumnDataType = "INTEGER", IsNullable = true)]
+        public long? GroupIdCloud { get; set; }
 
         /// <summary>
         /// order用于标识boss的序号(1-5)
