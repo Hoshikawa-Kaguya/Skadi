@@ -150,25 +150,18 @@ namespace SuiseiBot.Code.Database
         public long UpdateTime { set; get; }
     }
     #endregion
-    
-#region 会战Boss相关数据
+
+    #region 会战数据
 
     #region 每个公会的会战数据
-    [SugarTable("guild_battle_data")]
-    internal class GuildBattleData
+    [SugarTable("guild_battle_status")]
+    internal class GuildBattleStatus
     {
         /// <summary>
         /// 公会所属群号
         /// </summary>
         [SugarColumn(ColumnName = "gid",ColumnDataType = "INTEGER",IsPrimaryKey = true)]
         public long Gid { get; set; }
-
-        /// <summary>
-        /// 当前公会正在进行的会战数据id（与ClanBattleInfo的会战ID相同）
-        /// boss血量数据均由此ID进行查找
-        /// </summary>
-        [SugarColumn(ColumnName = "clan_battle_id",ColumnDataType = "INTEGER")]
-        public long ClanBattleId { get; set; }
 
         /// <summary>
         /// 当前boss的血量
@@ -202,307 +195,134 @@ namespace SuiseiBot.Code.Database
     }
     #endregion
 
-    #region 会战数据表定义
-    [SugarTable("clan_battle_info")]
-    internal class ClanBattleInfo
+    #region Boss数据
+    [SugarTable("guild_battle_boss")]
+    internal class GuildBattleBoss
     {
         /// <summary>
-        /// 会战ID
+        /// boss的区服
         /// </summary>
-        [SugarColumn(ColumnName = "clan_battle_id", ColumnDataType = "INTEGER", IsIdentity = true)]
-        public long ClanBattleId { get; set; }
-
-        /// <summary>
-        /// 当前会战在远程数据库中的id
-        /// 为空时则是本地数据
-        /// </summary>
-        [SugarColumn(ColumnName = "clan_battle_id_cloud", ColumnDataType = "INTEGER", IsNullable = true)]
-        public long? ClanBattleIdCloud { get; set; }
-
-        /// <summary>
-        /// server用于标识当前boss组信息的所在区服
-        /// </summary>
-        [SugarColumn(ColumnName = "server", ColumnDataType = "INTEGER")]
+        [SugarColumn(ColumnName = "server",ColumnDataType = "INTEGER",IsPrimaryKey = true)]
         public Server ServerId { set; get; }
 
         /// <summary>
-        /// 当前会战数据的更新时间
+        /// Boss在一周目中的序号
         /// </summary>
-        [SugarColumn(ColumnName = "update_time", ColumnDataType = "INTEGER")]
-        public long UpdateTime { get; set; }
-
-        #region 一阶段
+        [SugarColumn(ColumnName = "order",ColumnDataType = "INTEGER",IsPrimaryKey = true)]
+        public int Order { set; get; }
 
         /// <summary>
-        /// 用于记录一阶段boss组所属分组的id
+        /// 阶段
         /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id_1", ColumnDataType = "INTEGER")]
-        public long BossGroupId1 { get; set; }
+        [SugarColumn(ColumnName = "phase",ColumnDataType = "INTEGER",IsPrimaryKey = true)]
+        public int Phase { set; get; }
 
         /// <summary>
-        /// 用于记录一阶段boss组所属分组在远程数据库中的id
-        /// 为空时则是本地数据
+        /// 进入下一阶段的所需的周目数
         /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id_cloud_1", ColumnDataType = "INTEGER", IsNullable = true)]
-        public long? GroupIdCloud1 { get; set; }
+        [SugarColumn(ColumnName = "round",ColumnDataType = "INTEGER")]
+        public int Round { set; get; }
 
         /// <summary>
-        /// 用于记录一阶段boss组该阶段的周目数
-        /// -1则为无限周目数，不再进入下一阶段
+        /// 当前boss的血量
         /// </summary>
-        [SugarColumn(ColumnName = "round_1", ColumnDataType = "INTEGER")]
-        public int Round1 { get; set; }
+        [SugarColumn(ColumnName = "hp",ColumnDataType = "INTEGER")]
+        public long HP { set; get; }
 
-        #endregion
-
-        #region 二阶段
-
-        /// <summary>
-        /// 用于记录二阶段boss组所属分组的id
-        /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id_2", ColumnDataType = "INTEGER")]
-        public long BossGroupId2 { get; set; }
-
-        /// <summary>
-        /// 用于记录二阶段boss组所属分组在远程数据库中的id
-        /// 为空时则是本地数据
-        /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id_cloud_2", ColumnDataType = "INTEGER", IsNullable = true)]
-        public long? GroupIdCloud2 { get; set; }
-
-        /// <summary>
-        /// 用于记录二阶段boss组该阶段的周目数
-        /// -1则为无限周目数，不再进入下一阶段
-        /// </summary>
-        [SugarColumn(ColumnName = "round_2", ColumnDataType = "INTEGER")]
-        public int Round2 { get; set; }
-
-        #endregion
-
-        //第三/四阶段均为可空字段，当不存在三/四阶段时需要置空
-
-        #region 三阶段
-
-        /// <summary>
-        /// 用于记录三阶段boss组所属分组的id
-        /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id_3", ColumnDataType = "INTEGER", IsNullable = true)]
-        public long? BossGroupId3 { get; set; }
-
-        /// <summary>
-        /// 用于记录三阶段boss组所属分组在远程数据库中的id
-        /// 为空时则是本地数据
-        /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id_cloud_3", ColumnDataType = "INTEGER", IsNullable = true)]
-        public long? GroupIdCloud3 { get; set; }
-
-        /// <summary>
-        /// 用于记录三阶段boss组该阶段的周目数
-        /// -1则为无限周目数，不再进入下一阶段
-        /// </summary>
-        [SugarColumn(ColumnName = "round_3", ColumnDataType = "INTEGER", IsNullable = true)]
-        public int? Round3 { get; set; }
-
-        #endregion
-
-        #region 四阶段
-
-        /// <summary>
-        /// 用于记录三阶段boss组所属分组的id
-        /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id_4", ColumnDataType = "INTEGER", IsNullable = true)]
-        public long? BossGroupId4 { get; set; }
-
-        /// <summary>
-        /// 用于记录三阶段boss组所属分组在远程数据库中的id
-        /// 为空时则是本地数据
-        /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id_cloud_4", ColumnDataType = "INTEGER", IsNullable = true)]
-        public long? GroupIdCloud4 { get; set; }
-
-        /// <summary>
-        /// 用于记录三阶段boss组该阶段的周目数
-        /// -1则为无限周目数，不再进入下一阶段
-        /// </summary>
-        [SugarColumn(ColumnName = "round_4", ColumnDataType = "INTEGER", IsNullable = true)]
-        public int? Round4 { get; set; }
-
-        #endregion
-
-        public static ClanBattleInfo GetInitClanBattleInfo()
+        public static List<GuildBattleBoss> GetInitBossInfos()
         {
-            return new ClanBattleInfo
+            List<GuildBattleBoss> initInfos = new List<GuildBattleBoss>();
+
+            #region 一阶段
+            initInfos.Add(new GuildBattleBoss
             {
-                ClanBattleId = 0,
-                ServerId     = Server.CN,
-                UpdateTime   = 0,
-                //一阶段
-                BossGroupId1 = 0,
-                Round1       = 1,
-                //二阶段
-                BossGroupId2 = 1,
-                Round2       = -1
-            };
+                ServerId = Server.CN,
+                HP       = 6000000,
+                Order    = 1,
+                Phase    = 1,
+                Round    = 1
+            });
+            initInfos.Add(new GuildBattleBoss
+            {
+                ServerId = Server.CN,
+                HP       = 8000000,
+                Order    = 2,
+                Phase    = 1,
+                Round    = 1
+            });
+            initInfos.Add(new GuildBattleBoss
+            {
+                ServerId = Server.CN,
+                HP       = 10000000,
+                Order    = 3,
+                Phase    = 1,
+                Round    = 1
+            });
+            initInfos.Add(new GuildBattleBoss
+            {
+                ServerId = Server.CN,
+                HP       = 12000000,
+                Order    = 4,
+                Phase    = 1,
+                Round    = 1
+            });
+            initInfos.Add(new GuildBattleBoss
+            {
+                ServerId = Server.CN,
+                HP       = 20000000,
+                Order    = 5,
+                Phase    = 1,
+                Round    = 1
+            });
+            #endregion
+            
+            #region 二阶段
+            initInfos.Add(new GuildBattleBoss
+            {
+                ServerId = Server.CN,
+                HP       = 6000000,
+                Order    = 1,
+                Phase    = 2,
+                Round    = -1
+            });
+            initInfos.Add(new GuildBattleBoss
+            {
+                ServerId = Server.CN,
+                HP       = 8000000,
+                Order    = 2,
+                Phase    = 2,
+                Round    = -1
+            });
+            initInfos.Add(new GuildBattleBoss
+            {
+                ServerId = Server.CN,
+                HP       = 10000000,
+                Order    = 3,
+                Phase    = 2,
+                Round    = -1
+            });
+            initInfos.Add(new GuildBattleBoss
+            {
+                ServerId = Server.CN,
+                HP       = 12000000,
+                Order    = 4,
+                Phase    = 2,
+                Round    = -1
+            });
+            initInfos.Add(new GuildBattleBoss
+            {
+                ServerId = Server.CN,
+                HP       = 20000000,
+                Order    = 5,
+                Phase    = 2,
+                Round    = -1
+            });
+            #endregion
+
+            return initInfos;
         }
     }
     #endregion
 
-    #region BOSS信息表定义
-    [SugarTable("clan_battle_boss_info")]
-    internal class BossInfo
-    {
-        /// <summary>
-        /// GroupId用于记录该boss所属分组的id
-        /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
-        public long BossGroupId { get; set; }
-
-        /// <summary>
-        /// GroupIdCloud用于记录当前boss组所属分组在远程数据中的id
-        /// 为空时则是本地数据
-        /// </summary>
-        [SugarColumn(ColumnName = "boss_group_id_cloud", ColumnDataType = "INTEGER", IsNullable = true)]
-        public long? GroupIdCloud { get; set; }
-
-        /// <summary>
-        /// order用于标识boss的序号(1-5)
-        /// </summary>
-        [SugarColumn(ColumnName = "order_num", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
-        public int Order { get; set; }
-
-        /// <summary>
-        /// server用于标识boss信息的所在区服
-        /// </summary>
-        [SugarColumn(ColumnName = "server", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
-        public Server ServerId { set; get; }
-
-        /// <summary>
-        /// boss属性：属性强化倍率
-        /// </summary>
-        [SugarColumn(ColumnName = "scale", ColumnDataType = "FLOAT", IsNullable = true)]
-        public float? Scale { get; set; }
-
-        /// <summary>
-        /// boss属性：名称
-        /// </summary>
-        [SugarColumn(ColumnName = "name", ColumnDataType = "VARCHAR", IsNullable = true)]
-        public string Name { get; set; }
-
-        /// <summary>
-        /// boss属性：血量
-        /// </summary>
-        [SugarColumn(ColumnName = "hp", ColumnDataType = "INTEGER")]
-        public long HP { get; set; }
-
-        /// <summary>
-        /// boss属性：物攻
-        /// </summary>
-        [SugarColumn(ColumnName = "atk", ColumnDataType = "INTEGER", IsNullable = true)]
-        public int? ATK { get; set; }
-
-        /// <summary>
-        /// boss属性：法攻
-        /// </summary>
-        [SugarColumn(ColumnName = "magic_atk", ColumnDataType = "INTEGER", IsNullable = true)]
-        public int? MagicATK { get; set; }
-
-        /// <summary>
-        /// boss属性：物防
-        /// </summary>
-        [SugarColumn(ColumnName = "def", ColumnDataType = "INTEGER", IsNullable = true)]
-        public int? DEF { get; set; }
-
-        /// <summary>
-        /// boss属性：法防
-        /// </summary>
-        [SugarColumn(ColumnName = "magic_def", ColumnDataType = "INTEGER", IsNullable = true)]
-        public int? MagicDEF { get; set; }
-
-        /// <summary>
-        /// 用于记录boss描述
-        /// </summary>
-        [SugarColumn(ColumnName = "comment", ColumnDataType = "VARCHAR", IsNullable = true)]
-        public string Comment { get; set; }
-
-        public static List<BossInfo> GetInitBossInfos()
-        {
-            List<BossInfo> init = new List<BossInfo>();
-            //一阶段
-            init.Add(new BossInfo
-            {
-                BossGroupId = 0,
-                Order       = 1,
-                ServerId    = Server.CN,
-                HP          = 6000000,
-            });
-            init.Add(new BossInfo
-            {
-                BossGroupId = 0,
-                Order       = 2,
-                ServerId    = Server.CN,
-                HP          = 8000000,
-            });
-            init.Add(new BossInfo
-            {
-                BossGroupId = 0,
-                Order       = 3,
-                ServerId    = Server.CN,
-                HP          = 10000000,
-            });
-            init.Add(new BossInfo
-            {
-                BossGroupId = 0,
-                Order       = 4,
-                ServerId    = Server.CN,
-                HP          = 12000000,
-            });
-            init.Add(new BossInfo
-            {
-                BossGroupId = 0,
-                Order       = 5,
-                ServerId    = Server.CN,
-                HP          = 20000000,
-            });
-            //二阶段
-            init.Add(new BossInfo
-            {
-                BossGroupId = 1,
-                Order       = 1,
-                ServerId    = Server.CN,
-                HP          = 6000000,
-            });
-            init.Add(new BossInfo
-            {
-                BossGroupId = 1,
-                Order       = 2,
-                ServerId    = Server.CN,
-                HP          = 8000000,
-            });
-            init.Add(new BossInfo
-            {
-                BossGroupId = 1,
-                Order       = 3,
-                ServerId    = Server.CN,
-                HP          = 10000000,
-            });
-            init.Add(new BossInfo
-            {
-                BossGroupId = 1,
-                Order       = 4,
-                ServerId    = Server.CN,
-                HP          = 12000000,
-            });
-            init.Add(new BossInfo
-            {
-                BossGroupId = 1,
-                Order       = 5,
-                ServerId    = Server.CN,
-                HP          = 20000000,
-            });
-            return init;
-        }
-    }
-#endregion
-
-#endregion
+    #endregion
 }
