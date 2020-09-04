@@ -1,9 +1,9 @@
-using System.Linq;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
 using SuiseiBot.Code.SqliteTool;
 using SuiseiBot.Code.Tool;
 using SuiseiBot.Code.Tool.LogUtils;
+using System.Linq;
 
 namespace SuiseiBot.Code.Database.Helpers
 {
@@ -36,7 +36,30 @@ namespace SuiseiBot.Code.Database.Helpers
 
             #endregion
         }
+        
+        public string GetBossId(int order)
+        {
+            switch (order)
+            {
+                case 1:
+                    return "a";
+                    break;
+                case 2:
+                    return "b";
+                    break;
+                case 3:
+                    return "c";
+                    break;
+                case 4:
+                    return "d";
+                    break;
+                case 5:
+                    return "e";
+                    break;
+            }
 
+            return "";
+        }
         /// <summary>
         /// 开始会战
         /// </summary>
@@ -107,9 +130,9 @@ namespace SuiseiBot.Code.Database.Helpers
 
                 //出刀判断
 
-                //BOSS数据
+                //当前BOSS数据
                 var bossStatus =
-                    dbClient.Queryable<GuildBattleData>()
+                    dbClient.Queryable<GuildBattleStatus>()
                             .Where(i => i.Gid == GroupId)
                             .ToList();
                 if (!bossStatus.Any())
@@ -120,24 +143,24 @@ namespace SuiseiBot.Code.Database.Helpers
                 long CurrHP = bossStatus.FirstOrDefault().HP;
 
 
-                long realDamage = dmg;
-                if (dmg > CurrHP)
+                long realDamage     = dmg;
+                //是否需要切换boss
+                bool needChangeBoss = false;
+                if (dmg >= CurrHP)
                 {
-                    realDamage = CurrHP;
+                    realDamage     = CurrHP;
+                    needChangeBoss = true;
                 }
 
-
-                //TODO: 需要修正真实伤害
-
+                //储存请求的时间
                 long requestTime = data.First().Time;
-
 
                 //插入一刀数据
                 var insertData = new GuildBattle()
                 {
-                    Uid  = uid,
-                    Time = requestTime,
-                    BossID = bossStatus.FirstOrDefault().Round+"",
+                    Uid    = uid,
+                    Time   = requestTime,
+                    BossID = bossStatus.FirstOrDefault().Round + ((char)(97+bossStatus.FirstOrDefault().Order)).ToString(),
                     Damage = realDamage,
                     Flag   = attackType
                 };
