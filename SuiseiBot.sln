@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Native.Sdk", "Native.Sdk\Na
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Native.Core", "Native.Core\Native.Core.csproj", "{C03C5BB7-91D0-4894-AAF9-127090DFAD91}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "com.cbgan.SuiseiBot.Code", "com.cbgan.SuiseiBot.Code\com.cbgan.SuiseiBot.Code.csproj", "{B20B6FCD-2817-49B3-9B07-689649C560D2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuiseiBot.Code", "SuiseiBot\SuiseiBot.Code.csproj", "{B20B6FCD-2817-49B3-9B07-689649C560D2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Native.Core</RootNamespace>
-    <AssemblyName>com.cbgan.SuiseiBot</AssemblyName>
+    <AssemblyName>SuiseiBot</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -115,7 +115,7 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\com.cbgan.SuiseiBot.Code\com.cbgan.SuiseiBot.Code.csproj">
+    <ProjectReference Include="..\SuiseiBot\SuiseiBot.Code.csproj">
       <Project>{b20b6fcd-2817-49b3-9b07-689649c560d2}</Project>
       <Name>com.cbgan.SuiseiBot.Code</Name>
     </ProjectReference>
