@@ -206,7 +206,7 @@ namespace SuiseiBot.Code.Database
         public Server ServerId { set; get; }
 
         /// <summary>
-        /// Boss在一周目中的序号
+        /// Boss序号
         /// </summary>
         [SugarColumn(ColumnName = "order_num",ColumnDataType = "INTEGER",IsPrimaryKey = true)]
         public int Order { set; get; }
@@ -224,7 +224,7 @@ namespace SuiseiBot.Code.Database
         public int Round { set; get; }
 
         /// <summary>
-        /// 当前boss的血量
+        /// boss的血量
         /// </summary>
         [SugarColumn(ColumnName = "hp",ColumnDataType = "INTEGER")]
         public long HP { set; get; }
