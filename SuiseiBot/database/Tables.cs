@@ -184,8 +184,8 @@ namespace SuiseiBot.Code.Database
         /// <summary>
         /// 当前所在boss序号
         /// </summary>
-        [SugarColumn(ColumnName = "boss_num",ColumnDataType = "INTEGER")]
-        public int BossNum { get; set; }
+        [SugarColumn(ColumnName = "order_num",ColumnDataType = "INTEGER")]
+        public int Order { get; set; }
 
         /// <summary>
         /// 当前boss阶段
