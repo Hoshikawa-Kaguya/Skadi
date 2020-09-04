@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
@@ -30,42 +31,50 @@ namespace SuiseiBot.Code.Database
                 IsAutoCloseConnection = true,
                 InitKeyType           = InitKeyType.Attribute
             });
-            if (!SugarUtils.TableExists<SuiseiData>(dbClient)) //彗酱数据库初始化
+            try
             {
-                ConsoleLog.Warning("数据库初始化", "未找到慧酱数据表 - 创建一个新表");
-                SugarUtils.CreateTable<SuiseiData>(dbClient);
+                if (!SugarUtils.TableExists<SuiseiData>(dbClient)) //彗酱数据库初始化
+                {
+                    ConsoleLog.Warning("数据库初始化", "未找到慧酱数据表 - 创建一个新表");
+                    SugarUtils.CreateTable<SuiseiData>(dbClient);
+                }
+                if (!SugarUtils.TableExists<GuildData>(dbClient)) //公会数据库初始化
+                {
+                    ConsoleLog.Warning("数据库初始化", "未找到公会表数据表 - 创建一个新表");
+                    SugarUtils.CreateTable<GuildData>(dbClient);
+                }
+                if (!SugarUtils.TableExists<MemberData>(dbClient)) //公会成员数据库初始化
+                {
+                    ConsoleLog.Warning("数据库初始化", "未找到成员表数据表 - 创建一个新表");
+                    SugarUtils.CreateTable<MemberData>(dbClient);
+                }
+                if (!SugarUtils.TableExists<MemberStatus>(dbClient)) //成员状态表的初始化
+                {
+                    ConsoleLog.Warning("数据库初始化", "未找到成员状态表 - 创建一个新表");
+                    SugarUtils.CreateTable<MemberStatus>(dbClient);
+                }
+                if (!SugarUtils.TableExists<BiliSubscription>(dbClient)) //动态记录表的初始化
+                {
+                    ConsoleLog.Warning("数据库初始化", "未找到动态记录表 - 创建一个新表");
+                    SugarUtils.CreateTable<BiliSubscription>(dbClient);
+                }
+                if (!SugarUtils.TableExists<GuildBattleBoss>(dbClient)) //会战数据表的初始化
+                {
+                    ConsoleLog.Warning("数据库初始化", "未找到会战数据表 - 创建一个新表");
+                    SugarUtils.CreateTable<GuildBattleBoss>(dbClient);
+                    //写入初始化数据
+                    dbClient.Insertable(GuildBattleBoss.GetInitBossInfos()).ExecuteCommand();
+                }
+                if (!SugarUtils.TableExists<GuildBattleStatus>(dbClient)) //会战状态表的初始化
+                {
+                    ConsoleLog.Warning("数据库初始化", "未找到会战状态表 - 创建一个新表");
+                    SugarUtils.CreateTable<GuildBattleStatus>(dbClient);
+                }
             }
-            if (!SugarUtils.TableExists<GuildData>(dbClient)) //公会数据库初始化
+            catch (Exception exception)
             {
-                ConsoleLog.Warning("数据库初始化", "未找到公会表数据表 - 创建一个新表");
-                SugarUtils.CreateTable<GuildData>(dbClient);
-            }
-            if (!SugarUtils.TableExists<MemberData>(dbClient)) //公会成员数据库初始化
-            {
-                ConsoleLog.Warning("数据库初始化", "未找到成员表数据表 - 创建一个新表");
-                SugarUtils.CreateTable<MemberData>(dbClient);
-            }
-            if (!SugarUtils.TableExists<MemberStatus>(dbClient))//成员状态表的初始化
-            {
-                ConsoleLog.Warning("数据库初始化", "未找到成员状态表 - 创建一个新表");
-                SugarUtils.CreateTable<MemberStatus>(dbClient);
-            }
-            if (!SugarUtils.TableExists<BiliSubscription>(dbClient)) //动态记录表的初始化
-            {
-                ConsoleLog.Warning("数据库初始化", "未找到动态记录表 - 创建一个新表");
-                SugarUtils.CreateTable<BiliSubscription>(dbClient);
-            }
-            if (!SugarUtils.TableExists<GuildBattleBoss>(dbClient)) //会战数据表的初始化
-            {
-                ConsoleLog.Warning("数据库初始化", "未找到Boss信息表 - 创建一个新表");
-                SugarUtils.CreateTable<GuildBattleBoss>(dbClient);
-                //写入初始化数据
-                dbClient.Insertable(GuildBattleBoss.GetInitBossInfos()).ExecuteCommand();
-            }
-            if (!SugarUtils.TableExists<GuildBattleStatus>(dbClient)) //会战状态表的初始化
-            {
-                ConsoleLog.Warning("数据库初始化", "未找到动态记录表 - 创建一个新表");
-                SugarUtils.CreateTable<GuildBattleStatus>(dbClient);
+                ConsoleLog.Fatal("数据库初始化错误",ConsoleLog.ErrorLogBuilder(exception));
+                throw;
             }
         }
     }

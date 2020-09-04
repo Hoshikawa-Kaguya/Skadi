@@ -208,7 +208,7 @@ namespace SuiseiBot.Code.Database
         /// <summary>
         /// Boss在一周目中的序号
         /// </summary>
-        [SugarColumn(ColumnName = "order",ColumnDataType = "INTEGER",IsPrimaryKey = true)]
+        [SugarColumn(ColumnName = "order_num",ColumnDataType = "INTEGER",IsPrimaryKey = true)]
         public int Order { set; get; }
 
         /// <summary>
