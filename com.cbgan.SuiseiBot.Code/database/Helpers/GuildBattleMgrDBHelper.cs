@@ -1,8 +1,8 @@
+using Native.Sdk.Cqp.EventArgs;
+using SqlSugar;
 using SuiseiBot.SqliteTool;
 using SuiseiBot.Tool;
 using SuiseiBot.Tool.Log;
-using Native.Sdk.Cqp.EventArgs;
-using SqlSugar;
 using System.Linq;
 
 namespace SuiseiBot.Database.Helpers
@@ -64,7 +64,7 @@ namespace SuiseiBot.Database.Helpers
         public int EndBattle()
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            if (SugarUtils.TableExists<GuildBattle>(dbClient,TableName))
+            if (SugarUtils.TableExists<GuildBattle>(dbClient, TableName))
             {
                 ConsoleLog.Error("会战管理数据库", "结束一期会战，开始输出数据");
                 //TODO: EXCEL导出公会战数据
@@ -81,15 +81,14 @@ namespace SuiseiBot.Database.Helpers
         /// 出刀命令
         /// </summary>
         /// <param name="uid">用户QQ号</param>
-        /// <param name="gid">QQ群号</param>
         /// <param name="dmg">当前刀伤害</param>
         /// <param name="attackType">当前刀类型（0=通常刀 1=尾刀 2=补偿刀 3=掉刀）</param>
-        /// <returns>0：正常 | -1：该成员不存在 | -2：需要先下树 | -3：未开始出刀 | -99：数据库出错</returns>
-        public int Attack(int uid, int gid, int dmg, int attackType)
+        /// <returns>0：正常 | -1：该成员不存在 | -2：需要先下树 | -3：未开始出刀 | -4：会战未开始 | -99：数据库出错</returns>
+        public int Attack(int uid, long dmg, int attackType)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             var data = dbClient.Queryable<MemberStatus>()
-                               .Where(i => i.Uid == uid && i.Gid == gid)
+                               .Where(i => i.Uid == uid && i.Gid == GroupId)
                                .ToList();
             if (data.Any())
             {
@@ -107,8 +106,27 @@ namespace SuiseiBot.Database.Helpers
                 }
 
                 //出刀判断
-                //TODO: BOSS血量够不够以及掉血
-                int realDamage = dmg;
+
+                //BOSS数据
+                var bossStatus =
+                    dbClient.Queryable<GuildBattleData>()
+                            .Where(i => i.Gid == GroupId)
+                            .ToList();
+                if (!bossStatus.Any())
+                {
+                    return -4;
+                }
+
+                long CurrHP = bossStatus.FirstOrDefault().HP;
+
+
+                long realDamage = dmg;
+                if (dmg > CurrHP)
+                {
+                    realDamage = CurrHP;
+                }
+
+
                 //TODO: 需要修正真实伤害
 
                 long requestTime = data.First().Time;
@@ -119,7 +137,7 @@ namespace SuiseiBot.Database.Helpers
                 {
                     Uid  = uid,
                     Time = requestTime,
-                    //TODO: 需要补足BOSS编号
+                    BossID = bossStatus.FirstOrDefault().Round+"",
                     Damage = realDamage,
                     Flag   = attackType
                 };
@@ -159,14 +177,13 @@ namespace SuiseiBot.Database.Helpers
         /// SL命令
         /// </summary>
         /// <param name="uid">成员QQ号</param>
-        /// <param name="gid">QQ群号</param>
         /// <returns>0：正常 | -1：成员不存在 | -2：当日已用过SL | -3：当前并不在出刀状态中 | -99：数据库出错</returns>
-        public int SL(int uid, int gid)
+        public int SL(int uid)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             var currSL =
                 dbClient.Queryable<MemberStatus>()
-                        .Where(i => i.Uid == uid && i.Gid == gid)
+                        .Where(i => i.Uid == uid && i.Gid == GroupId)
                         .ToList();
             if (currSL.Any())
             {
@@ -197,14 +214,13 @@ namespace SuiseiBot.Database.Helpers
         /// 撤销SL命令
         /// </summary>
         /// <param name="uid">成员QQ号</param>
-        /// <param name="gid">QQ群号</param>
         /// <returns>0：正常 | -1：成员不存在 | -2：今天未使用过SL | -99：数据库出错</returns>
-        public int SLUndo(int uid, int gid)
+        public int SLUndo(int uid)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             var currSL =
                 dbClient.Queryable<MemberStatus>()
-                        .Where(i => i.Uid == uid && i.Gid == gid)
+                        .Where(i => i.Uid == uid && i.Gid == GroupId)
                         .ToList();
             if (currSL.Any())
             {
@@ -229,15 +245,14 @@ namespace SuiseiBot.Database.Helpers
         /// 申请出刀
         /// </summary>
         /// <param name="uid">成员QQ号（请填写真实造成伤害的成员的QQ号）</param>
-        /// <param name="gid">QQ群号</param>
         /// <param name="flag">当前成员状态的Flag</param>
         /// <returns>0：正常 | -1：成员不存在 | -2：宁不是搁着树上爬吗，出个🔨的刀 | -3：已出满3刀 | -4：已经出刀，请不要重复出刀 | -99：数据库出错</returns>
-        public int RequestAttack(int uid, int gid, out int flag)
+        public int RequestAttack(int uid, out int flag)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             var member =
                 dbClient.Queryable<MemberStatus>()
-                        .Where(i => i.Uid == uid && i.Gid == gid)
+                        .Where(i => i.Uid == uid && i.Gid == GroupId)
                         .ToList();
             //成员是否存在 
             if (member.Any())
@@ -276,7 +291,7 @@ namespace SuiseiBot.Database.Helpers
                 //修改出刀成员状态
                 return dbClient.Updateable(new MemberStatus() {Flag = 1})
                                .UpdateColumns(i => new {i.Flag})
-                               .Where(i => i.Uid == uid && i.Gid == gid)
+                               .Where(i => i.Uid == uid && i.Gid == GroupId)
                                .ExecuteCommandHasChange()
                     ? 0
                     : -99;
@@ -294,7 +309,7 @@ namespace SuiseiBot.Database.Helpers
         /// <param name="AttackId">出刀编号</param>
         /// <param name="IsBossChanged">BOSS是否已经变更</param>
         /// <returns>0：正常 | -1：未找到该出刀编号 | -99：数据库出错</returns>
-        public int DeleteAttack(int gid, int AttackId, out bool IsBossChanged)
+        public int DeleteAttack(int AttackId, out bool IsBossChanged)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             var attackInfo =
