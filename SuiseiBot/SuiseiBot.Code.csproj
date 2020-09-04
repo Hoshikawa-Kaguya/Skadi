@@ -114,7 +114,6 @@
     <Compile Include="CQInterface\AppEnableInterface.cs" />
     <Compile Include="CQInterface\GroupMessageInterface.cs" />
     <Compile Include="CQInterface\PrivateMessageInterface.cs" />
-    <Compile Include="Database\Helpers\BossDBHelper.cs" />
     <Compile Include="Database\Helpers\GuildBattleMgrDBHelper.cs" />
     <Compile Include="Database\Helpers\SubscriptionDBHelper.cs" />
     <Compile Include="Database\Tables.cs" />
