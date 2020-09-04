@@ -1,6 +1,4 @@
-using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.EventArgs;
-using SuiseiBot.Code.Resource.TypeEnum.CmdType;
 
 namespace SuiseiBot.Code.ChatHandle
 {
@@ -28,28 +26,41 @@ namespace SuiseiBot.Code.ChatHandle
         /// 消息接收函数
         /// 并匹配相应指令
         /// </summary>
-        /// <param name="keywordType"></param>
-        public void GetChat(WholeMatchCmdType keywordType) //消息接收并判断是否响应
+        public void GetChat() //消息接收并判断是否响应
         {
             if (DebugEventArgs == null || Sender == null) return;
-            switch (keywordType)
+            if (DebugEventArgs.Message.Text.StartsWith("echo"))
             {
-                case WholeMatchCmdType.Debug:
-                    Test();
-                    break;
+                Echo();
+            }
+            else
+            {
+                Test();
             }
         }
-        #endregion
+        #endregion/
 
         #region DEBUG
         /// <summary>
+        /// echo打印函数
+        /// </summary>
+        private void Echo()
+        {
+            if (DebugEventArgs.Message.Text.Length > 5)
+            {
+                DebugEventArgs.FromGroup.SendGroupMessage(DebugEventArgs.Message.Text.Substring(5));
+            }
+        }
+
+        /// <summary>
         /// 响应函数
         /// </summary>
-        public void Test() //功能响应
+        private void Test() //功能响应
         {
             //此区域代码均只用于测试
 #if DEBUG
-            DebugEventArgs.FromGroup.SendGroupMessage(CQApi.CQCode_Image("/hso/75603102_p0.png"));
+            //目前测试得到mirai发向pixiv.cat的请求依旧返回403
+            DebugEventArgs.FromGroup.SendGroupMessage("[CQ:image,url=https://pixiv.cat/69168247.png]");
 #else
             DebugEventArgs.FromGroup.SendGroupMessage("哇哦");
 #endif

@@ -52,16 +52,6 @@ namespace SuiseiBot.Code.CQInterface
             }
             switch (cmdType)
             {
-                //输入debug
-                case WholeMatchCmdType.Debug:
-                    if(!config.LoadedConfig.ModuleSwitch.Debug)
-                    {
-                        SendDisableMessage();
-                        return;
-                    }
-                    DefaultHandle dh = new DefaultHandle(sender, eventArgs);
-                    dh.GetChat(cmdType);
-                    return;
                 //娱乐功能
                 case WholeMatchCmdType.SurpriseMFK_Random:
                 case WholeMatchCmdType.SurpriseMFK_Ban:
@@ -94,6 +84,16 @@ namespace SuiseiBot.Code.CQInterface
                     }
                     HsoHandle hso = new HsoHandle(sender, eventArgs);
                     hso.GetChat(cmdType);
+                    return;
+                //输入debug
+                case WholeMatchCmdType.Debug:
+                    if(!config.LoadedConfig.ModuleSwitch.Debug)
+                    {
+                        SendDisableMessage();
+                        return;
+                    }
+                    DefaultHandle dh = new DefaultHandle(sender, eventArgs);
+                    dh.GetChat();
                     return;
                 default:
                     break;
@@ -131,6 +131,15 @@ namespace SuiseiBot.Code.CQInterface
                     CheruHandle cheru = new CheruHandle(sender,eventArgs);
                     cheru.GetChat(keywordType);
                     break;
+                case KeywordCmdType.Debug_Echo:
+                    if(!config.LoadedConfig.ModuleSwitch.Debug)
+                    {
+                        SendDisableMessage();
+                        return;
+                    }
+                    DefaultHandle dh = new DefaultHandle(sender, eventArgs);
+                    dh.GetChat();
+                    return;
                 default:
                     break;
             }

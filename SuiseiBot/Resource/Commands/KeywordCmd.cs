@@ -20,6 +20,8 @@ namespace SuiseiBot.Code.Resource.Commands
             Keywords.Add("来点切噜",KeywordCmdType.Cheru_Encode);
             Keywords.Add("切噜~",KeywordCmdType.Cheru_Decode);
             Keywords.Add("切噜～",KeywordCmdType.Cheru_Decode);
+
+            Keywords.Add("echo", KeywordCmdType.Debug_Echo);
             Keywords.Add(CQApi.CQCode_At(cqApi.GetLoginQQ().Id).ToString(), KeywordCmdType.At_Bot);
         }
 

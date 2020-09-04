@@ -14,6 +14,10 @@ namespace SuiseiBot.Code.Resource.TypeEnum.CmdType
         /// 切噜翻译
         /// </summary>
         Cheru_Encode = 3,
-        Cheru_Decode = 4
+        Cheru_Decode = 4,
+        /// <summary>
+        /// echo
+        /// </summary>
+        Debug_Echo = 5
     }
 }

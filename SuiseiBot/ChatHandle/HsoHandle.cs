@@ -1,6 +1,5 @@
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.EventArgs;
-using Native.Sdk.Cqp.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
@@ -14,6 +13,7 @@ using SuiseiBot.Code.Network;
 using SuiseiBot.Code.Resource.TypeEnum;
 using SuiseiBot.Code.Resource.TypeEnum.CmdType;
 using SuiseiBot.Code.Tool.LogUtils;
+using Group = Native.Sdk.Cqp.Model.Group;
 
 namespace SuiseiBot.Code.ChatHandle
 {
@@ -135,18 +135,24 @@ namespace SuiseiBot.Code.ChatHandle
                 if ((int)picJson["code"] == 0)
                 {
                     //图片链接
-                    string picUrl = picJson["data"]?[0]?["url"]?.ToString();
+                    string picUrl        = picJson["data"]?[0]?["url"]?.ToString() ?? "";
                     ConsoleLog.Debug("获取到图片",picUrl);
                     //本地图片存储路径
                     localPicPath = $"{IOUtils.GetHsoPath()}/{Path.GetFileName(picUrl)}";
-                    if (File.Exists(localPicPath))//检查是否已缓存过图片
+                    if (File.Exists(localPicPath)) //检查是否已缓存过图片
+                    {
                         QQGroup.SendGroupMessage(CQApi.CQCode_Image(localPicPath));
+                    }
                     else
+                    {
+                        //文件名处理(mirai发送网络图片时pixivcat会返回403暂时无法使用代理发送图片
+                        //QQGroup.SendGroupMessage(CQApi.Mirai_UrlImage(picUrl));
                         DownloadFileFromURL(picUrl, localPicPath);
-                    ConsoleLog.Debug("Setu Url", picUrl);
+                    }
                     return Task.CompletedTask;
                 }
-                if (((int) picJson["code"] == 401 || (int) picJson["code"] == 429)&&setuSource == SetuSourceType.Lolicon)
+                if (((int) picJson["code"] == 401 || (int) picJson["code"] == 429) &&
+                    setuSource == SetuSourceType.Lolicon) 
                     ConsoleLog.Warning("API Token 失效",$"code:{picJson["code"]}");
                 else
                     ConsoleLog.Warning("没有找到图片信息","服务器拒绝提供信息");
@@ -192,6 +198,7 @@ namespace SuiseiBot.Code.ChatHandle
                                                 {
                                                     ConsoleLog.Info("Hso","下载数据成功,发送图片");
                                                     QQGroup.SendGroupMessage(CQApi.CQCode_Image(receivePath));
+                                                    ConsoleLog.Debug("file",Path.GetFileName(receivePath));
                                                 };
                 client.DownloadFileAsync(new Uri(url), receivePath);
             }
