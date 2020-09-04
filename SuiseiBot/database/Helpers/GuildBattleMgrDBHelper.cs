@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using System.Linq;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
+using SuiseiBot.Code.Resource.TypeEnum;
 using SuiseiBot.Code.SqliteTool;
 using SuiseiBot.Code.Tool;
 using SuiseiBot.Code.Tool.LogUtils;
@@ -21,20 +23,13 @@ namespace SuiseiBot.Code.Database.Helpers
             TableName = $"{SugarTableUtils.GetTableName<GuildBattle>()}_{GroupId}";
         }
 
+        /// <summary>
+        /// 检查公会是否存在
+        /// </summary>
         public bool GuildExists()
         {
-            #region DEBUG
-
-            bool isExists, isExists2;
-            using (SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath))
-            {
-                isExists  = dbClient.Queryable<GuildData>().Where(guild => guild.Gid == 883740678).Any();
-                isExists2 = dbClient.Queryable<GuildData>().Where(guild => guild.Gid == 1146619912).Any();
-            }
-
-            return isExists || isExists2;
-
-            #endregion
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            return dbClient.Queryable<GuildData>().Where(guild => guild.Gid == GroupId).Any();
         }
 
         /// <summary>
@@ -361,6 +356,53 @@ namespace SuiseiBot.Code.Database.Helpers
                         .Select(i => new {i.Round, i.Order})	
                         .First();	
             return $"{curBossInfo.Round}{BOSS_NUM[curBossInfo.Order]}";	
+        }
+
+        /// <summary>
+        /// 获取下一个周目的boss对应阶段
+        /// </summary>
+        /// <returns>下一周目boss的阶段值</returns>
+        public int GetNextRoundPhase()
+        {
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);	
+            //当前所处周目及区服
+            //由于双表查询效率太低所以用的单表查询
+            var battleStatus =	
+                dbClient.Queryable<GuildBattleStatus>()	
+                        .Where(status => status.Gid == 1)	
+                        .Select(status=> new{ status.Round,status.BossPhase })	
+                        .First();
+            Server server =
+                dbClient.Queryable<GuildData>()
+                        .Where(guild => guild.Gid == 1)
+                        .Select(guild => guild.ServerArea)
+                        .First();
+            //boss的最大阶段
+            int maxPhase =
+                dbClient.Queryable<GuildBattleBoss>()
+                        .Where(boss => boss.Round == -1)
+                        .Select(boss => boss.Phase)
+                        .First();
+            //已到最后一个阶段
+            if (battleStatus.BossPhase == maxPhase) return maxPhase;
+            //未达到最后一个阶段
+            int nextRound = battleStatus.Round + 1;
+            int nextPhase = battleStatus.BossPhase;
+            //获取除了最后一阶段的所有round值
+            for (int i = 1; i < maxPhase; i++)
+            {
+                nextRound -= dbClient.Queryable<GuildBattleBoss>()
+                                     .Where(boss => boss.Phase == i && boss.ServerId == server)
+                                     .Select(boss => boss.Round)
+                                     .First();
+                if (nextRound <= 0) //得到下一个周目的阶段终止循环
+                {
+                    nextPhase = i;
+                    break;
+                }
+            }
+            if (nextRound > 0) nextPhase = maxPhase;
+            return nextPhase;
         }
     }
 }

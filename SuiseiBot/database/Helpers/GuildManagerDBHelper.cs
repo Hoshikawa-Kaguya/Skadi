@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
+using SuiseiBot.Code.Resource.TypeEnum;
 using SuiseiBot.Code.SqliteTool;
 
 namespace SuiseiBot.Code.Database.Helpers
@@ -266,7 +267,7 @@ namespace SuiseiBot.Code.Database.Helpers
         /// 1：该群公会已存在，更新信息
         /// -1:数据库出错
         /// </returns>
-        public int createGuild(string gArea, string gName, long gId)
+        public int createGuild(Server gArea, string gName, long gId)
         {
             try
             {

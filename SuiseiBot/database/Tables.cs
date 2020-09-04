@@ -37,8 +37,8 @@ namespace SuiseiBot.Code.Database
         [SugarColumn(ColumnName = "name", ColumnDataType = "VARCHAR")]
         public string GuildName { get; set; }
         //公会所在区服
-        [SugarColumn(ColumnName = "server", ColumnDataType = "VARCHAR")]
-        public string ServerArea { get; set; }
+        [SugarColumn(ColumnName = "server", ColumnDataType = "INTEGER")]
+        public Server ServerArea { get; set; }
     }
     #endregion
 

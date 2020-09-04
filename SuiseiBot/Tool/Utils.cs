@@ -52,7 +52,7 @@ namespace SuiseiBot.Code.Tool
         /// <param name="len">至少需要的参数个数</param>
         /// <param name="QQgroup">（可选，不给的话就不发送错误信息）\n报错信息要发送到的QQ群对象</param>
         /// <param name="fromQQid">（可选，但QQgroup给了的话本参数必填）\n要通知的人的QQ Id</param>
-        /// <returns>长度合法性\n-1不符合 0符合 1超出</returns>
+        /// <returns>Illegal不符合 Legitimate符合 Extra超出</returns>
         public static LenType CheckForLength(string[] args, int len, Group QQgroup = null, long fromQQid = 0)
         {
             if (args.Length >= len + 1)
@@ -63,7 +63,6 @@ namespace SuiseiBot.Code.Tool
             else
             {
                 QQgroup?.SendGroupMessage(CQApi.CQCode_At(fromQQid), " 命令参数不全，请补充。");
-
                 return LenType.Illegal;
             }
         }

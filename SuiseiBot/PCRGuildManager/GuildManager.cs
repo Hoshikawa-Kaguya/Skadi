@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -43,6 +44,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             {
                 //参数1 服务器地区，参数2 公会名（可选，缺省为群名）
                 case PCRGuildCmdType.CreateGuild: //建会
+                    string guildName = QQgroup.GetGroupInfo().Name;
                     if (!isAdminAction)
                     {
                         QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
@@ -51,16 +53,41 @@ namespace SuiseiBot.Code.PCRGuildManager
                         return;
                     }
 
-                    if (Utils.CheckForLength(commandArgs, 1, QQgroup, GMgrEventArgs.FromQQ.Id) == LenType.Legitimate)
+                    if (Utils.CheckForLength(commandArgs, 1) != LenType.Illegal)
                     {
-                        if (commandArgs.Length == 3)
+                        Server guildServer;
+                        //检查输入服务器代号是否合法
+                        if (Enum.IsDefined(typeof(Server), commandArgs[1]))
                         {
-                            result = dbAction.createGuild(commandArgs[1], commandArgs[2], QQgroup.Id);
+                            guildServer = (Server)Enum.Parse(typeof(Server),commandArgs[1]);
                         }
-                        else if (commandArgs.Length == 2)
+                        else
                         {
-                            result = dbAction.createGuild(commandArgs[1], QQgroup.GetGroupInfo().Name, QQgroup.Id);
+                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
+                                                     "弟啊，你哪个服务器的");
+                            return;
                         }
+                        //根据输入参数建立公会
+                        switch (Utils.CheckForLength(commandArgs, 2))
+                        {
+                            case LenType.Legitimate://参数中有公会名
+                                guildName = commandArgs[2];
+                                result    = dbAction.createGuild(guildServer, guildName, QQgroup.Id);
+                                break;
+                            case LenType.Illegal: //参数中没有公会名
+                                result = dbAction.createGuild(guildServer, guildName, QQgroup.Id);
+                                break;
+                            case LenType.Extra:
+                                QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
+                                                         "参数过多");
+                                return;
+                        }
+                    }
+                    else
+                    {
+                        QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
+                                                 "弟啊，你哪个服务器的");
+                        return;
                     }
 
                     switch (result)
@@ -68,12 +95,12 @@ namespace SuiseiBot.Code.PCRGuildManager
                         case -1:
                             QQgroup.SendGroupMessage(
                                                      CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
-                                                     $" 公会[{GMgrEventArgs.CQApi.GetGroupInfo(GMgrEventArgs.FromGroup.Id).Name}]创建失败：数据库错误。");
+                                                     $" 公会[{guildName}]创建失败：数据库错误。");
                             break;
                         case 0:
                             QQgroup.SendGroupMessage(
                                                      CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
-                                                     $" 公会[{GMgrEventArgs.CQApi.GetGroupInfo(GMgrEventArgs.FromGroup.Id).Name}]已经创建。");
+                                                     $" 公会[{guildName}]已经创建。");
                             break;
                         case 1:
                             QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 公会已经存在，更新了当前公会的信息。");
