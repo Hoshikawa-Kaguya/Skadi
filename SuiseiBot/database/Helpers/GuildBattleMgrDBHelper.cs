@@ -370,5 +370,20 @@ namespace SuiseiBot.Code.Database.Helpers
             //TODO: 读取JSON中当前boss代号和血量
             return -1;
         }
+
+        /// <summary>	
+        /// 获取当前公会所在boss的代号	
+        /// </summary>	
+        public string GetCurrentBossID()	
+        {	
+            const string         BOSS_NUM = "abcde";	
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);	
+            var curBossInfo =	
+                dbClient.Queryable<GuildBattleStatus>()	
+                        .Where(i => i.Gid == GroupId)	
+                        .Select(i => new {i.Round, i.Order})	
+                        .First();	
+            return $"{curBossInfo.Round}{BOSS_NUM[curBossInfo.Order]}";	
+        }
     }
 }
