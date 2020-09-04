@@ -6,7 +6,6 @@ using SuiseiBot.Code.Resource.TypeEnum;
 using SuiseiBot.Code.SqliteTool;
 using SuiseiBot.Code.Tool;
 using SuiseiBot.Code.Tool.LogUtils;
-using System.Linq;
 
 namespace SuiseiBot.Code.Database.Helpers
 {
@@ -33,29 +32,6 @@ namespace SuiseiBot.Code.Database.Helpers
             return dbClient.Queryable<GuildData>().Where(guild => guild.Gid == GroupId).Any();
         }
         
-        public string GetBossId(int order)
-        {
-            switch (order)
-            {
-                case 1:
-                    return "a";
-                    break;
-                case 2:
-                    return "b";
-                    break;
-                case 3:
-                    return "c";
-                    break;
-                case 4:
-                    return "d";
-                    break;
-                case 5:
-                    return "e";
-                    break;
-            }
-
-            return "";
-        }
         /// <summary>
         /// 开始会战
         /// </summary>
