@@ -137,6 +137,7 @@ namespace SuiseiBot.Code.Tool
         #endregion
 
         #region 字符串处理
+
         /// <summary>
         /// 从字符串中提取正整数
         /// 必须保证字符串中一定有数字，否则会抛出异常
@@ -144,8 +145,24 @@ namespace SuiseiBot.Code.Tool
         /// </summary>
         /// <param name="input">输入的含有数字的字符串</param>
         /// <returns>纯数字</returns>
-        public static int GetIntFromString(string input) =>
+        public static int GetFirstIntFromString(string input) =>
             int.Parse(Regex.Match(input, "^[1-9]\\d*").Groups[0].Value);
+
+        /// <summary>
+        /// 从 BOSS ID 提取BOSS序号（a、b、c、d、e）
+        /// </summary>
+        /// <param name="input">BOSS ID</param>
+        /// <returns>BOSS 序号</returns>
+        public static int GetBossOrderFromBossId(string input) =>
+            int.Parse(Regex.Match(input, "^[a-e]$").Groups[0].Value);
+
+        /// <summary>
+        /// 确认 BOSS ID 是否符合标准
+        /// </summary>
+        /// <param name="BossID">输入的 BOSS ID</param>
+        /// <returns>是否符合标准</returns>
+        public static bool CheckBossIsLegal(string BossID) =>
+            Regex.IsMatch(BossID, @"^[1-9]\d*[a-e]$");
 
 
         /// <summary>
