@@ -1,10 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.Model;
 using SuiseiBot.Code.Resource.TypeEnum;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Text.RegularExpressions;
+using Group = Native.Sdk.Cqp.Model.Group;
 
 namespace SuiseiBot.Code.Tool
 {
@@ -66,6 +68,7 @@ namespace SuiseiBot.Code.Tool
                 return LenType.Illegal;
             }
         }
+
         /// <summary>
         /// 获取当前时间戳
         /// 时间戳单位(毫秒)
@@ -77,6 +80,7 @@ namespace SuiseiBot.Code.Tool
         /// 时间戳单位(毫秒)
         /// </summary>
         public static long GetTodayStampLong => (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
+
         /// <summary>
         /// 获取当前时间戳
         /// 时间戳单位(秒)
@@ -133,6 +137,16 @@ namespace SuiseiBot.Code.Tool
         #endregion
 
         #region 字符串处理
+        /// <summary>
+        /// 从字符串中提取正整数
+        /// 必须保证字符串中一定有数字，否则会抛出异常
+        /// 只会返回找到的第一组数字
+        /// </summary>
+        /// <param name="input">输入的含有数字的字符串</param>
+        /// <returns>纯数字</returns>
+        public static int GetIntFromString(string input) =>
+            int.Parse(Regex.Match(input, "^[1-9]\\d*").Groups[0].Value);
+
 
         /// <summary>
         /// 获取字符串在QQ上显示的长度（用于PadQQ函数）
