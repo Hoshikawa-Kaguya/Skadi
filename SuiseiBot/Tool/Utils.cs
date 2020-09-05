@@ -154,7 +154,7 @@ namespace SuiseiBot.Code.Tool
         /// <param name="input">BOSS ID</param>
         /// <returns>BOSS 序号</returns>
         public static int GetBossOrderFromBossId(string input) =>
-            int.Parse(Regex.Match(input, "^[a-e]$").Groups[0].Value);
+            int.Parse(Regex.Match(input, "[a-e]$").Groups[0].Value);
 
         /// <summary>
         /// 确认 BOSS ID 是否符合标准
