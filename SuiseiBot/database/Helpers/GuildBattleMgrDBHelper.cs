@@ -1,5 +1,6 @@
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
+using SuiseiBot.Code.Resource.TypeEnum;
 using SuiseiBot.Code.SqliteTool;
 using SuiseiBot.Code.Tool;
 using SuiseiBot.Code.Tool.LogUtils;
@@ -36,7 +37,7 @@ namespace SuiseiBot.Code.Database.Helpers
 
             #endregion
         }
-        
+
         public string GetBossId(int order)
         {
             switch (order)
@@ -60,6 +61,7 @@ namespace SuiseiBot.Code.Database.Helpers
 
             return "";
         }
+
         /// <summary>
         /// 开始会战
         /// </summary>
@@ -143,13 +145,14 @@ namespace SuiseiBot.Code.Database.Helpers
                 long CurrHP = bossStatus.FirstOrDefault().HP;
 
 
-                long realDamage     = dmg;
+                long realDamage = dmg;
                 //是否需要切换boss
                 bool needChangeBoss = false;
                 if (dmg >= CurrHP)
                 {
                     realDamage     = CurrHP;
                     needChangeBoss = true;
+                    attackType     = 1;
                 }
 
                 //储存请求的时间
@@ -160,13 +163,14 @@ namespace SuiseiBot.Code.Database.Helpers
                 {
                     Uid    = uid,
                     Time   = requestTime,
-                    BossID = bossStatus.FirstOrDefault().Round + ((char)(97+bossStatus.FirstOrDefault().Order)).ToString(),
+                    BossID = GetCurrentBossID(),
                     Damage = realDamage,
                     Flag   = attackType
                 };
                 bool succInsert = dbClient.Insertable<GuildBattle>(insertData)
                                           .AS(TableName)
                                           .ExecuteCommand() > 0;
+                bool succUpdateBoss = true;
                 //如果是尾刀
                 if (attackType == 1)
                 {
@@ -175,7 +179,49 @@ namespace SuiseiBot.Code.Database.Helpers
                             .Where(i => i.Flag == 3 || i.Flag == 1)
                             .UpdateColumns(i => new {i.Flag})
                             .ExecuteCommand();
-                    //TODO: 预约中取消BOSS预约
+                    //切换boss
+                    int nextRoundNeededRound = dbClient.Queryable<GuildBattleBoss>()
+                                                       .Where(i => i.ServerId == Server.CN
+                                                                && i.Order    == bossStatus.FirstOrDefault().Order
+                                                                && i.Round    == bossStatus.FirstOrDefault().Round)
+                                                       .First().Round;
+                    int nextOrder = bossStatus.FirstOrDefault().Order;
+                    int nextRound = bossStatus.FirstOrDefault().Round;
+                    int nextPhase = bossStatus.FirstOrDefault().BossPhase;
+                    if (bossStatus.FirstOrDefault().Order != 5)
+                    {
+                        nextOrder++;
+                    }
+                    else
+                    {
+                        nextOrder = 1;
+                        nextRound++;
+                        //TODO:修正
+
+                        if (nextRound > nextRoundNeededRound)
+                        {
+                            nextPhase++;
+                        }
+                    }
+
+                    var nextBossData = dbClient.Queryable<GuildBattleBoss>()
+                                               .Where(i => i.ServerId == Server.CN
+                                                        && i.Phase    == nextPhase
+                                                        && i.Order    == nextOrder)
+                                               .First();
+                    var updateBossData =
+                        new GuildBattleStatus()
+                        {
+                            BossPhase = nextPhase,
+                            Order     = nextOrder,
+                            Round     = nextRound,
+                            HP        = nextBossData.HP,
+                            TotalHP   = nextBossData.HP
+                        };
+                    succUpdateBoss = dbClient.Updateable<GuildBattleStatus>(updateBossData)
+                                             .UpdateColumns(i => new {i.Order, i.HP, i.BossPhase, i.Round, i.TotalHP})
+                                             .Where(i=>i.Gid==GroupId)
+                                             .ExecuteCommandHasChange();
                 }
 
                 //更新成员信息，报刀后变空闲
@@ -188,7 +234,7 @@ namespace SuiseiBot.Code.Database.Helpers
                 bool succUpdate = dbClient.Updateable(memberStatus)
                                           .ExecuteCommandHasChange();
 
-                return succUpdate && succInsert ? 0 : -99;
+                return (succUpdateBoss && succUpdate && succInsert) ? 0 : -99;
             }
             else
             {
@@ -374,16 +420,16 @@ namespace SuiseiBot.Code.Database.Helpers
         /// <summary>	
         /// 获取当前公会所在boss的代号	
         /// </summary>	
-        public string GetCurrentBossID()	
-        {	
-            const string         BOSS_NUM = "abcde";	
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);	
-            var curBossInfo =	
-                dbClient.Queryable<GuildBattleStatus>()	
-                        .Where(i => i.Gid == GroupId)	
-                        .Select(i => new {i.Round, i.Order})	
-                        .First();	
-            return $"{curBossInfo.Round}{BOSS_NUM[curBossInfo.Order]}";	
+        public string GetCurrentBossID()
+        {
+            const string         BOSS_NUM = "abcde";
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            var curBossInfo =
+                dbClient.Queryable<GuildBattleStatus>()
+                        .Where(i => i.Gid == GroupId)
+                        .Select(i => new {i.Round, i.Order})
+                        .First();
+            return $"{curBossInfo.Round}{BOSS_NUM[curBossInfo.Order]}";
         }
     }
 }
