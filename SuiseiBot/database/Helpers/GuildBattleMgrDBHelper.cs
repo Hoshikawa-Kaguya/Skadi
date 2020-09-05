@@ -383,7 +383,7 @@ namespace SuiseiBot.Code.Database.Helpers
             GuildBattleStatus bossStatus =
                 dbClient.Queryable<GuildBattleStatus>()
                         .InSingle(GroupId);
-            if (bossStatus.Round != Utils.GetRoundFromBossId(attackInfo.FirstOrDefault().BossID))
+            if (bossStatus.Round != Utils.GetFirstIntFromString(attackInfo.FirstOrDefault().BossID))
             {
                 return -2;
             }
