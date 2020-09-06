@@ -4,6 +4,7 @@ using SuiseiBot.Code.Resource.TypeEnum;
 using SuiseiBot.Code.SqliteTool;
 using SuiseiBot.Code.Tool;
 using SuiseiBot.Code.Tool.LogUtils;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SuiseiBot.Code.Database.Helpers
@@ -78,8 +79,9 @@ namespace SuiseiBot.Code.Database.Helpers
         /// <param name="dmg">当前刀伤害</param>
         /// <param name="attackType">当前刀类型（0=通常刀 1=尾刀 2=补偿刀 3=掉刀）</param>
         /// <param name="status">0：无异常 | 1：乱报尾刀警告 | 2：过度虐杀警告</param>
-        /// <returns>0：正常 | -1：该成员不存在 | -2：需要先下树 | -3：未开始出刀 | -4：会战未开始 | -99：数据库出错</returns>
-        public int Attack(int uid, long dmg, int attackType, out int status)
+        /// <param name="needChangeBoss">是否切换BOSS</param>
+        /// <returns>0：正常 | -1：该成员不存在 | -2：需要先下树 | -3：未开始出刀 | -4：禁止不紧跟着尾刀出补时刀 | -5：补时刀等待中 | -6：会战未开始 | -99：数据库出错</returns>
+        public int Attack(int uid, long dmg, int attackType, out int status, out bool needChangeBoss)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             var data = dbClient.Queryable<MemberStatus>()
@@ -91,14 +93,16 @@ namespace SuiseiBot.Code.Database.Helpers
                 {
                     //当前并未开始出刀，请先申请出刀=>返回
                     case 0:
-                        status = 0;
+                        status         = 0;
+                        needChangeBoss = false;
                         return -3;
                     //进入出刀判断
                     case 1:
                         break;
                     //需要下树才能报刀
                     case 3:
-                        status = 0;
+                        status         = 0;
+                        needChangeBoss = false;
                         return -2;
                 }
 
@@ -110,16 +114,46 @@ namespace SuiseiBot.Code.Database.Helpers
                             .InSingle(GroupId); //单主键查询
                 if (bossStatus == null)
                 {
-                    status = 0;
-                    return -4;
+                    status         = 0;
+                    needChangeBoss = false;
+                    return -6;
                 }
 
+                if (attackType == 2)
+                {
+                    var lastAttack=dbClient.Queryable<GuildBattle>()
+                            .Where(i => i.Uid == uid)
+                            .OrderBy(i => i.Bid, OrderByType.Desc);
+                    //如果上一刀不是尾刀
+                    if (lastAttack.Any() && lastAttack.First().Flag!=1)
+                    {
+                        //禁止出补时刀
+                        needChangeBoss = false;
+                        status         = 0;
+                        return -4;
+
+                    }
+                }
+                else
+                {
+                    var lastAttack = dbClient.Queryable<GuildBattle>()
+                                             .OrderBy(i => i.Bid, OrderByType.Desc);
+                    //如果上一刀是尾刀
+                    if (lastAttack.Any() && lastAttack.First().Flag == 1)
+                    {
+                        //禁止任何人出刀，等待补时刀
+                        needChangeBoss = false;
+                        status         = 0;
+                        return -5;
+
+                    }
+                }
                 long CurrHP = bossStatus.HP;
 
 
                 long realDamage = dmg;
                 //是否需要切换boss
-                bool needChangeBoss = false;
+                needChangeBoss = false;
                 //如果确实是尾刀
                 if (dmg >= CurrHP)
                 {
@@ -226,11 +260,10 @@ namespace SuiseiBot.Code.Database.Helpers
 
                 return (succUpdateBoss && succUpdate && succInsert) ? 0 : -99;
             }
-            else
-            {
-                status = 0;
-                return -1;
-            }
+
+            needChangeBoss = false;
+            status         = 0;
+            return -1;
         }
 
         /// <summary>
@@ -284,7 +317,7 @@ namespace SuiseiBot.Code.Database.Helpers
                         .ToList();
             if (currSL.Any())
             {
-                if (currSL.FirstOrDefault()?.SL == 0)
+                if (currSL.FirstOrDefault()?.SL == 0 || currSL.FirstOrDefault().Time > Utils.GetTodayStamp)
                 {
                     return -2;
                 }
@@ -366,12 +399,30 @@ namespace SuiseiBot.Code.Database.Helpers
                 return -1;
             }
         }
-
+        /// <summary>
+        /// 撤销出刀
+        /// </summary>
+        /// <returns>同删刀</returns>
+        public int UndoAttack()
+        {
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            var lastAttack=
+                dbClient.Queryable<GuildBattle>()
+                    .OrderBy(i => i.Bid, OrderByType.Desc);
+            if (lastAttack.Any())
+            {
+               return DeleteAttack(lastAttack.First().Bid);
+            }
+            else
+            {
+                return -1;
+            }
+        }
         /// <summary>
         /// 删刀
         /// </summary>
         /// <param name="AttackId">出刀编号</param>
-        /// <returns>0：正常 | -1：未找到该出刀编号 | -2：禁止删除非当前BOSS的刀 | -99：数据库出错</returns>
+        /// <returns>0：正常 | -1：未找到该出刀编号 | -2：禁止删除非当前BOSS的刀 | -3：只能删通常刀 | -99：数据库出错</returns>
         public int DeleteAttack(int AttackId)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
@@ -390,6 +441,10 @@ namespace SuiseiBot.Code.Database.Helpers
 
             if (attackInfo.Any())
             {
+                if (attackInfo.FirstOrDefault().Flag != 0)
+                {
+                    return -3;
+                }
                 bool succDelete = dbClient.Deleteable<GuildBattle>()
                                           .AS(TableName)
                                           .Where(i => i.Bid == AttackId)
@@ -403,7 +458,119 @@ namespace SuiseiBot.Code.Database.Helpers
             }
         }
 
-        //TODO：添加改刀
+        /// <summary>
+        /// 改刀（尾刀不能修改）
+        /// </summary>
+        /// <param name="AttackId">出刀编号</param>
+        /// <param name="toValue">要修改为的目标伤害</param>
+        /// <param name="needChangeBoss">是否切换BOSS</param>
+        /// <returns>0：正常 | -1：未找到该出刀编号 | -2：禁止修改非当前BOSS的刀 | -3：禁止修改尾刀 | -99：数据库出错</returns>
+        public int ModifyAttack(int AttackId, long toValue, out bool needChangeBoss)
+        {
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            var attackInfo =
+                dbClient.Queryable<GuildBattle>()
+                        .AS(TableName)
+                        .Where(i => i.Bid == AttackId)
+                        .ToList();
+            GuildBattleStatus bossStatus =
+                dbClient.Queryable<GuildBattleStatus>()
+                        .InSingle(GroupId);
+            if (bossStatus.Round != Utils.GetFirstIntFromString(attackInfo.FirstOrDefault().BossID))
+            {
+                needChangeBoss = false;
+                return -2;
+            }
+
+            if (attackInfo.Any())
+            {
+                //修改尾刀可能导致数据发生大范围回滚，禁止修改
+                if (attackInfo.FirstOrDefault().Flag == 1)
+                {
+                    needChangeBoss = false;
+                    return -3;
+                }
+
+                long CurrHP = bossStatus.HP;
+
+                long realDamage = toValue;
+                //是否需要切换boss
+                needChangeBoss = false;
+                //修改后是否已经击杀Boss
+                if (toValue >= CurrHP)
+                {
+                    realDamage     = CurrHP;
+                    needChangeBoss = true;
+                }
+
+                //修改一刀数据
+                bool succModify = dbClient.Updateable<GuildBattle>(
+                                                                   new GuildBattle()
+                                                                   {
+                                                                       Damage = realDamage,
+                                                                       Flag   = needChangeBoss ? 1 : 0
+                                                                   })
+                                          .AS(TableName)
+                                          .UpdateColumns(i => new {i.Damage, i.Flag})
+                                          .Where(i => i.Bid == AttackId)
+                                          .ExecuteCommandHasChange();
+
+                bool succUpdateBoss = true;
+                //如果已经击杀
+                if (needChangeBoss)
+                {
+                    //全部下树，出刀中取消出刀状态
+                    dbClient.Updateable(new MemberStatus() {Flag = 0})
+                            .Where(i => i.Flag == 3 || i.Flag == 1)
+                            .UpdateColumns(i => new {i.Flag})
+                            .ExecuteCommand();
+                    //切换boss
+                    int nextOrder = bossStatus.Order;
+                    int nextRound = bossStatus.Round;
+                    int nextPhase = bossStatus.BossPhase;
+                    if (bossStatus.Order != 5)
+                    {
+                        //当前周目下一个怪
+                        nextOrder++;
+                    }
+                    else
+                    {
+                        //切周目
+                        nextOrder = 1;
+                        nextRound++;
+                        nextPhase = GetNextRoundPhase(bossStatus);
+                    }
+
+                    var nextBossData = dbClient.Queryable<GuildBattleBoss>()
+                                               .Where(i => i.ServerId == Server.CN
+                                                        && i.Phase    == nextPhase
+                                                        && i.Order    == nextOrder)
+                                               .First();
+                    var updateBossData =
+                        new GuildBattleStatus()
+                        {
+                            BossPhase = nextPhase,
+                            Order     = nextOrder,
+                            Round     = nextRound,
+                            HP        = nextBossData.HP,
+                            TotalHP   = nextBossData.HP
+                        };
+                    succUpdateBoss = dbClient.Updateable<GuildBattleStatus>(updateBossData)
+                                             .UpdateColumns(i => new {i.Order, i.HP, i.BossPhase, i.Round, i.TotalHP})
+                                             .Where(i => i.Gid == GroupId)
+                                             .ExecuteCommandHasChange();
+                }
+
+
+                return (succModify && succUpdateBoss) ? 0 : -99;
+            }
+            else
+            {
+                needChangeBoss = false;
+                return -1;
+            }
+        }
+
 
         /// <summary>
         /// 显示当前进度（请只在聊天判断中使用，本类中请自行查库，避免不必要的数据库链接）
@@ -416,6 +583,18 @@ namespace SuiseiBot.Code.Database.Helpers
                 dbClient.Queryable<GuildBattleStatus>()
                         .InSingle(GroupId);
             return bossStatus;
+        }
+        /// <summary>
+        /// 获取今天的出刀列表
+        /// </summary>
+        /// <returns>出刀List</returns>
+        public List<GuildBattle> GetTodayAttacks()
+        {
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            return dbClient.Queryable<GuildBattle>()
+                           .Where(i => i.Time > Utils.GetTodayStamp)
+                           .OrderBy(i => i.Bid)
+                           .ToList();
         }
 
         /// <summary>	
