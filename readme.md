@@ -27,6 +27,8 @@ Microsoft Visual C++ 2015-2019 Redistributable
 
 ## 进度
 
+>  目前机器人只设计为国服服务，动态更新的功能一部分与日程表更新的功能重复，将不会支持日程表更新，除非之后会添加对外服的支持（摸了）
+
 - [x] 会站排名查询
 - [x] 一些奇奇怪怪的功能（掷骰子之类的）
 - [x] ~~好感度养成~~(台本还没写)
@@ -43,7 +45,6 @@ Microsoft Visual C++ 2015-2019 Redistributable
 
 ## 目前正在做的
 
-- [ ] 日程表更新
 - [ ] 买药小助手
 - [ ] 更新API库以支持更多的动态类型
 - [ ] 公会战管理模块(由 [XiaoHe321](https://github.com/orgs/Suisei-Kawaii/people/xh321) 进行模块的开发)
