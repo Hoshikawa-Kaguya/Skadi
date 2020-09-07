@@ -4,9 +4,9 @@ using System.Text;
 using System.Threading.Tasks;
 using BilibiliApi;
 using BilibiliApi.Dynamic;
-using BilibiliApi.Dynamic.CardEnum;
-using BilibiliApi.Dynamic.DynamicData;
-using BilibiliApi.Dynamic.DynamicData.Card;
+using BilibiliApi.Dynamic.Enums;
+using BilibiliApi.Dynamic.Models;
+using BilibiliApi.Dynamic.Models.Card;
 using Native.Sdk.Cqp;
 using Newtonsoft.Json.Linq;
 using SuiseiBot.Code.DatabaseUtils.Helpers;
@@ -49,14 +49,12 @@ namespace SuiseiBot.Code.TimerEvent.Event
 
         private static Task GetDynamic(CQApi cqApi, long biliUser, List<long> groupId, SubscriptionDBHelper dbHelper)
         {
-            string  message;
-            JObject cardData;
-            Dynamic biliDynamic;
-            CardType cardType;
+            string   message;
+            Dynamic  biliDynamic;
             //获取动态文本
             try
             {
-                cardData = NetUtils.GetBiliDynamicJson((ulong)biliUser, out cardType);
+                JObject cardData = DynamicAPIs.GetBiliDynamicJson((ulong)biliUser, out CardType cardType);
                 switch (cardType)
                 {
                     //检查动态类型
