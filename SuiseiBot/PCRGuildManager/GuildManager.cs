@@ -7,7 +7,7 @@ using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 using SuiseiBot.Code.ChatHandle.PCRHandle;
-using SuiseiBot.Code.Database.Helpers;
+using SuiseiBot.Code.DatabaseUtils.Helpers;
 using SuiseiBot.Code.Resource.TypeEnum;
 using SuiseiBot.Code.Resource.TypeEnum.CmdType;
 using SuiseiBot.Code.Tool;

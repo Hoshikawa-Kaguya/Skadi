@@ -5,7 +5,7 @@ using SqlSugar;
 using SuiseiBot.Code.SqliteTool;
 using SuiseiBot.Code.Tool.LogUtils;
 
-namespace SuiseiBot.Code.Database
+namespace SuiseiBot.Code.DatabaseUtils
 {
     internal static class DatabaseInit//数据库初始化类
     {

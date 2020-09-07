@@ -9,7 +9,7 @@ using BilibiliApi.Dynamic.DynamicData;
 using BilibiliApi.Dynamic.DynamicData.Card;
 using Native.Sdk.Cqp;
 using Newtonsoft.Json.Linq;
-using SuiseiBot.Code.Database.Helpers;
+using SuiseiBot.Code.DatabaseUtils.Helpers;
 using SuiseiBot.Code.IO.Config;
 using SuiseiBot.Code.IO.Config.ConfigFile;
 using SuiseiBot.Code.Tool.LogUtils;

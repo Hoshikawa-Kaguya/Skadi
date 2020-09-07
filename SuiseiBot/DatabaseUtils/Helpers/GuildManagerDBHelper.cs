@@ -5,7 +5,7 @@ using SqlSugar;
 using SuiseiBot.Code.Resource.TypeEnum;
 using SuiseiBot.Code.SqliteTool;
 
-namespace SuiseiBot.Code.Database.Helpers
+namespace SuiseiBot.Code.DatabaseUtils.Helpers
 {
     internal class GuildManagerDBHelper
     {

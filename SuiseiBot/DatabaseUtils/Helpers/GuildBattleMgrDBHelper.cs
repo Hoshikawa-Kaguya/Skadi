@@ -7,7 +7,7 @@ using SuiseiBot.Code.Tool.LogUtils;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SuiseiBot.Code.Database.Helpers
+namespace SuiseiBot.Code.DatabaseUtils.Helpers
 {
     internal class GuildBattleMgrDBHelper
     {

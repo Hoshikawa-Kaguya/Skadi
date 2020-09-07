@@ -114,9 +114,9 @@
     <Compile Include="CQInterface\AppEnableInterface.cs" />
     <Compile Include="CQInterface\GroupMessageInterface.cs" />
     <Compile Include="CQInterface\PrivateMessageInterface.cs" />
-    <Compile Include="Database\Helpers\GuildBattleMgrDBHelper.cs" />
-    <Compile Include="Database\Helpers\SubscriptionDBHelper.cs" />
-    <Compile Include="Database\Tables.cs" />
+    <Compile Include="DatabaseUtils\Helpers\GuildBattleMgrDBHelper.cs" />
+    <Compile Include="DatabaseUtils\Helpers\SubscriptionDBHelper.cs" />
+    <Compile Include="DatabaseUtils\Tables.cs" />
     <Compile Include="IO\Config\ConfigFile\BiliSubscription.cs" />
     <Compile Include="IO\Config\Config.cs" />
     <Compile Include="IO\Config\ConfigFile\HsoConfig.cs" />
@@ -145,9 +145,9 @@
     <Compile Include="TimerEvent\TimerInit.cs" />
     <Compile Include="Tool\CheckInCD.cs" />
     <Compile Include="Tool\LogUtils\ConsoleLog.cs" />
-    <Compile Include="Database\DatabaseInit.cs" />
-    <Compile Include="Database\Helpers\GuildManagerDBHelper.cs" />
-    <Compile Include="Database\Helpers\SuiseiDBHelper.cs" />
+    <Compile Include="DatabaseUtils\DatabaseInit.cs" />
+    <Compile Include="DatabaseUtils\Helpers\GuildManagerDBHelper.cs" />
+    <Compile Include="DatabaseUtils\Helpers\SuiseiDBHelper.cs" />
     <Compile Include="ChatHandle\DefaultHandle.cs" />
     <Compile Include="ChatHandle\SuiseiHanlde.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

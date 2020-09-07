@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Interface;
-using SuiseiBot.Code.Database;
+using SuiseiBot.Code.DatabaseUtils;
 using SuiseiBot.Code.IO.Config;
 using SuiseiBot.Code.Resource.CommandHelp;
 using SuiseiBot.Code.Resource.Commands;
