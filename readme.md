@@ -47,7 +47,7 @@ Microsoft Visual C++ 2015-2019 Redistributable
 - [ ] 数据库的同步更新
 - [ ] 提醒买药小助手（其实是个定时小功能，可以自定义发送和内容）
 - [ ] 更新更多的动态类型支持和直播的订阅更新(DD狂喜
-- [ ] 公会战管理模块(由 [XiaoHe321](https://github.com/orgs/Suisei-Kawaii/people/xh321) 进行模块的开发)
+- [ ] 公会战管理模块(由 [XiaoHe321](https://github.com/orgs/Suisei-Kawaii/people/xh321) 完成大部分的数据库部分)
 
 ## 注意
 
