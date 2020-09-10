@@ -33,7 +33,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             this.GroupId = eventArgs.FromGroup.Id;
             this.Sender = sender;
             this.SuiseiGroupMessageEventArgs = eventArgs;
-            this.TriggerTime = Utils.GetTodayStamp;//触发日期
+            this.TriggerTime = Utils.GetTodayStamp();//触发日期
             DBPath = SugarUtils.GetDBPath(eventArgs.CQApi.GetLoginQQ().Id.ToString());
         }
         #endregion

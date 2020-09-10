@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using SqlSugar;
 using SuiseiBot.Code.Resource.TypeEnum;
+using SuiseiBot.Code.Resource.TypeEnum.GuildBattleType;
 
 namespace SuiseiBot.Code.DatabaseUtils
 {
@@ -97,7 +98,7 @@ namespace SuiseiBot.Code.DatabaseUtils
         /// 出刀类型标记
         /// </summary>
         [SugarColumn(ColumnName = "flag",ColumnDataType = "INTEGER")]
-        public int Flag { get; set; }
+        public AttackType Attack { get; set; }
     }
     #endregion
 
@@ -124,7 +125,7 @@ namespace SuiseiBot.Code.DatabaseUtils
         /// 用户状态标志
         /// </summary>
         [SugarColumn(ColumnName = "flag",ColumnDataType = "INTEGER")]
-        public int Flag { get; set; }
+        public FlagType Flag { get; set; }
         /// <summary>
         /// 状态描述（可空，需按照文档进行修改）
         /// </summary>
@@ -192,6 +193,9 @@ namespace SuiseiBot.Code.DatabaseUtils
         /// </summary>
         [SugarColumn(ColumnName = "boss_phase",ColumnDataType = "INTEGER")]
         public int BossPhase { get; set; }
+
+        [SugarColumn(ColumnName = "in_battle",ColumnDataType = "INTEGER")]
+        public bool InBattle { get; set; }
     }
     #endregion
 

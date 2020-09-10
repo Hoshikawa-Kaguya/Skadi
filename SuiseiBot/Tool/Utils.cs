@@ -79,48 +79,54 @@ namespace SuiseiBot.Code.Tool
         /// 获取今天零点的时间戳
         /// 时间戳单位(毫秒)
         /// </summary>
-        public static long GetTodayStampLong => (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
+        public static long GetTodayStampLong() => (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
 
         /// <summary>
         /// 获取当前时间戳
         /// 时间戳单位(秒)
         /// </summary>
-        public static int GetNowTimeStamp => (DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
+        public static int GetNowTimeStamp() => (DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
 
         /// <summary>
         /// 获取今天零点的时间戳
         /// 时间戳单位(秒)
         /// </summary>
-        public static int GetTodayStamp => (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
+        public static int GetTodayStamp() => (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
+
+        /// <summary>
+        /// 获取今天5点的时间戳
+        /// 时间戳单位(秒)
+        /// </summary>
+        public static int GetUpdateStamp() => (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Add(new TimeSpan(5,0,0)).Seconds;
 
         /// <summary>
         /// 将long类型13位时间戳转换为DateTime
         /// 时间戳单位(毫秒)
         /// </summary>
-        public static System.DateTime TimeStampToDateTime(long TimeStamp) =>
-            new System.DateTime(1970, 1, 1, 8, 0, 0, 0).AddMilliseconds(TimeStamp);
+        public static DateTime TimeStampToDateTime(long TimeStamp) =>
+            new DateTime(1970, 1, 1, 8, 0, 0, 0).AddMilliseconds(TimeStamp);
 
         /// <summary>
         /// 将int类型11位时间戳转换为DateTime
         /// 时间戳单位(秒)
         /// </summary>
-        public static System.DateTime TimeStampToDateTime(int TimeStamp) =>
-            new System.DateTime(1970, 1, 1, 8, 0, 0, 0).AddSeconds(TimeStamp);
+        public static DateTime TimeStampToDateTime(int TimeStamp) =>
+            new DateTime(1970, 1, 1, 8, 0, 0, 0).AddSeconds(TimeStamp);
 
         /// <summary>
         /// 将DateTime转换为13位long时间戳
         /// 时间戳单位(秒)
         /// </summary>
-        public static long DateTimeToTimeStampLong(System.DateTime dateTime) =>
-            (dateTime - (new System.DateTime(1970, 1, 1, 8, 0, 0, 0))).Milliseconds;
+        public static long DateTimeToTimeStampLong(DateTime dateTime) =>
+            (dateTime - (new DateTime(1970, 1, 1, 8, 0, 0, 0))).Milliseconds;
 
 
         /// <summary>
         /// 将DateTime转换为11位int时间戳
         /// 时间戳单位(秒)
         /// </summary>
-        public static int DateTimeToTimeStamp(System.DateTime dateTime) =>
-            (dateTime - (new System.DateTime(1970, 1, 1, 8, 0, 0, 0))).Seconds;
+        public static int DateTimeToTimeStamp(DateTime dateTime) =>
+            (dateTime - (new DateTime(1970, 1, 1, 8, 0, 0, 0))).Seconds;
 
         #endregion
 
@@ -171,7 +177,7 @@ namespace SuiseiBot.Code.Tool
         /// <param name="input">要计算长度的字符串</param>
         /// <param name="len">至少需要的参数个数</param>
         /// <returns>长度（不要问为啥是Double，0.5个字符真的存在）</returns>
-        public static double getQQStrLength(string input)
+        public static double GetQQStrLength(string input)
         {
             double strLength = 0;
             foreach (char i in input)
@@ -208,7 +214,7 @@ namespace SuiseiBot.Code.Tool
         {
             StringBuilder sb = new StringBuilder();
 
-            int toPadNum = int.Parse(Math.Floor(padNums - getQQStrLength(input)).ToString());
+            int toPadNum = int.Parse(Math.Floor(padNums - GetQQStrLength(input)).ToString());
             if (toPadNum <= 0)
             {
                 return input;
