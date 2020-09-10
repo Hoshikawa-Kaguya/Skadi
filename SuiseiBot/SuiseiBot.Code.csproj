@@ -125,6 +125,7 @@
     <Compile Include="Network\HTTPUtils.cs" />
     <Compile Include="Network\NetServiceUtils.cs" />
     <Compile Include="PCRGuildManager\BossManager.cs" />
+    <Compile Include="PluginInfo.cs" />
     <Compile Include="Resource\Commands\WholeMatchCmd.cs" />
     <Compile Include="PCRGuildManager\GuildBattleManager.cs" />
     <Compile Include="PCRGuildManager\GuildManager.cs" />
