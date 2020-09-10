@@ -14,6 +14,7 @@ using Native.Sdk.Cqp.Interface;
 using Native.Sdk.Cqp.Expand;
 using Native.Sdk.Cqp.Model;
 using Newtonsoft.Json;
+using SuiseiBot.Code;
 using Unity;
 using Unity.Injection;
 
@@ -43,7 +44,9 @@ namespace Native.App.Export
 		}	
 		#endregion	
 		
-		#region --核心方法--	
+		#region --核心方法--
+		private static PluginInfo pInfo = new PluginInfo();
+
 		/// <summary>	
 		/// 返回酷Q用于识别本应用的 AppID 和 ApiVer	
 		/// </summary>	
@@ -51,7 +54,7 @@ namespace Native.App.Export
 		[DllExport (ExportName = "AppInfo", CallingConvention = CallingConvention.StdCall)]	
 		private static string AppInfo ()	
 		{	
-			return "9,com.cbgan.SuiseiBot";	
+			return $"{pInfo.apiver},{pInfo.name}";	
 		}	
 		
 		/// <summary>	
@@ -65,17 +68,26 @@ namespace Native.App.Export
 			// 反射获取 AppData 实例	
 			Type appDataType = typeof (AppData);	
 			// 注册一个 CQApi 实例	
-			AppInfo appInfo = new AppInfo ("com.cbgan.SuiseiBot", 1, 9, "SuiSeiBot", "0.2", 2, "SUISEI_DEV_GROUP", "饼干神必机器人，噫hihihihi", authCode);	
+			AppInfo appInfo = new AppInfo (pInfo.name, pInfo.ret, pInfo.apiver, pInfo.name, pInfo.version, pInfo.version_id, pInfo.author, pInfo.description, authCode);	
 			appDataType.GetRuntimeProperty ("CQApi").GetSetMethod (true).Invoke (null, new object[] { new CQApi (appInfo) });	
-			AppData.UnityContainer.RegisterInstance<CQApi> ("com.cbgan.SuiseiBot", AppData.CQApi);	
+			AppData.UnityContainer.RegisterInstance<CQApi> (pInfo.name, AppData.CQApi);	
 			// 向容器注册一个 CQLog 实例	
 			appDataType.GetRuntimeProperty ("CQLog").GetSetMethod (true).Invoke (null, new object[] { new CQLog (authCode) });	
-			AppData.UnityContainer.RegisterInstance<CQLog> ("com.cbgan.SuiseiBot", AppData.CQLog);	
+			AppData.UnityContainer.RegisterInstance<CQLog> (pInfo.name, AppData.CQLog);	
 			// 注册插件全局异常捕获回调, 用于捕获未处理的异常, 回弹给 酷Q 做处理	
 			AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;	
 			// 本函数【禁止】处理其他任何代码，以免发生异常情况。如需执行初始化代码请在Startup事件中执行（Type=1001）。	
 			return 0;	
-		}	
+		}
+
+        /// <summary>
+        /// native插件信息
+        /// </summary>
+        [DllExport (ExportName = "pluginInfo", CallingConvention = CallingConvention.StdCall)]
+        public static IntPtr pluginInfo()
+        {
+            return Marshal.StringToHGlobalAnsi(JsonConvert.SerializeObject(new PluginInfo()));
+        }
 		#endregion	
 		
 		#region --私有方法--	
@@ -610,15 +622,6 @@ namespace Native.App.Export
 			}	
 			return 0;	
 		}
-
-		/// <summary>
-		/// native插件信息
-		/// </summary>
-        [DllExport (ExportName = "pluginInfo", CallingConvention = CallingConvention.StdCall)]
-		public static IntPtr pluginInfo()
-        {
-            return Marshal.StringToHGlobalAnsi(JsonConvert.SerializeObject(new PluginInfo()));
-		}
-		#endregion
+        #endregion
 	}	
 }

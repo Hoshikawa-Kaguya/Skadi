@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using SqlSugar;
 using SuiseiBot.Code.Resource.TypeEnum;
 
-namespace SuiseiBot.Code.Database
+namespace SuiseiBot.Code.DatabaseUtils
 {
     #region 成员表定义
     /// <summary>

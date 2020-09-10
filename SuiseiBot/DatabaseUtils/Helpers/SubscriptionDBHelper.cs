@@ -4,7 +4,7 @@ using SqlSugar;
 using SuiseiBot.Code.SqliteTool;
 using SuiseiBot.Code.Tool;
 
-namespace SuiseiBot.Code.Database.Helpers
+namespace SuiseiBot.Code.DatabaseUtils.Helpers
 {
     internal class SubscriptionDBHelper
     {

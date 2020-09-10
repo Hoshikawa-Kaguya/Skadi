@@ -1,7 +1,7 @@
 using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
-using SuiseiBot.Code.Database;
-using SuiseiBot.Code.Database.Helpers;
+using SuiseiBot.Code.DatabaseUtils;
+using SuiseiBot.Code.DatabaseUtils.Helpers;
 using SuiseiBot.Code.Resource.TypeEnum.CmdType;
 using SuiseiBot.Code.Tool.LogUtils;
 

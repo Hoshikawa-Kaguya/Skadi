@@ -5,7 +5,7 @@ using SuiseiBot.Code.SqliteTool;
 using SuiseiBot.Code.Tool;
 using SuiseiBot.Code.Tool.LogUtils;
 
-namespace SuiseiBot.Code.Database.Helpers
+namespace SuiseiBot.Code.DatabaseUtils.Helpers
 {
     internal class SuiseiDBHelper
     {
