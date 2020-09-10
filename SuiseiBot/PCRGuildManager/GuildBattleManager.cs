@@ -38,7 +38,6 @@ namespace SuiseiBot.Code.PCRGuildManager
                 return;
             }
 
-            //TODO 自动更新boss数据
             //指示是否是管理员操作的
             bool isAdminAction = (memberInfo.MemberType == QQGroupMemberType.Manage ||
                                   memberInfo.MemberType == QQGroupMemberType.Creator);

@@ -45,7 +45,8 @@ namespace Native.App.Export
 		#endregion	
 		
 		#region --核心方法--
-		private static PluginInfo pInfo = new PluginInfo();
+		//插件的所有信息
+		private static readonly PluginInfo pInfo = new PluginInfo();
 
 		/// <summary>	
 		/// 返回酷Q用于识别本应用的 AppID 和 ApiVer	

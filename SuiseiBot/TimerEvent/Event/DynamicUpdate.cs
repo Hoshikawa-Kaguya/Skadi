@@ -59,14 +59,18 @@ namespace SuiseiBot.Code.TimerEvent.Event
                 {
                     //检查动态类型
                     case CardType.PlainText:
-                        PlainTextCard plainTextCard = new PlainTextCard(cardData);
-                        plainTextCard.ContentType = ContentType.CQCode;
+                        PlainTextCard plainTextCard = new PlainTextCard(cardData)
+                        {
+                            ContentType = ContentType.CQCode
+                        };
                         message                   = plainTextCard.ToString();
                         biliDynamic               = plainTextCard;
                         break;
                     case CardType.TextAndPic:
-                        TextAndPicCard textAndPicCard = new TextAndPicCard(cardData);
-                        textAndPicCard.ContentType = ContentType.CQCode;
+                        TextAndPicCard textAndPicCard = new TextAndPicCard(cardData)
+                        {
+                            ContentType = ContentType.CQCode
+                        };
                         message                    = textAndPicCard.ToString();
                         biliDynamic                = textAndPicCard;
                         break;
@@ -99,7 +103,7 @@ namespace SuiseiBot.Code.TimerEvent.Event
                 return Task.CompletedTask;
             }
             //向未发生消息的群发送消息
-            string messageToSend = msgBuilder(sender, message, biliDynamic);
+            string messageToSend = MsgBuilder(sender, message, biliDynamic);
             foreach (long targetGroup in targetGroups)
             {
                 ConsoleLog.Info("动态获取", $"向群{targetGroup}发送动态信息");
@@ -116,7 +120,7 @@ namespace SuiseiBot.Code.TimerEvent.Event
         /// <param name="message">文字信息</param>
         /// <param name="biliDynamic">动态实例</param>
         /// <returns></returns>
-        private static string msgBuilder(UserInfo sender,string message,Dynamic biliDynamic)
+        private static string MsgBuilder(UserInfo sender,string message,Dynamic biliDynamic)
         {
             //格式化动态信息
             StringBuilder sendMessageBuilder = new StringBuilder();

@@ -136,6 +136,8 @@
     <Compile Include="Resource\TypeEnum\CmdType\PCRGuildCmdType.cs" />
     <Compile Include="Resource\Commands\KeywordCmd.cs" />
     <Compile Include="Resource\TypeEnum\CmdType\KeywordCmdType.cs" />
+    <Compile Include="Resource\TypeEnum\GuildBattleType\AttackType.cs" />
+    <Compile Include="Resource\TypeEnum\GuildBattleType\FlagType.cs" />
     <Compile Include="Resource\TypeEnum\LenType.cs" />
     <Compile Include="Resource\TypeEnum\ServerType.cs" />
     <Compile Include="Resource\TypeEnum\SetuSourceType.cs" />

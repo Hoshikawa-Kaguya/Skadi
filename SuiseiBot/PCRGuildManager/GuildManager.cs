@@ -72,10 +72,10 @@ namespace SuiseiBot.Code.PCRGuildManager
                         {
                             case LenType.Legitimate://参数中有公会名
                                 guildName = commandArgs[2];
-                                result    = dbAction.createGuild(guildServer, guildName, QQgroup.Id);
+                                result    = dbAction.CreateGuild(guildServer, guildName, QQgroup.Id);
                                 break;
                             case LenType.Illegal: //参数中没有公会名
-                                result = dbAction.createGuild(guildServer, guildName, QQgroup.Id);
+                                result = dbAction.CreateGuild(guildServer, guildName, QQgroup.Id);
                                 break;
                             case LenType.Extra:
                                 QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
@@ -275,14 +275,14 @@ namespace SuiseiBot.Code.PCRGuildManager
                         int           maxLenghtOfNickint = 0; //最长的昵称长度，用于Pad对齐
                         list.ForEach(i =>
                                      {
-                                         if (Utils.getQQStrLength(i.Uid.ToString()) > maxLenghtOfQQ)
+                                         if (Utils.GetQQStrLength(i.Uid.ToString()) > maxLenghtOfQQ)
                                          {
-                                             maxLenghtOfQQ = Utils.getQQStrLength(i.Uid.ToString());
+                                             maxLenghtOfQQ = Utils.GetQQStrLength(i.Uid.ToString());
                                          }
 
-                                         if (Utils.getQQStrLength(i.NickName.ToString()) > maxLenghtOfNick)
+                                         if (Utils.GetQQStrLength(i.NickName.ToString()) > maxLenghtOfNick)
                                          {
-                                             maxLenghtOfNick = Utils.getQQStrLength(i.NickName.ToString());
+                                             maxLenghtOfNick = Utils.GetQQStrLength(i.NickName.ToString());
                                          }
 
                                          if (i.Uid.ToString().Length > maxLenghtOfQQint)
@@ -301,7 +301,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                                                     "  |   " +
                                                     i.NickName));
 
-                        string listHeader = "\n\t" + dbAction.getGuildName(QQgroup.Id);
+                        string listHeader = "\n\t" + dbAction.GetGuildName(QQgroup.Id);
                         listHeader += "\n\t公会成员列表";
                         listHeader += "\n".PadRight(maxLenghtOfNickint + maxLenghtOfQQint + 6, '=');
                         listHeader += "\n" + Utils.PadRightQQ("QQ号", maxLenghtOfQQ) + "  |   昵称";
