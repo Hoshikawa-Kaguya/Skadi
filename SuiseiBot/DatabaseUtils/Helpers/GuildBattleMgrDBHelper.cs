@@ -1,13 +1,13 @@
-using System;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
 using SuiseiBot.Code.Resource.TypeEnum;
+using SuiseiBot.Code.Resource.TypeEnum.GuildBattleType;
 using SuiseiBot.Code.SqliteTool;
 using SuiseiBot.Code.Tool;
 using SuiseiBot.Code.Tool.LogUtils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using SuiseiBot.Code.Resource.TypeEnum.GuildBattleType;
 
 namespace SuiseiBot.Code.DatabaseUtils.Helpers
 {
@@ -426,7 +426,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// <summary>
         /// 撤销出刀
         /// </summary>
-        /// <returns>同删刀</returns>
+        /// <returns>同删刀，但 -4：上一刀为空，不能撤销</returns>
         public int UndoAttack(long uid)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
@@ -437,7 +437,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                         .Where(member => member.Uid == uid)
                         .OrderBy(i => i.Bid, OrderByType.Desc)
                         .First();
-            if (lastAttack == null) return -1;
+            if (lastAttack == null) return -4;
             //删刀
             return DeleteAttack(lastAttack.Bid);
         }
@@ -454,10 +454,12 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                 dbClient.Queryable<GuildBattle>()
                         .AS(TableName)
                         .InSingle(AttackId);
+            if (attackInfo == null) return -1;
+
             GuildBattleStatus bossStatus =
                 dbClient.Queryable<GuildBattleStatus>()
                         .InSingle(GroupId);
-            if (attackInfo == null) return -1;
+            
             if (bossStatus.Round != Utils.GetFirstIntFromString(attackInfo.BossID))
             {
                 return -2;
