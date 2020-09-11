@@ -1,3 +1,4 @@
+using System;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
 using SuiseiBot.Code.Resource.TypeEnum;
@@ -31,7 +32,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// <summary>
         /// 开始会战
         /// </summary>
-        /// <returns>0：开始成功 | -1：上次仍未结束或已经开始</returns>
+        /// <returns>0：开始成功 | -1：上次仍未结束或已经开始 | -99:数据库错误</returns>
         public int StartBattle()
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
@@ -44,14 +45,19 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             {
                 SugarUtils.CreateTable<GuildBattle>(dbClient, TableName);
                 ConsoleLog.Info("会战管理数据库", "开始新的一期会战统计");
-                return 0;
+                return dbClient.Updateable(new GuildBattleStatus {InBattle = true})
+                               .Where(guild => guild.Gid == GroupId)
+                               .UpdateColumns(i => new {i.InBattle})
+                               .ExecuteCommandHasChange()
+                    ? 0
+                    : -99;
             }
         }
 
         /// <summary>
         /// 结束会战
         /// </summary>
-        /// <returns>0：成功结束 | 1：还未开始会战</returns>
+        /// <returns>0：成功结束 | 1：还未开始会战 | -99:数据库错误</returns>
         public int EndBattle()
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
@@ -64,7 +70,12 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             else
             {
                 ConsoleLog.Info("会战管理数据库", "会战表为空，请确认是否已经开始会战统计");
-                return -1;
+                return dbClient.Updateable(new GuildBattleStatus {InBattle = false})
+                               .Where(guild => guild.Gid == GroupId)
+                               .UpdateColumns(i => new {i.InBattle})
+                               .ExecuteCommandHasChange()
+                    ? 0
+                    : -99;
             }
         }
 
@@ -77,7 +88,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// <param name="flag">成员状态</param>
         /// <param name="status">0：无异常 | 1：乱报尾刀警告 | 2：过度虐杀警告</param>
         /// <returns>0：正常 | -1：该成员不存在 | -2：未开始出刀 | -3：会战未开始 | -4:补时刀保护 | -99：数据库出错</returns>
-        public int Attack(int uid, long dmg, out AttackType attackType, out FlagType flag, out int status)
+        public int Attack(long uid, long dmg, out AttackType attackType, out FlagType flag, out int status)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             var statusData = dbClient.Queryable<MemberStatus>()
@@ -211,12 +222,12 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                                           .Select(guild => guild.ServerArea)
                                           .First();
 
-                var nextBossData = dbClient.Queryable<GuildBattleBoss>()
-                                           .Where(i => i.ServerId == serverId
-                                                    && i.Phase    == nextPhase
-                                                    && i.Order    == nextOrder)
-                                           .First();
-                var updateBossData =
+                GuildBattleBoss nextBossData = dbClient.Queryable<GuildBattleBoss>()
+                                                       .Where(i => i.ServerId == serverId
+                                                                && i.Phase    == nextPhase
+                                                                && i.Order    == nextOrder)
+                                                       .First();
+                GuildBattleStatus updateBossData =
                     new GuildBattleStatus()
                     {
                         BossPhase = nextPhase,
@@ -232,13 +243,15 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             }
 
             //更新成员信息，报刀后变空闲
-            var memberStatus = new MemberStatus()
+            MemberStatus memberStatus = new MemberStatus()
             {
-                Flag = 0,
+                Flag = FlagType.IDLE,
                 Info = null,
                 Time = Utils.GetNowTimeStamp(),
             };
             bool succUpdate = dbClient.Updateable(memberStatus)
+                                      .UpdateColumns(i => new{i.Flag,i.Info,i.Time})
+                                      .Where(i=>i.Gid == GroupId && i.Uid == uid)
                                       .ExecuteCommandHasChange();
             return (succUpdateBoss && succUpdate && succInsert) ? 0 : -99;
         }
@@ -248,7 +261,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// </summary>
         /// <param name="uid">成员QQ号</param>
         /// <returns>0：正常 | -1：成员不存在 | -2：当日已用过SL | -3：当前并不在出刀状态中 | -99：数据库出错</returns>
-        public int SL(int uid)
+        public int SL(long uid)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             MemberStatus currSL =
@@ -268,8 +281,10 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             }
 
             return dbClient
-                   .Updateable(new MemberStatus{Flag = 0, SL = Utils.GetNowTimeStamp(),Time = Utils.GetNowTimeStamp()})
+                   .Updateable(new MemberStatus
+                                   {Flag = 0, SL = Utils.GetNowTimeStamp(), Time = Utils.GetNowTimeStamp()})
                    .UpdateColumns(i => new {i.Flag, i.SL})
+                   .Where(i => i.Gid == GroupId && i.Uid == uid)
                    .ExecuteCommandHasChange()
                 ? 0
                 : -99;
@@ -280,7 +295,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// </summary>
         /// <param name="uid">成员QQ号</param>
         /// <returns>0：正常 | -1：成员不存在 | -2：今天未使用过SL | -99：数据库出错</returns>
-        public int SLUndo(int uid)
+        public int SLUndo(long uid)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             MemberStatus currSL =
@@ -295,6 +310,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
 
             return dbClient.Updateable(new MemberStatus{SL = 0})
                            .UpdateColumns(i => new {i.SL})
+                           .Where(i => i.Uid == uid && i.Gid == GroupId)
                            .ExecuteCommandHasChange()
                 ? 0
                 : -99;
@@ -306,7 +322,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// <param name="uid">成员QQ号（请填写真实造成伤害的成员的QQ号）</param>
         /// <param name="flag">当前成员状态的Flag</param>
         /// <returns>0：正常 | -1：成员不存在 | -2：当前并不在空闲中 | -3：已出满3刀 | -4:补时刀前不允许出刀 | -99：数据库出错</returns>
-        public int RequestAttack(int uid, out FlagType flag)
+        public int RequestAttack(long uid, out FlagType flag)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             MemberStatus member =
@@ -379,7 +395,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// <param name="uid"></param>
         /// <param name="flag"></param>
         /// <returns>0：正常 | -1：成员不存在 | -2：宁不是搁着树上爬吗，找管理下来罢 | -2：这不是没有出刀吗，你取消申请个锤子 | -98：不可能遇到的错误 | -99：数据库出错</returns>
-        public int UndoRequest(int uid, out FlagType flag)
+        public int UndoRequest(long uid, out FlagType flag)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             MemberStatus member =
@@ -694,6 +710,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// 查询今日余刀
         /// 用于查刀和催刀
         /// </summary>
+        /// <returns>余刀表</returns>
         public Dictionary<long, int> CheckTodayAttacks()
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
@@ -713,7 +730,49 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                                  member => member.times);
         }
 
-        //TODO 会战进度修正
+        /// <summary>
+        /// 修改会战进度（无视当前出刀进度和历史出刀）
+        /// </summary>
+        /// <returns>0:正常 | -1:设定的HP值超出上限 | -99:数据库错误</returns>
+        public int ModifyProgress(int round,int bossOrder,long hp)
+        {
+            //参数检查
+            if (round < 0 || bossOrder < 0 || hp < 0 || bossOrder > 5)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+
+            //查找公会服务器信息
+            Server serverId = dbClient.Queryable<GuildData>()
+                                      .Where(guild => guild.Gid == GroupId)
+                                      .Select(guild => guild.ServerArea)
+                                      .First();
+
+            int phase = GetRoundPhase(round);
+            long totalHp = dbClient.Queryable<GuildBattleBoss>()
+                                  .Where(boss => boss.ServerId == serverId && boss.Order == bossOrder &&
+                                                 boss.Phase    == phase)
+                                  .Select(boss => boss.HP)
+                                  .First();
+            if (hp > totalHp) return -1;
+            
+            //更新数据
+            return dbClient.Updateable(new GuildBattleStatus
+                           {
+                               HP        = hp,
+                               TotalHP   = totalHp,
+                               Round     = round,
+                               Order     = bossOrder,
+                               BossPhase = phase,
+                           })
+                           .Where(guild => guild.Gid == GroupId)
+                           .IgnoreColumns(info => new {info.Gid, info.InBattle})
+                           .ExecuteCommandHasChange()
+                ? 0
+                : -99;
+        }
         #endregion
 
         #region 公有方法
@@ -724,6 +783,15 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             return dbClient.Queryable<GuildData>().Where(guild => guild.Gid == GroupId).Any();
+        }
+
+        /// <summary>
+        /// 检查是否已进入会战
+        /// </summary>
+        public bool CheckInBattle()
+        {
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            return dbClient.Queryable<GuildBattleStatus>().InSingle(GroupId).InBattle;
         }
         #endregion
 
@@ -778,6 +846,48 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             }
 
             if (nextRound > 0) nextPhase = maxPhase;
+            return nextPhase;
+        }
+
+        /// <summary>
+        /// 获取指定周目的boss对应阶段
+        /// </summary>
+        /// <param name="Round">指定周目</param>
+        /// <returns>下一周目boss的阶段值</returns>
+        private int GetRoundPhase(int Round)
+        {
+            //检查参数合法性
+            if(Round <= 0) throw new ArgumentOutOfRangeException(nameof(Round));
+
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            //当前所处区服
+            Server server =
+                dbClient.Queryable<GuildData>()
+                        .Where(guild => guild.Gid == GroupId)
+                        .Select(guild => guild.ServerArea)
+                        .First();
+            //boss的最大阶段
+            int maxPhase =
+                dbClient.Queryable<GuildBattleBoss>()
+                        .Where(boss => boss.Round == -1)
+                        .Select(boss => boss.Phase)
+                        .First();
+            //未达到最后一个阶段
+            int nextPhase = 0;
+            //获取除了最后一阶段的所有round值，在获取到相应阶段后终止循环
+            for (int i = 1; i < maxPhase; i++)
+            {
+                Round -= dbClient.Queryable<GuildBattleBoss>()
+                                 .Where(boss => boss.Phase == i && boss.ServerId == server)
+                                 .Select(boss => boss.Round)
+                                 .First();
+                if (Round <= 0) //得到下一个周目的阶段终止循环
+                {
+                    nextPhase = i;
+                    break;
+                }
+            }
+            if (Round > 0) nextPhase = maxPhase;
             return nextPhase;
         }
         #endregion
