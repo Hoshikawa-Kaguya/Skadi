@@ -1,24 +1,19 @@
-/*
- * 此文件由T4引擎自动生成, 请勿修改此文件中的代码!
- */
 using System;
-using System.Text;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Native.Core;
+using System.Text;
 using Native.Core.Domain;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.Enum;
 using Native.Sdk.Cqp.EventArgs;
-using Native.Sdk.Cqp.Interface;
 using Native.Sdk.Cqp.Expand;
+using Native.Sdk.Cqp.Interface;
 using Native.Sdk.Cqp.Model;
 using Newtonsoft.Json;
 using SuiseiBot.Code;
 using Unity;
-using Unity.Injection;
 
-namespace Native.App.Export
+namespace Native.Core.Export
 {
 	/// <summary>	
 	/// 表示酷Q事件导出的类	
@@ -30,11 +25,8 @@ namespace Native.App.Export
 		/// 由托管环境初始化的 <see cref="CQEventExport"/> 的新实例	
 		/// </summary>	
 		static CQEventExport ()	
-		{	
-			// 初始化 Costura.Fody	
-			//CosturaUtility.Initialize ();	
-			
-			Type appDataType = typeof (AppData);	
+		{
+            Type appDataType = typeof (AppData);	
 			appDataType.GetRuntimeProperty ("UnityContainer").GetSetMethod (true).Invoke (null, new object[] { new UnityContainer () });	
 			// 调用方法进行注册	
 			CQMain.Register (AppData.UnityContainer);	

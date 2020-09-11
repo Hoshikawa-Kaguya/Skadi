@@ -79,36 +79,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Export\CQEventExport.cs" />
     <Compile Include="Domain\AppData.cs" />
     <Compile Include="CQMain.cs" />
-    <Compile Include="Export\CQEventExport.cs">
-      <DependentUpon>CQExport.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Export\CQMenuExport.cs">
-      <DependentUpon>CQExport.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Export\CQStatusExport.cs">
-      <DependentUpon>CQExport.tt</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Export\CQExport.log">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>CQExport.tt</DependentUpon>
-    </None>
     <None Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Export\CQExport.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>CQExport.log</LastGenOutput>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
@@ -123,6 +104,7 @@
       <Name>Native.Sdk</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ImportGroup Label=".NET DllExport">
     <Import Project="$(SolutionDir)packages\DllExport.1.6.1\tools\net.r_eg.DllExport.targets" Condition="Exists('$(SolutionDir)packages\DllExport.1.6.1\tools\net.r_eg.DllExport.targets')" Label="8337224c9ad9e356" />
@@ -137,16 +119,12 @@
   </Target>
   <PropertyGroup>
     <PreBuildEvent>if exist "$(TargetDir)$(TargetName)" (echo 文件夹已存在) else (md "$(TargetDir)$(TargetName)") 
-if exist "$(TargetDir)$(TargetName)\app.dll" (del /F /A /Q "$(TargetDir)$(TargetName)\app.dll") 
-if exist "$(TargetDir)$(TargetName)\app.json" (del /F /A /Q "$(TargetDir)$(TargetName)\app.json")</PreBuildEvent>
+if exist "$(TargetDir)$(TargetName)\app.dll" (del /F /A /Q "$(TargetDir)$(TargetName)\app.dll")</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>if exist "$(TargetDir)$(TargetName).dll" (
 move "$(TargetDir)$(TargetName).dll" "$(TargetDir)$(TargetName)" 
-rename "$(TargetDir)$(TargetName)\$(TargetName).dll" "app.dll" 
-) 
-if exist "$(TargetDir)app.json" (
-move "$(TargetDir)app.json" "$(TargetDir)$(TargetName)" 
+rename "$(TargetDir)$(TargetName)\$(TargetName).dll" "$(TargetName).dll" 
 )</PostBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
