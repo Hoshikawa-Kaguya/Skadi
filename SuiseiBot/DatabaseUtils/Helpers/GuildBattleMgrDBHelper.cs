@@ -87,8 +87,9 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// <param name="attackType">当前刀类型（0=通常刀 1=尾刀 2=补偿刀 3=掉刀）</param>
         /// <param name="flag">成员状态</param>
         /// <param name="status">0：无异常 | 1：乱报尾刀警告 | 2：过度虐杀警告</param>
+        /// <param name="isChangeBoss">是否已切换Boss</param>
         /// <returns>0：正常 | -1：该成员不存在 | -2：未开始出刀 | -3：会战未开始 | -4:补时刀保护 | -99：数据库出错</returns>
-        public int Attack(long uid, long dmg, out AttackType attackType, out FlagType flag, out int status)
+        public int Attack(long uid, long dmg, out AttackType attackType, out FlagType flag, out int status,out bool isChangeBoss)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             var statusData = dbClient.Queryable<MemberStatus>()
@@ -97,9 +98,10 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             //检查是否查找到此成员
             if (statusData == null)
             {
-                flag       = FlagType.UnknownMember;
-                attackType = AttackType.Illeage;
-                status     = 0;
+                flag         = FlagType.UnknownMember;
+                attackType   = AttackType.Illeage;
+                status       = 0;
+                isChangeBoss = false;
                 return -1;
             }
             attackType = AttackType.Normal;
@@ -112,8 +114,9 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                     break;
                 //需要下树才能报刀      当前并未开始出刀，请先申请出刀=>返回
                 case FlagType.OnTree:   case FlagType.IDLE:
-                    attackType = AttackType.Illeage;
-                    status     = 0;
+                    attackType   = AttackType.Illeage;
+                    status       = 0;
+                    isChangeBoss = false;
                     return -2;
             }
 
@@ -124,8 +127,9 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             //检查公会是否进入会战
             if (!bossStatus.InBattle)
             {
-                status     = 0;
-                attackType = AttackType.Illeage;
+                status       = 0;
+                attackType   = AttackType.Illeage;
+                isChangeBoss = false;
                 return -3;
             }
 
@@ -153,7 +157,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                 }
                 else
                 {
-                    status = 0;
+                    status       = 0;
+                    isChangeBoss = false;
                     return -4;
                 }
             }
@@ -189,8 +194,9 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             bool succInsert = dbClient.Insertable(insertData)
                                       .AS(TableName)
                                       .ExecuteCommand() > 0;
+            //数据库：是否成功更新
             bool succUpdateBoss = true;
-
+            isChangeBoss = false;
             //如果是尾刀
             if (attackType == AttackType.Final)
             {
@@ -200,6 +206,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                         .Where(i => i.Flag == FlagType.OnTree || i.Flag == FlagType.EnGage)
                         .UpdateColumns(i => new {i.Flag, i.Info})
                         .ExecuteCommand();
+                isChangeBoss = true;
                 //切换boss
                 int nextOrder = bossStatus.Order;
                 int nextRound = bossStatus.Round;
