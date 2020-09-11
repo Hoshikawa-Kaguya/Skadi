@@ -288,7 +288,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                         .Where(i => i.Uid == uid && i.Gid == GroupId)
                         .First();
             if (currSL == null) return -1;
-            if (currSL.SL == 0 || currSL.SL <= Utils.GetUpdateStamp())
+            if (currSL.SL == 0 || currSL.SL < Utils.GetUpdateStamp())
             {
                 return -2;
             }
@@ -348,7 +348,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                 dbClient.Queryable<GuildBattle>()
                         .AS(TableName)
                         //今天5点之后出刀的
-                        .Where(i => i.Uid == uid && i.Time > Utils.GetUpdateStamp())
+                        .Where(i => i.Uid == uid && i.Time >= Utils.GetUpdateStamp())
                         .GroupBy(i => i.Uid)
                         //筛选出刀总数
                         .Select(i => new {id = i.Uid, times = SqlFunc.AggregateCount(i.Uid)})
@@ -596,7 +596,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             return dbClient.Queryable<GuildBattle>()
                            .AS(TableName)
-                           .Where(i => i.Time > Utils.GetUpdateStamp())
+                           .Where(i => i.Time >= Utils.GetUpdateStamp())
                            .OrderBy(i => i.Bid)
                            .ToList();
         }
@@ -689,6 +689,31 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                            .Select(member => member.Uid)
                            .ToList();
         }
+
+        /// <summary>
+        /// 查询今日余刀
+        /// 用于查刀和催刀
+        /// </summary>
+        public Dictionary<long, int> CheckTodayAttacks()
+        {
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            var attackTimeList = dbClient.Queryable<GuildBattle>()
+                            .AS(TableName)
+                            .Where(attack => attack.Time > Utils.GetUpdateStamp())
+                            .GroupBy(member => member.Uid)
+                            .Select(member => new
+                            {
+                                member.Uid,
+                                times = SqlFunc.AggregateCount(member.Uid)
+                            })
+                            .ToList();
+            return attackTimeList
+                   .Where(member => member.times < 3)
+                   .ToDictionary(member => member.Uid,
+                                 member => member.times);
+        }
+
+        //TODO 会战进度修正
         #endregion
 
         #region 公有方法
