@@ -10,33 +10,24 @@ using SuiseiBot.Code.Resource.TypeEnum.GuildBattleType;
 
 namespace SuiseiBot.Code.DatabaseUtils.Helpers
 {
-    //TODO 指令需要检查是否存在公会
-    //TODO 上树查树下树
-    //TODO 余刀催刀
-    //TODO 会战进度修正
     internal class GuildBattleMgrDBHelper
     {
-        private long   GroupId { get; set; }
-        private string DBPath  { get; set; }
-
+        #region 属性
+        private long   GroupId   { get; set; }
+        private string DBPath    { get; set; }
         private string TableName { get; set; }
+        #endregion
 
+        #region 构造函数
         public GuildBattleMgrDBHelper(object sender, CQGroupMessageEventArgs eventArgs)
         {
             GroupId   = eventArgs.FromGroup.Id;
             DBPath    = SugarUtils.GetDBPath(eventArgs.CQApi.GetLoginQQ().Id.ToString());
             TableName = $"{SugarTableUtils.GetTableName<GuildBattle>()}_{GroupId}";
         }
+        #endregion
 
-        /// <summary>
-        /// 检查公会是否存在
-        /// </summary>
-        public bool GuildExists()
-        {
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            return dbClient.Queryable<GuildData>().Where(guild => guild.Gid == GroupId).Any();
-        }
-
+        #region 指令
         /// <summary>
         /// 开始会战
         /// </summary>
@@ -83,36 +74,33 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// <param name="uid">用户QQ号</param>
         /// <param name="dmg">当前刀伤害</param>
         /// <param name="attackType">当前刀类型（0=通常刀 1=尾刀 2=补偿刀 3=掉刀）</param>
+        /// <param name="flag">成员状态</param>
         /// <param name="status">0：无异常 | 1：乱报尾刀警告 | 2：过度虐杀警告</param>
-        /// <param name="lostAttack">是否掉刀</param>
-        /// <returns>0：正常 | -1：该成员不存在 | -2：需要先下树 | -3：未开始出刀 | -6：会战未开始 | -99：数据库出错</returns>
-        public int Attack(int uid, long dmg,out AttackType attackType, out int status)
+        /// <returns>0：正常 | -1：该成员不存在 | -2：未开始出刀 | -3：会战未开始 | -4:补时刀保护 | -99：数据库出错</returns>
+        public int Attack(int uid, long dmg, out AttackType attackType, out FlagType flag, out int status)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             var statusData = dbClient.Queryable<MemberStatus>()
-                               .Where(i => i.Uid == uid && i.Gid == GroupId)
-                               .First();
+                                     .Where(i => i.Uid == uid && i.Gid == GroupId)
+                                     .First();
             //检查是否查找到此成员
             if (statusData == null)
             {
+                flag       = FlagType.UnknownMember;
                 attackType = AttackType.Illeage;
                 status     = 0;
                 return -1;
             }
             attackType = AttackType.Normal;
+            flag       = statusData.Flag;
             //成员状态检查
             switch (statusData.Flag)
             {
-                //当前并未开始出刀，请先申请出刀=>返回
-                case FlagType.IDLE:
-                    attackType = AttackType.Illeage;
-                    status     = 0;
-                    return -3;
                 //进入出刀判断
                 case FlagType.EnGage:
                     break;
-                //需要下树才能报刀
-                case FlagType.OnTree:
+                //需要下树才能报刀      当前并未开始出刀，请先申请出刀=>返回
+                case FlagType.OnTree:   case FlagType.IDLE:
                     attackType = AttackType.Illeage;
                     status     = 0;
                     return -2;
@@ -127,7 +115,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             {
                 status     = 0;
                 attackType = AttackType.Illeage;
-                return -6;
+                return -3;
             }
 
             #region 出刀类型判断
@@ -137,17 +125,26 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             //获取最后一刀的类型
             var lastAttack =
                 dbClient.Queryable<GuildBattle>()
+                        .AS(TableName)
                         .OrderBy(attack => attack.Bid, OrderByType.Desc)
                         .Select(attack => new {Flag = attack.Attack, attack.Uid})
                         .First();
             //出刀类型判断
             //判断顺序: 补时刀->尾刀->通常刀
-            if (lastAttack != null && uid == lastAttack.Uid && (AttackType)lastAttack.Flag == AttackType.Final) //补时
+            if (lastAttack != null && lastAttack.Flag == AttackType.Final) //补时
             {
-                status = 0;
-                attackType = dmg >= CurrHP
-                    ? AttackType.Normal //当补时刀的伤害也超过了boss血量,判定为普通刀（你开挂！
-                    : AttackType.Compensate;
+                if (uid == lastAttack.Uid)
+                {
+                    status = 0;
+                    attackType = dmg >= CurrHP
+                        ? AttackType.Normal //当补时刀的伤害也超过了boss血量,判定为普通刀（你开挂！
+                        : AttackType.Compensate;
+                }
+                else
+                {
+                    status = 0;
+                    return -4;
+                }
             }
             else
             {
@@ -178,7 +175,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                 Damage = realDamage,
                 Attack = attackType
             };
-            bool succInsert = dbClient.Insertable<GuildBattle>(insertData)
+            bool succInsert = dbClient.Insertable(insertData)
                                       .AS(TableName)
                                       .ExecuteCommand() > 0;
             bool succUpdateBoss = true;
@@ -186,10 +183,11 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             //如果是尾刀
             if (attackType == AttackType.Final)
             {
+                //TODO 下树提醒
                 //全部下树，出刀中取消出刀状态
-                dbClient.Updateable(new MemberStatus() {Flag = 0})
+                dbClient.Updateable(new MemberStatus {Flag = FlagType.IDLE, Info = null})
                         .Where(i => i.Flag == FlagType.OnTree || i.Flag == FlagType.EnGage)
-                        .UpdateColumns(i => new {i.Flag})
+                        .UpdateColumns(i => new {i.Flag, i.Info})
                         .ExecuteCommand();
                 //切换boss
                 int nextOrder = bossStatus.Order;
@@ -208,8 +206,13 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                     nextPhase = GetNextRoundPhase(bossStatus);
                 }
 
+                Server serverId = dbClient.Queryable<GuildData>()
+                                          .Where(guild => guild.Gid == GroupId)
+                                          .Select(guild => guild.ServerArea)
+                                          .First();
+
                 var nextBossData = dbClient.Queryable<GuildBattleBoss>()
-                                           .Where(i => i.ServerId == Server.CN
+                                           .Where(i => i.ServerId == serverId
                                                     && i.Phase    == nextPhase
                                                     && i.Order    == nextOrder)
                                            .First();
@@ -222,7 +225,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                         HP        = nextBossData.HP,
                         TotalHP   = nextBossData.HP
                     };
-                succUpdateBoss = dbClient.Updateable<GuildBattleStatus>(updateBossData)
+                succUpdateBoss = dbClient.Updateable(updateBossData)
                                          .UpdateColumns(i => new {i.Order, i.HP, i.BossPhase, i.Round, i.TotalHP})
                                          .Where(i => i.Gid == GroupId)
                                          .ExecuteCommandHasChange();
@@ -232,7 +235,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             var memberStatus = new MemberStatus()
             {
                 Flag = 0,
-                Info = "",
+                Info = null,
                 Time = Utils.GetNowTimeStamp(),
             };
             bool succUpdate = dbClient.Updateable(memberStatus)
@@ -258,7 +261,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             {
                 return -2;
             }
-
+            //检查成员状态
             if (currSL.Flag != FlagType.EnGage)
             {
                 return -3;
@@ -290,7 +293,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                 return -2;
             }
 
-            return dbClient.Updateable(new MemberStatus() {SL = 0})
+            return dbClient.Updateable(new MemberStatus{SL = 0})
                            .UpdateColumns(i => new {i.SL})
                            .ExecuteCommandHasChange()
                 ? 0
@@ -302,7 +305,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// </summary>
         /// <param name="uid">成员QQ号（请填写真实造成伤害的成员的QQ号）</param>
         /// <param name="flag">当前成员状态的Flag</param>
-        /// <returns>0：正常 | -1：成员不存在 | -2：宁不是搁着树上爬吗，出个🔨的刀 | -3：已出满3刀 | -4：已经出刀，请不要重复出刀 | -5:补时刀前不允许出刀 | -99：数据库出错</returns>
+        /// <returns>0：正常 | -1：成员不存在 | -2：当前并不在空闲中 | -3：已出满3刀 | -4:补时刀前不允许出刀 | -99：数据库出错</returns>
         public int RequestAttack(int uid, out FlagType flag)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
@@ -322,10 +325,10 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                         .OrderBy(attack => attack.Bid, OrderByType.Desc)
                         .Select(attack => new {Flag = attack.Attack, attack.Uid})
                         .First();
-            if (lastAttack != null && (AttackType) lastAttack.Flag == AttackType.Final && uid != lastAttack.Uid)
+            if (lastAttack != null && lastAttack.Flag == AttackType.Final && uid != lastAttack.Uid)
             {
                 flag = 0;
-                return -5;
+                return -4;
             }
 
             //当前成员状态是否能出刀
@@ -335,11 +338,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                 //空闲可以出刀
                 case FlagType.IDLE:
                     break;
-                //重复出刀
-                case FlagType.EnGage:
-                    return -4;
-                //挂树不允许出刀
-                case FlagType.OnTree:
+                //挂树不允许出刀       //重复出刀
+                case FlagType.OnTree: case FlagType.EnGage:
                     return -2;
             }
 
@@ -351,15 +351,16 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                         .Where(i => i.Uid == uid && i.Time > Utils.GetUpdateStamp())
                         .GroupBy(i => i.Uid)
                         //筛选出刀总数
-                        .Select(i => new {id = i.Uid, times = SqlFunc.AggregateCount(i.Uid)}).ToList();
+                        .Select(i => new {id = i.Uid, times = SqlFunc.AggregateCount(i.Uid)})
+                        .First();
             //一天只能3刀
-            if (AttackHistory.Any() && AttackHistory.FirstOrDefault()?.times >= 3)
+            if (AttackHistory != null && AttackHistory.times >= 3)
             {
                 return -3;
             }
 
             //修改出刀成员状态
-            return dbClient.Updateable(new MemberStatus()
+            return dbClient.Updateable(new MemberStatus
                            {
                                Flag = FlagType.EnGage,
                                Info = GetCurrentBossID(dbClient.Queryable<GuildBattleStatus>()
@@ -377,7 +378,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// </summary>
         /// <param name="uid"></param>
         /// <param name="flag"></param>
-        /// <returns>0：正常 | -1：成员不存在 | -2：宁不是搁着树上爬吗，找管理下来罢 | -3：这不是没有出刀吗，你取消申请个锤子 | -98：不可能遇到的错误 | -99：数据库出错</returns>
+        /// <returns>0：正常 | -1：成员不存在 | -2：宁不是搁着树上爬吗，找管理下来罢 | -2：这不是没有出刀吗，你取消申请个锤子 | -98：不可能遇到的错误 | -99：数据库出错</returns>
         public int UndoRequest(int uid, out FlagType flag)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
@@ -393,8 +394,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             flag = member.Flag;
             return member.Flag switch
             {
-                FlagType.IDLE => -3,
-                FlagType.EnGage => dbClient.Updateable(new MemberStatus() {Flag = FlagType.IDLE, Info = null})
+                FlagType.IDLE => -2,
+                FlagType.EnGage => dbClient.Updateable(new MemberStatus{Flag = FlagType.IDLE, Info = null})
                                            .UpdateColumns(i => new {i.Flag, i.Info})
                                            .Where(i => i.Uid == uid && i.Gid == GroupId)
                                            .ExecuteCommandHasChange()
@@ -416,6 +417,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             //查找该成员的上一刀
             GuildBattle lastAttack =
                 dbClient.Queryable<GuildBattle>()
+                        .AS(TableName)
                         .Where(member => member.Uid == uid)
                         .OrderBy(i => i.Bid, OrderByType.Desc)
                         .First();
@@ -423,6 +425,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             //删刀
             return DeleteAttack(lastAttack.Bid);
         }
+
         /// <summary>
         /// 删刀
         /// </summary>
@@ -505,12 +508,12 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             }
 
             //修改一刀数据
-            bool succModify = dbClient.Updateable<GuildBattle>(
-                                                               new GuildBattle()
-                                                               {
-                                                                   Damage = realDamage,
-                                                                   Attack   = needChangeBoss ? AttackType.Final : AttackType.Normal
-                                                               })
+            bool succModify = dbClient.Updateable(
+                                                  new GuildBattle()
+                                                  {
+                                                      Damage = realDamage,
+                                                      Attack = needChangeBoss ? AttackType.Final : AttackType.Normal
+                                                  })
                                       .AS(TableName)
                                       .UpdateColumns(i => new {i.Damage, Flag = i.Attack})
                                       .Where(i => i.Bid == AttackId)
@@ -521,7 +524,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             if (needChangeBoss)
             {
                 //全部下树，出刀中取消出刀状态
-                dbClient.Updateable(new MemberStatus() {Flag = 0})
+                dbClient.Updateable(new MemberStatus{Flag = FlagType.IDLE})
                         .Where(i => i.Flag == FlagType.OnTree || i.Flag == FlagType.EnGage)
                         .UpdateColumns(i => new {i.Flag})
                         .ExecuteCommand();
@@ -541,9 +544,14 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                     nextRound++;
                     nextPhase = GetNextRoundPhase(bossStatus);
                 }
-
+                //查找公会服务器信息
+                Server serverId = dbClient.Queryable<GuildData>()
+                                          .Where(guild => guild.Gid == GroupId)
+                                          .Select(guild => guild.ServerArea)
+                                          .First();
+                //查找下一个boss的信息
                 var nextBossData = dbClient.Queryable<GuildBattleBoss>()
-                                           .Where(i => i.ServerId == Server.CN
+                                           .Where(i => i.ServerId == serverId
                                                     && i.Phase    == nextPhase
                                                     && i.Order    == nextOrder)
                                            .First();
@@ -556,7 +564,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                         HP        = nextBossData.HP,
                         TotalHP   = nextBossData.HP
                     };
-                succUpdateBoss = dbClient.Updateable<GuildBattleStatus>(updateBossData)
+                succUpdateBoss = dbClient.Updateable(updateBossData)
                                          .UpdateColumns(i => new {i.Order, i.HP, i.BossPhase, i.Round, i.TotalHP})
                                          .Where(i => i.Gid == GroupId)
                                          .ExecuteCommandHasChange();
@@ -587,16 +595,119 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             return dbClient.Queryable<GuildBattle>()
+                           .AS(TableName)
                            .Where(i => i.Time > Utils.GetUpdateStamp())
                            .OrderBy(i => i.Bid)
                            .ToList();
         }
 
+        /// <summary>
+        /// 上树
+        /// </summary>
+        /// <param name="uid"></param>
+        /// <param name="flag"></param>
+        /// <returns>0:正常 | -1:刀还没出呢 | -1:你不是在树上了吗,爪巴 | -99:数据库错误</returns>
+        public int ClimbTree(long uid, out FlagType flag)
+        {
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            MemberStatus member =
+                dbClient.Queryable<MemberStatus>()
+                        .Where(i => i.Uid == uid && i.Gid == GroupId)
+                        .First();
+            if (member == null)
+            {
+                flag = FlagType.UnknownMember;
+                return -1;
+            }
+
+            //当前成员状态是否能上树
+            flag = member.Flag;
+            switch (flag)
+            {
+                case FlagType.EnGage:
+                    break;
+                //已经上树              并没有在出刀
+                case FlagType.OnTree:  case FlagType.IDLE:
+                    return -1;
+            }
+            //修改状态
+            member.Flag = FlagType.OnTree;
+            member.Info = Utils.GetNowTimeStamp().ToString();
+
+            return dbClient.Updateable(member).ExecuteCommandHasChange()
+                ? 0
+                : -99;
+        }
+
+        /// <summary>
+        /// 下树
+        /// </summary>
+        /// <param name="uid"></param>
+        /// <param name="flag"></param>
+        /// <returns>0:正常 | -1:你不是在树下面吗？| -99:数据库错误</returns>
+        public int LeaveTree(long uid, out FlagType flag)
+        {
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            MemberStatus member =
+                dbClient.Queryable<MemberStatus>()
+                        .Where(i => i.Uid == uid && i.Gid == GroupId)
+                        .First();
+            if (member == null)
+            {
+                flag = FlagType.UnknownMember;
+                return -1;
+            }
+
+            //当前成员状态是否能下树
+            flag = member.Flag;
+            switch (flag)
+            {
+                case FlagType.OnTree:
+                    break;
+                //正在出刀             并没有在出刀
+                case FlagType.EnGage: case FlagType.IDLE:
+                    return -1;
+            }
+            //修改状态
+            member.Flag = FlagType.IDLE;
+            member.Info = null;
+
+            return dbClient.Updateable(member).ExecuteCommandHasChange()
+                ? 0
+                : -99;
+        }
+
+        /// <summary>
+        /// 查树
+        /// </summary>
+        /// <returns>挂树表</returns>
+        public List<long> CheckTree()
+        {
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            return dbClient.Queryable<MemberStatus>()
+                           .Where(member => member.Gid == GroupId && member.Flag == FlagType.OnTree)
+                           .Select(member => member.Uid)
+                           .ToList();
+        }
+        #endregion
+
+        #region 公有方法
+        /// <summary>
+        /// 检查公会是否存在
+        /// </summary>
+        public bool GuildExists()
+        {
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            return dbClient.Queryable<GuildData>().Where(guild => guild.Gid == GroupId).Any();
+        }
+        #endregion
+
+        #region 私有方法
         /// <summary>	
         /// 获取当前公会所在boss的代号
         /// <param name="status">当前会战进度</param>
         /// </summary>	
-        public string GetCurrentBossID(GuildBattleStatus status)
+        private string GetCurrentBossID(GuildBattleStatus status)
         {
             const string BOSS_NUM = "abcde";
             return $"{status.Round}{BOSS_NUM[status.Order]}";
@@ -607,7 +718,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// </summary>
         /// /// <param name="status">当前会战进度</param>
         /// <returns>下一周目boss的阶段值</returns>
-        public int GetNextRoundPhase(GuildBattleStatus status)
+        private int GetNextRoundPhase(GuildBattleStatus status)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             //当前所处区服
@@ -644,5 +755,6 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             if (nextRound > 0) nextPhase = maxPhase;
             return nextPhase;
         }
+        #endregion
     }
 }
