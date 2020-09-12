@@ -27,6 +27,10 @@ namespace SuiseiBot.Code.Resource.TypeEnum.CmdType
         /// </summary>
         JoinAll = 6,
         /// <summary>
+        /// 删除公会
+        /// </summary>
+        DeleteGuild = 7,
+        /// <summary>
         /// 会战开始指令
         /// </summary>
         BattleStart = 101,

@@ -73,31 +73,31 @@ namespace SuiseiBot.Code.Tool
         /// 获取当前时间戳
         /// 时间戳单位(毫秒)
         /// </summary>
-        public static long GetNowTimeStampLong => (DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
+        public static long GetNowTimeStampLong() =>(long) (DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalMilliseconds;
 
         /// <summary>
         /// 获取今天零点的时间戳
         /// 时间戳单位(毫秒)
         /// </summary>
-        public static long GetTodayStampLong() => (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
+        public static long GetTodayStampLong() =>(long) (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalMilliseconds;
 
         /// <summary>
         /// 获取当前时间戳
         /// 时间戳单位(秒)
         /// </summary>
-        public static int GetNowTimeStamp() => (DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
+        public static long GetNowTimeStamp() =>(long) (DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;
 
         /// <summary>
         /// 获取今天零点的时间戳
         /// 时间戳单位(秒)
         /// </summary>
-        public static int GetTodayStamp() => (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Seconds;
+        public static long GetTodayStamp() =>(long) (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;
 
         /// <summary>
         /// 获取今天5点的时间戳
         /// 时间戳单位(秒)
         /// </summary>
-        public static int GetUpdateStamp() => (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Add(new TimeSpan(5,0,0)).Seconds;
+        public static long GetUpdateStamp() =>(long) (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Add(new TimeSpan(5,0,0)).TotalSeconds;
 
         /// <summary>
         /// 将long类型13位时间戳转换为DateTime
@@ -117,16 +117,16 @@ namespace SuiseiBot.Code.Tool
         /// 将DateTime转换为13位long时间戳
         /// 时间戳单位(秒)
         /// </summary>
-        public static long DateTimeToTimeStampLong(DateTime dateTime) =>
-            (dateTime - (new DateTime(1970, 1, 1, 8, 0, 0, 0))).Milliseconds;
+        public static long DateTimeToTimeStampLong(DateTime dateTime) =>(long)
+            (dateTime - (new DateTime(1970, 1, 1, 8, 0, 0, 0))).TotalMilliseconds;
 
 
         /// <summary>
         /// 将DateTime转换为11位int时间戳
         /// 时间戳单位(秒)
         /// </summary>
-        public static int DateTimeToTimeStamp(DateTime dateTime) =>
-            (dateTime - (new DateTime(1970, 1, 1, 8, 0, 0, 0))).Seconds;
+        public static long DateTimeToTimeStamp(DateTime dateTime) =>(long)
+            (dateTime - (new DateTime(1970, 1, 1, 8, 0, 0, 0))).TotalSeconds;
 
         #endregion
 

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
 using SuiseiBot.Code.Resource.TypeEnum;
+using SuiseiBot.Code.Resource.TypeEnum.GuildBattleType;
 using SuiseiBot.Code.SqliteTool;
+using SuiseiBot.Code.Tool;
 using SuiseiBot.Code.Tool.LogUtils;
 
 namespace SuiseiBot.Code.DatabaseUtils.Helpers
@@ -34,76 +36,29 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
 
         #endregion
 
-        #region PCR数据表的定义
-
-        //公会表
-        public readonly static string[] GColName =
-        {
-            //字段名
-            "gid",   //公会所在的QQ群号
-            "name",  //公会名
-            "server" //公会所在区服
-        };
-
-        public readonly static string[] GColType =
-        {
-            //字段类型
-            "INTEGER NOT NULL",
-            "VARCHAR NOT NULL",
-            "VARCHAR NOT NULL"
-        };
-
-        public readonly static string[] GPrimaryColName =
-        {
-            //主键名
-            "gid" //公会所在的QQ群号
-        };
-
-        //成员表
-        public readonly static string[] MColName =
-        {
-            //字段名
-            "uid",  //成员的QQ号
-            "gid",  //公会所在的QQ群号
-            "name", //成员昵称
-        };
-
-        public readonly static string[] MColType =
-        {
-            //字段类型
-            "INTEGER NOT NULL",
-            "INTEGER NOT NULL",
-            "VARCHAR NOT NULL"
-        };
-
-        public readonly static string[] MPrimaryColName =
-        {
-            //主键名
-            "uid", //成员的QQ号
-            "gid"  //公会所在的QQ群号
-        };
-
-        #endregion
-
         #region 查询函数
-
         public string GetGuildName(long groupid)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            var                  data     = dbClient.Queryable<GuildData>().Where(i => i.Gid == groupid);
+            var                  data     = dbClient.Queryable<GuildInfo>().Where(i => i.Gid == groupid);
             if (data.Any())
             {
                 return data.First().GuildName;
             }
             else
             {
-                return "公会不存在";
+                return null;
             }
         }
 
+        public int GetMemberCount(long groupId)
+        {
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            return dbClient.Queryable<MemberInfo>().Where(guild => guild.Gid == groupId).Count();
+        }
         #endregion
 
-        #region 指令响应函数
+        #region 指令
 
         /// <summary>
         /// 移除所有成员
@@ -117,10 +72,10 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         public int EmptyMember(long groupid)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            var                  data     = dbClient.Queryable<MemberData>().Where(i => i.Gid == groupid);
+            var                  data     = dbClient.Queryable<MemberInfo>().Where(i => i.Gid == groupid);
             if (data.Any())
             {
-                if (dbClient.Deleteable<MemberData>().Where(i => i.Gid == groupid).ExecuteCommandHasChange())
+                if (dbClient.Deleteable<MemberInfo>().Where(i => i.Gid == groupid).ExecuteCommandHasChange())
                 {
                     return 0;
                 }
@@ -149,9 +104,9 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         {
             int                  retCode  = -1;
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            if (dbClient.Queryable<MemberData>().Where(i => i.Uid == qqid && i.Gid == groupid).Any())
+            if (dbClient.Queryable<MemberInfo>().Where(i => i.Uid == qqid && i.Gid == groupid).Any())
             {
-                retCode = dbClient.Deleteable<MemberData>().Where(i => i.Uid == qqid && i.Gid == groupid)
+                retCode = dbClient.Deleteable<MemberInfo>().Where(i => i.Uid == qqid && i.Gid == groupid)
                                   .ExecuteCommandHasChange()
                     ? 0
                     : -1;
@@ -164,10 +119,10 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             return retCode;
         }
 
-        public List<MemberData> ShowMembers(long groupid)
+        public List<MemberInfo> ShowMembers(long groupid)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            return dbClient.Queryable<MemberData>().Where(i => i.Gid == groupid).ToList();
+            return dbClient.Queryable<MemberInfo>().Where(i => i.Gid == groupid).ToList();
         }
 
         /// <summary>
@@ -187,14 +142,13 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             {
                 int                  retCode  = -1;
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                var data = new MemberData()
+                if (dbClient.Queryable<MemberInfo>().Where(i => i.Uid == qqid && i.Gid == groupid).Any())
                 {
-                    NickName = nickName,
-                    Uid      = qqid,
-                    Gid      = groupid
-                };
-                if (dbClient.Queryable<MemberData>().Where(i => i.Uid == qqid && i.Gid == groupid).Any())
-                {
+                    var data = new MemberInfo()
+                    {
+                        Uid = qqid,
+                        Gid = groupid
+                    };
                     retCode = dbClient.Updateable(data)
                                       .Where(i => i.Uid == qqid && i.Gid == groupid)
                                       .ExecuteCommandHasChange()
@@ -203,7 +157,18 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                 }
                 else
                 {
-                    retCode = dbClient.Insertable(data).ExecuteCommand() > 0 ? 0 : -1;
+                    //成员状态
+                    var memberStatus = new MemberInfo
+                    {
+                        Flag = FlagType.IDLE,
+                        Gid = groupid,
+                        Info = null,
+                        SL = 0,
+                        Time = Utils.GetNowTimeStamp(),
+                        Uid = qqid
+                    };
+                    //成员信息
+                    retCode = dbClient.Insertable(memberStatus).ExecuteCommand() > 0 ? 0 : -1;
                 }
                 return retCode;
             }
@@ -229,19 +194,21 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         {
             try
             {
-                int                  retCode  = -1;
+                int                  retCode;
                 long                 initHP   = GetInitBossHP(gArea);
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                var data = new GuildData()
-                {
-                    GuildName  = gName,
-                    ServerArea = gArea,
-                    Gid        = gId
-                };
                 //更新信息时不需要更新公会战信息
-                if (dbClient.Queryable<GuildData>().Where(i => i.Gid == gId).Any())
+                if (dbClient.Queryable<GuildInfo>().Where(i => i.Gid == gId).Any())
                 {
+                    var data = new GuildInfo()
+                    {
+                        GuildName = gName,
+                        ServerId  = gArea,
+                        Gid       = gId
+                    };
                     retCode = dbClient.Updateable(data)
+                                      .UpdateColumns(guildInfo =>
+                                                         new {guildInfo.GuildName, guildInfo.ServerId, guildInfo.Gid})
                                       .Where(i => i.Gid == gId)
                                       .ExecuteCommandHasChange()
                         ? 1
@@ -249,7 +216,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                 }
                 else
                 {
-                    var statusData = new GuildBattleStatus
+                    //会战进度表
+                    var bossStatusData = new GuildInfo
                     {
                         BossPhase = 1,
                         Gid       = gId,
@@ -257,10 +225,11 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                         InBattle  = false,
                         Order     = 1,
                         Round     = 1,
-                        TotalHP   = initHP
+                        TotalHP   = initHP,
+                        GuildName = gName,
+                        ServerId  = gArea
                     };
-                    retCode = dbClient.Insertable(statusData).ExecuteCommand() > 0 ? 0 : -1;
-                    retCode = dbClient.Insertable(data).ExecuteCommand()       > 0 ? 0 : -1;
+                    retCode = dbClient.Insertable(bossStatusData).ExecuteCommand() > 0 ? 0 : -1;
                 }
 
                 return retCode;
@@ -272,7 +241,33 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             }
         }
 
-        //TODO 解散公会
+        /// <summary>
+        /// 删除公会
+        /// </summary>
+        /// <param name="gid">公会群的群号</param>
+        /// <returns>数据库是否成功运行</returns>
+        public bool DeleteGuild(long gid)
+        {
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                bool deletGuildInfo = dbClient.Deleteable<GuildInfo>().Where(guild => guild.Gid == gid)
+                                              .ExecuteCommandHasChange();
+                bool deletMemberInfo = true;
+                if (GetMemberCount(gid) > 0)
+                {
+                    deletMemberInfo = dbClient.Deleteable<MemberInfo>().Where(member => member.Gid == gid)
+                                              .ExecuteCommandHasChange();
+                }
+                
+                return deletMemberInfo && deletGuildInfo;
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database",ConsoleLog.ErrorLogBuilder(e));
+                return false;
+            }
+        }
         #endregion
 
         #region 私有方法

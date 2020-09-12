@@ -200,10 +200,10 @@ namespace SuiseiBot.Code.PCRGuildManager
             ConsoleLog.Debug("Dmg info parse",$"DEBUG\r\ndmg = {dmg} | attack_user = {attcakUid}");
 
             //获取成员状态信息
-            MemberStatus atkMemberStatus = GuildBattleDB.GetMemberStatus(attcakUid);
+            MemberInfo atkMemberInfo = GuildBattleDB.GetMemberStatus(attcakUid);
 
             //成员状态检查
-            switch (atkMemberStatus.Flag)
+            switch (atkMemberInfo.Flag)
             {
                 //进入出刀判断
                 case FlagType.EnGage:case FlagType.OnTree:

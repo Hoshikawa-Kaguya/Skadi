@@ -5,44 +5,6 @@ using SuiseiBot.Code.Resource.TypeEnum.GuildBattleType;
 
 namespace SuiseiBot.Code.DatabaseUtils
 {
-    #region 成员表定义
-    /// <summary>
-    /// 用于存放成员信息的表定义
-    /// </summary>
-    [SugarTable("member", "guild members data table")]
-    internal class MemberData
-    {
-        //成员QQ
-        [SugarColumn(ColumnName = "uid", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
-        public long Uid { get; set; }
-        //成员所在群号
-        [SugarColumn(ColumnName = "gid", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
-        public long Gid { get; set; }
-        //成员昵称
-        [SugarColumn(ColumnName = "name", ColumnDataType = "VARCHAR")]
-        public string NickName { get; set; }
-    }
-    #endregion
-
-    #region 公会表定义
-    /// <summary>
-    /// 用于存放公会信息的表定义
-    /// </summary>
-    [SugarTable("guild", "guild data table")]
-    internal class GuildData
-    {
-        //公会所在的QQ群号
-        [SugarColumn(ColumnName = "gid", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
-        public long Gid { get; set; }
-        //公会名
-        [SugarColumn(ColumnName = "name", ColumnDataType = "VARCHAR")]
-        public string GuildName { get; set; }
-        //公会所在区服
-        [SugarColumn(ColumnName = "server", ColumnDataType = "INTEGER")]
-        public Server ServerArea { get; set; }
-    }
-    #endregion
-
     #region 彗酱签到表定义
     /// <summary>
     /// 用于存放彗酱信息的表定义
@@ -64,6 +26,21 @@ namespace SuiseiBot.Code.DatabaseUtils
         public long ChatDate { get; set; }
     }
     #endregion
+
+    #region 阿B订阅数据表定义
+    [SugarTable("bili_subscription")]
+    internal class BiliSubscription
+    {
+        [SugarColumn(ColumnName = "gid", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public long Gid { set; get; }
+        [SugarColumn(ColumnName = "subscription_id", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public long SubscriptionId { set; get; }
+        [SugarColumn(ColumnName = "update_time", ColumnDataType = "VARCHAR")]
+        public long UpdateTime { set; get; }
+    }
+    #endregion
+
+    #region 会战数据
 
     #region 出刀记录表定义
     [SugarTable("guildbattle")]
@@ -102,9 +79,9 @@ namespace SuiseiBot.Code.DatabaseUtils
     }
     #endregion
 
-    #region 状态表定义
-    [SugarTable("member_status")]
-    internal class MemberStatus
+    #region 成员表定义
+    [SugarTable("member")]
+    internal class MemberInfo
     {
         /// <summary>
         /// 用户所在群号，同时也是公会标识
@@ -139,30 +116,27 @@ namespace SuiseiBot.Code.DatabaseUtils
     }
     #endregion
 
-    #region 阿B订阅数据表定义
-    [SugarTable("bili_subscription")]
-    internal class BiliSubscription
-    {
-        [SugarColumn(ColumnName = "gid", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
-        public long Gid { set; get; }
-        [SugarColumn(ColumnName = "subscription_id", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
-        public long SubscriptionId { set; get; }
-        [SugarColumn(ColumnName = "update_time", ColumnDataType = "VARCHAR")]
-        public long UpdateTime { set; get; }
-    }
-    #endregion
-
-    #region 会战数据
-
-    #region 每个公会的会战数据
-    [SugarTable("guild_battle_status")]
-    internal class GuildBattleStatus
+    #region 公会表定义
+    [SugarTable("guild")]
+    internal class GuildInfo
     {
         /// <summary>
         /// 公会所属群号
         /// </summary>
         [SugarColumn(ColumnName = "gid",ColumnDataType = "INTEGER",IsPrimaryKey = true)]
         public long Gid { get; set; }
+
+        /// <summary>
+        /// 公会名
+        /// </summary>
+        [SugarColumn(ColumnName = "name", ColumnDataType = "VARCHAR")]
+        public string GuildName { get; set; }
+
+        /// <summary>
+        /// 公会所在区服
+        /// </summary>
+        [SugarColumn(ColumnName = "server", ColumnDataType = "INTEGER")]
+        public Server ServerId { get; set; }
 
         /// <summary>
         /// 当前boss的血量
@@ -194,6 +168,9 @@ namespace SuiseiBot.Code.DatabaseUtils
         [SugarColumn(ColumnName = "boss_phase",ColumnDataType = "INTEGER")]
         public int BossPhase { get; set; }
 
+        /// <summary>
+        /// 公会是否在会战
+        /// </summary>
         [SugarColumn(ColumnName = "in_battle",ColumnDataType = "INTEGER")]
         public bool InBattle { get; set; }
     }

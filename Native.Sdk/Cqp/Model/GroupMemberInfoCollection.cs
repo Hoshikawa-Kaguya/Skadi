@@ -1,4 +1,4 @@
-﻿using Native.Sdk.Cqp.Expand;
+using Native.Sdk.Cqp.Expand;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -124,6 +124,15 @@ namespace Native.Sdk.Cqp.Model
 		{
 			return this.ToString ();
 		}
+
+        /// <summary>
+        /// 转换为成员列表
+        /// </summary>
+        /// <returns>List</returns>
+        public List<GroupMemberInfo> ToList()
+        {
+            return _list;
+        }
 		#endregion
 
 		#region --私有方法--

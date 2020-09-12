@@ -47,6 +47,26 @@ namespace SuiseiBot.Code.SqliteTool
         #endregion
 
         #region 表辅助函数
+        /// <summary>
+        /// 删除表
+        /// </summary>
+        /// <typeparam name="TableClass">自定义表格类</typeparam>
+        /// <param name="sugarClient">SqlSugarClient</param>
+        /// <param name="tableName">表名，为空值则为默认值</param>
+        /// <returns>影响的记录数</returns>
+        public static int DeletTable<TableClass>(SqlSugarClient sugarClient, string tableName = null)
+        {
+            if (sugarClient == null) throw new NullReferenceException("null SqlSugarClient");
+            using IDbCommand cmd = sugarClient.Ado.Connection.CreateCommand();
+            //检查表名
+            if (string.IsNullOrEmpty(tableName)) tableName = SugarTableUtils.GetTableName<TableClass>();
+            cmd.CommandText = $"DROP TABLE {tableName}";
+            //检查数据库链接
+            sugarClient.Ado.CheckConnection();
+            int ret = cmd.ExecuteNonQuery();
+            if (sugarClient.CurrentConnectionConfig.IsAutoCloseConnection) sugarClient.Close();
+            return ret;
+        }
 
         /// <summary>
         /// 创建新表，返回影响的记录数
@@ -89,7 +109,7 @@ namespace SuiseiBot.Code.SqliteTool
             //检查数据库链接
             sugarClient.Ado.CheckConnection();
             int ret = cmd.ExecuteNonQuery();
-            if (sugarClient.CurrentConnectionConfig.IsAutoCloseConnection) sugarClient.Close();
+            if (!sugarClient.CurrentConnectionConfig.IsAutoCloseConnection) sugarClient.Close();
             return ret;
         }
 
@@ -109,7 +129,6 @@ namespace SuiseiBot.Code.SqliteTool
             List<DbTableInfo> tableInfos = sugarClient.DbMaintenance.GetTableInfoList();
             return tableInfos.Exists(table => table.Name == tableName);
         }
-
         #endregion
 
         #region 简单辅助函数
@@ -128,7 +147,7 @@ namespace SuiseiBot.Code.SqliteTool
             //检查数据库链接
             sugarClient.Ado.CheckConnection();
             int ret = cmd.ExecuteNonQuery();
-            if (sugarClient.CurrentConnectionConfig.IsAutoCloseConnection) sugarClient.Close();
+            if (!sugarClient.CurrentConnectionConfig.IsAutoCloseConnection) sugarClient.Close();
             return ret;
         }
         #endregion

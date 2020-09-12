@@ -13,6 +13,7 @@ namespace SuiseiBot.Code.Resource.Commands
         {
             //公会管理模块的指令
             PCRGuildCommands.Add("建会", PCRGuildCmdType.CreateGuild);
+            PCRGuildCommands.Add("删除公会",PCRGuildCmdType.DeleteGuild);
             PCRGuildCommands.Add("入会", PCRGuildCmdType.JoinGuild);
             PCRGuildCommands.Add("查看成员", PCRGuildCmdType.ListMember);
             PCRGuildCommands.Add("退会", PCRGuildCmdType.QuitGuild);

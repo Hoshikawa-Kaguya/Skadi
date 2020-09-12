@@ -29,7 +29,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             Group QQgroup = GMgrEventArgs.FromGroup;
 
             //index=0为命令本身，其余为参数
-            string[] commandArgs = GMgrEventArgs.Message.Text.Split(' ');
+            string[] commandArgs = GMgrEventArgs.Message.Text.Trim().Split(' ');
 
             GuildManagerDBHelper dbAction = new GuildManagerDBHelper(Sender, GMgrEventArgs);
 
@@ -42,9 +42,23 @@ namespace SuiseiBot.Code.PCRGuildManager
                                   fromQQMemberType == QQGroupMemberType.Creator);
             switch (commandType)
             {
+                case PCRGuildCmdType.DeleteGuild://删除公会
+                    if(Utils.CheckForLength(commandArgs, 0) != LenType.Legitimate) return;
+                    string guildName1 = dbAction.GetGuildName(GMgrEventArgs.FromGroup.Id);
+                    if(guildName1 == null)
+                    {
+                        QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
+                                                 "此群并未标记为公会");
+                        return;
+                    }
+                    QQgroup.SendGroupMessage(dbAction.DeleteGuild(GMgrEventArgs.FromGroup.Id)
+                                                 ? $" 公会[{guildName1}]已被删除。"
+                                                 : $" 公会[{guildName1}]删除失败，数据库错误。");
+                    break;
+
                 //参数1 服务器地区，参数2 公会名（可选，缺省为群名）
                 case PCRGuildCmdType.CreateGuild: //建会
-                    string guildName = QQgroup.GetGroupInfo().Name;
+                    string guildName2 = QQgroup.GetGroupInfo().Name;
                     if (!isAdminAction)
                     {
                         QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
@@ -77,11 +91,11 @@ namespace SuiseiBot.Code.PCRGuildManager
                         switch (Utils.CheckForLength(commandArgs, 2))
                         {
                             case LenType.Legitimate://参数中有公会名
-                                guildName = commandArgs[2];
-                                result    = dbAction.CreateGuild(guildServer, guildName, QQgroup.Id);
+                                guildName2 = commandArgs[2];
+                                result    = dbAction.CreateGuild(guildServer, guildName2, QQgroup.Id);
                                 break;
                             case LenType.Illegal: //参数中没有公会名
-                                result = dbAction.CreateGuild(guildServer, guildName, QQgroup.Id);
+                                result = dbAction.CreateGuild(guildServer, guildName2, QQgroup.Id);
                                 break;
                             case LenType.Extra:
                                 QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
@@ -99,17 +113,13 @@ namespace SuiseiBot.Code.PCRGuildManager
                     switch (result)
                     {
                         case -1:
-                            QQgroup.SendGroupMessage(
-                                                     CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
-                                                     $" 公会[{guildName}]创建失败：数据库错误。");
+                            QQgroup.SendGroupMessage($" 公会[{guildName2}]创建失败：数据库错误。");
                             break;
                         case 0:
-                            QQgroup.SendGroupMessage(
-                                                     CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
-                                                     $" 公会[{guildName}]已经创建。");
+                            QQgroup.SendGroupMessage($" 公会[{guildName2}]已经创建。");
                             break;
                         case 1:
-                            QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id), " 公会已经存在，更新了当前公会的信息。");
+                            QQgroup.SendGroupMessage("公会已经存在，更新了当前公会的信息。");
                             break;
                     }
 
@@ -281,14 +291,15 @@ namespace SuiseiBot.Code.PCRGuildManager
                         int           maxLenghtOfNickint = 0; //最长的昵称长度，用于Pad对齐
                         list.ForEach(i =>
                                      {
+                                         GroupMemberInfo member = GMgrEventArgs.CQApi.GetGroupMemberInfo(i.Gid, i.Uid);
                                          if (Utils.GetQQStrLength(i.Uid.ToString()) > maxLenghtOfQQ)
                                          {
                                              maxLenghtOfQQ = Utils.GetQQStrLength(i.Uid.ToString());
                                          }
 
-                                         if (Utils.GetQQStrLength(i.NickName.ToString()) > maxLenghtOfNick)
+                                         if (Utils.GetQQStrLength(member.Nick) > maxLenghtOfNick)
                                          {
-                                             maxLenghtOfNick = Utils.GetQQStrLength(i.NickName.ToString());
+                                             maxLenghtOfNick = Utils.GetQQStrLength(member.Nick);
                                          }
 
                                          if (i.Uid.ToString().Length > maxLenghtOfQQint)
@@ -296,16 +307,20 @@ namespace SuiseiBot.Code.PCRGuildManager
                                              maxLenghtOfQQint = i.Uid.ToString().Length;
                                          }
 
-                                         if (i.NickName.ToString().Length > maxLenghtOfNickint)
+                                         if (member.Nick.Length > maxLenghtOfNickint)
                                          {
-                                             maxLenghtOfNickint = i.NickName.ToString().Length;
+                                             maxLenghtOfNickint = member.Nick.Length;
                                          }
                                      });
                         maxLenghtOfQQ++;
                         maxLenghtOfQQ++;
-                        list.ForEach(i => sb.Append("\n"     + Utils.PadRightQQ(i.Uid.ToString(), maxLenghtOfQQ) +
-                                                    "  |   " +
-                                                    i.NickName));
+                        list.ForEach(i =>
+                                     {
+                                         GroupMemberInfo member = GMgrEventArgs.CQApi.GetGroupMemberInfo(i.Gid, i.Uid);
+                                         sb.Append("\n"     + Utils.PadRightQQ(i.Uid.ToString(), maxLenghtOfQQ) +
+                                                   "  |   " +
+                                                   member.Nick);
+                                     });
 
                         string listHeader = "\n\t" + dbAction.GetGuildName(QQgroup.Id);
                         listHeader += "\n\t公会成员列表";

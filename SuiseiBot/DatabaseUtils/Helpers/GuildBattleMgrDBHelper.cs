@@ -45,7 +45,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             {
                 SugarUtils.CreateTable<GuildBattle>(dbClient, TableName);
                 ConsoleLog.Info("会战管理数据库", "开始新的一期会战统计");
-                return dbClient.Updateable(new GuildBattleStatus {InBattle = true})
+                return dbClient.Updateable(new GuildInfo {InBattle = true})
                                .Where(guild => guild.Gid == GroupId)
                                .UpdateColumns(i => new {i.InBattle})
                                .ExecuteCommandHasChange()
@@ -65,17 +65,18 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             {
                 ConsoleLog.Warning("会战管理数据库", "结束一期会战，开始输出数据");
                 //TODO: EXCEL导出公会战数据
-                return 0;
-            }
-            else
-            {
-                ConsoleLog.Info("会战管理数据库", "会战表为空，请确认是否已经开始会战统计");
-                return dbClient.Updateable(new GuildBattleStatus {InBattle = false})
+                SugarUtils.DeletTable<GuildBattle>(dbClient, TableName);
+                return dbClient.Updateable(new GuildInfo {InBattle = false})
                                .Where(guild => guild.Gid == GroupId)
                                .UpdateColumns(i => new {i.InBattle})
                                .ExecuteCommandHasChange()
                     ? 0
                     : -99;
+            }
+            else
+            {
+                ConsoleLog.Info("会战管理数据库", "会战表为空，请确认是否已经开始会战统计");
+                return 1;
             }
         }
 
@@ -86,13 +87,12 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// <param name="dmg">当前刀伤害</param>
         /// <param name="attackType">当前刀类型</param>
         /// <param name="flag">成员状态</param>
-        /// <param name="status">0：无异常 | 1：乱报尾刀警告 | 2：过度虐杀警告</param>
         /// <param name="isChangeBoss">是否已切换Boss</param>
         /// <returns>0：正常 | -1：该成员不存在 | -2：非正常出刀状态 | -3：会战未开始 | -4:补时刀保护 | -98：数据库（写入出刀信息时出错） | -99：数据库出错</returns>
         public int Attack(long uid, long dmg, out AttackType attackType, out FlagType flag,out bool isChangeBoss)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            var statusData = dbClient.Queryable<MemberStatus>()
+            var statusData = dbClient.Queryable<MemberInfo>()
                                      .Where(i => i.Uid == uid && i.Gid == GroupId)
                                      .First();
             //检查是否查找到此成员
@@ -118,11 +118,11 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             }
 
             //当前BOSS数据
-            GuildBattleStatus bossStatus =
-                dbClient.Queryable<GuildBattleStatus>()
+            GuildInfo guildInfo =
+                dbClient.Queryable<GuildInfo>()
                         .InSingle(GroupId); //单主键查询
             //检查公会是否进入会战
-            if (!bossStatus.InBattle)
+            if (!guildInfo.InBattle)
             {
                 attackType   = AttackType.Illeage;
                 isChangeBoss = false;
@@ -130,7 +130,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             }
 
             #region 出刀类型判断
-            long CurrHP     = bossStatus.HP;
+            long CurrHP     = guildInfo.HP;
             long realDamage = dmg; //实际计量伤害
 
             //获取最后一刀的类型
@@ -182,7 +182,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             {
                 Uid    = uid,
                 Time   = requestTime,
-                BossID = GetCurrentBossID(bossStatus),
+                BossID = GetCurrentBossID(guildInfo),
                 Damage = realDamage,
                 Attack = attackType
             };
@@ -201,16 +201,16 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             {
                 //TODO 下树提醒
                 //全部下树，出刀中取消出刀状态
-                dbClient.Updateable(new MemberStatus {Flag = FlagType.IDLE, Info = null})
+                dbClient.Updateable(new MemberInfo {Flag = FlagType.IDLE, Info = null})
                         .Where(i => i.Flag == FlagType.OnTree || i.Flag == FlagType.EnGage)
                         .UpdateColumns(i => new {i.Flag, i.Info})
                         .ExecuteCommand();
                 isChangeBoss = true;
                 //切换boss
-                int nextOrder = bossStatus.Order;
-                int nextRound = bossStatus.Round;
-                int nextPhase = bossStatus.BossPhase;
-                if (bossStatus.Order != 5)
+                int nextOrder = guildInfo.Order;
+                int nextRound = guildInfo.Round;
+                int nextPhase = guildInfo.BossPhase;
+                if (guildInfo.Order != 5)
                 {
                     //当前周目下一个boss
                     nextOrder++;
@@ -220,21 +220,16 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                     //切周目
                     nextOrder = 1;
                     nextRound++;
-                    nextPhase = GetNextRoundPhase(bossStatus);
+                    nextPhase = GetNextRoundPhase(guildInfo);
                 }
 
-                Server serverId = dbClient.Queryable<GuildData>()
-                                          .Where(guild => guild.Gid == GroupId)
-                                          .Select(guild => guild.ServerArea)
-                                          .First();
-
                 GuildBattleBoss nextBossData = dbClient.Queryable<GuildBattleBoss>()
-                                                       .Where(i => i.ServerId == serverId
+                                                       .Where(i => i.ServerId == guildInfo.ServerId
                                                                 && i.Phase    == nextPhase
                                                                 && i.Order    == nextOrder)
                                                        .First();
-                GuildBattleStatus updateBossData =
-                    new GuildBattleStatus()
+                GuildInfo updateBossData =
+                    new GuildInfo()
                     {
                         BossPhase = nextPhase,
                         Order     = nextOrder,
@@ -249,13 +244,13 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             }
 
             //更新成员信息，报刀后变空闲
-            MemberStatus memberStatus = new MemberStatus()
+            MemberInfo memberInfo = new MemberInfo()
             {
                 Flag = FlagType.IDLE,
                 Info = null,
                 Time = Utils.GetNowTimeStamp(),
             };
-            bool succUpdate = dbClient.Updateable(memberStatus)
+            bool succUpdate = dbClient.Updateable(memberInfo)
                                       .UpdateColumns(i => new{i.Flag,i.Info,i.Time})
                                       .Where(i=>i.Gid == GroupId && i.Uid == uid)
                                       .ExecuteCommandHasChange();
@@ -270,8 +265,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         public int SL(long uid)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            MemberStatus currSL =
-                dbClient.Queryable<MemberStatus>()
+            MemberInfo currSL =
+                dbClient.Queryable<MemberInfo>()
                         .Where(i => i.Uid == uid && i.Gid == GroupId)
                         .First();
             if (currSL == null) return -1;
@@ -287,7 +282,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             }
 
             return dbClient
-                   .Updateable(new MemberStatus
+                   .Updateable(new MemberInfo
                                    {Flag = 0, SL = Utils.GetNowTimeStamp(), Time = Utils.GetNowTimeStamp()})
                    .UpdateColumns(i => new {i.Flag, i.SL})
                    .Where(i => i.Gid == GroupId && i.Uid == uid)
@@ -304,8 +299,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         public int SLUndo(long uid)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            MemberStatus currSL =
-                dbClient.Queryable<MemberStatus>()
+            MemberInfo currSL =
+                dbClient.Queryable<MemberInfo>()
                         .Where(i => i.Uid == uid && i.Gid == GroupId)
                         .First();
             if (currSL == null) return -1;
@@ -314,7 +309,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                 return -2;
             }
 
-            return dbClient.Updateable(new MemberStatus{SL = 0})
+            return dbClient.Updateable(new MemberInfo{SL = 0})
                            .UpdateColumns(i => new {i.SL})
                            .Where(i => i.Uid == uid && i.Gid == GroupId)
                            .ExecuteCommandHasChange()
@@ -331,8 +326,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         public int RequestAttack(long uid, out FlagType flag)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            MemberStatus member =
-                dbClient.Queryable<MemberStatus>()
+            MemberInfo member =
+                dbClient.Queryable<MemberInfo>()
                         .Where(i => i.Uid == uid && i.Gid == GroupId)
                         .First();
             if (member == null)
@@ -382,10 +377,10 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             }
 
             //修改出刀成员状态
-            return dbClient.Updateable(new MemberStatus
+            return dbClient.Updateable(new MemberInfo
                            {
                                Flag = FlagType.EnGage,
-                               Info = GetCurrentBossID(dbClient.Queryable<GuildBattleStatus>()
+                               Info = GetCurrentBossID(dbClient.Queryable<GuildInfo>()
                                                                .InSingle(GroupId))
                            })
                            .UpdateColumns(i => new {i.Flag, i.Info})
@@ -404,8 +399,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         public int UndoRequest(long uid, out FlagType flag)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            MemberStatus member =
-                dbClient.Queryable<MemberStatus>()
+            MemberInfo member =
+                dbClient.Queryable<MemberInfo>()
                         .Where(i => i.Uid == uid && i.Gid == GroupId)
                         .First();
             if (member == null)
@@ -417,7 +412,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             return member.Flag switch
             {
                 FlagType.IDLE => -2,
-                FlagType.EnGage => dbClient.Updateable(new MemberStatus{Flag = FlagType.IDLE, Info = null})
+                FlagType.EnGage => dbClient.Updateable(new MemberInfo{Flag = FlagType.IDLE, Info = null})
                                            .UpdateColumns(i => new {i.Flag, i.Info})
                                            .Where(i => i.Uid == uid && i.Gid == GroupId)
                                            .ExecuteCommandHasChange()
@@ -462,8 +457,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                         .InSingle(AttackId);
             if (attackInfo == null) return -1;
 
-            GuildBattleStatus bossStatus =
-                dbClient.Queryable<GuildBattleStatus>()
+            GuildInfo bossStatus =
+                dbClient.Queryable<GuildInfo>()
                         .InSingle(GroupId);
             
             if (bossStatus.Round != Utils.GetFirstIntFromString(attackInfo.BossID))
@@ -497,8 +492,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                 dbClient.Queryable<GuildBattle>()
                         .AS(TableName)
                         .InSingle(AttackId);
-            GuildBattleStatus bossStatus =
-                dbClient.Queryable<GuildBattleStatus>()
+            GuildInfo guildInfo =
+                dbClient.Queryable<GuildInfo>()
                         .InSingle(GroupId);
             //判断是否查找到这一刀
             if (attackInfo == null)
@@ -507,7 +502,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                 return -1;
             }
             //判断是否在当前boss
-            if (bossStatus.Round != Utils.GetFirstIntFromString(attackInfo.BossID))
+            if (guildInfo.Round != Utils.GetFirstIntFromString(attackInfo.BossID))
             {
                 needChangeBoss = false;
                 return -2;
@@ -519,7 +514,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                 return -3;
             }
 
-            long CurrHP = bossStatus.HP;
+            long CurrHP = guildInfo.HP;
 
             long realDamage = toValue;
             //是否需要切换boss
@@ -548,15 +543,15 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             if (needChangeBoss)
             {
                 //全部下树，出刀中取消出刀状态
-                dbClient.Updateable(new MemberStatus{Flag = FlagType.IDLE})
+                dbClient.Updateable(new MemberInfo{Flag = FlagType.IDLE})
                         .Where(i => i.Flag == FlagType.OnTree || i.Flag == FlagType.EnGage)
                         .UpdateColumns(i => new {i.Flag})
                         .ExecuteCommand();
                 //切换boss
-                int nextOrder = bossStatus.Order;
-                int nextRound = bossStatus.Round;
-                int nextPhase = bossStatus.BossPhase;
-                if (bossStatus.Order != 5)
+                int nextOrder = guildInfo.Order;
+                int nextRound = guildInfo.Round;
+                int nextPhase = guildInfo.BossPhase;
+                if (guildInfo.Order != 5)
                 {
                     //当前周目下一个怪
                     nextOrder++;
@@ -566,21 +561,17 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                     //切周目
                     nextOrder = 1;
                     nextRound++;
-                    nextPhase = GetNextRoundPhase(bossStatus);
+                    nextPhase = GetNextRoundPhase(guildInfo);
                 }
-                //查找公会服务器信息
-                Server serverId = dbClient.Queryable<GuildData>()
-                                          .Where(guild => guild.Gid == GroupId)
-                                          .Select(guild => guild.ServerArea)
-                                          .First();
+
                 //查找下一个boss的信息
                 var nextBossData = dbClient.Queryable<GuildBattleBoss>()
-                                           .Where(i => i.ServerId == serverId
+                                           .Where(i => i.ServerId == guildInfo.ServerId
                                                     && i.Phase    == nextPhase
                                                     && i.Order    == nextOrder)
                                            .First();
                 var updateBossData =
-                    new GuildBattleStatus()
+                    new GuildInfo()
                     {
                         BossPhase = nextPhase,
                         Order     = nextOrder,
@@ -602,11 +593,11 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// 显示当前进度（请只在聊天判断中使用，本类中请自行查库，避免不必要的数据库链接）
         /// </summary>
         /// <returns>返回当前进度对象</returns>
-        public GuildBattleStatus ShowProgress()
+        public GuildInfo ShowProgress()
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            GuildBattleStatus bossStatus =
-                dbClient.Queryable<GuildBattleStatus>()
+            GuildInfo bossStatus =
+                dbClient.Queryable<GuildInfo>()
                         .InSingle(GroupId);
             return bossStatus;
         }
@@ -634,8 +625,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         public int ClimbTree(long uid, out FlagType flag)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            MemberStatus member =
-                dbClient.Queryable<MemberStatus>()
+            MemberInfo member =
+                dbClient.Queryable<MemberInfo>()
                         .Where(i => i.Uid == uid && i.Gid == GroupId)
                         .First();
             if (member == null)
@@ -672,8 +663,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         public int LeaveTree(long uid, out FlagType flag)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            MemberStatus member =
-                dbClient.Queryable<MemberStatus>()
+            MemberInfo member =
+                dbClient.Queryable<MemberInfo>()
                         .Where(i => i.Uid == uid && i.Gid == GroupId)
                         .First();
             if (member == null)
@@ -708,7 +699,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         public List<long> CheckTree()
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            return dbClient.Queryable<MemberStatus>()
+            return dbClient.Queryable<MemberInfo>()
                            .Where(member => member.Gid == GroupId && member.Flag == FlagType.OnTree)
                            .Select(member => member.Uid)
                            .ToList();
@@ -753,9 +744,9 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
 
             //查找公会服务器信息
-            Server serverId = dbClient.Queryable<GuildData>()
+            Server serverId = dbClient.Queryable<GuildInfo>()
                                       .Where(guild => guild.Gid == GroupId)
-                                      .Select(guild => guild.ServerArea)
+                                      .Select(guild => guild.ServerId)
                                       .First();
 
             int phase = GetRoundPhase(round);
@@ -767,7 +758,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             if (hp > totalHp) return -1;
             
             //更新数据
-            return dbClient.Updateable(new GuildBattleStatus
+            return dbClient.Updateable(new GuildInfo
                            {
                                HP        = hp,
                                TotalHP   = totalHp,
@@ -776,7 +767,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                                BossPhase = phase,
                            })
                            .Where(guild => guild.Gid == GroupId)
-                           .IgnoreColumns(info => new {info.Gid, info.InBattle})
+                           .UpdateColumns(info => new {info.HP, info.TotalHP, info.Round, info.Order, info.BossPhase})
                            .ExecuteCommandHasChange()
                 ? 0
                 : -99;
@@ -790,7 +781,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         public bool GuildExists()
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            return dbClient.Queryable<GuildData>().Where(guild => guild.Gid == GroupId).Any();
+            return dbClient.Queryable<GuildInfo>().Where(guild => guild.Gid == GroupId).Any();
         }
 
         /// <summary>
@@ -799,21 +790,21 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         public bool CheckInBattle()
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            return dbClient.Queryable<GuildBattleStatus>().InSingle(GroupId).InBattle;
+            return dbClient.Queryable<GuildInfo>().InSingle(GroupId).InBattle;
         }
 
         public bool CheckMember(long uid)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            return dbClient.Queryable<MemberStatus>()
+            return dbClient.Queryable<MemberInfo>()
                            .Where(i => i.Uid == uid && i.Gid == GroupId)
                            .Any();
         }
 
-        public MemberStatus GetMemberStatus(long uid)
+        public MemberInfo GetMemberStatus(long uid)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            return dbClient.Queryable<MemberStatus>()
+            return dbClient.Queryable<MemberInfo>()
                            .Where(i => i.Uid == uid && i.Gid == GroupId)
                            .First();
         }
@@ -824,7 +815,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// 获取当前公会所在boss的代号
         /// <param name="status">当前会战进度</param>
         /// </summary>	
-        private string GetCurrentBossID(GuildBattleStatus status)
+        private string GetCurrentBossID(GuildInfo status)
         {
             const string BOSS_NUM = "abcde";
             return $"{status.Round}{BOSS_NUM[status.Order]}";
@@ -833,17 +824,11 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// <summary>
         /// 获取下一个周目的boss对应阶段
         /// </summary>
-        /// /// <param name="status">当前会战进度</param>
+        /// /// <param name="guildInfo">当前会战进度</param>
         /// <returns>下一周目boss的阶段值</returns>
-        private int GetNextRoundPhase(GuildBattleStatus status)
+        private int GetNextRoundPhase(GuildInfo guildInfo)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            //当前所处区服
-            Server server =
-                dbClient.Queryable<GuildData>()
-                        .Where(guild => guild.Gid == GroupId)
-                        .Select(guild => guild.ServerArea)
-                        .First();
             //boss的最大阶段
             int maxPhase =
                 dbClient.Queryable<GuildBattleBoss>()
@@ -851,15 +836,15 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                         .Select(boss => boss.Phase)
                         .First();
             //已到最后一个阶段
-            if (status.BossPhase == maxPhase) return maxPhase;
+            if (guildInfo.BossPhase == maxPhase) return maxPhase;
             //未达到最后一个阶段
-            int nextRound = status.Round + 1;
-            int nextPhase = status.BossPhase;
+            int nextRound = guildInfo.Round + 1;
+            int nextPhase = guildInfo.BossPhase;
             //获取除了最后一阶段的所有round值，在获取到相应阶段后终止循环
             for (int i = 1; i < maxPhase; i++)
             {
                 nextRound -= dbClient.Queryable<GuildBattleBoss>()
-                                     .Where(boss => boss.Phase == i && boss.ServerId == server)
+                                     .Where(boss => boss.Phase == i && boss.ServerId == guildInfo.ServerId)
                                      .Select(boss => boss.Round)
                                      .First();
                 if (nextRound <= 0) //得到下一个周目的阶段终止循环
@@ -886,9 +871,9 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             //当前所处区服
             Server server =
-                dbClient.Queryable<GuildData>()
+                dbClient.Queryable<GuildInfo>()
                         .Where(guild => guild.Gid == GroupId)
-                        .Select(guild => guild.ServerArea)
+                        .Select(guild => guild.ServerId)
                         .First();
             //boss的最大阶段
             int maxPhase =

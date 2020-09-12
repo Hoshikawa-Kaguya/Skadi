@@ -39,20 +39,10 @@ namespace SuiseiBot.Code.DatabaseUtils
                     ConsoleLog.Warning("数据库初始化", "未找到慧酱数据表 - 创建一个新表");
                     SugarUtils.CreateTable<SuiseiData>(dbClient);
                 }
-                if (!SugarUtils.TableExists<GuildData>(dbClient)) //公会数据库初始化
-                {
-                    ConsoleLog.Warning("数据库初始化", "未找到公会表数据表 - 创建一个新表");
-                    SugarUtils.CreateTable<GuildData>(dbClient);
-                }
-                if (!SugarUtils.TableExists<MemberData>(dbClient)) //公会成员数据库初始化
-                {
-                    ConsoleLog.Warning("数据库初始化", "未找到成员表数据表 - 创建一个新表");
-                    SugarUtils.CreateTable<MemberData>(dbClient);
-                }
-                if (!SugarUtils.TableExists<MemberStatus>(dbClient)) //成员状态表的初始化
+                if (!SugarUtils.TableExists<MemberInfo>(dbClient)) //成员状态表的初始化
                 {
                     ConsoleLog.Warning("数据库初始化", "未找到成员状态表 - 创建一个新表");
-                    SugarUtils.CreateTable<MemberStatus>(dbClient);
+                    SugarUtils.CreateTable<MemberInfo>(dbClient);
                 }
                 if (!SugarUtils.TableExists<BiliSubscription>(dbClient)) //动态记录表的初始化
                 {
@@ -66,10 +56,10 @@ namespace SuiseiBot.Code.DatabaseUtils
                     //写入初始化数据
                     dbClient.Insertable(GuildBattleBoss.GetInitBossInfos()).ExecuteCommand();
                 }
-                if (!SugarUtils.TableExists<GuildBattleStatus>(dbClient)) //会战状态表的初始化
+                if (!SugarUtils.TableExists<GuildInfo>(dbClient)) //会战状态表的初始化
                 {
                     ConsoleLog.Warning("数据库初始化", "未找到会战状态表 - 创建一个新表");
-                    SugarUtils.CreateTable<GuildBattleStatus>(dbClient);
+                    SugarUtils.CreateTable<GuildInfo>(dbClient);
                 }
             }
             catch (Exception exception)
