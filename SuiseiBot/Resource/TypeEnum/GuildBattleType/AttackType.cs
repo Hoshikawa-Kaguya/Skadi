@@ -21,12 +21,16 @@ namespace SuiseiBot.Code.Resource.TypeEnum.GuildBattleType
         /// </summary>
         Final = 1,
         /// <summary>
+        /// 过度伤害
+        /// </summary>
+        FinalOutOfRange = 2,
+        /// <summary>
         /// 补时刀
         /// </summary>
-        Compensate = 2,
+        Compensate = 3,
         /// <summary>
         /// 掉刀
         /// </summary>
-        Offline = 3
+        Offline = 4
     }
 }

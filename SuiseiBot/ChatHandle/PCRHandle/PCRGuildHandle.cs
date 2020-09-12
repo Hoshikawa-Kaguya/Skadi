@@ -35,6 +35,7 @@ namespace SuiseiBot.Code.ChatHandle.PCRHandle
                 PCRGuildCommand = PCRGuildEventArgs.Message.Text.Substring(1).Split(' ')[0];
                 //获取指令类型
                 PCRGuildCmd.PCRGuildCommands.TryGetValue(PCRGuildCommand, out PCRGuildCmdType commandType);
+                ConsoleLog.Debug("Guild Command",$"user={PCRGuildEventArgs.FromQQ.Id} command={commandType}");
                 this.CommandType = commandType;
                 //未知指令
                 if (CommandType == 0)

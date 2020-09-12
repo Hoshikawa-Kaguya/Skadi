@@ -21,7 +21,8 @@ namespace SuiseiBot.Code.CQInterface
         {
             if (sender == null || e == null) return;
             this.eventArgs = e;
-            ConsoleLog.Info($"收到信息[群:{eventArgs.FromGroup.Id}]",$"{(eventArgs.Message.Text).Replace("\r\n", "\\r\\n")}");
+            //与MiraiLog信息重复暂不显示
+            //ConsoleLog.Info($"收到信息[群:{eventArgs.FromGroup.Id}]",$"{(eventArgs.Message.Text).Replace("\r\n", "\\r\\n")}");
             //读取配置文件
             Config config = new Config(eventArgs.CQApi.GetLoginQQ().Id,false);
             //Module moduleEnable = config.LoadedConfig.ModuleSwitch;

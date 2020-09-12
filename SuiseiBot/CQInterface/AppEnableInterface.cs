@@ -23,7 +23,7 @@ namespace SuiseiBot.Code.CQInterface
             }
             //打开控制台
             //ConsoleLog.AllocConsole();
-            //Console.Title = "SuiseiBot(请勿关闭此窗口)";
+            Console.Title = "SuiseiBot";
 
             //初始化配置文件
             Config config = new Config(e.CQApi.GetLoginQQ().Id);

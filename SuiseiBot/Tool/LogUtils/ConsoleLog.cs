@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace SuiseiBot.Code.Tool.LogUtils
@@ -9,6 +10,15 @@ namespace SuiseiBot.Code.Tool.LogUtils
     /// </summary>
     internal class ConsoleLog
     {
+        #region 控制台调用函数
+        /// <summary>
+        /// 打开控制台
+        /// </summary>
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool AllocConsole();
+        #endregion
+
         #region Log等级设置
         private static LogLevel Level = LogLevel.Info;
 

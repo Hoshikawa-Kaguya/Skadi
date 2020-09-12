@@ -67,6 +67,12 @@ namespace SuiseiBot.Code.PCRGuildManager
                                                      "弟啊，你哪个服务器的");
                             return;
                         }
+
+                        if (guildServer != Server.CN)
+                        {
+                            QQgroup.SendGroupMessage("暂不支持国服以外的服务器");
+                            return;
+                        }
                         //根据输入参数建立公会
                         switch (Utils.CheckForLength(commandArgs, 2))
                         {

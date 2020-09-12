@@ -8,7 +8,11 @@ using SuiseiBot.Code.Resource.TypeEnum.CmdType;
 using SuiseiBot.Code.Resource.TypeEnum.GuildBattleType;
 using SuiseiBot.Code.Tool.LogUtils;
 using System;
+using System.Collections.Generic;
 using System.Text;
+using SuiseiBot.Code.DatabaseUtils;
+using SuiseiBot.Code.Resource.TypeEnum;
+using SuiseiBot.Code.Tool;
 
 namespace SuiseiBot.Code.PCRGuildManager
 {
@@ -38,8 +42,9 @@ namespace SuiseiBot.Code.PCRGuildManager
         {
             if (GBEventArgs == null) throw new ArgumentNullException(nameof(GBEventArgs));
 
+            string message = GBEventArgs.Message.Text.Trim();
             //index=0为命令本身，其余为参数
-            string[] commandArgs = GBEventArgs.Message.Text.Split(' ');
+            string[] commandArgs = message.Split(' ');
 
             //查找是否存在这个公会
             if (!GuildBattleDB.GuildExists())
@@ -127,62 +132,149 @@ namespace SuiseiBot.Code.PCRGuildManager
 
         private void Attack(string[] CommandArgs)
         {
-            if (!int.TryParse(CommandArgs[1], out int dmg) || dmg < 0) 
+            if (!GuildBattleDB.CheckInBattle())
             {
-                QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
-                                         "\r\n伤害输入有误！仅能输入自然数！");
+                QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "公会战还没开呢");
                 return;
             }
-
-            int ret = GuildBattleDB.Attack(uid: SenderQQ.Id,
-                                           dmg: dmg,
-                                           out AttackType AttType,
-                                           out FlagType flag,
-                                           out int status,
-                                           out bool isChangeBoss
-                                          ); //命令执行返回值
-            StringBuilder sb = new StringBuilder();
-            switch (ret)
+            long attcakUid;
+            //判断参数类型
+            switch (Utils.CheckForLength(CommandArgs,1))
             {
-                case 0:
-                    //TODO 优化出刀类型判断和消息文本的构建
-                    sb.Append("\r\n出刀成功！");
-                    if (status == 2)
+                case LenType.Illegal:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n兄啊你的伤害呢");
+                    return;
+                case LenType.Legitimate://正常出刀
+                    //检查成员
+                    if (!GuildBattleDB.CheckMember(SenderQQ.Id))
                     {
-                        sb.Append("\r\n不过伤害过多，已修正伤害为BOSS剩余HP；");
+                        QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n不是这个公会的还想打会战？");
+                        return;
                     }
-                    else if (status == 1)
+                    attcakUid = SenderQQ.Id;
+                    break;
+                case LenType.Extra://代刀
+                    //检查是否有多余参数和AT
+                    if (GBEventArgs.Message.CQCodes.Count       == 1             &&
+                        GBEventArgs.Message.CQCodes[0].Function == CQFunction.At &&
+                        Utils.CheckForLength(CommandArgs,2)     == LenType.Legitimate)
                     {
-                        sb.Append("\r\n未尾刀请不要报为尾刀，已修正为通常刀；");
+                        //从CQCode中获取QQ号
+                        Dictionary<string,string> codeInfo =  GBEventArgs.Message.CQCodes[0].Items;
+                        if (codeInfo.TryGetValue("qq",out string uid))
+                        {
+                            attcakUid = Convert.ToInt64(uid);
+                            //检查成员
+                            if (!GuildBattleDB.CheckMember(attcakUid))
+                            {
+                                QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n此成员不是这个公会的成员");
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            ConsoleLog.Error("CQCode parse error","can't get uid in cqcode");
+                            return;
+                        }
                     }
-                    var nowProgress =
-                        GuildBattleDB.ShowProgress();
-                    if (isChangeBoss)
+                    else
                     {
-                        sb.Append("\r\n@全体成员 BOSS已经成功切换啦");
+                        QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                                 "\r\n听不见！重来！（有多余参数）");
+                        return;
                     }
-
-                    sb.Append($"\r\n目前第{nowProgress.Round}周目的老{nowProgress.Order}状态如下：");
-                    sb.Append($"\r\n血量：{nowProgress.HP} / {nowProgress.HP}");
-                    sb.Append($"\r\n阶段：{nowProgress.BossPhase}");
                     break;
-                case -1:
-                    sb.Append("\r\n你并不在公会，请先入会！");
-                    break;
-                case -2:
-                    sb.Append("\r\n公会战还没开始，请等待管理员的指令！");
-                    break;
-                case -3:
-                    sb.Append("\r\n目前禁止出刀，请等待管理员的指令！");
-                    break;
-                case -4:
-                    sb.Append("\r\n目前禁止出刀，请等待补时刀出完！");
-                    break;
-                case -99:
-                    sb.Append("\r\n数据库出错，请联系管理员！");
-                    break;
+                default:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "发生未知错误，请联系机器人管理员");
+                    ConsoleLog.Error("Unknown error","LenType");
+                    return;
             }
-            QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), sb.ToString());
+            //处理参数得到伤害值并检查合法性
+            if (!long.TryParse(CommandArgs[1], out long dmg) || dmg < 0) 
+            {
+                QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                         "\r\n兄啊你的伤害好jb怪啊");
+                return;
+            }
+            ConsoleLog.Debug("Dmg info parse",$"DEBUG\r\ndmg = {dmg} | attack_user = {attcakUid}");
+
+            //获取成员状态信息
+            MemberStatus atkMemberStatus = GuildBattleDB.GetMemberStatus(attcakUid);
+
+            //成员状态检查
+            switch (atkMemberStatus.Flag)
+            {
+                //进入出刀判断
+                case FlagType.EnGage:case FlagType.OnTree:
+                    break;
+                //当前并未开始出刀，请先申请出刀=>返回
+                case FlagType.IDLE:
+                    return;
+            }
+
+
+            // int ret = GuildBattleDB.Attack(uid: SenderQQ.Id,
+            //                                dmg: dmg,
+            //                                out AttackType AttType,
+            //                                out FlagType flag,
+            //                                out bool isChangeBoss
+            //                               ); //命令执行返回值
+            // ConsoleLog.Debug("Guild Battle",$"user:{SenderQQ.Id} dmg:{dmg} type:{AttType}");
+            // StringBuilder sb = new StringBuilder();
+            // //检查成员状态
+            // switch (flag)
+            // {
+            //     case FlagType.EnGage:
+            //         break;
+            //     case FlagType.IDLE:
+            //
+            // }
+            // switch (AttType)
+            // {
+            //     
+            // }
+            // switch (ret)
+            // {
+            //     case 0:
+            //         //TODO 优化出刀类型判断和消息文本的构建
+            //         sb.Append("\r\n出刀成功！");
+            //         if (status == 2)
+            //         {
+            //             sb.Append("\r\n不过伤害过多，已修正伤害为BOSS剩余HP；");
+            //         }
+            //         else if (status == 1)
+            //         {
+            //             sb.Append("\r\n未尾刀请不要报为尾刀，已修正为通常刀；");
+            //         }
+            //         var nowProgress =
+            //             GuildBattleDB.ShowProgress();
+            //         if (isChangeBoss)
+            //         {
+            //             sb.Append("\r\n@全体成员 BOSS已经成功切换啦");
+            //         }
+            //
+            //         sb.Append($"\r\n目前第{nowProgress.Round}周目的老{nowProgress.Order}状态如下：");
+            //         sb.Append($"\r\n血量：{nowProgress.HP} / {nowProgress.HP}");
+            //         sb.Append($"\r\n阶段：{nowProgress.BossPhase}");
+            //         break;
+            //     case -1:
+            //         sb.Append("\r\n你并不在公会，请先入会！");
+            //         break;
+            //     case -2:
+            //         sb.Append("\r\n公会战还没开始，请等待管理员的指令！");
+            //         break;
+            //     case -3:
+            //         sb.Append("\r\n目前禁止出刀，请等待管理员的指令！");
+            //         break;
+            //     case -4:
+            //         sb.Append("\r\n目前禁止出刀，请等待补时刀出完！");
+            //         break;
+            //     case -99:
+            //         sb.Append("\r\n数据库出错，请联系管理员！");
+            //         break;
+            // }
+            // QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), sb.ToString());
         }
         #endregion
 

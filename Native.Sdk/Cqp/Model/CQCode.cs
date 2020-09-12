@@ -130,7 +130,7 @@ namespace Native.Sdk.Cqp.Model
 		{
 			return code.Function == CQFunction.Record;
 		}
-		/// <summary>
+        /// <summary>
 		/// 确定指定的对象是否等于当前对象
 		/// </summary>
 		/// <param name="obj">要与当前对象进行比较的对象</param>

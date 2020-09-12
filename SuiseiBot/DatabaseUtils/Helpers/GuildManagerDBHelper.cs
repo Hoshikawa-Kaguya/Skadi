@@ -25,7 +25,6 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         /// </summary>
         /// <param name="sender">sender object</param>
         /// <param name="eventArgs">CQAppEnableEventArgs类</param>
-        /// <param name="time">触发时间</param>
         public GuildManagerDBHelper(object sender, CQGroupMessageEventArgs eventArgs)
         {
             this.Sender    = sender;
@@ -231,6 +230,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             try
             {
                 int                  retCode  = -1;
+                long                 initHP   = GetInitBossHP(gArea);
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 var data = new GuildData()
                 {
@@ -238,6 +238,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                     ServerArea = gArea,
                     Gid        = gId
                 };
+                //更新信息时不需要更新公会战信息
                 if (dbClient.Queryable<GuildData>().Where(i => i.Gid == gId).Any())
                 {
                     retCode = dbClient.Updateable(data)
@@ -248,8 +249,20 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                 }
                 else
                 {
-                    retCode = dbClient.Insertable<GuildData>(data).ExecuteCommand() > 0 ? 0 : -1;
+                    var statusData = new GuildBattleStatus
+                    {
+                        BossPhase = 1,
+                        Gid       = gId,
+                        HP        = initHP,
+                        InBattle  = false,
+                        Order     = 1,
+                        Round     = 1,
+                        TotalHP   = initHP
+                    };
+                    retCode = dbClient.Insertable(statusData).ExecuteCommand() > 0 ? 0 : -1;
+                    retCode = dbClient.Insertable(data).ExecuteCommand()       > 0 ? 0 : -1;
                 }
+
                 return retCode;
             }
             catch (Exception e)
@@ -259,6 +272,20 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             }
         }
 
+        //TODO 解散公会
+        #endregion
+
+        #region 私有方法
+        private long GetInitBossHP(Server server)
+        {
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            return dbClient.Queryable<GuildBattleBoss>()
+                           .Where(i => i.ServerId == server
+                                    && i.Phase    == 1
+                                    && i.Order    == 1)
+                           .Select(i=>i.HP)
+                           .First();
+        }
         #endregion
     }
 }

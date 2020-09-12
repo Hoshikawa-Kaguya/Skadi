@@ -18,9 +18,10 @@ namespace SuiseiBot.Code.Resource.Commands
             PCRGuildCommands.Add("退会", PCRGuildCmdType.QuitGuild);
             PCRGuildCommands.Add("清空成员", PCRGuildCmdType.QuitAll);
             PCRGuildCommands.Add("一键入会", PCRGuildCmdType.JoinAll);
-            //出道模块的指令（在做了在做了
+            //出刀模块的指令（在做了在做了
             PCRGuildCommands.Add("开始会战",PCRGuildCmdType.BattleStart);
             PCRGuildCommands.Add("更新BOSS",PCRGuildCmdType.UpdateBoss);
+            PCRGuildCommands.Add("出刀",PCRGuildCmdType.Attack);
         }
     }
 }

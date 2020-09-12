@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
 using SuiseiBot.Code.SqliteTool;
@@ -74,6 +75,7 @@ namespace SuiseiBot.Code.DatabaseUtils
             catch (Exception exception)
             {
                 ConsoleLog.Fatal("数据库初始化错误",ConsoleLog.ErrorLogBuilder(exception));
+                Thread.Sleep(5000);
                 throw;
             }
         }
