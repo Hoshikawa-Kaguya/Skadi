@@ -8,58 +8,23 @@ using SuiseiBot.Code.SqliteTool;
 using SuiseiBot.Code.Tool;
 using SuiseiBot.Code.Tool.LogUtils;
 
-namespace SuiseiBot.Code.DatabaseUtils.Helpers
+namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
 {
-    internal class GuildManagerDBHelper
+    internal class GuildManagerDBHelper : GuildDBHelper
     {
-        //TODO 创建公会时同时写入会战相关表格
-        #region 参数
-        public         CQGroupMessageEventArgs EventArgs { private set; get; }
-        public         object                  Sender    { private set; get; }
-        private static string                  DBPath; //数据库路径
-
-        #endregion
-
         #region 构造函数
-
         /// <summary>
         /// 在接受到群消息时使用
         /// </summary>
-        /// <param name="sender">sender object</param>
-        /// <param name="eventArgs">CQAppEnableEventArgs类</param>
-        public GuildManagerDBHelper(object sender, CQGroupMessageEventArgs eventArgs)
+        /// <param name="guildEventArgs">CQAppEnableEventArgs类</param>
+        public GuildManagerDBHelper(CQGroupMessageEventArgs guildEventArgs)
         {
-            this.Sender    = sender;
-            this.EventArgs = eventArgs;
-            DBPath         = SugarUtils.GetDBPath(eventArgs.CQApi.GetLoginQQ().Id.ToString());
-        }
-
-        #endregion
-
-        #region 查询函数
-        public string GetGuildName(long groupid)
-        {
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            var                  data     = dbClient.Queryable<GuildInfo>().Where(i => i.Gid == groupid);
-            if (data.Any())
-            {
-                return data.First().GuildName;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public int GetMemberCount(long groupId)
-        {
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            return dbClient.Queryable<MemberInfo>().Where(guild => guild.Gid == groupId).Count();
+            this.GuildEventArgs = guildEventArgs;
+            this.DBPath         = SugarUtils.GetDBPath(guildEventArgs.CQApi.GetLoginQQ().Id.ToString());
         }
         #endregion
 
         #region 指令
-
         /// <summary>
         /// 移除所有成员
         /// </summary>
@@ -119,6 +84,11 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
             return retCode;
         }
 
+        /// <summary>
+        /// 查询公会所有成员
+        /// </summary>
+        /// <param name="groupid">QQ群号</param>
+        /// <returns>成员列表</returns>
         public List<MemberInfo> ShowMembers(long groupid)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
@@ -254,7 +224,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
                 bool deletGuildInfo = dbClient.Deleteable<GuildInfo>().Where(guild => guild.Gid == gid)
                                               .ExecuteCommandHasChange();
                 bool deletMemberInfo = true;
-                if (GetMemberCount(gid) > 0)
+                if (dbClient.Queryable<MemberInfo>().Where(guild => guild.Gid == gid).Count() > 0)
                 {
                     deletMemberInfo = dbClient.Deleteable<MemberInfo>().Where(member => member.Gid == gid)
                                               .ExecuteCommandHasChange();
@@ -271,6 +241,10 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers
         #endregion
 
         #region 私有方法
+        /// <summary>
+        /// 获取对应区服的boss初始化HP
+        /// </summary>
+        /// <param name="server">区服</param>
         private long GetInitBossHP(Server server)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);

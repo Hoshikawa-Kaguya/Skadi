@@ -55,11 +55,6 @@ namespace SuiseiBot.Code.ChatHandle.PCRHandle
                     GuildBattleManager battleManager = new GuildBattleManager(PCRGuildEventArgs,CommandType);
                     battleManager.GuildBattleResponse();
                 }
-                //Boss数据相关指令
-                else if ((int)CommandType > 200 && (int)CommandType < 300)
-                {
-                    BossManager.BossResponse(Sender, PCRGuildEventArgs, CommandType);
-                }
             }
             catch(Exception e)
             {

@@ -8,6 +8,7 @@ using Native.Sdk.Cqp.EventArgs;
 using Native.Sdk.Cqp.Model;
 using SuiseiBot.Code.ChatHandle.PCRHandle;
 using SuiseiBot.Code.DatabaseUtils.Helpers;
+using SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper;
 using SuiseiBot.Code.Resource.TypeEnum;
 using SuiseiBot.Code.Resource.TypeEnum.CmdType;
 using SuiseiBot.Code.Tool;
@@ -31,7 +32,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             //index=0为命令本身，其余为参数
             string[] commandArgs = GMgrEventArgs.Message.Text.Trim().Split(' ');
 
-            GuildManagerDBHelper dbAction = new GuildManagerDBHelper(Sender, GMgrEventArgs);
+            GuildManagerDBHelper dbAction = new GuildManagerDBHelper(GMgrEventArgs);
 
             int result = -2;
 
@@ -44,13 +45,13 @@ namespace SuiseiBot.Code.PCRGuildManager
             {
                 case PCRGuildCmdType.DeleteGuild://删除公会
                     if(Utils.CheckForLength(commandArgs, 0) != LenType.Legitimate) return;
-                    string guildName1 = dbAction.GetGuildName(GMgrEventArgs.FromGroup.Id);
-                    if(guildName1 == null)
+                    if(!dbAction.GuildExists())
                     {
                         QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
                                                  "此群并未标记为公会");
                         return;
                     }
+                    string guildName1 = dbAction.GetGuildName(GMgrEventArgs.FromGroup.Id);
                     QQgroup.SendGroupMessage(dbAction.DeleteGuild(GMgrEventArgs.FromGroup.Id)
                                                  ? $" 公会[{guildName1}]已被删除。"
                                                  : $" 公会[{guildName1}]删除失败，数据库错误。");
@@ -64,6 +65,13 @@ namespace SuiseiBot.Code.PCRGuildManager
                         QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
                                                  " 你没有权限这样做~");
                         ConsoleLog.Warning($"会战[群:{QQgroup.Id}]", $"群成员{QQgroup.GetGroupMemberInfo(GMgrEventArgs.FromQQ.Id).Nick}正在尝试执行指令{commandType}");
+                        return;
+                    }
+                    //检查群是否已经被标记为公会
+                    if (dbAction.GuildExists())
+                    {
+                        QQgroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
+                                                 "此群并未标记为公会");
                         return;
                     }
 
