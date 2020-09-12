@@ -51,7 +51,8 @@ namespace SuiseiBot.Code.ChatHandle.PCRHandle
                 //出刀管理指令
                 else if ((int)CommandType > 100 && (int)CommandType < 200)
                 {
-                    GuildBattleManager.GuildBattleResponse(Sender,PCRGuildEventArgs, CommandType);
+                    GuildBattleManager battleManager = new GuildBattleManager(PCRGuildEventArgs,CommandType);
+                    battleManager.GuildBattleResponse();
                 }
                 //Boss数据相关指令
                 else if ((int)CommandType > 200 && (int)CommandType < 300)
@@ -63,7 +64,6 @@ namespace SuiseiBot.Code.ChatHandle.PCRHandle
             {
                 //命令无法被正确解析
                 ConsoleLog.Error("PCR公会管理", $"指令解析发生错误\n{e}");
-                return;
             }
         }
         #endregion
@@ -72,7 +72,6 @@ namespace SuiseiBot.Code.ChatHandle.PCRHandle
         /// <summary>
         /// 得到未知指令时的响应
         /// </summary>
-        /// <param name="sender">sender</param>
         /// <param name="e">CQGroupMessageEventArgs</param>
         public static void GetUnknowCommand(CQGroupMessageEventArgs e)
         {

@@ -376,7 +376,7 @@ namespace Native.Sdk.Cqp
         {
             if (string.IsNullOrEmpty(url))
             {
-                throw new ArgumentException("路径不能为空", "url");
+                throw new ArgumentException("路径不能为空", nameof(url));
             }
 
             return new CQCode(
