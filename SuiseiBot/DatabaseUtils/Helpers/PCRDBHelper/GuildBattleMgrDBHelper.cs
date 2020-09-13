@@ -212,12 +212,15 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                 return -3;
             }
 
+            string bossCode = dbClient.Queryable<GuildInfo>()
+                                      .Select(boss => $"{boss.Round}:{boss.Order}")
+                                      .InSingle(GuildEventArgs.FromGroup.Id);
+
             //修改出刀成员状态
             return dbClient.Updateable(new MemberInfo
                            {
                                Flag = FlagType.EnGage,
-                               Info = GetCurrentBossID(dbClient.Queryable<GuildInfo>()
-                                                               .InSingle(GuildEventArgs.FromGroup.Id))
+                               Info = bossCode
                            })
                            .UpdateColumns(i => new {i.Flag, i.Info})
                            .Where(i => i.Uid == uid && i.Gid == GuildEventArgs.FromGroup.Id)
@@ -293,11 +296,11 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                         .InSingle(AttackId);
             if (attackInfo == null) return -1;
 
-            GuildInfo bossStatus =
+            GuildInfo guildInfo =
                 dbClient.Queryable<GuildInfo>()
                         .InSingle(GuildEventArgs.FromGroup.Id);
             
-            if (bossStatus.Round != Utils.GetFirstIntFromString(attackInfo.BossID))
+            if (guildInfo.Round != attackInfo.Round && guildInfo.Order != attackInfo.Order)
             {
                 return -2;
             }
@@ -338,7 +341,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                 return -1;
             }
             //判断是否在当前boss
-            if (guildInfo.Round != Utils.GetFirstIntFromString(attackInfo.BossID))
+            if (guildInfo.Round != attackInfo.Round && guildInfo.Order != attackInfo.Order)
             {
                 needChangeBoss = false;
                 return -2;
@@ -686,7 +689,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                 {
                     Uid    = uid,
                     Time   = Utils.GetNowTimeStamp(),
-                    BossID = GetCurrentBossID(guildInfo),
+                    Order  = guildInfo.Order,
+                    Round  = guildInfo.Round,
                     Damage = dmg,
                     Attack = attackType
                 };
@@ -870,16 +874,6 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         #endregion
 
         #region 私有方法
-        /// <summary>	
-        /// 获取当前公会所在boss的代号
-        /// <param name="status">当前会战进度</param>
-        /// </summary>	
-        private string GetCurrentBossID(GuildInfo status)
-        {
-            const string BOSS_NUM = "abcde";
-            return $"{status.Round}{BOSS_NUM[status.Order]}";
-        }
-
         /// <summary>
         /// 获取下一个周目的boss对应阶段
         /// </summary>

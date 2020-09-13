@@ -62,10 +62,15 @@ namespace SuiseiBot.Code.DatabaseUtils
         [SugarColumn(ColumnName = "time",ColumnDataType = "INTEGER")]
         public long Time { get; set; }
         /// <summary>
-        /// boss的代号
+        /// 周目数
         /// </summary>
-        [SugarColumn(ColumnName = "boss",ColumnDataType = "VARCHAR")]
-        public string BossID { get; set; }
+        [SugarColumn(ColumnName = "round",ColumnDataType = "INTEGER")]
+        public int Round { get; set; }
+        /// <summary>
+        /// boss的序号
+        /// </summary>
+        [SugarColumn(ColumnName = "order_num",ColumnDataType = "INTEGER")]
+        public int Order { get; set; }
         /// <summary>
         /// 伤害数值
         /// </summary>

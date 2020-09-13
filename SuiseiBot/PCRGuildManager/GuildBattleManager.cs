@@ -8,6 +8,7 @@ using SuiseiBot.Code.Resource.TypeEnum.GuildBattleType;
 using SuiseiBot.Code.Tool.LogUtils;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using SuiseiBot.Code.DatabaseUtils;
 using SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper;
 using SuiseiBot.Code.Resource.TypeEnum;
@@ -147,8 +148,11 @@ namespace SuiseiBot.Code.PCRGuildManager
                     return true;
                 case -1:
                     return false;
-                default:
+                case 1:
                     break;
+                default:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "遇到了未知错误");
+                    return true;
             }
             long atkUid;
             
@@ -228,9 +232,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                 case FlagType.IDLE:
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
                                              "请先申请出刀再重拳出击");
-                    //TODO 调试后去除break
-                    break;
-                    //return;
+                    return true;
             }
             ConsoleLog.Debug("member flag check",$"DEBUG\r\nuser = {atkUid} | flag = {atkMemberInfo.Flag}");
 
@@ -248,7 +250,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             //出刀类型判断
             AttackType curAttackType;
             //判断顺序: 补时刀->尾刀->通常刀
-            if (lastAttackType == AttackType.Final) //补时
+            if (lastAttackType == AttackType.Final || lastAttackType == AttackType.FinalOutOfRange) //补时
             {
                 if (atkUid == lastAttackUid)
                 {
@@ -270,12 +272,14 @@ namespace SuiseiBot.Code.PCRGuildManager
                 if (dmg >= atkGuildInfo.HP)
                 {
                     curAttackType = dmg > atkGuildInfo.HP ? AttackType.FinalOutOfRange : AttackType.Final;
-                    dmg           = atkGuildInfo.HP;
                 }
                 //掉刀判断
                 if (dmg == 0)
                     curAttackType = AttackType.Offline;
             }
+            //伤害修正
+            if(needChangeBoss) dmg = atkGuildInfo.HP;
+            ConsoleLog.Debug("attack type",curAttackType);
             #endregion
 
             if (!GuildBattleDB.NewAttack(atkUid, atkGuildInfo, dmg, curAttackType)) return false;
@@ -286,28 +290,49 @@ namespace SuiseiBot.Code.PCRGuildManager
                 if (!GuildBattleDB.CleanTree(atkGuildInfo)) return false;
                 if (atkGuildInfo.Order == 5) //进入下一个周目
                 {
+                    ConsoleLog.Debug("change boss","go to next round");
                     if (!GuildBattleDB.GotoNextRound(atkGuildInfo)) return false;
                 }
                 else //进入下一个Boss
                 {
+                    ConsoleLog.Debug("change boss","go to next boss");
                     if (!GuildBattleDB.GotoNextBoss(atkGuildInfo)) return false;
                 }
             }
             else
             {
                 //更新boss数据
-                if (!GuildBattleDB.ModifyBossHP(atkGuildInfo, atkGuildInfo.TotalHP - dmg)) return false;
+                if (!GuildBattleDB.ModifyBossHP(atkGuildInfo, atkGuildInfo.HP - dmg)) return false;
             }
 
             //报刀后成员变为空闲
             if (!GuildBattleDB.UpdateMemberStatus(atkUid, FlagType.IDLE, null)) return false;
 
-            //TODO 消息提示
-            // StringBuilder message = new StringBuilder();
-            // message.Append(CQApi.CQCode_At(atkUid));
-            // message.Append("对boss造成[");
-            // message.Append(dmg);
-            // message.Append("]伤害");
+            //消息提示
+            StringBuilder message = new StringBuilder();
+            if (curAttackType == AttackType.FinalOutOfRange) message.Append("过度伤害！ 已自动修正boss血量\r\n");
+            message.Append(CQApi.CQCode_At(atkUid));
+            message.Append($"\r\n对{atkGuildInfo.Round}周目{atkGuildInfo.Order}王造成伤害\r\n");
+            message.Append(dmg.ToString("N0"));
+            message.Append("\r\n\r\n目前进度：");
+            GuildInfo latestGuildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
+            if (latestGuildInfo == null) return false;
+            message.Append($"{latestGuildInfo.Round}周目{latestGuildInfo.Order}王\r\n");
+            message.Append($"{latestGuildInfo.HP:N0}/{latestGuildInfo.TotalHP:N0}");
+            switch (curAttackType)
+            {
+                case AttackType.FinalOutOfRange:
+                case AttackType.Final:
+                    message.Append("\r\n已被自动标记为尾刀\r\nboss已被锁定请等待补时刀");
+                    break;
+                case AttackType.Compensate:
+                    message.Append("\r\n已被自动标记为补时刀");
+                    break;
+                case AttackType.Offline:
+                    message.Append("\r\n已被自动标记为掉刀");
+                    break;
+            }
+            QQGroup.SendGroupMessage(message);
             return true;
         }
         #endregion
