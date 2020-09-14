@@ -255,6 +255,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             long lastAttackUid = GuildBattleDB.GetLastAttack(atkUid, out AttackType lastAttack);
             if (lastAttackUid == -1) return false;
 
+            ConsoleLog.Debug("member status",member.Flag);
             //检查成员状态
             switch (member.Flag)
             {
@@ -293,6 +294,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             }
 
             int todayAtkCount = GuildBattleDB.GetTodayAttackCount(atkUid);
+            ConsoleLog.Debug("atk count",todayAtkCount);
             if (todayAtkCount == -1) return false;
             //检查今日出刀数量
             if (!(lastAttack == AttackType.Final || lastAttack == AttackType.FinalOutOfRange) && todayAtkCount >= 3) 
@@ -416,6 +418,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             //获取成员信息
             MemberInfo member = GuildBattleDB.GetMemberInfo(atkUid);
             if (member == null) return false;
+            ConsoleLog.Debug("member status",member.Flag);
 
             switch (member.Flag)
             {
@@ -676,6 +679,70 @@ namespace SuiseiBot.Code.PCRGuildManager
             return true;
         }
 
+        private bool DelAttack()
+        {
+            //检查成员
+            if (!GuildBattleDB.CheckMemberExists(SenderQQ.Id,out bool database))
+            {
+                if(database)
+                {
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n你不是这个公会的成员");
+                    return true;
+                }
+                return false;
+            }
+
+            #region 参数检查
+            switch (Utils.CheckForLength(CommandArgs,1))
+            {
+                case LenType.Illegal:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n兄啊刀号呢");
+                    return true;
+                case LenType.Legitimate: //正常
+                    break;
+                case LenType.Extra: //代刀
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n有多余参数");
+                    return true;
+                default:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "发生未知错误，请联系机器人管理员");
+                    ConsoleLog.Error("Unknown error","LenType");
+                    return true;
+            }
+
+            //处理参数得到伤害值并检查合法性
+            if (!int.TryParse(CommandArgs[1], out int aid) || aid < 0) 
+            {
+                QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                         "\r\n兄啊这伤害好怪啊");
+                return true;
+            }
+            ConsoleLog.Debug("get aid", aid);
+            #endregion
+
+            GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
+            if (guildInfo == null) return false;
+            GuildBattle atkInfo = GuildBattleDB.GetAtkByID(aid);
+
+            //检查是否当前boss
+            if (guildInfo.Round != atkInfo.Round && guildInfo.Order != atkInfo.Order)
+            {
+                QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                         "\r\n非当前所处boss不允许删除");
+                return true;
+            }
+            //检查是否为尾刀
+            if (atkInfo.Attack == AttackType.Final || atkInfo.Attack == AttackType.FinalOutOfRange)
+            {
+                QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                         "\r\n尾刀不允许删除");
+                return true;
+            }
+            //删除出刀信息
+            if (!GuildBattleDB.DelAtkByID(aid)) return false;
+            //更新boss数据
+            return GuildBattleDB.ModifyBossHP(guildInfo, guildInfo.HP + atkInfo.Damage);
+        }
         #endregion
 
         #region 私有方法

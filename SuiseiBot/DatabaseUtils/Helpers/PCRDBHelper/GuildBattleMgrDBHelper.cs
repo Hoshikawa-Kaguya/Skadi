@@ -561,6 +561,55 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         }
 
         /// <summary>
+        /// 由刀号获取出刀信息
+        /// </summary>
+        /// <param name="aid">刀号</param>
+        /// <returns>
+        /// <para>出刀信息</para>
+        /// <para><see langword="null"/> 数据库错误</para>
+        /// </returns>
+        public GuildBattle GetAtkByID(int aid)
+        {
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                return dbClient.Queryable<GuildBattle>()
+                               .AS(BattleTableName)
+                               .InSingle(aid);
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 由刀号获取删除出刀信息
+        /// </summary>
+        /// <param name="aid">刀号</param>
+        /// <returns>
+        /// <para><see langword="true"/> 写入成功</para>
+        /// <para><see langword="false"/> 数据库错误</para>
+        /// </returns>
+        public bool DelAtkByID(int aid)
+        {
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                return dbClient.Deleteable<GuildBattle>()
+                               .AS(BattleTableName)
+                               .Where(i => i.Aid == aid)
+                               .ExecuteCommandHasChange();
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                return false;
+            }
+        }
+
+        /// <summary>
         /// 获取今日的出刀数量
         /// </summary>
         /// <param name="uid">执行者UID</param>
@@ -597,7 +646,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// <param name="dmg">伤害</param>
         /// <param name="attackType">出刀类型</param>
         /// <returns>
-        /// 本次出刀刀号
+        /// <para>本次出刀刀号</para>
+        /// <para><see langword="-1"/> 数据库错误</para>
         /// </returns>
         public int NewAttack(long uid,GuildInfo guildInfo,long dmg,AttackType attackType)
         {
@@ -818,7 +868,6 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// <summary>
         /// 更新成员状态
         /// </summary>
-        /// <param name="gid">公会群号</param>
         /// <param name="uid">成员UID</param>
         /// <param name="newFlag">新的状态</param>
         /// <param name="newInfo">新的消息</param>

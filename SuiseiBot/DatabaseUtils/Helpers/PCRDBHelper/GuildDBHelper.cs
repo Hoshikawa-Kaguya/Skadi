@@ -128,7 +128,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<MemberInfo>()
                                .Where(i => i.Uid == uid && i.Gid == GuildEventArgs.FromGroup.Id)
-                               .First() ?? new MemberInfo();
+                               .First();
             }
             catch (Exception e)
             {
@@ -151,7 +151,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<GuildInfo>()
-                               .InSingle(GuildEventArgs.FromGroup.Id) ?? new GuildInfo(); //单主键查询
+                               .InSingle(GuildEventArgs.FromGroup.Id); //单主键查询
             }
             catch (Exception e)
             {
