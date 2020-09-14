@@ -577,7 +577,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                 return dbClient.Queryable<GuildBattle>()
                                .AS(BattleTableName)
                                //今天5点之后出刀的
-                               .Where(i => i.Uid == uid && i.Time >= Utils.GetUpdateStamp())
+                               .Where(i => i.Uid    == uid && i.Time >= Utils.GetUpdateStamp() &&
+                                           i.Attack != AttackType.Compensate)
                                //筛选出刀总数
                                .Count();
             }
@@ -596,10 +597,9 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// <param name="dmg">伤害</param>
         /// <param name="attackType">出刀类型</param>
         /// <returns>
-        /// <para><see langword="true"/> 写入成功</para>
-        /// <para><see langword="false"/> 数据库错误</para>
+        /// 本次出刀刀号
         /// </returns>
-        public bool NewAttack(long uid,GuildInfo guildInfo,long dmg,AttackType attackType)
+        public int NewAttack(long uid,GuildInfo guildInfo,long dmg,AttackType attackType)
         {
             try
             {
@@ -616,12 +616,12 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                 };
                 return dbClient.Insertable(insertData)
                                .AS(BattleTableName)
-                               .ExecuteCommand() > 0;
+                               .ExecuteReturnIdentity();
             }
             catch (Exception e)
             {
                 ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
-                return false;
+                return -1;
             }
         }
 

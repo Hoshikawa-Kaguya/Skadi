@@ -24,6 +24,7 @@ namespace SuiseiBot.Code.PCRGuildManager
         private QQ                      SenderQQ      { get; set; }
         private PCRGuildCmdType         CommandType   { get; set; }
         private GuildBattleMgrDBHelper  GuildBattleDB { get; set; }
+        private string[]                CommandArgs   { get; set; }
         #endregion
 
         #region 构造函数
@@ -34,6 +35,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             this.SenderQQ      = GBEventArgs.FromQQ;
             this.CommandType   = commandType;
             this.GuildBattleDB = new GuildBattleMgrDBHelper(GBEventArgs);
+            this.CommandArgs   = GBEventArgs.Message.Text.Trim().Split(' ');
         }
         #endregion
 
@@ -41,10 +43,6 @@ namespace SuiseiBot.Code.PCRGuildManager
         public void GuildBattleResponse() //指令分发
         {
             if (GBEventArgs == null) throw new ArgumentNullException(nameof(GBEventArgs));
-
-            string message = GBEventArgs.Message.Text.Trim();
-            //index=0为命令本身，其余为参数
-            string[] commandArgs = message.Split(' ');
 
             //查找是否存在这个公会
             if (!GuildBattleDB.GuildExists())
@@ -74,15 +72,15 @@ namespace SuiseiBot.Code.PCRGuildManager
                     break;
 
                 case PCRGuildCmdType.Attack:
-                    dbSuccess = Attack(commandArgs);
+                    dbSuccess = Attack();
                     break;
 
                 case PCRGuildCmdType.RequestAttack:
-                    dbSuccess = RequestAttack(commandArgs);
+                    dbSuccess = RequestAttack();
                     break;
 
                 case PCRGuildCmdType.UndoRequestAtk:
-                    dbSuccess = UndoRequest(commandArgs);
+                    dbSuccess = UndoRequest();
                     break;
 
                 default:
@@ -143,12 +141,11 @@ namespace SuiseiBot.Code.PCRGuildManager
         /// <summary>
         /// 申请出刀
         /// </summary>
-        /// <param name="commandArgs">指令参数</param>
         /// <returns>
         /// <para><see langword="true"/> 数据写入成功</para>
         /// <para><see langword="false"/> 数据库错误</para>
         /// </returns>
-        private bool RequestAttack(string[] commandArgs)
+        private bool RequestAttack()
         {
             //检查是否进入会战
             switch (GuildBattleDB.CheckInBattle())
@@ -167,7 +164,8 @@ namespace SuiseiBot.Code.PCRGuildManager
 
             bool substitute;//代刀标记
             long atkUid;
-            switch (Utils.CheckForLength(commandArgs,0))
+            //指令检查
+            switch (Utils.CheckForLength(CommandArgs,0))
             {
                 case LenType.Legitimate:
                     //检查成员
@@ -187,7 +185,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     //检查是否有多余参数和AT
                     if (GBEventArgs.Message.CQCodes.Count       == 1             &&
                         GBEventArgs.Message.CQCodes[0].Function == CQFunction.At &&
-                        Utils.CheckForLength(commandArgs,1)     == LenType.Legitimate)
+                        Utils.CheckForLength(CommandArgs,1)     == LenType.Legitimate)
                     {
                         //从CQCode中获取QQ号
                         Dictionary<string,string> codeInfo =  GBEventArgs.Message.CQCodes[0].Items;
@@ -307,12 +305,11 @@ namespace SuiseiBot.Code.PCRGuildManager
         /// <summary>
         /// 取消出刀申请
         /// </summary>
-        /// <param name="commandArgs"></param>
         /// <returns>
         /// <para><see langword="true"/> 数据写入成功</para>
         /// <para><see langword="false"/> 数据库错误</para>
         /// </returns>
-        public bool UndoRequest(string[] commandArgs)
+        public bool UndoRequest()
         {
             //检查是否进入会战
             switch (GuildBattleDB.CheckInBattle())
@@ -331,7 +328,8 @@ namespace SuiseiBot.Code.PCRGuildManager
 
             bool substitute;//代刀标记
             long atkUid;
-            switch (Utils.CheckForLength(commandArgs,0))
+            //指令检查
+            switch (Utils.CheckForLength(CommandArgs,0))
             {
                 case LenType.Legitimate:
                     //检查成员
@@ -351,7 +349,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     //检查是否有多余参数和AT
                     if (GBEventArgs.Message.CQCodes.Count       == 1             &&
                         GBEventArgs.Message.CQCodes[0].Function == CQFunction.At &&
-                        Utils.CheckForLength(commandArgs,1)     == LenType.Legitimate)
+                        Utils.CheckForLength(CommandArgs,1)     == LenType.Legitimate)
                     {
                         //从CQCode中获取QQ号
                         Dictionary<string,string> codeInfo =  GBEventArgs.Message.CQCodes[0].Items;
@@ -438,12 +436,11 @@ namespace SuiseiBot.Code.PCRGuildManager
         /// <summary>
         /// 出刀
         /// </summary>
-        /// <param name="commandArgs">指令</param>
         /// <returns>
         /// <para><see langword="true"/> 数据写入成功</para>
         /// <para><see langword="false"/> 数据库错误</para>
         /// </returns>
-        private bool Attack(string[] commandArgs)
+        private bool Attack()
         {
             //检查是否进入会战
             switch (GuildBattleDB.CheckInBattle())
@@ -463,7 +460,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             bool substitute; //代刀标记
             long atkUid;
             #region 处理传入参数
-            switch (Utils.CheckForLength(commandArgs,1))
+            switch (Utils.CheckForLength(CommandArgs,1))
             {
                 case LenType.Illegal:
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n兄啊伤害呢");
@@ -486,7 +483,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     //检查是否有多余参数和AT
                     if (GBEventArgs.Message.CQCodes.Count       == 1             &&
                         GBEventArgs.Message.CQCodes[0].Function == CQFunction.At &&
-                        Utils.CheckForLength(commandArgs,2)     == LenType.Legitimate)
+                        Utils.CheckForLength(CommandArgs,2)     == LenType.Legitimate)
                     {
                         //从CQCode中获取QQ号
                         Dictionary<string,string> codeInfo =  GBEventArgs.Message.CQCodes[0].Items;
@@ -527,7 +524,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             #endregion
 
             //处理参数得到伤害值并检查合法性
-            if (!long.TryParse(commandArgs[1], out long dmg) || dmg < 0) 
+            if (!long.TryParse(CommandArgs[1], out long dmg) || dmg < 0) 
             {
                 QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
                                          "\r\n兄啊这伤害好怪啊");
@@ -596,8 +593,10 @@ namespace SuiseiBot.Code.PCRGuildManager
             if(needChangeBoss) dmg = atkGuildInfo.HP;
             ConsoleLog.Debug("attack type",curAttackType);
             #endregion
-
-            if (!GuildBattleDB.NewAttack(atkUid, atkGuildInfo, dmg, curAttackType)) return false;
+            
+            //向数据库插入新刀
+            int attackId = GuildBattleDB.NewAttack(atkUid, atkGuildInfo, dmg, curAttackType);
+            if (attackId == -1) return false;
 
             if (needChangeBoss) //进入下一个boss
             {
@@ -633,7 +632,8 @@ namespace SuiseiBot.Code.PCRGuildManager
             GuildInfo latestGuildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
             if (latestGuildInfo == null) return false;
             message.Append($"{latestGuildInfo.Round}周目{latestGuildInfo.Order}王\r\n");
-            message.Append($"{latestGuildInfo.HP:N0}/{latestGuildInfo.TotalHP:N0}");
+            message.Append($"{latestGuildInfo.HP:N0}/{latestGuildInfo.TotalHP:N0}\r\n");
+            message.Append($"出刀编号：{attackId}");
             switch (curAttackType)
             {
                 case AttackType.FinalOutOfRange:
