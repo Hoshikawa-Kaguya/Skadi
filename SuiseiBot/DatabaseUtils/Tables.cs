@@ -49,8 +49,8 @@ namespace SuiseiBot.Code.DatabaseUtils
         /// <summary>
         /// 记录编号[自增]
         /// </summary>
-        [SugarColumn(ColumnName = "bid" , ColumnDataType = "INTEGER",IsIdentity = true)]
-        public int Bid { get; set; }
+        [SugarColumn(ColumnName = "aid" , ColumnDataType = "INTEGER",IsIdentity = true)]
+        public int Aid { get; set; }
         /// <summary>
         /// 用户QQ号
         /// </summary>

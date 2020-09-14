@@ -165,11 +165,11 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                 dbClient.Queryable<GuildBattle>()
                         .AS(BattleTableName)
                         .Where(member => member.Uid == uid)
-                        .OrderBy(i => i.Bid, OrderByType.Desc)
+                        .OrderBy(i => i.Aid, OrderByType.Desc)
                         .First();
             if (lastAttack == null) return -4;
             //删刀
-            return DeleteAttack(lastAttack.Bid);
+            return DeleteAttack(lastAttack.Aid);
         }
 
         /// <summary>
@@ -201,7 +201,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
             }
             bool succDelete = dbClient.Deleteable<GuildBattle>()
                                       .AS(BattleTableName)
-                                      .Where(i => i.Bid == AttackId)
+                                      .Where(i => i.Aid == AttackId)
                                       .ExecuteCommandHasChange();
 
             return succDelete ? 0 : -99;
@@ -264,7 +264,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                                                   })
                                       .AS(BattleTableName)
                                       .UpdateColumns(i => new {i.Damage, Flag = i.Attack})
-                                      .Where(i => i.Bid == AttackId)
+                                      .Where(i => i.Aid == AttackId)
                                       .ExecuteCommandHasChange();
 
             bool succUpdateBoss = true;
@@ -341,7 +341,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
             return dbClient.Queryable<GuildBattle>()
                            .AS(BattleTableName)
                            .Where(i => i.Time >= Utils.GetUpdateStamp())
-                           .OrderBy(i => i.Bid)
+                           .OrderBy(i => i.Aid)
                            .ToList();
         }
 
@@ -546,7 +546,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                     dbClient.Queryable<GuildBattle>()
                             .AS(BattleTableName)
                             .Where(member => member.Uid == uid)
-                            .OrderBy(attack => attack.Bid, OrderByType.Desc)
+                            .OrderBy(attack => attack.Aid, OrderByType.Desc)
                             .Select(attack => new {lastType = attack.Attack, attack.Uid})
                             .First();
                 attackType = lastAttack?.lastType ?? AttackType.Illeage;
