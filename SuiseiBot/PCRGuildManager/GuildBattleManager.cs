@@ -43,20 +43,25 @@ namespace SuiseiBot.Code.PCRGuildManager
         public void GuildBattleResponse() //指令分发
         {
             if (GBEventArgs == null) throw new ArgumentNullException(nameof(GBEventArgs));
-
-            //查找是否存在这个公会
-            if (!GuildBattleDB.GuildExists())
-            {
-                ConsoleLog.Debug("GuildExists", "guild not found");
-                QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
-                                         "\r\n此群未被登记为公会",
-                                         "\r\n请使用以下指令创建公会",
-                                         $"\r\n{PCRGuildHandle.GetCommandHelp(CommandType)}");
-                return;
-            }
-
-            ConsoleLog.Info($"会战[群:{QQGroup.Id}]", $"开始处理指令{CommandType}");
             bool dbSuccess;
+            //查找是否存在这个公会
+            switch (GuildBattleDB.GuildExists())
+            {
+                case 0:
+                    ConsoleLog.Debug("GuildExists", "guild not found");
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "\r\n此群未被登记为公会",
+                                             "\r\n请使用以下指令创建公会",
+                                             $"\r\n{PCRGuildHandle.GetCommandHelp(CommandType)}");
+                    return;
+                case -1:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "\r\nERROR",
+                                             "\r\n数据库错误");
+                    return;
+            }
+            
+            ConsoleLog.Info($"会战[群:{QQGroup.Id}]", $"开始处理指令{CommandType}");
             switch (CommandType)
             {
                 case PCRGuildCmdType.BattleStart:
@@ -97,6 +102,16 @@ namespace SuiseiBot.Code.PCRGuildManager
         #region 指令
         private bool BattleStart()
         {
+            //检查成员
+            if (!GuildBattleDB.CheckMemberExists(SenderQQ.Id,out bool database))
+            {
+                if(database)
+                {
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n你不是这个公会的成员");
+                    return true;
+                }
+                return false;
+            }
             //判断返回值
             switch (GuildBattleDB.StartBattle())
             {
@@ -119,6 +134,16 @@ namespace SuiseiBot.Code.PCRGuildManager
         private bool BattleEnd()
         {
             //TODO: EXCEL导出公会战数据
+            //检查成员
+            if (!GuildBattleDB.CheckMemberExists(SenderQQ.Id,out bool database))
+            {
+                if(database)
+                {
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n你不是这个公会的成员");
+                    return true;
+                }
+                return false;
+            }
             //判断返回值
             switch (GuildBattleDB.StartBattle())
             {

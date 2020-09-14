@@ -17,20 +17,36 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// <summary>
         /// 检查公会是否存在
         /// </summary>
-        public bool GuildExists()
+        /// <returns>
+        /// <para><see langword="1"/> 公会存在</para>
+        /// <para><see langword="0"/> 公会不存在</para>
+        /// <para><see langword="-1"/> 数据库错误</para>
+        /// </returns>
+        public int GuildExists()
         {
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                return dbClient.Queryable<GuildInfo>().Where(guild => guild.Gid == GuildEventArgs.FromGroup.Id).Any();
+                return dbClient.Queryable<GuildInfo>().Where(guild => guild.Gid == GuildEventArgs.FromGroup.Id).Any()
+                    ? 1
+                    : 0;
             }
             catch (Exception e)
             {
                 ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
-                return false;
+                return -1;
             }
         }
 
+        /// <summary>
+        /// 获取公会名
+        /// </summary>
+        /// <param name="groupid"></param>
+        /// <returns>
+        /// <para>公会名</para>
+        /// <para><see langword="空字符串"/> 公会不存在</para>
+        /// <para><see langword="null"/> 数据库错误</para>
+        /// </returns>
         public string GetGuildName(long groupid)
         {
             try
@@ -43,7 +59,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                 }
                 else
                 {
-                    return null;
+                    return string.Empty;
                 }
             }
             catch (Exception e)
@@ -58,7 +74,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// </summary>
         /// <param name="gid">公会群号</param>
         /// <returns>
-        /// 
+        /// <para>成员数</para>
+        /// <para><see langword="-1"/> 数据库错误</para>
         /// </returns>
         public int GetMemberCount(long gid)
         {
@@ -100,7 +117,10 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// 获取成员信息
         /// </summary>
         /// <param name="uid"></param>
-        /// <returns></returns>
+        /// <returns>
+        /// <para>成员信息</para>
+        /// <para><see langword="null"/> 数据库错误</para>
+        /// </returns>
         public MemberInfo GetMemberInfo(long uid)
         {
             try
@@ -108,7 +128,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<MemberInfo>()
                                .Where(i => i.Uid == uid && i.Gid == GuildEventArgs.FromGroup.Id)
-                               .First();
+                               .First() ?? new MemberInfo();
             }
             catch (Exception e)
             {
@@ -117,13 +137,21 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
             }
         }
 
+        /// <summary>
+        /// 获取公会信息
+        /// </summary>
+        /// <param name="gid"></param>
+        /// <returns>
+        /// <para>成员信息</para>
+        /// <para><see langword="null"/> 数据库错误</para>
+        /// </returns>
         public GuildInfo GetGuildInfo(long gid)
         {
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<GuildInfo>()
-                               .InSingle(GuildEventArgs.FromGroup.Id); //单主键查询
+                               .InSingle(GuildEventArgs.FromGroup.Id) ?? new GuildInfo(); //单主键查询
             }
             catch (Exception e)
             {
