@@ -529,13 +529,14 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// <summary>
         /// 获取最后一次出刀的类型和执行者
         /// </summary>
+        /// <param name="uid">uid</param>
         /// <param name="attackType">出刀类型</param>
         /// <returns>
         /// <para>执行者UID</para>
         /// <para><see langword="0"/> 没有出刀记录</para>
         /// <para><see langword="-1"/> 数据库错误</para>
         /// </returns>
-        public long GetLastAttack(out AttackType attackType)
+        public long GetLastAttack(long uid, out AttackType attackType)
         {
             try
             {
@@ -544,6 +545,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                 var lastAttack =
                     dbClient.Queryable<GuildBattle>()
                             .AS(BattleTableName)
+                            .Where(member => member.Uid == uid)
                             .OrderBy(attack => attack.Bid, OrderByType.Desc)
                             .Select(attack => new {lastType = attack.Attack, attack.Uid})
                             .First();

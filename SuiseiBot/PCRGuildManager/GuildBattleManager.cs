@@ -229,15 +229,8 @@ namespace SuiseiBot.Code.PCRGuildManager
             //获取成员信息和上一次的出刀类型
             MemberInfo member = GuildBattleDB.GetMemberInfo(atkUid);
             if (member == null) return false;
-            long lastAttackUid = GuildBattleDB.GetLastAttack(out AttackType lastAttack);
+            long lastAttackUid = GuildBattleDB.GetLastAttack(atkUid, out AttackType lastAttack);
             if (lastAttackUid == -1) return false;
-
-            if ((lastAttack == AttackType.Final || lastAttack == AttackType.FinalOutOfRange) && lastAttackUid == atkUid)
-            {
-                QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
-                                         "补时刀未出不允许出刀");
-                return true;
-            }
 
             //检查成员状态
             switch (member.Flag)
@@ -276,10 +269,10 @@ namespace SuiseiBot.Code.PCRGuildManager
                     return true;
             }
 
-            //检查今日出刀数量
             int todayAtkCount = GuildBattleDB.GetTodayAttackCount(atkUid);
             if (todayAtkCount == -1) return false;
-            if (todayAtkCount >= 3)
+            //检查今日出刀数量
+            if (!(lastAttack == AttackType.Final || lastAttack == AttackType.FinalOutOfRange) && todayAtkCount >= 3) 
             {
                 if (substitute)
                 {
@@ -574,7 +567,7 @@ namespace SuiseiBot.Code.PCRGuildManager
 
             #region 出刀类型判断
             //获取上一刀的信息
-            long lastAttackUid = GuildBattleDB.GetLastAttack(out AttackType lastAttackType);
+            long lastAttackUid = GuildBattleDB.GetLastAttack(atkUid, out AttackType lastAttackType);
             if (lastAttackUid == -1) return false;
             //判断是否进入下一个boss
             bool needChangeBoss = dmg >= atkGuildInfo.HP;
@@ -583,19 +576,9 @@ namespace SuiseiBot.Code.PCRGuildManager
             //判断顺序: 补时刀->尾刀->通常刀
             if (lastAttackType == AttackType.Final || lastAttackType == AttackType.FinalOutOfRange) //补时
             {
-                if (atkUid == lastAttackUid)
-                {
-                    curAttackType = dmg >=  atkGuildInfo.HP
-                        ? AttackType.Normal //当补时刀的伤害也超过了boss血量,判定为普通刀（你开挂！
-                        : AttackType.Compensate;
-                }
-                else
-                {
-                    //一般不会进入此情况，防御性考虑
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
-                                             "补时刀未出不允许出刀");
-                    return true;
-                }
+                curAttackType = dmg >=  atkGuildInfo.HP
+                    ? AttackType.Normal //当补时刀的伤害也超过了boss血量,判定为普通刀（你开挂！
+                    : AttackType.Compensate;
             }
             else
             {
@@ -655,7 +638,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             {
                 case AttackType.FinalOutOfRange:
                 case AttackType.Final:
-                    message.Append("\r\n已被自动标记为尾刀\r\nboss已被锁定请等待补时刀");
+                    message.Append("\r\n已被自动标记为尾刀");
                     break;
                 case AttackType.Compensate:
                     message.Append("\r\n已被自动标记为补时刀");
