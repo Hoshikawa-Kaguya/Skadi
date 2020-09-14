@@ -91,6 +91,10 @@ namespace SuiseiBot.Code.Resource.TypeEnum.CmdType
         /// </summary>
         UrgeAttack = 115,
         /// <summary>
+        /// 取消出刀申请
+        /// </summary>
+        UndoRequestAtk = 116,
+        /// <summary>
         /// 修改当前boss状态
         /// </summary>
         UpdateBoss = 201

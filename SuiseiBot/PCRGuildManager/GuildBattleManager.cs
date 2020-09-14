@@ -58,30 +58,39 @@ namespace SuiseiBot.Code.PCRGuildManager
             }
 
             ConsoleLog.Info($"会战[群:{QQGroup.Id}]", $"开始处理指令{CommandType}");
-            bool databaseSuccess;
+            bool dbSuccess;
             switch (CommandType)
             {
                 case PCRGuildCmdType.BattleStart:
                     //检查执行者权限
                     if(!IsAdmin()) return;
-                    
-                    databaseSuccess = BattleStart();
+                    dbSuccess = BattleStart();
                     break;
+
                 case PCRGuildCmdType.BattleEnd:
                     //检查执行者权限
                     if(!IsAdmin()) return;
+                    dbSuccess = BattleEnd();
+                    break;
 
-                    databaseSuccess = BattleEnd();
-                    break;
                 case PCRGuildCmdType.Attack:
-                    databaseSuccess = Attack(commandArgs);
+                    dbSuccess = Attack(commandArgs);
                     break;
+
+                case PCRGuildCmdType.RequestAttack:
+                    dbSuccess = RequestAttack(commandArgs);
+                    break;
+
+                case PCRGuildCmdType.UndoRequestAtk:
+                    dbSuccess = UndoRequest(commandArgs);
+                    break;
+
                 default:
                     PCRGuildHandle.GetUnknowCommand(GBEventArgs);
                     ConsoleLog.Warning($"会战[群:{QQGroup.Id}]", $"接到未知指令{CommandType}");
                     return;
             }
-            if(!databaseSuccess) QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+            if(!dbSuccess) QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
                                                           "\r\nERROR",
                                                           "\r\n数据库错误");
         }
@@ -132,15 +141,16 @@ namespace SuiseiBot.Code.PCRGuildManager
         }
 
         /// <summary>
-        /// 出刀
+        /// 申请出刀
         /// </summary>
-        /// <param name="CommandArgs">指令</param>
+        /// <param name="commandArgs">指令参数</param>
         /// <returns>
         /// <para><see langword="true"/> 数据写入成功</para>
         /// <para><see langword="false"/> 数据库错误</para>
         /// </returns>
-        private bool Attack(string[] CommandArgs)
+        private bool RequestAttack(string[] commandArgs)
         {
+            //检查是否进入会战
             switch (GuildBattleDB.CheckInBattle())
             {
                 case 0:
@@ -154,28 +164,30 @@ namespace SuiseiBot.Code.PCRGuildManager
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "遇到了未知错误");
                     return true;
             }
+
+            bool substitute;//代刀标记
             long atkUid;
-            
-            #region 处理传入参数
-            switch (Utils.CheckForLength(CommandArgs,1))
+            switch (Utils.CheckForLength(commandArgs,0))
             {
-                case LenType.Illegal:
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n兄啊你的伤害呢");
-                    return true;
-                case LenType.Legitimate: //正常出刀
+                case LenType.Legitimate:
                     //检查成员
-                    if (!GuildBattleDB.CheckMemberExists(SenderQQ.Id))
+                    if (!GuildBattleDB.CheckMemberExists(SenderQQ.Id,out bool database))
                     {
-                        QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n不是这个公会的还想打会战？");
-                        return true;
+                        if(database)
+                        {
+                            QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n不是这个公会的还想打会战？");
+                            return true;
+                        }
+                        return false;
                     }
-                    atkUid = SenderQQ.Id;
+                    atkUid     = SenderQQ.Id;
+                    substitute = false;
                     break;
-                case LenType.Extra: //代刀
+                case LenType.Extra://代刀
                     //检查是否有多余参数和AT
                     if (GBEventArgs.Message.CQCodes.Count       == 1             &&
                         GBEventArgs.Message.CQCodes[0].Function == CQFunction.At &&
-                        Utils.CheckForLength(CommandArgs,2)     == LenType.Legitimate)
+                        Utils.CheckForLength(commandArgs,1)     == LenType.Legitimate)
                     {
                         //从CQCode中获取QQ号
                         Dictionary<string,string> codeInfo =  GBEventArgs.Message.CQCodes[0].Items;
@@ -183,10 +195,14 @@ namespace SuiseiBot.Code.PCRGuildManager
                         {
                             atkUid = Convert.ToInt64(uid);
                             //检查成员
-                            if (!GuildBattleDB.CheckMemberExists(atkUid))
+                            if (!GuildBattleDB.CheckMemberExists(atkUid,out database))
                             {
-                                QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n此成员不是这个公会的成员");
-                                return true;
+                                if(database)
+                                {
+                                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n此成员不是这个公会的成员");
+                                    return true;
+                                }
+                                return false;
                             }
                         }
                         else
@@ -201,6 +217,313 @@ namespace SuiseiBot.Code.PCRGuildManager
                                                  "\r\n听不见！重来！（有多余参数）");
                         return true;
                     }
+                    substitute = true;
+                    break;
+                default:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "发生未知错误，请联系机器人管理员");
+                    ConsoleLog.Error("Unknown error","LenType");
+                    return true;
+            }
+
+            //获取成员信息和上一次的出刀类型
+            MemberInfo member = GuildBattleDB.GetMemberInfo(atkUid);
+            if (member == null) return false;
+            long lastAttackUid = GuildBattleDB.GetLastAttack(out AttackType lastAttack);
+            if (lastAttackUid == -1) return false;
+
+            if ((lastAttack == AttackType.Final || lastAttack == AttackType.FinalOutOfRange) && lastAttackUid == atkUid)
+            {
+                QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                         "补时刀未出不允许出刀");
+                return true;
+            }
+
+            //检查成员状态
+            switch (member.Flag)
+            {
+                //空闲可以出刀
+                case FlagType.IDLE:
+                    break;
+                case FlagType.OnTree:
+                    if (substitute)
+                    {
+                        QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                                 "\n兄啊",CQApi.CQCode_At(atkUid),"在树上啊");
+                    }
+                    else
+                    {
+                        QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                                 "\n好好爬你的树，你出个🔨的刀");
+                    }
+                    return true;
+                case FlagType.EnGage:
+                    if (substitute)
+                    {
+                        QQGroup.SendGroupMessage("成员",CQApi.CQCode_At(atkUid),
+                                                 "\n已经在出刀中");
+                    }
+                    else
+                    {
+                        QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                                 "\n你不是已经在出刀吗？");
+                    }
+                    return true;
+                default:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "发生未知错误，请联系机器人管理员");
+                    ConsoleLog.Error("Unknown error","member.Flag");
+                    return true;
+            }
+
+            //检查今日出刀数量
+            int todayAtkCount = GuildBattleDB.GetTodayAttackCount(atkUid);
+            if (todayAtkCount == -1) return false;
+            if (todayAtkCount >= 3)
+            {
+                if (substitute)
+                {
+                    QQGroup.SendGroupMessage("成员",CQApi.CQCode_At(atkUid),
+                                             "今日已出完三刀");
+                }
+                else
+                {
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "今日已出完三刀");
+                }
+                return true;
+            }
+
+            //修改成员状态
+            if (GuildBattleDB.MemberEngage(atkUid))
+            {
+                if (substitute)
+                {
+                    QQGroup.SendGroupMessage("成员",CQApi.CQCode_At(atkUid),
+                                             "开始出刀！");
+                }
+                else
+                {
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "开始出刀！");
+                }
+                return true;
+            }else return false;
+        }
+
+        /// <summary>
+        /// 取消出刀申请
+        /// </summary>
+        /// <param name="commandArgs"></param>
+        /// <returns>
+        /// <para><see langword="true"/> 数据写入成功</para>
+        /// <para><see langword="false"/> 数据库错误</para>
+        /// </returns>
+        public bool UndoRequest(string[] commandArgs)
+        {
+            //检查是否进入会战
+            switch (GuildBattleDB.CheckInBattle())
+            {
+                case 0:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "公会战还没开呢");
+                    return true;
+                case -1:
+                    return false;
+                case 1:
+                    break;
+                default:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "遇到了未知错误");
+                    return true;
+            }
+
+            bool substitute;//代刀标记
+            long atkUid;
+            switch (Utils.CheckForLength(commandArgs,0))
+            {
+                case LenType.Legitimate:
+                    //检查成员
+                    if (!GuildBattleDB.CheckMemberExists(SenderQQ.Id,out bool database))
+                    {
+                        if(database)
+                        {
+                            QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n不是这个公会的还想打会战？");
+                            return true;
+                        }
+                        return false;
+                    }
+                    atkUid     = SenderQQ.Id;
+                    substitute = false;
+                    break;
+                case LenType.Extra://代刀
+                    //检查是否有多余参数和AT
+                    if (GBEventArgs.Message.CQCodes.Count       == 1             &&
+                        GBEventArgs.Message.CQCodes[0].Function == CQFunction.At &&
+                        Utils.CheckForLength(commandArgs,1)     == LenType.Legitimate)
+                    {
+                        //从CQCode中获取QQ号
+                        Dictionary<string,string> codeInfo =  GBEventArgs.Message.CQCodes[0].Items;
+                        if (codeInfo.TryGetValue("qq",out string uid))
+                        {
+                            atkUid = Convert.ToInt64(uid);
+                            //检查成员
+                            if (!GuildBattleDB.CheckMemberExists(atkUid,out database))
+                            {
+                                if(database)
+                                {
+                                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n此成员不是这个公会的成员");
+                                    return true;
+                                }
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            ConsoleLog.Error("CQCode parse error","can't get uid in cqcode");
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                                 "\r\n听不见！重来！（有多余参数）");
+                        return true;
+                    }
+                    substitute = true;
+                    break;
+                default:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "发生未知错误，请联系机器人管理员");
+                    ConsoleLog.Error("Unknown error","LenType");
+                    return true;
+            }
+
+            //获取成员信息
+            MemberInfo member = GuildBattleDB.GetMemberInfo(atkUid);
+            if (member == null) return false;
+
+            switch (member.Flag)
+            {
+                case FlagType.IDLE:
+                    if (substitute)
+                    {
+                        QQGroup.SendGroupMessage("成员", CQApi.CQCode_At(atkUid)
+                                               , "\n并未出刀");
+                    }
+                    else
+                    {
+                        QQGroup.SendGroupMessage(CQApi.CQCode_At(atkUid)
+                                               , "\n并未申请出刀");
+                    }
+                    return true;
+                case FlagType.OnTree:
+                    if (substitute)
+                    {
+                        QQGroup.SendGroupMessage("成员", CQApi.CQCode_At(atkUid),
+                                                 "在树上挂着呢");
+                    }
+                    else
+                    {
+                        QQGroup.SendGroupMessage(CQApi.CQCode_At(atkUid),
+                                                 "想下树？找管理员");
+                    }
+                    return true;
+                case FlagType.EnGage:
+                    if (GuildBattleDB.MemberIDLE(atkUid))
+                    {
+                        QQGroup.SendGroupMessage("已取消出刀申请");
+                        return true;
+                    }
+                    else return false;
+                default: //如果跑到这了，我完蛋了
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "发生未知错误，请联系机器人管理员");
+                    ConsoleLog.Error("Unknown error","member.Flag");
+                    return true;
+            }
+        }
+
+        /// <summary>
+        /// 出刀
+        /// </summary>
+        /// <param name="commandArgs">指令</param>
+        /// <returns>
+        /// <para><see langword="true"/> 数据写入成功</para>
+        /// <para><see langword="false"/> 数据库错误</para>
+        /// </returns>
+        private bool Attack(string[] commandArgs)
+        {
+            //检查是否进入会战
+            switch (GuildBattleDB.CheckInBattle())
+            {
+                case 0:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "公会战还没开呢");
+                    return true;
+                case -1:
+                    return false;
+                case 1:
+                    break;
+                default:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "遇到了未知错误");
+                    return true;
+            }
+
+            bool substitute; //代刀标记
+            long atkUid;
+            #region 处理传入参数
+            switch (Utils.CheckForLength(commandArgs,1))
+            {
+                case LenType.Illegal:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n兄啊伤害呢");
+                    return true;
+                case LenType.Legitimate: //正常出刀
+                    //检查成员
+                    if (!GuildBattleDB.CheckMemberExists(SenderQQ.Id,out bool database))
+                    {
+                        if(database)
+                        {
+                            QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n不是这个公会的还想打会战？");
+                            return true;
+                        }
+                        return false;
+                    }
+                    atkUid     = SenderQQ.Id;
+                    substitute = false;
+                    break;
+                case LenType.Extra: //代刀
+                    //检查是否有多余参数和AT
+                    if (GBEventArgs.Message.CQCodes.Count       == 1             &&
+                        GBEventArgs.Message.CQCodes[0].Function == CQFunction.At &&
+                        Utils.CheckForLength(commandArgs,2)     == LenType.Legitimate)
+                    {
+                        //从CQCode中获取QQ号
+                        Dictionary<string,string> codeInfo =  GBEventArgs.Message.CQCodes[0].Items;
+                        if (codeInfo.TryGetValue("qq",out string uid))
+                        {
+                            atkUid = Convert.ToInt64(uid);
+                            //检查成员
+                            if (!GuildBattleDB.CheckMemberExists(atkUid,out database))
+                            {
+                                if(database)
+                                {
+                                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n此成员不是这个公会的成员");
+                                    return true;
+                                }
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            ConsoleLog.Error("CQCode parse error","can't get uid in cqcode");
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                                 "\r\n听不见！重来！（有多余参数）");
+                        return true;
+                    }
+                    substitute = true;
                     break;
                 default:
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
@@ -211,10 +534,10 @@ namespace SuiseiBot.Code.PCRGuildManager
             #endregion
 
             //处理参数得到伤害值并检查合法性
-            if (!long.TryParse(CommandArgs[1], out long dmg) || dmg < 0) 
+            if (!long.TryParse(commandArgs[1], out long dmg) || dmg < 0) 
             {
                 QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
-                                         "\r\n兄啊你的伤害好jb怪啊");
+                                         "\r\n兄啊这伤害好怪啊");
                 return true;
             }
             ConsoleLog.Debug("Dmg info parse",$"DEBUG\r\ndmg = {dmg} | attack_user = {atkUid}");
@@ -230,8 +553,16 @@ namespace SuiseiBot.Code.PCRGuildManager
                     break;
                 //当前并未开始出刀，请先申请出刀=>返回
                 case FlagType.IDLE:
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
-                                             "请先申请出刀再重拳出击");
+                    if (substitute)
+                    {
+                        QQGroup.SendGroupMessage("成员",CQApi.CQCode_At(atkUid),
+                                                 "未申请出刀");
+                    }
+                    else
+                    {
+                        QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                                 "请先申请出刀再重拳出击");
+                    }
                     return true;
             }
             ConsoleLog.Debug("member flag check",$"DEBUG\r\nuser = {atkUid} | flag = {atkMemberInfo.Flag}");
@@ -260,6 +591,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                 }
                 else
                 {
+                    //一般不会进入此情况，防御性考虑
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
                                              "补时刀未出不允许出刀");
                     return true;
@@ -335,6 +667,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             QQGroup.SendGroupMessage(message);
             return true;
         }
+
         #endregion
 
         #region 私有方法

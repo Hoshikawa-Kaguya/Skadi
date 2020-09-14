@@ -53,6 +53,13 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
             }
         }
 
+        /// <summary>
+        /// 获取公会成员数
+        /// </summary>
+        /// <param name="gid">公会群号</param>
+        /// <returns>
+        /// 
+        /// </returns>
         public int GetMemberCount(long gid)
         {
             try
@@ -71,11 +78,13 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// 检查公会是否有这个成员
         /// </summary>
         /// <param name="uid">QQ号</param>
-        public bool CheckMemberExists(long uid)
+        /// <param name="database">数据库是否执行成功</param>
+        public bool CheckMemberExists(long uid ,out bool database)
         {
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                database = true;
                 return dbClient.Queryable<MemberInfo>()
                                .Where(i => i.Uid == uid && i.Gid == GuildEventArgs.FromGroup.Id)
                                .Any();
@@ -83,6 +92,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
             catch (Exception e)
             {
                 ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                database = false;
                 return false;
             }
         }

@@ -23,6 +23,8 @@ namespace SuiseiBot.Code.Resource.Commands
             PCRGuildCommands.Add("开始会战",PCRGuildCmdType.BattleStart);
             PCRGuildCommands.Add("更新BOSS",PCRGuildCmdType.UpdateBoss);
             PCRGuildCommands.Add("出刀",PCRGuildCmdType.Attack);
+            PCRGuildCommands.Add("申请出刀",PCRGuildCmdType.RequestAttack);
+            PCRGuildCommands.Add("取消出刀",PCRGuildCmdType.UndoRequestAtk);
         }
     }
 }
