@@ -21,10 +21,12 @@ namespace SuiseiBot.Code.Resource.Commands
             PCRGuildCommands.Add("一键入会", PCRGuildCmdType.JoinAll);
             //出刀模块的指令（在做了在做了
             PCRGuildCommands.Add("开始会战",PCRGuildCmdType.BattleStart);
-            PCRGuildCommands.Add("更新BOSS",PCRGuildCmdType.UpdateBoss);
+            PCRGuildCommands.Add("结束会战",PCRGuildCmdType.BattleEnd);
             PCRGuildCommands.Add("出刀",PCRGuildCmdType.Attack);
             PCRGuildCommands.Add("申请出刀",PCRGuildCmdType.RequestAttack);
             PCRGuildCommands.Add("取消出刀",PCRGuildCmdType.UndoRequestAtk);
+            PCRGuildCommands.Add("删刀",PCRGuildCmdType.DeleteAttack);
+            PCRGuildCommands.Add("撤刀",PCRGuildCmdType.UndoAttack);
         }
     }
 }

@@ -88,6 +88,16 @@ namespace SuiseiBot.Code.PCRGuildManager
                     dbSuccess = UndoRequest();
                     break;
 
+                case PCRGuildCmdType.DeleteAttack:
+                    //检查执行者权限
+                    if(!IsAdmin()) return;
+                    dbSuccess = DelAttack();
+                    break;
+
+                case PCRGuildCmdType.UndoAttack:
+                    dbSuccess = UndoAtk();
+                    break;
+
                 default:
                     PCRGuildHandle.GetUnknowCommand(GBEventArgs);
                     ConsoleLog.Warning($"会战[群:{QQGroup.Id}]", $"接到未知指令{CommandType}");
@@ -100,6 +110,13 @@ namespace SuiseiBot.Code.PCRGuildManager
         #endregion
 
         #region 指令
+        /// <summary>
+        /// 开始会战
+        /// </summary>
+        /// <returns>
+        /// <para><see langword="true"/> 数据写入成功</para>
+        /// <para><see langword="false"/> 数据库错误</para>
+        /// </returns>
         private bool BattleStart()
         {
             //检查成员
@@ -115,22 +132,29 @@ namespace SuiseiBot.Code.PCRGuildManager
             //判断返回值
             switch (GuildBattleDB.StartBattle())
             {
-                case -1: //已经执行过开始命令
+                case 0: //已经执行过开始命令
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
-                                             "\r\n出刀统计已经开始了嗷",
+                                             "\r\n上一次的出刀统计未结束",
                                              "\r\n此时会战已经开始或上一期仍未结束",
                                              "\r\n请检查是否未结束上期会战的出刀统计");
                     break;
-                case 0:
+                case 1:
                     QQGroup.SendGroupMessage(CQApi.CQCode_AtAll(),
                                              "\r\n新的一期会战开始啦！");
-                    break;
-                case -99:
+                    return true;
+                case -1:
                     return false;
             }
-            return true;
+            return false;
         }
 
+        /// <summary>
+        /// 结束会战
+        /// </summary>
+        /// <returns>
+        /// <para><see langword="true"/> 数据写入成功</para>
+        /// <para><see langword="false"/> 数据库错误</para>
+        /// </returns>
         private bool BattleEnd()
         {
             //TODO: EXCEL导出公会战数据
@@ -145,22 +169,21 @@ namespace SuiseiBot.Code.PCRGuildManager
                 return false;
             }
             //判断返回值
-            switch (GuildBattleDB.StartBattle())
+            switch (GuildBattleDB.EndBattle())
             {
-                case -1: //已经执行过开始命令
+                case 0: //已经执行过开始命令
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
-                                             "\r\n出刀统计已经开始了嗷",
-                                             "\r\n此时会战已经开始或上一期仍未结束",
-                                             "\r\n请检查是否未结束上期会战的出刀统计");
+                                             "\r\n出刀统计并没有启动",
+                                             "\r\n请检查是否未开始会战的出刀统计");
                     break;
-                case 0:
+                case 1:
                     QQGroup.SendGroupMessage(CQApi.CQCode_AtAll(),
-                                             "\r\n新的一期会战开始啦！");
-                    break;
-                default:
+                                             "\r\n会战结束啦~");
+                    return true;
+                case -1:
                     return false;
             }
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -251,9 +274,8 @@ namespace SuiseiBot.Code.PCRGuildManager
 
             //获取成员信息和上一次的出刀类型
             MemberInfo member = GuildBattleDB.GetMemberInfo(atkUid);
-            if (member == null) return false;
-            long lastAttackUid = GuildBattleDB.GetLastAttack(atkUid, out AttackType lastAttack);
-            if (lastAttackUid == -1) return false;
+            if (member                                                         == null) return false;
+            if (GuildBattleDB.GetLastAttack(atkUid, out AttackType lastAttack) == -1) return false;
 
             ConsoleLog.Debug("member status",member.Flag);
             //检查成员状态
@@ -336,7 +358,7 @@ namespace SuiseiBot.Code.PCRGuildManager
         /// <para><see langword="true"/> 数据写入成功</para>
         /// <para><see langword="false"/> 数据库错误</para>
         /// </returns>
-        public bool UndoRequest()
+        private bool UndoRequest()
         {
             //检查是否进入会战
             switch (GuildBattleDB.CheckInBattle())
@@ -592,8 +614,7 @@ namespace SuiseiBot.Code.PCRGuildManager
 
             #region 出刀类型判断
             //获取上一刀的信息
-            long lastAttackUid = GuildBattleDB.GetLastAttack(atkUid, out AttackType lastAttackType);
-            if (lastAttackUid == -1) return false;
+            if (GuildBattleDB.GetLastAttack(atkUid, out AttackType lastAttackType) == -1) return false;
             //判断是否进入下一个boss
             bool needChangeBoss = dmg >= atkGuildInfo.HP;
             //出刀类型判断
@@ -679,6 +700,56 @@ namespace SuiseiBot.Code.PCRGuildManager
             return true;
         }
 
+        /// <summary>
+        /// 撤刀
+        /// </summary>
+        /// <returns>
+        /// <para><see langword="true"/> 数据写入成功</para>
+        /// <para><see langword="false"/> 数据库错误</para>
+        /// </returns>
+        private bool UndoAtk()
+        {
+            //检查成员
+            if (!GuildBattleDB.CheckMemberExists(SenderQQ.Id,out bool database))
+            {
+                if(database)
+                {
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n你不是这个公会的成员");
+                    return true;
+                }
+                return false;
+            }
+
+            #region 参数检查
+            switch (Utils.CheckForLength(CommandArgs,0))
+            {
+                case LenType.Legitimate: //正常
+                    break;
+                case LenType.Extra:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n有多余参数");
+                    return true;
+                default:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "发生未知错误，请联系机器人管理员");
+                    ConsoleLog.Error("Unknown error","LenType");
+                    return true;
+            }
+            #endregion
+
+            //获取上一次的出刀类型
+            int lastAtkAid = GuildBattleDB.GetLastAttack(SenderQQ.Id,out _);
+            if (lastAtkAid == -1) return false;
+
+            return DelAtkByAid(lastAtkAid);
+        }
+
+        /// <summary>
+        /// 删刀
+        /// </summary>
+        /// <returns>
+        /// <para><see langword="true"/> 数据写入成功</para>
+        /// <para><see langword="false"/> 数据库错误</para>
+        /// </returns>
         private bool DelAttack()
         {
             //检查成员
@@ -700,7 +771,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     return true;
                 case LenType.Legitimate: //正常
                     break;
-                case LenType.Extra: //代刀
+                case LenType.Extra:
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n有多余参数");
                     return true;
                 default:
@@ -710,7 +781,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     return true;
             }
 
-            //处理参数得到伤害值并检查合法性
+            //处理参数得到刀号并检查合法性
             if (!int.TryParse(CommandArgs[1], out int aid) || aid < 0) 
             {
                 QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
@@ -720,6 +791,21 @@ namespace SuiseiBot.Code.PCRGuildManager
             ConsoleLog.Debug("get aid", aid);
             #endregion
 
+            return DelAtkByAid(aid);
+        }
+        #endregion
+
+        #region 私有方法
+        /// <summary>
+        /// 由刀号获取删除出刀信息
+        /// </summary>
+        /// <param name="aid">刀号</param>
+        /// <returns>
+        /// <para><see langword="true"/> 成功</para>
+        /// <para><see langword="false"/> 数据库错误</para>
+        /// </returns>
+        private bool DelAtkByAid(int aid)
+        {
             GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
             if (guildInfo == null) return false;
             GuildBattle atkInfo = GuildBattleDB.GetAtkByID(aid);
@@ -743,9 +829,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             //更新boss数据
             return GuildBattleDB.ModifyBossHP(guildInfo, guildInfo.HP + atkInfo.Damage);
         }
-        #endregion
 
-        #region 私有方法
         /// <summary>
         /// 检查成员权限等级是否为管理员及以上
         /// </summary>

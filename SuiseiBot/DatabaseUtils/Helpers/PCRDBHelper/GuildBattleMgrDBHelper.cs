@@ -28,72 +28,6 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
 
         #region 指令
         /// <summary>
-        /// 开始会战
-        /// </summary>
-        /// <returns>0：开始成功 | -1：上次仍未结束或已经开始 | -99:数据库错误</returns>
-        public int StartBattle()
-        {
-            try
-            {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                if (SugarUtils.TableExists<GuildBattle>(dbClient, BattleTableName))
-                {
-                    ConsoleLog.Error("会战管理数据库", "会战表已经存在，请检查是否未结束上次会战统计");
-                    return -1;
-                }
-                else
-                {
-                    SugarUtils.CreateTable<GuildBattle>(dbClient, BattleTableName);
-                    ConsoleLog.Info("会战管理数据库", "开始新的一期会战统计");
-                    return dbClient.Updateable(new GuildInfo {InBattle = true})
-                                   .Where(guild => guild.Gid == GuildEventArgs.FromGroup.Id)
-                                   .UpdateColumns(i => new {i.InBattle})
-                                   .ExecuteCommandHasChange()
-                        ? 0
-                        : -99;
-                }
-            }
-            catch (Exception e)
-            {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
-                return -99;
-            }
-        }
-
-        /// <summary>
-        /// 结束会战
-        /// </summary>
-        /// <returns>0：成功结束 | 1：还未开始会战 | -99:数据库错误</returns>
-        public int EndBattle()
-        {
-            try
-            {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                if (SugarUtils.TableExists<GuildBattle>(dbClient, BattleTableName))
-                {
-                    ConsoleLog.Warning("会战管理数据库", "结束一期会战，开始输出数据");
-                    SugarUtils.DeletTable<GuildBattle>(dbClient, BattleTableName);
-                    return dbClient.Updateable(new GuildInfo {InBattle = false})
-                                   .Where(guild => guild.Gid == GuildEventArgs.FromGroup.Id)
-                                   .UpdateColumns(i => new {i.InBattle})
-                                   .ExecuteCommandHasChange()
-                        ? 0
-                        : -99;
-                }
-                else
-                {
-                    ConsoleLog.Info("会战管理数据库", "会战表为空，请确认是否已经开始会战统计");
-                    return 1;
-                }
-            }
-            catch (Exception e)
-            {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
-                return -99;
-            }
-        }
-
-        /// <summary>
         /// SL命令
         /// </summary>
         /// <param name="uid">成员QQ号</param>
@@ -151,60 +85,6 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                            .ExecuteCommandHasChange()
                 ? 0
                 : -99;
-        }
-
-        /// <summary>
-        /// 撤销出刀
-        /// </summary>
-        /// <returns>同删刀，但 -4：上一刀为空，不能撤销</returns>
-        public int UndoAttack(long uid)
-        {
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            //查找该成员的上一刀
-            GuildBattle lastAttack =
-                dbClient.Queryable<GuildBattle>()
-                        .AS(BattleTableName)
-                        .Where(member => member.Uid == uid)
-                        .OrderBy(i => i.Aid, OrderByType.Desc)
-                        .First();
-            if (lastAttack == null) return -4;
-            //删刀
-            return DeleteAttack(lastAttack.Aid);
-        }
-
-        /// <summary>
-        /// 删刀
-        /// </summary>
-        /// <param name="AttackId">出刀编号</param>
-        /// <returns>0：正常 | -1：未找到该出刀编号 | -2：禁止删除非当前BOSS的刀 | -3：只能删通常刀 | -99：数据库出错</returns>
-        public int DeleteAttack(int AttackId)
-        {
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            GuildBattle attackInfo =
-                dbClient.Queryable<GuildBattle>()
-                        .AS(BattleTableName)
-                        .InSingle(AttackId);
-            if (attackInfo == null) return -1;
-
-            GuildInfo guildInfo =
-                dbClient.Queryable<GuildInfo>()
-                        .InSingle(GuildEventArgs.FromGroup.Id);
-            
-            if (guildInfo.Round != attackInfo.Round && guildInfo.Order != attackInfo.Order)
-            {
-                return -2;
-            }
-
-            if (attackInfo.Attack != AttackType.Normal)
-            {
-                return -3;
-            }
-            bool succDelete = dbClient.Deleteable<GuildBattle>()
-                                      .AS(BattleTableName)
-                                      .Where(i => i.Aid == AttackId)
-                                      .ExecuteCommandHasChange();
-
-            return succDelete ? 0 : -99;
         }
 
         /// <summary>
@@ -527,16 +407,91 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         }
 
         /// <summary>
-        /// 获取最后一次出刀的类型和执行者
+        /// 开始会战
+        /// </summary>
+        /// <returns>
+        /// <para><see langword="1"/> 成功开始统计</para>
+        /// <para><see langword="0"/> 未结束会战</para>
+        /// <para><see langword="-1"/> 数据库错误</para>
+        /// </returns>
+        public int StartBattle()
+        {
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                if (SugarUtils.TableExists<GuildBattle>(dbClient, BattleTableName))
+                {
+                    ConsoleLog.Error("会战管理数据库", "会战表已经存在，请检查是否未结束上次会战统计");
+                    return 0;
+                }
+                else
+                {
+                    SugarUtils.CreateTable<GuildBattle>(dbClient, BattleTableName);
+                    ConsoleLog.Info("会战管理数据库", "开始新的一期会战统计");
+                    return dbClient.Updateable(new GuildInfo {InBattle = true})
+                                   .Where(guild => guild.Gid == GuildEventArgs.FromGroup.Id)
+                                   .UpdateColumns(i => new {i.InBattle})
+                                   .ExecuteCommandHasChange()
+                        ? 1
+                        : -1;
+                }
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                return -1;
+            }
+        }
+
+        /// <summary>
+        /// 结束会战
+        /// </summary>
+        /// <returns>0：成功结束 | 1：还未开始会战 | -99:数据库错误</returns>
+        /// <returns>
+        /// <para><see langword="1"/> 成功结束统计</para>
+        /// <para><see langword="0"/> 未开始会战</para>
+        /// <para><see langword="-1"/> 数据库错误</para>
+        /// </returns>
+        public int EndBattle()
+        {
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                if (SugarUtils.TableExists<GuildBattle>(dbClient, BattleTableName))
+                {
+                    ConsoleLog.Warning("会战管理数据库", "结束一期会战统计删除旧表");
+                    SugarUtils.DeletTable<GuildBattle>(dbClient, BattleTableName);
+                    return dbClient.Updateable(new GuildInfo {InBattle = false})
+                                   .Where(guild => guild.Gid == GuildEventArgs.FromGroup.Id)
+                                   .UpdateColumns(i => new {i.InBattle})
+                                   .ExecuteCommandHasChange()
+                        ? 1
+                        : -1;
+                }
+                else
+                {
+                    ConsoleLog.Info("会战管理数据库", "会战表为空，请确认是否已经开始会战统计");
+                    return 0;
+                }
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                return -1;
+            }
+        }
+
+        /// <summary>
+        /// 获取指定用户最后一次出刀的类型
         /// </summary>
         /// <param name="uid">uid</param>
         /// <param name="attackType">出刀类型</param>
         /// <returns>
-        /// <para>执行者UID</para>
+        /// <para>刀号</para>
         /// <para><see langword="0"/> 没有出刀记录</para>
         /// <para><see langword="-1"/> 数据库错误</para>
         /// </returns>
-        public long GetLastAttack(long uid, out AttackType attackType)
+        public int GetLastAttack(long uid, out AttackType attackType)
         {
             try
             {
@@ -547,10 +502,10 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                             .AS(BattleTableName)
                             .Where(member => member.Uid == uid)
                             .OrderBy(attack => attack.Aid, OrderByType.Desc)
-                            .Select(attack => new {lastType = attack.Attack, attack.Uid})
+                            .Select(attack => new {lastType = attack.Attack, attack.Aid})
                             .First();
                 attackType = lastAttack?.lastType ?? AttackType.Illeage;
-                return lastAttack?.Uid ?? 0;
+                return lastAttack?.Aid ?? 0;
             }
             catch (Exception e)
             {
