@@ -618,65 +618,6 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         }
 
         /// <summary>
-        /// 成员进入空闲
-        /// </summary>
-        /// <param name="uid">uid</param>
-        /// <returns>
-        /// <para><see langword="true"/> 写入成功</para>
-        /// <para><see langword="false"/> 数据库错误</para>
-        /// </returns>
-        public bool MemberIDLE(long uid)
-        {
-            try
-            {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                return dbClient.Updateable(new MemberInfo {Flag = FlagType.IDLE, Info = null})
-                               .UpdateColumns(i => new {i.Flag, i.Info})
-                               .Where(i => i.Uid == uid && i.Gid == GuildEventArgs.FromGroup.Id)
-                               .ExecuteCommandHasChange();
-            }
-            catch (Exception e)
-            {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 成员进入实战
-        /// </summary>
-        /// <param name="uid">uid</param>
-        /// <returns>
-        /// <para><see langword="true"/> 写入成功</para>
-        /// <para><see langword="false"/> 数据库错误</para>
-        /// </returns>
-        public bool MemberEngage(long uid)
-        {
-            try
-            {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                var bossCode = dbClient.Queryable<GuildInfo>()
-                                       .Where(guild => guild.Gid == GuildEventArgs.FromGroup.Id)
-                                       .Select(boss => new {boss.Round, boss.Order})
-                                       .First();
-
-                return dbClient.Updateable(new MemberInfo
-                               {
-                                   Flag = FlagType.EnGage,
-                                   Info = $"{bossCode.Round}:{bossCode.Order}"
-                               })
-                               .UpdateColumns(i => new {i.Flag, i.Info})
-                               .Where(i => i.Uid == uid && i.Gid == GuildEventArgs.FromGroup.Id)
-                               .ExecuteCommandHasChange();
-            }
-            catch (Exception e)
-            {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
-                return false;
-            }
-        }
-
-        /// <summary>
         /// 修改当前boss血量
         /// </summary>
         /// <param name="guildInfo">公会信息</param>
@@ -840,9 +781,6 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                 return false;
             }
         }
-
-
-
         #endregion
 
         #region 私有方法

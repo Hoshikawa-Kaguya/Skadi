@@ -277,7 +277,8 @@ namespace SuiseiBot.Code.PCRGuildManager
             }
 
             //获取成员信息和上一次的出刀类型
-            MemberInfo member = GuildBattleDB.GetMemberInfo(atkUid);
+            MemberInfo member    = GuildBattleDB.GetMemberInfo(atkUid);
+            GuildInfo  guildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
             if (member                                                         == null) return false;
             if (GuildBattleDB.GetLastAttack(atkUid, out AttackType lastAttack) == -1) return false;
 
@@ -339,7 +340,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             }
 
             //修改成员状态
-            if (GuildBattleDB.MemberEngage(atkUid))
+            if (GuildBattleDB.UpdateMemberStatus(atkUid, FlagType.EnGage, $"{guildInfo.Round}:{guildInfo.Order}")) 
             {
                 if (substitute)
                 {
@@ -473,7 +474,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     }
                     return true;
                 case FlagType.EnGage:
-                    if (GuildBattleDB.MemberIDLE(atkUid))
+                    if (GuildBattleDB.UpdateMemberStatus(atkUid, FlagType.IDLE, null))
                     {
                         QQGroup.SendGroupMessage("已取消出刀申请");
                         return true;
