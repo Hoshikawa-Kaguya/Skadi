@@ -700,6 +700,9 @@ namespace SuiseiBot.Code.PCRGuildManager
                 case AttackType.Offline:
                     message.Append("\r\n已被自动标记为掉刀");
                     break;
+                case AttackType.CompensateKill:
+                    message.Append("\r\n注意！你使用补时刀击杀了boss,没有时间补偿");
+                    break;
             }
             QQGroup.SendGroupMessage(message);
             return true;
