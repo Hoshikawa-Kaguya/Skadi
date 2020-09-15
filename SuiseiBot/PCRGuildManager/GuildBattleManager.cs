@@ -98,6 +98,10 @@ namespace SuiseiBot.Code.PCRGuildManager
                     dbSuccess = UndoAtk();
                     break;
 
+                case PCRGuildCmdType.ShowProgress:
+                    dbSuccess = ShowProgress();
+                    break;
+
                 default:
                     PCRGuildHandle.GetUnknowCommand(GBEventArgs);
                     ConsoleLog.Warning($"会战[群:{QQGroup.Id}]", $"接到未知指令{CommandType}");
@@ -740,7 +744,22 @@ namespace SuiseiBot.Code.PCRGuildManager
             int lastAtkAid = GuildBattleDB.GetLastAttack(SenderQQ.Id,out _);
             if (lastAtkAid == -1) return false;
 
-            return DelAtkByAid(lastAtkAid);
+            //删除记录
+            switch (DelAtkByAid(lastAtkAid))
+            {
+                case 0:
+                    return true;
+                case 1:
+                    break;
+                default:
+                    return false;
+            }
+            QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                     $"出刀编号为 {lastAtkAid} 的出刀记录已被删除");
+            //显示进度
+            if (!ShowProgress()) return false;
+
+            return true;
         }
 
         /// <summary>
@@ -785,49 +804,88 @@ namespace SuiseiBot.Code.PCRGuildManager
             if (!int.TryParse(CommandArgs[1], out int aid) || aid < 0) 
             {
                 QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
-                                         "\r\n兄啊这伤害好怪啊");
+                                         "\r\n兄啊这不是刀号");
                 return true;
             }
             ConsoleLog.Debug("get aid", aid);
             #endregion
 
-            return DelAtkByAid(aid);
+            //删除记录
+            switch (DelAtkByAid(aid))
+            {
+                case 0:
+                    return true;
+                case 1:
+                    break;
+                default:
+                    return false;
+            }
+            QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                     $"出刀编号为 {aid} 的出刀记录已被删除");
+            //显示进度
+            if (!ShowProgress()) return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// 显示会战进度
+        /// </summary>
+        /// <returns>
+        /// <para><see langword="true"/> 数据查询成功</para>
+        /// <para><see langword="false"/> 数据库错误</para>
+        /// </returns>
+        private bool ShowProgress()
+        {
+            GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
+            if (guildInfo == null) return false;
+
+            StringBuilder message = new StringBuilder();
+            message.Append($"{guildInfo.GuildName} 当前进度：\r\n");
+            message.Append($"{guildInfo.Round}周目{guildInfo.Order}王\r\n");
+            message.Append($"阶段{guildInfo.BossPhase}\r\n");
+            message.Append($"剩余血量:{guildInfo.HP}/{guildInfo.TotalHP}");
+
+            QQGroup.SendGroupMessage(message.ToString());
+            return true;
         }
         #endregion
 
         #region 私有方法
         /// <summary>
-        /// 由刀号获取删除出刀信息
+        /// 由刀号删除出刀信息
         /// </summary>
         /// <param name="aid">刀号</param>
         /// <returns>
-        /// <para><see langword="true"/> 成功</para>
-        /// <para><see langword="false"/> 数据库错误</para>
+        /// <para><see langword="1"/> 成功</para>
+        /// <para><see langword="0"/> 不允许删除</para>
+        /// <para><see langword="-1"/> 数据库错误</para>
         /// </returns>
-        private bool DelAtkByAid(int aid)
+        private int DelAtkByAid(int aid)
         {
             GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
-            if (guildInfo == null) return false;
+            if (guildInfo == null) return -1;
             GuildBattle atkInfo = GuildBattleDB.GetAtkByID(aid);
 
             //检查是否当前boss
-            if (guildInfo.Round != atkInfo.Round && guildInfo.Order != atkInfo.Order)
+            if (guildInfo.Round != atkInfo.Round || guildInfo.Order != atkInfo.Order)
             {
                 QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
                                          "\r\n非当前所处boss不允许删除");
-                return true;
+                return 0;
             }
+            ConsoleLog.Debug("Del atk type",atkInfo.Attack);
             //检查是否为尾刀
             if (atkInfo.Attack == AttackType.Final || atkInfo.Attack == AttackType.FinalOutOfRange)
             {
                 QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
                                          "\r\n尾刀不允许删除");
-                return true;
+                return 0;
             }
             //删除出刀信息
-            if (!GuildBattleDB.DelAtkByID(aid)) return false;
+            if (!GuildBattleDB.DelAtkByID(aid)) return -1;
             //更新boss数据
-            return GuildBattleDB.ModifyBossHP(guildInfo, guildInfo.HP + atkInfo.Damage);
+            return GuildBattleDB.ModifyBossHP(guildInfo, guildInfo.HP + atkInfo.Damage) ? 1 : -1;
         }
 
         /// <summary>

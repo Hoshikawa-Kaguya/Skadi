@@ -199,19 +199,6 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         }
 
         /// <summary>
-        /// 显示当前进度（请只在聊天判断中使用，本类中请自行查库，避免不必要的数据库链接）
-        /// </summary>
-        /// <returns>返回当前进度对象</returns>
-        public GuildInfo ShowProgress()
-        {
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            GuildInfo bossStatus =
-                dbClient.Queryable<GuildInfo>()
-                        .InSingle(GuildEventArgs.FromGroup.Id);
-            return bossStatus;
-        }
-
-        /// <summary>
         /// 获取今天的出刀列表
         /// </summary>
         /// <returns>出刀List</returns>
