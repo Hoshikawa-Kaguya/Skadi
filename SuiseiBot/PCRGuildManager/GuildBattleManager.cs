@@ -628,7 +628,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             if (lastAttackType == AttackType.Final || lastAttackType == AttackType.FinalOutOfRange) //补时
             {
                 curAttackType = dmg >=  atkGuildInfo.HP
-                    ? AttackType.Normal //当补时刀的伤害也超过了boss血量,判定为普通刀（你开挂！
+                    ? AttackType.CompensateKill //当补时刀的伤害也超过了boss血量,判定为普通刀
                     : AttackType.Compensate;
             }
             else
@@ -877,7 +877,8 @@ namespace SuiseiBot.Code.PCRGuildManager
             }
             ConsoleLog.Debug("Del atk type",atkInfo.Attack);
             //检查是否为尾刀
-            if (atkInfo.Attack == AttackType.Final || atkInfo.Attack == AttackType.FinalOutOfRange)
+            if (atkInfo.Attack == AttackType.Final || atkInfo.Attack == AttackType.FinalOutOfRange ||
+                atkInfo.Attack == AttackType.CompensateKill) 
             {
                 QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
                                          "\r\n尾刀不允许删除");

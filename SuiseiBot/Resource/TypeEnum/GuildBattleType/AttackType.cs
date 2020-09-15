@@ -31,6 +31,10 @@ namespace SuiseiBot.Code.Resource.TypeEnum.GuildBattleType
         /// <summary>
         /// 掉刀
         /// </summary>
-        Offline = 4
+        Offline = 4,
+        /// <summary>
+        /// 补时刀击杀
+        /// </summary>
+        CompensateKill = 5
     }
 }

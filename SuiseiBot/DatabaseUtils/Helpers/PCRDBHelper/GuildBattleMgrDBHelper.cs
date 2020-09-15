@@ -568,8 +568,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                 return dbClient.Queryable<GuildBattle>()
                                .AS(BattleTableName)
                                //今天5点之后出刀的
-                               .Where(i => i.Uid    == uid && i.Time >= Utils.GetUpdateStamp() &&
-                                           i.Attack != AttackType.Compensate)
+                               .Where(i => i.Uid == uid && i.Time >= Utils.GetUpdateStamp() &&
+                                           (i.Attack != AttackType.Compensate || i.Attack != AttackType.CompensateKill))
                                //筛选出刀总数
                                .Count();
             }
