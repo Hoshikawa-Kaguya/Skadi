@@ -61,7 +61,7 @@ namespace SuiseiBot.Code.Resource.TypeEnum.CmdType
         /// <summary>
         /// 撤回SL命令
         /// </summary>
-        SLUndo = 108,
+        UndoSL = 108,
         /// <summary>
         /// 查看进度命令
         /// </summary>

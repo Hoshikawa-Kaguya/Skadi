@@ -27,7 +27,9 @@ namespace SuiseiBot.Code.Resource.Commands
             PCRGuildCommands.Add("取消出刀",PCRGuildCmdType.UndoRequestAtk);
             PCRGuildCommands.Add("删刀",PCRGuildCmdType.DeleteAttack);
             PCRGuildCommands.Add("撤刀",PCRGuildCmdType.UndoAttack);
-            PCRGuildCommands.Add("进度",PCRGuildCmdType.ShowProgress);
+            PCRGuildCommands.Add("进度", PCRGuildCmdType.ShowProgress);
+            PCRGuildCommands.Add("SL",PCRGuildCmdType.SL);
+            PCRGuildCommands.Add("撤回SL",PCRGuildCmdType.UndoSL);
         }
     }
 }

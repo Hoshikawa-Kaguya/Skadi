@@ -263,7 +263,6 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// <summary>
         /// 结束会战
         /// </summary>
-        /// <returns>0：成功结束 | 1：还未开始会战 | -99:数据库错误</returns>
         /// <returns>
         /// <para><see langword="1"/> 成功结束统计</para>
         /// <para><see langword="0"/> 未开始会战</para>
@@ -623,7 +622,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// <para><see langword="true"/> 写入成功</para>
         /// <para><see langword="false"/> 数据库错误</para>
         /// </returns>
-        public bool SetMemberSL(long uid,bool cleanSL = false)
+        public bool SetMemberSL(long uid, bool cleanSL = false)
         {
             try
             {

@@ -117,6 +117,7 @@
     <Compile Include="DatabaseUtils\Helpers\PCRDBHelper\GuildBattleMgrDBHelper.cs" />
     <Compile Include="DatabaseUtils\Helpers\PCRDBHelper\GuildDBHelper.cs" />
     <Compile Include="DatabaseUtils\Helpers\SubscriptionDBHelper.cs" />
+    <Compile Include="DatabaseUtils\DBMsgUtils.cs" />
     <Compile Include="DatabaseUtils\Tables.cs" />
     <Compile Include="IO\Config\ConfigFile\BiliSubscription.cs" />
     <Compile Include="IO\Config\Config.cs" />
