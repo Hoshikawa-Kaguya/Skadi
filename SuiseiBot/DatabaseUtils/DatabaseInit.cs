@@ -17,7 +17,7 @@ namespace SuiseiBot.Code.DatabaseUtils
         public static void Init(CQAppEnableEventArgs e)
         {
             string DBPath = SugarUtils.GetDBPath(e.CQApi.GetLoginQQ().Id.ToString());
-            ConsoleLog.Info("IO",$"获取数据路径{DBPath}");
+            ConsoleLog.Debug("IO",$"获取数据路径{DBPath}");
             if (!File.Exists(DBPath))//查找数据文件
             {
                 //数据库文件不存在，新建数据库

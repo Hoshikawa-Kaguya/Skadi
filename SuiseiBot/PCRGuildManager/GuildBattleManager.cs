@@ -116,6 +116,7 @@ namespace SuiseiBot.Code.PCRGuildManager
         #region 指令
         /// <summary>
         /// 开始会战
+        /// 只允许管理员执行
         /// </summary>
         /// <returns>
         /// <para><see langword="true"/> 数据写入成功</para>
@@ -154,6 +155,7 @@ namespace SuiseiBot.Code.PCRGuildManager
 
         /// <summary>
         /// 结束会战
+        /// 只允许管理员执行
         /// </summary>
         /// <returns>
         /// <para><see langword="true"/> 数据写入成功</para>
@@ -200,19 +202,7 @@ namespace SuiseiBot.Code.PCRGuildManager
         private bool RequestAttack()
         {
             //检查是否进入会战
-            switch (GuildBattleDB.CheckInBattle())
-            {
-                case 0:
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "公会战还没开呢");
-                    return true;
-                case -1:
-                    return false;
-                case 1:
-                    break;
-                default:
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "遇到了未知错误");
-                    return true;
-            }
+            if (!CheckInBattle()) return true;
 
             bool substitute;//代刀标记
             long atkUid;
@@ -366,19 +356,7 @@ namespace SuiseiBot.Code.PCRGuildManager
         private bool UndoRequest()
         {
             //检查是否进入会战
-            switch (GuildBattleDB.CheckInBattle())
-            {
-                case 0:
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "公会战还没开呢");
-                    return true;
-                case -1:
-                    return false;
-                case 1:
-                    break;
-                default:
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "遇到了未知错误");
-                    return true;
-            }
+            if (!CheckInBattle()) return true;
 
             bool substitute;//代刀标记
             long atkUid;
@@ -498,19 +476,7 @@ namespace SuiseiBot.Code.PCRGuildManager
         private bool Attack()
         {
             //检查是否进入会战
-            switch (GuildBattleDB.CheckInBattle())
-            {
-                case 0:
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "公会战还没开呢");
-                    return true;
-                case -1:
-                    return false;
-                case 1:
-                    break;
-                default:
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "遇到了未知错误");
-                    return true;
-            }
+            if (!CheckInBattle()) return true;
 
             bool substitute; //代刀标记
             long atkUid;
@@ -717,6 +683,8 @@ namespace SuiseiBot.Code.PCRGuildManager
         /// </returns>
         private bool UndoAtk()
         {
+            //检查是否进入会战
+            if (!CheckInBattle()) return true;
             //检查成员
             if (!GuildBattleDB.CheckMemberExists(SenderQQ.Id,out bool database))
             {
@@ -727,7 +695,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                 }
                 return false;
             }
-
+            
             #region 参数检查
             switch (Utils.CheckForLength(CommandArgs,0))
             {
@@ -768,6 +736,7 @@ namespace SuiseiBot.Code.PCRGuildManager
 
         /// <summary>
         /// 删刀
+        /// 只允许管理员执行
         /// </summary>
         /// <returns>
         /// <para><see langword="true"/> 数据写入成功</para>
@@ -775,6 +744,8 @@ namespace SuiseiBot.Code.PCRGuildManager
         /// </returns>
         private bool DelAttack()
         {
+            //检查是否进入会战
+            if (!CheckInBattle()) return true;
             //检查成员
             if (!GuildBattleDB.CheckMemberExists(SenderQQ.Id,out bool database))
             {
@@ -785,7 +756,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                 }
                 return false;
             }
-
+            
             #region 参数检查
             switch (Utils.CheckForLength(CommandArgs,1))
             {
@@ -853,6 +824,89 @@ namespace SuiseiBot.Code.PCRGuildManager
             QQGroup.SendGroupMessage(message.ToString());
             return true;
         }
+
+        /// <summary>
+        /// SL
+        /// </summary>
+        /// <returns>
+        /// <para><see langword="true"/> 数据查询成功</para>
+        /// <para><see langword="false"/> 数据库错误</para>
+        /// </returns>
+        private bool SL()
+        {
+            //检查是否进入会战
+            if (!CheckInBattle()) return true;
+
+            //检查参数
+            long SLMemberID;
+            switch (Utils.CheckForLength(CommandArgs,0))
+            {
+                case LenType.Extra:
+                    if (GBEventArgs.Message.CQCodes.Count       == 1             &&
+                        GBEventArgs.Message.CQCodes[0].Function == CQFunction.At &&
+                        Utils.CheckForLength(CommandArgs,2)     == LenType.Legitimate)
+                    {
+                        //从CQCode中获取QQ号
+                        Dictionary<string,string> codeInfo =  GBEventArgs.Message.CQCodes[0].Items;
+                        if (codeInfo.TryGetValue("qq",out string uid))
+                        {
+                            SLMemberID = Convert.ToInt64(uid);
+                        }
+                        else
+                        {
+                            ConsoleLog.Error("CQCode parse error","can't get uid in cqcode");
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                                 "\r\n听不见！重来！（有多余参数）");
+                        return true;
+                    }
+                    break;
+                case LenType.Legitimate:
+                    SLMemberID = SenderQQ.Id;
+                    break;
+                default:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "发生未知错误，请联系机器人管理员");
+                    ConsoleLog.Error("Unknown error","LenType");
+                    return true;
+            }
+
+            //检查成员
+            if (!GuildBattleDB.CheckMemberExists(SLMemberID,out bool database))
+            {
+                if(database)
+                {
+                    QQGroup.SendGroupMessage("成员 ",CQApi.CQCode_At(SLMemberID), "不是这个公会的成员");
+                    return true;
+                }
+                return false;
+            }
+            //查找成员信息 
+            MemberInfo member = GuildBattleDB.GetMemberInfo(SenderQQ.Id);
+            if (member == null) return false;
+            //判断成员状态
+            if (member.Flag != FlagType.EnGage)
+            {
+                QQGroup.SendGroupMessage(CQApi.CQCode_At(SLMemberID), "并不在出刀中");
+                return true;
+            }
+            //判断今天是否使用过SL
+            if (member.SL >= Utils.GetUpdateStamp())
+            {
+                QQGroup.SendGroupMessage(CQApi.CQCode_At(SLMemberID), "今天已使用过SL");
+                return true;
+            }
+            else
+            {
+                if (!GuildBattleDB.SetMemberSL(SLMemberID)) return false;
+                QQGroup.SendGroupMessage("成员 ", CQApi.CQCode_At(SLMemberID), "已使用SL");
+                return true;
+            }
+        }
         #endregion
 
         #region 私有方法
@@ -887,6 +941,13 @@ namespace SuiseiBot.Code.PCRGuildManager
                                          "\r\n尾刀不允许删除");
                 return 0;
             }
+            //判断数据是否非法
+            if (guildInfo.HP + atkInfo.Damage > guildInfo.TotalHP)
+            {
+                QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                         "\r\n删刀后血量超出上线，请联系管理员检查机器人所在进度");
+                return 0;
+            }
             //删除出刀信息
             if (!GuildBattleDB.DelAtkByID(aid)) return -1;
             //更新boss数据
@@ -896,7 +957,11 @@ namespace SuiseiBot.Code.PCRGuildManager
         /// <summary>
         /// 检查成员权限等级是否为管理员及以上
         /// </summary>
-        private bool IsAdmin()
+        /// <returns>
+        /// <para><see langword="true"/> 成员为管理员或群主</para>
+        /// <para><see langword="false"/> 成员不是管理员</para>
+        /// </returns>
+        private bool IsAdmin(bool shwoWarning = true)
         {
             GroupMemberInfo memberInfo = GBEventArgs.CQApi.GetGroupMemberInfo(GBEventArgs.FromGroup.Id, GBEventArgs.FromQQ.Id);
 
@@ -906,12 +971,40 @@ namespace SuiseiBot.Code.PCRGuildManager
             if (!isAdmin)
             {
                 //执行者为普通群员时拒绝执行指令
-                GBEventArgs.FromGroup.SendGroupMessage(CQApi.CQCode_At(GBEventArgs.FromQQ.Id),
-                                                       "此指令只允许管理者执行");
+                if(shwoWarning)GBEventArgs.FromGroup.SendGroupMessage(CQApi.CQCode_At(GBEventArgs.FromQQ.Id),
+                                                                      "此指令只允许管理者执行");
                 ConsoleLog.Warning($"会战[群:{GBEventArgs.FromGroup.Id}]", $"群成员{memberInfo.Nick}正在尝试执行指令{CommandType}");
             }
 
             return isAdmin;
+        }
+
+        /// <summary>
+        /// 检查是否已经进入会战
+        /// </summary>
+        /// <returns>
+        /// <para><see langword="true"/> 已经进入会战</para>
+        /// <para><see langword="false"/> 未进入或发生了其他错误</para>
+        /// </returns>
+        private bool CheckInBattle()
+        {
+            //检查是否进入会战
+            switch (GuildBattleDB.CheckInBattle())
+            {
+                case 0:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "公会战还没开呢");
+                    return false;
+                case -1:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "\r\nERROR",
+                                             "\r\n数据库错误");
+                    return false;
+                case 1:
+                    return true;
+                default:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "遇到了未知错误");
+                    return false;
+            }
         }
         #endregion
     }

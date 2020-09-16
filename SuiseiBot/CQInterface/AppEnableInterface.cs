@@ -32,7 +32,7 @@ namespace SuiseiBot.Code.CQInterface
             //读取应用信息
             ConsoleLog.Debug("APP AuthCode(native plugin ID)", e.CQApi.AppInfo.AuthCode);
             //修改环境文件夹，初始化环境
-            ConsoleLog.Info("获取到环境路径", Directory.GetCurrentDirectory());
+            ConsoleLog.Debug("获取到环境路径", Directory.GetCurrentDirectory());
             System.Environment.SetEnvironmentVariable("Path", Directory.GetCurrentDirectory());
             //显示Log等级
             ConsoleLog.Debug("Log Level", config.LoadedConfig.LogLevel);

@@ -8,6 +8,7 @@ using SuiseiBot.Code.Resource.TypeEnum.GuildBattleType;
 using SuiseiBot.Code.SqliteTool;
 using SuiseiBot.Code.Tool;
 using SuiseiBot.Code.Tool.LogUtils;
+// ReSharper disable AccessToModifiedClosure
 
 namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
 {
@@ -27,177 +28,6 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         #endregion
 
         #region 指令
-        /// <summary>
-        /// SL命令
-        /// </summary>
-        /// <param name="uid">成员QQ号</param>
-        /// <returns>0：正常 | -1：成员不存在 | -2：当日已用过SL | -3：当前并不在出刀状态中 | -99：数据库出错</returns>
-        public int SL(long uid)
-        {
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            MemberInfo currSL =
-                dbClient.Queryable<MemberInfo>()
-                        .Where(i => i.Uid == uid && i.Gid == GuildEventArgs.FromGroup.Id)
-                        .First();
-            if (currSL == null) return -1;
-            //检查SL记录的时间
-            if (currSL.SL >= Utils.GetUpdateStamp())
-            {
-                return -2;
-            }
-            //检查成员状态
-            if (currSL.Flag != FlagType.EnGage)
-            {
-                return -3;
-            }
-
-            return dbClient
-                   .Updateable(new MemberInfo
-                                   {Flag = 0, SL = Utils.GetNowTimeStamp(), Time = Utils.GetNowTimeStamp()})
-                   .UpdateColumns(i => new {i.Flag, i.SL})
-                   .Where(i => i.Gid == GuildEventArgs.FromGroup.Id && i.Uid == uid)
-                   .ExecuteCommandHasChange()
-                ? 0
-                : -99;
-        }
-
-        /// <summary>
-        /// 撤销SL命令
-        /// </summary>
-        /// <param name="uid">成员QQ号</param>
-        /// <returns>0：正常 | -1：成员不存在 | -2：今天未使用过SL | -99：数据库出错</returns>
-        public int SLUndo(long uid)
-        {
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            MemberInfo currSL =
-                dbClient.Queryable<MemberInfo>()
-                        .Where(i => i.Uid == uid && i.Gid == GuildEventArgs.FromGroup.Id)
-                        .First();
-            if (currSL == null) return -1;
-            if (currSL.SL == 0 || currSL.SL < Utils.GetUpdateStamp())
-            {
-                return -2;
-            }
-
-            return dbClient.Updateable(new MemberInfo{SL = 0})
-                           .UpdateColumns(i => new {i.SL})
-                           .Where(i => i.Uid == uid && i.Gid == GuildEventArgs.FromGroup.Id)
-                           .ExecuteCommandHasChange()
-                ? 0
-                : -99;
-        }
-
-        /// <summary>
-        /// 改刀（尾刀不能修改）
-        /// </summary>
-        /// <param name="AttackId">出刀编号</param>
-        /// <param name="toValue">要修改为的目标伤害</param>
-        /// <param name="needChangeBoss">是否切换BOSS</param>
-        /// <returns>0：正常 | -1：未找到该出刀编号 | -2：禁止修改非当前BOSS的刀 | -3：禁止修改尾刀 | -99：数据库出错</returns>
-        public int ModifyAttack(int AttackId, long toValue, out bool needChangeBoss)
-        {
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            GuildBattle attackInfo =
-                dbClient.Queryable<GuildBattle>()
-                        .AS(BattleTableName)
-                        .InSingle(AttackId);
-            GuildInfo guildInfo =
-                dbClient.Queryable<GuildInfo>()
-                        .InSingle(GuildEventArgs.FromGroup.Id);
-            //判断是否查找到这一刀
-            if (attackInfo == null)
-            {
-                needChangeBoss = false;
-                return -1;
-            }
-            //判断是否在当前boss
-            if (guildInfo.Round != attackInfo.Round && guildInfo.Order != attackInfo.Order)
-            {
-                needChangeBoss = false;
-                return -2;
-            }
-            //修改尾刀可能导致数据发生大范围回滚，禁止修改
-            if (attackInfo.Attack == AttackType.Normal)
-            {
-                needChangeBoss = false;
-                return -3;
-            }
-
-            long CurrHP = guildInfo.HP;
-
-            long realDamage = toValue;
-            //是否需要切换boss
-            needChangeBoss = false;
-            //修改后是否已经击杀Boss
-            if (toValue >= CurrHP)
-            {
-                realDamage     = CurrHP;
-                needChangeBoss = true;
-            }
-
-            //修改一刀数据
-            bool succModify = dbClient.Updateable(
-                                                  new GuildBattle()
-                                                  {
-                                                      Damage = realDamage,
-                                                      Attack = needChangeBoss ? AttackType.Final : AttackType.Normal
-                                                  })
-                                      .AS(BattleTableName)
-                                      .UpdateColumns(i => new {i.Damage, Flag = i.Attack})
-                                      .Where(i => i.Aid == AttackId)
-                                      .ExecuteCommandHasChange();
-
-            bool succUpdateBoss = true;
-            //如果已经击杀
-            if (needChangeBoss)
-            {
-                //全部下树，出刀中取消出刀状态
-                dbClient.Updateable(new MemberInfo{Flag = FlagType.IDLE})
-                        .Where(i => i.Flag == FlagType.OnTree || i.Flag == FlagType.EnGage)
-                        .UpdateColumns(i => new {i.Flag})
-                        .ExecuteCommand();
-                //切换boss
-                int nextOrder = guildInfo.Order;
-                int nextRound = guildInfo.Round;
-                int nextPhase = guildInfo.BossPhase;
-                if (guildInfo.Order != 5)
-                {
-                    //当前周目下一个怪
-                    nextOrder++;
-                }
-                else
-                {
-                    //切周目
-                    nextOrder = 1;
-                    nextRound++;
-                    nextPhase = GetNextRoundPhase(guildInfo);
-                }
-
-                //查找下一个boss的信息
-                var nextBossData = dbClient.Queryable<GuildBattleBoss>()
-                                           .Where(i => i.ServerId == guildInfo.ServerId
-                                                    && i.Phase    == nextPhase
-                                                    && i.Order    == nextOrder)
-                                           .First();
-                var updateBossData =
-                    new GuildInfo()
-                    {
-                        BossPhase = nextPhase,
-                        Order     = nextOrder,
-                        Round     = nextRound,
-                        HP        = nextBossData.HP,
-                        TotalHP   = nextBossData.HP
-                    };
-                succUpdateBoss = dbClient.Updateable(updateBossData)
-                                         .UpdateColumns(i => new {i.Order, i.HP, i.BossPhase, i.Round, i.TotalHP})
-                                         .Where(i => i.Gid == GuildEventArgs.FromGroup.Id)
-                                         .ExecuteCommandHasChange();
-            }
-
-
-            return (succModify && succUpdateBoss) ? 0 : -99;
-        }
-
         /// <summary>
         /// 获取今天的出刀列表
         /// </summary>
@@ -774,6 +604,48 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                                .UpdateColumns(i => new{i.Flag,i.Info,i.Time})
                                .Where(i=>i.Gid == GuildEventArgs.FromGroup.Id && i.Uid == uid)
                                .ExecuteCommandHasChange();
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 设置成员SL
+        /// 同时自动下树
+        /// 如果只清空则不会修改状态
+        /// </summary>
+        /// <param name="uid">成员UID</param>
+        /// <param name="cleanSL">是否清空SL</param>
+        /// <returns>
+        /// <para><see langword="true"/> 写入成功</para>
+        /// <para><see langword="false"/> 数据库错误</para>
+        /// </returns>
+        public bool SetMemberSL(long uid,bool cleanSL = false)
+        {
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                if (cleanSL) //清空SL
+                {
+                    return dbClient
+                           .Updateable(new MemberInfo
+                                           {SL = 0})
+                           .UpdateColumns(i => new {i.SL})
+                           .Where(i => i.Gid == GuildEventArgs.FromGroup.Id && i.Uid == uid)
+                           .ExecuteCommandHasChange();
+                }
+                else //设置新的SL
+                {
+                    return dbClient
+                           .Updateable(new MemberInfo
+                                           {Flag = FlagType.IDLE, SL = Utils.GetNowTimeStamp(), Time = Utils.GetNowTimeStamp(), Info = null})
+                           .UpdateColumns(i => new {i.Flag, i.SL, i.Time, i.Info})
+                           .Where(i => i.Gid == GuildEventArgs.FromGroup.Id && i.Uid == uid)
+                           .ExecuteCommandHasChange();
+                }
             }
             catch (Exception e)
             {

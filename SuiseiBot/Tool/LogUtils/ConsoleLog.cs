@@ -62,7 +62,7 @@ namespace SuiseiBot.Code.Tool.LogUtils
             if (Level != LogLevel.Error || Level != LogLevel.Warning)
             {
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine($"[{DateTime.Now}][INFO][{type}]{message}");
+                Console.WriteLine($"[SuiseiBot][{DateTime.Now}][INFO][{type}]{message}");
             }
         }
 
@@ -76,7 +76,7 @@ namespace SuiseiBot.Code.Tool.LogUtils
             if (Level != LogLevel.Error)
             {
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Write($"[{DateTime.Now}][");
+                Console.Write($"[SuiseiBot][{DateTime.Now}][");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.Write("WARNINIG");
                 Console.ForegroundColor = ConsoleColor.White;
@@ -95,7 +95,7 @@ namespace SuiseiBot.Code.Tool.LogUtils
         public static void Error(object type, object message)
         {
             Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"[{DateTime.Now}][");
+            Console.Write($"[SuiseiBot][{DateTime.Now}][");
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write("ERROR");
             Console.ForegroundColor = ConsoleColor.White;
@@ -113,7 +113,7 @@ namespace SuiseiBot.Code.Tool.LogUtils
         public static void Fatal(object type, object message)
         {
             Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"[{DateTime.Now}][");
+            Console.Write($"[SuiseiBot][{DateTime.Now}][");
             Console.ForegroundColor = ConsoleColor.DarkRed;
             Console.Write("FATAL");
             Console.ForegroundColor = ConsoleColor.White;
@@ -133,7 +133,7 @@ namespace SuiseiBot.Code.Tool.LogUtils
             if (Level == LogLevel.Debug)
             {
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Write($"[{DateTime.Now}][");
+                Console.Write($"[SuiseiBot][{DateTime.Now}][");
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.Write("Verbose");
                 Console.ForegroundColor = ConsoleColor.White;
@@ -154,7 +154,7 @@ namespace SuiseiBot.Code.Tool.LogUtils
             if (Level == LogLevel.Debug)
             {
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Write($"[{DateTime.Now}][");
+                Console.Write($"[SuiseiBot][{DateTime.Now}][");
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.Write("DEBUG");
                 Console.ForegroundColor = ConsoleColor.White;
