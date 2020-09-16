@@ -1,8 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SuiseiBot.Code
 {
@@ -55,7 +51,7 @@ namespace SuiseiBot.Code
             {
                 id       = 1,
                 type     = 21,
-                name     = "私聊消息处理",
+                name     = "PrivateMessageInterface",
                 function = "_eventPrivateMsg",
                 priority = 30000
             },
@@ -63,56 +59,16 @@ namespace SuiseiBot.Code
             {
                 id       = 2,
                 type     = 2,
-                name     = "群消息处理",
+                name     = "GroupMessageInterface",
                 function = "_eventGroupMsg",
-                priority = 30000
-            },
-            new Event()
-            {
-                id       = 6,
-                type     = 102,
-                name     = "群成员减少事件处理",
-                function = "_eventSystem_GroupMemberDecrease",
-                priority = 30000
-            },
-            new Event()
-            {
-                id       = 8,
-                type     = 104,
-                name     = "群禁言事件处理",
-                function = "_eventSystem_GroupBan",
-                priority = 30000
-            },
-            new Event()
-            {
-                id       = 1001,
-                type     = 1001,
-                name     = "酷Q启动事件",
-                function = "_eventStartup",
-                priority = 30000
-            },
-            new Event()
-            {
-                id       = 1002,
-                type     = 1002,
-                name     = "酷Q关闭事件",
-                function = "_eventExit",
                 priority = 30000
             },
             new Event()
             {
                 id       = 1003,
                 type     = 1003,
-                name     = "应用已被启用",
+                name     = "AppEnableInterface",
                 function = "_eventEnable",
-                priority = 30000
-            },
-            new Event()
-            {
-                id       = 1004,
-                type     = 1004,
-                name     = "应用将被停用",
-                function = "_eventDisable",
                 priority = 30000
             },
         };

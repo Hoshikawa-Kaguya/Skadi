@@ -1,5 +1,4 @@
 using Native.Sdk.Cqp.EventArgs;
-using Native.Sdk.Cqp.Interface;
 using SuiseiBot.Code.ChatHandle;
 using SuiseiBot.Code.ChatHandle.PCRHandle;
 using SuiseiBot.Code.IO.Config;
@@ -9,18 +8,15 @@ using SuiseiBot.Code.Tool.LogUtils;
 
 namespace SuiseiBot.Code.CQInterface
 {
-    public class GroupMessageInterface : IGroupMessage
+    public static class GroupMessageInterface
     {
-        private CQGroupMessageEventArgs eventArgs { set; get; }
         /// <summary>
         /// 收到群消息
         /// </summary>
         /// <param name="sender">事件来源</param>
-        /// <param name="e">事件参数</param>
-        public void GroupMessage(object sender, CQGroupMessageEventArgs e)
+        /// <param name="eventArgs">事件参数</param>
+        public static void GroupMessage(object sender, CQGroupMessageEventArgs eventArgs)
         {
-            if (sender == null || e == null) return;
-            this.eventArgs = e;
             //与MiraiLog信息重复暂不显示
             //ConsoleLog.Info($"收到信息[群:{eventArgs.FromGroup.Id}]",$"{(eventArgs.Message.Text).Replace("\r\n", "\\r\\n")}");
             //读取配置文件
@@ -35,7 +31,7 @@ namespace SuiseiBot.Code.CQInterface
                 //检查模块使能
                 if (!config.LoadedConfig.ModuleSwitch.PCR_GuildManager)
                 {
-                    SendDisableMessage();
+                    eventArgs.FromGroup.SendGroupMessage("此模块未启用");
                     return;
                 }
                 PCRGuildHandle pcrGuild = new PCRGuildHandle(sender, eventArgs);
@@ -60,7 +56,7 @@ namespace SuiseiBot.Code.CQInterface
                 case WholeMatchCmdType.SurpriseMFK_24YearsOld:
                     if (!config.LoadedConfig.ModuleSwitch.HaveFun)
                     {
-                        SendDisableMessage();
+                        eventArgs.FromGroup.SendGroupMessage("此模块未启用");
                         return;
                     }
                     SurpriseMFKHandle smfh = new SurpriseMFKHandle(sender, eventArgs);
@@ -70,7 +66,7 @@ namespace SuiseiBot.Code.CQInterface
                 case WholeMatchCmdType.Suisei_SignIn:
                     if (!config.LoadedConfig.ModuleSwitch.Suisei)
                     {
-                        SendDisableMessage();
+                        eventArgs.FromGroup.SendGroupMessage("此模块未启用");
                         return;
                     }
                     SuiseiHanlde suisei = new SuiseiHanlde(sender, eventArgs);
@@ -80,7 +76,7 @@ namespace SuiseiBot.Code.CQInterface
                 case WholeMatchCmdType.Hso:
                     if (!config.LoadedConfig.ModuleSwitch.Hso)
                     {
-                        SendDisableMessage();
+                        eventArgs.FromGroup.SendGroupMessage("此模块未启用");
                         return;
                     }
                     HsoHandle hso = new HsoHandle(sender, eventArgs);
@@ -90,14 +86,12 @@ namespace SuiseiBot.Code.CQInterface
                 case WholeMatchCmdType.Debug:
                     if(!config.LoadedConfig.ModuleSwitch.Debug)
                     {
-                        SendDisableMessage();
+                        eventArgs.FromGroup.SendGroupMessage("此模块未启用");
                         return;
                     }
                     DefaultHandle dh = new DefaultHandle(sender, eventArgs);
                     dh.GetChat();
                     return;
-                default:
-                    break;
             }
 
             //参数指令匹配
@@ -113,7 +107,7 @@ namespace SuiseiBot.Code.CQInterface
                 case KeywordCmdType.PCRTools_GetGuildRank:
                     if (!config.LoadedConfig.ModuleSwitch.PCR_GuildRank)
                     {
-                        SendDisableMessage();
+                        eventArgs.FromGroup.SendGroupMessage("此模块未启用");
                         return;
                     }
                     GuildRankHandle pcrTools = new GuildRankHandle(sender, eventArgs);
@@ -126,7 +120,7 @@ namespace SuiseiBot.Code.CQInterface
                 case KeywordCmdType.Cheru_Decode:
                     if (!config.LoadedConfig.ModuleSwitch.Cheru)
                     {
-                        SendDisableMessage();
+                        eventArgs.FromGroup.SendGroupMessage("此模块未启用");
                         return;
                     }
                     CheruHandle cheru = new CheruHandle(sender,eventArgs);
@@ -135,22 +129,15 @@ namespace SuiseiBot.Code.CQInterface
                 case KeywordCmdType.Debug_Echo:
                     if(!config.LoadedConfig.ModuleSwitch.Debug)
                     {
-                        SendDisableMessage();
+                        eventArgs.FromGroup.SendGroupMessage("此模块未启用");
                         return;
                     }
                     DefaultHandle dh = new DefaultHandle(sender, eventArgs);
                     dh.GetChat();
                     return;
-                default:
-                    break;
             }
 
             eventArgs.Handler = true;
         }
-
-        #region 模块启用检查
-        private void SendDisableMessage()
-            => this.eventArgs.FromGroup.SendGroupMessage("此模块未启用");
-        #endregion
     }
 }

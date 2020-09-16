@@ -1,6 +1,6 @@
 namespace SuiseiBot.Code.Tool.LogUtils
 {
-    internal enum LogLevel
+    public enum LogLevel
     {
         Info = 0,
         Debug = 1,

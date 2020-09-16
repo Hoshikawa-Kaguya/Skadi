@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace SuiseiBot.Code.Tool.LogUtils
 {
@@ -8,7 +9,7 @@ namespace SuiseiBot.Code.Tool.LogUtils
     /// 用来格式化输出的控制台Log的通用代码
     /// by 饼干（摸了
     /// </summary>
-    internal class ConsoleLog
+    public class ConsoleLog
     {
         #region 控制台调用函数
         /// <summary>
@@ -165,6 +166,19 @@ namespace SuiseiBot.Code.Tool.LogUtils
             }
         }
 
+        #endregion
+
+        #region 全局错误Log
+        /// <summary>
+        /// 全局错误Log
+        /// </summary>
+        /// <param name="e"></param>
+        public static void UnhandledExceptionLog(Exception e)
+        {
+            Fatal("UnhandledException",ErrorLogBuilder(e));
+            Thread.Sleep(5000);
+            Environment.Exit(0);
+        }
         #endregion
     }
 }
