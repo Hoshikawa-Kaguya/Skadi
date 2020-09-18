@@ -77,7 +77,7 @@ namespace SuiseiBot.Code.Resource.TypeEnum.CmdType
         /// <summary>
         /// 下树命令
         /// </summary>
-        KickFromTree = 112,
+        LeaveTree = 112,
         /// <summary>
         /// 出刀表命令
         /// </summary>

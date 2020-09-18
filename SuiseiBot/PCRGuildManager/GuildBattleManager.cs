@@ -54,7 +54,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                                              $"\r\n{PCRGuildHandle.GetCommandHelp(CommandType)}");
                     return;
                 case -1:
-                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                    DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                     return;
             }
             
@@ -75,28 +75,28 @@ namespace SuiseiBot.Code.PCRGuildManager
                     break;
 
                 case PCRGuildCmdType.Attack:
-                    if(!CheckInBattle() || !MemberCheck()) return;
+                    if(!InBattleCheck() || !MemberCheck()) return;
                     Attack();
                     break;
 
                 case PCRGuildCmdType.RequestAttack:
-                    if(!CheckInBattle() || !MemberCheck()) return;
+                    if(!InBattleCheck() || !MemberCheck()) return;
                     RequestAttack();
                     break;
 
                 case PCRGuildCmdType.UndoRequestAtk:
-                    if(!CheckInBattle() || !MemberCheck()) return;
+                    if(!InBattleCheck() || !MemberCheck()) return;
                     UndoRequest();
                     break;
 
                 case PCRGuildCmdType.DeleteAttack:
                     //检查执行者权限
-                    if(!IsAdmin() || !MemberCheck() || !CheckInBattle()) return;
+                    if(!IsAdmin() || !MemberCheck() || !InBattleCheck()) return;
                     DelAttack();
                     break;
 
                 case PCRGuildCmdType.UndoAttack:
-                    if(!ZeroArgsCheck() || !MemberCheck() || !CheckInBattle()) return;
+                    if(!ZeroArgsCheck() || !MemberCheck() || !InBattleCheck()) return;
                     UndoAtk();
                     break;
 
@@ -105,30 +105,40 @@ namespace SuiseiBot.Code.PCRGuildManager
                     GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
                     if (guildInfo == null)
                     {
-                        DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                        DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                         break;
                     }
-                    if (CheckInBattle())
+                    if (InBattleCheck())
                     {
                         ShowProgress(guildInfo);
                     }
                     break;
 
                 case PCRGuildCmdType.SL:
-                    if(!ZeroArgsCheck() || !MemberCheck() || !CheckInBattle() || !ZeroArgsCheck()) return;
+                    if(!ZeroArgsCheck() || !MemberCheck() || !InBattleCheck()) return;
                     SL();
                     break;
                 
                 case PCRGuildCmdType.UndoSL:
                     //检查执行者权限
-                    if(!IsAdmin() || !MemberCheck() || !CheckInBattle()) return;
+                    if(!IsAdmin() || !MemberCheck() || !InBattleCheck()) return;
                     SL(true);
+                    break;
+
+                case PCRGuildCmdType.ClimbTree:
+                    if(!ZeroArgsCheck() || !MemberCheck() || !InBattleCheck()) return;
+                    ClimbTree();
+                    break;
+
+                case PCRGuildCmdType.LeaveTree:
+                    if(!IsAdmin() || !MemberCheck() || !InBattleCheck()) return;
+                    LeaveTree();
                     break;
 
                 default:
                     PCRGuildHandle.GetUnknowCommand(GBEventArgs);
                     ConsoleLog.Warning($"会战[群:{QQGroup.Id}]", $"接到未知指令{CommandType}");
-                    return;
+                    break;
             }
         }
         #endregion
@@ -142,7 +152,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
             if (guildInfo == null)
             {
-                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                 return;
             }
             //判断返回值
@@ -159,7 +169,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                                              "\r\n新的一期会战开始啦！");
                     break;
                 case -1:
-                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                    DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                     break;
             }
         }
@@ -183,7 +193,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                                              "\r\n会战结束啦~");
                     break;
                 case -1:
-                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                    DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                     break;
             }
         }
@@ -210,7 +220,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     {
                         //从CQCode中获取QQ号
                         atkUid = GetUidInMsg();
-                        if (atkUid == -1 || !MemberCheck(atkUid)) return;
+                        if (atkUid == -1) return;
                     }
                     else
                     {
@@ -232,7 +242,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             GuildInfo  guildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
             if (member == null || GuildBattleDB.GetLastAttack(atkUid, out AttackType lastAttack) == -1)
             {
-                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                 return;
             }
 
@@ -278,7 +288,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             ConsoleLog.Debug("atk count",todayAtkCount);
             if (todayAtkCount == -1)
             {
-                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                 return;
             }
             //检查今日出刀数量
@@ -313,7 +323,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             }
             else
             {
-                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
             }
         }
 
@@ -339,7 +349,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     {
                         //从CQCode中获取QQ号
                         atkUid = GetUidInMsg();
-                        if (atkUid == -1 || !MemberCheck(atkUid)) return;
+                        if (atkUid == -1) return;
                     }
                     else
                     {
@@ -360,7 +370,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             MemberInfo member = GuildBattleDB.GetMemberInfo(atkUid);
             if (member == null)
             {
-                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                 return;
             }
             ConsoleLog.Debug("member status",member.Flag);
@@ -399,7 +409,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     }
                     else
                     {
-                        DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                        DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                         return;
                     }
                 default: //如果跑到这了，我完蛋了
@@ -436,7 +446,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     {
                         //从CQCode中获取QQ号
                         atkUid = GetUidInMsg();
-                        if (atkUid == -1 || !MemberCheck(atkUid)) return;
+                        if (atkUid == -1) return;
                     }
                     else
                     {
@@ -468,7 +478,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             MemberInfo atkMemberInfo = GuildBattleDB.GetMemberInfo(atkUid);
             if (atkMemberInfo == null)
             {
-                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                 return;
             }
             //成员状态检查
@@ -498,7 +508,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             GuildInfo atkGuildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
             if (atkGuildInfo == null)
             {
-                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                 return;
             }
             ConsoleLog.Debug("guild info check",$"DEBUG\r\nguild = {atkGuildInfo.Gid} | flag = {atkMemberInfo.Flag}");
@@ -507,7 +517,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             //获取上一刀的信息
             if (GuildBattleDB.GetLastAttack(atkUid, out AttackType lastAttackType) == -1)
             {
-                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                 return;
             }
             //判断是否进入下一个boss
@@ -542,7 +552,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             int attackId = GuildBattleDB.NewAttack(atkUid, atkGuildInfo, dmg, curAttackType);
             if (attackId == -1)
             {
-                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                 return;
             }
 
@@ -552,7 +562,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                 //TODO 下树提示
                 if (!GuildBattleDB.CleanTree(atkGuildInfo))
                 {
-                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                    DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                     return;
                 }
                 if (atkGuildInfo.Order == 5) //进入下一个周目
@@ -560,7 +570,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     ConsoleLog.Debug("change boss","go to next round");
                     if (!GuildBattleDB.GotoNextRound(atkGuildInfo))
                     {
-                        DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                        DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                         return;
                     }
                 }
@@ -569,7 +579,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     ConsoleLog.Debug("change boss","go to next boss");
                     if (!GuildBattleDB.GotoNextBoss(atkGuildInfo))
                     {
-                        DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                        DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                         return;
                     }
                 }
@@ -579,7 +589,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                 //更新boss数据
                 if (!GuildBattleDB.ModifyBossHP(atkGuildInfo, atkGuildInfo.HP - dmg))
                 {
-                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                    DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                     return;
                 }
             }
@@ -588,7 +598,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             //报刀后成员变为空闲
             if (!GuildBattleDB.UpdateMemberStatus(atkUid, FlagType.IDLE, null))
             {
-                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                 return;
             }
 
@@ -603,7 +613,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             GuildInfo latestGuildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
             if (latestGuildInfo == null)
             {
-                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                 return;
             }
             message.Append($"{latestGuildInfo.Round}周目{latestGuildInfo.Order}王\r\n");
@@ -625,6 +635,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     message.Append("\r\n注意！你使用补时刀击杀了boss,没有时间补偿");
                     break;
             }
+            if (atkMemberInfo.Flag == FlagType.OnTree) message.Append("\r\n已自动下树");
             QQGroup.SendGroupMessage(message);
 
             #endregion
@@ -644,7 +655,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                                              "并没有找到出刀记录");
                     return;
                 case -1:
-                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                    DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                     return;
             }
 
@@ -656,7 +667,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                 case 1:
                     break;
                 default:
-                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                    DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                     return;
             }
             QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
@@ -665,7 +676,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
             if (guildInfo == null)
             {
-                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                 return;
             }
             //显示进度
@@ -714,7 +725,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                 case 1:
                     break;
                 default:
-                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                    DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                     return;
             }
             QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
@@ -723,7 +734,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
             if (guildInfo == null)
             {
-                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                 return;
             }
             //显示进度
@@ -741,7 +752,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                 MemberInfo member = GuildBattleDB.GetMemberInfo(SenderQQ.Id);
                 if (member == null)
                 {
-                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                    DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                     return;
                 }
                 //判断成员状态
@@ -759,7 +770,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                 {
                     if (!GuildBattleDB.SetMemberSL(SenderQQ.Id))
                     {
-                        DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                        DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                         return;
                     }
                     QQGroup.SendGroupMessage("成员 ", CQApi.CQCode_At(SenderQQ.Id), "已使用SL");
@@ -794,7 +805,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                 MemberInfo member = GuildBattleDB.GetMemberInfo(memberUid);
                 if (member == null)
                 {
-                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                    DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                     return;
                 }
                 #endregion
@@ -802,7 +813,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                 {
                     if (!GuildBattleDB.SetMemberSL(memberUid, true))
                     {
-                        DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                        DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                         return;
                     }
                     QQGroup.SendGroupMessage("成员 ",CQApi.CQCode_At(memberUid), "已撤回今天的SL");
@@ -814,19 +825,61 @@ namespace SuiseiBot.Code.PCRGuildManager
             } 
         }
 
+        /// <summary>
+        /// 上树
+        /// </summary>
         private void ClimbTree()
         {
-            //检查是否进入会战
-            if (!CheckInBattle()) return;
+            //获取成员信息
+            MemberInfo member = GuildBattleDB.GetMemberInfo(SenderQQ.Id);
+            if (member == null)
+            {
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
+                return;
+            }
 
-            //检查参数
+            switch (member.Flag)
+            {
+                case FlagType.EnGage:
+                    if (!GuildBattleDB.UpdateMemberStatus(SenderQQ.Id, FlagType.OnTree, null))
+                    {
+                        DBMsgUtils.DatabaseFailedTips(GBEventArgs);
+                    }
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "已上树");
+                    return;
+                case FlagType.IDLE:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "闲着没事不要爬树(未申请出刀)");
+                    return;
+                case FlagType.OnTree:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "都在树上嫌树不够高？");
+                    return;
+                default:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "发生未知错误，请联系机器人管理员");
+                    ConsoleLog.Error("Unknown error","member.Flag");
+                    return;
+            }
+        }
+
+        /// <summary>
+        /// 下树
+        /// </summary>
+        private void LeaveTree()
+        {
+            #region 参数检查
+            long memberUid;
+
             switch (Utils.CheckForLength(CommandArgs,0))
             {
-                case LenType.Extra:
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
-                                             "\r\n听不见！重来！（有多余参数）");
-                    return;
-                case LenType.Legitimate:
+                case LenType.Legitimate: //正常
+                    memberUid = SenderQQ.Id;
+                    break;
+                case LenType.Extra: //管理员撤销
+                    memberUid = GetUidInMsg();
+                    if (memberUid == -1) return;
                     break;
                 default:
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
@@ -835,16 +888,46 @@ namespace SuiseiBot.Code.PCRGuildManager
                     return;
             }
 
-            throw new NotImplementedException();
+            ConsoleLog.Debug("get Uid", memberUid);
+
+            //查找成员信息 
+            MemberInfo member = GuildBattleDB.GetMemberInfo(memberUid);
+            if (member == null)
+            {
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
+                return;
+            }
+            #endregion
+
+            switch (member.Flag)
+            {
+                case FlagType.EnGage:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "你 轴 歪 了\n(正在出刀不要乱用指令)");
+                    return;
+                case FlagType.IDLE:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "弟啊你不在树上");
+                    return;
+                case FlagType.OnTree:
+                    if (!GuildBattleDB.UpdateMemberStatus(SenderQQ.Id, FlagType.IDLE, null))
+                    {
+                        DBMsgUtils.DatabaseFailedTips(GBEventArgs);
+                    }
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "已下树");
+                    return;
+                default:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "发生未知错误，请联系机器人管理员");
+                    ConsoleLog.Error("Unknown error","member.Flag");
+                    return;
+            }
         }
 
         /// <summary>
         /// 显示会战进度
         /// </summary>
-        /// <returns>
-        /// <para><see langword="true"/> 数据查询成功</para>
-        /// <para><see langword="false"/> 数据库错误</para>
-        /// </returns>
         private void ShowProgress(GuildInfo guildInfo)
         {
             StringBuilder message = new StringBuilder();
@@ -933,7 +1016,7 @@ namespace SuiseiBot.Code.PCRGuildManager
         /// <para><see langword="true"/> 已经进入会战</para>
         /// <para><see langword="false"/> 未进入或发生了其他错误</para>
         /// </returns>
-        private bool CheckInBattle()
+        private bool InBattleCheck()
         {
             //检查是否进入会战
             switch (GuildBattleDB.CheckInBattle())
@@ -942,7 +1025,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "公会战还没开呢");
                     return false;
                 case -1:
-                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                    DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                     return false;
                 case 1:
                     return true;
@@ -997,7 +1080,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "不是这个公会的成员");
                     return false;
                 case -1:
-                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                    DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                     return false;
                 default:
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
@@ -1026,7 +1109,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(uid), "不是这个公会的成员");
                     return false;
                 case -1:
-                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                    DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                     return false;
                 default:
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(uid),
@@ -1036,7 +1119,9 @@ namespace SuiseiBot.Code.PCRGuildManager
             }
         }
 
-        //TODO 单AT改用此函数
+        /// <summary>
+        /// 从消息的CQ码中获取用户ID（单CQ码）
+        /// </summary>
         private long GetUidInMsg()
         {
             if (GBEventArgs.Message.CQCodes.Count       == 1 &&
@@ -1052,12 +1137,14 @@ namespace SuiseiBot.Code.PCRGuildManager
                     {
                         return Uid;
                     }
+                    return -1;
                 }
                 else
                 {
                     ConsoleLog.Error("CQCode parse error", "can't get uid in cqcode");
                 }
             }
+            QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ), "有非法参数");
             return -1;
         }
         #endregion

@@ -30,6 +30,8 @@ namespace SuiseiBot.Code.Resource.Commands
             PCRGuildCommands.Add("进度", PCRGuildCmdType.ShowProgress);
             PCRGuildCommands.Add("SL",PCRGuildCmdType.SL);
             PCRGuildCommands.Add("撤回SL",PCRGuildCmdType.UndoSL);
+            PCRGuildCommands.Add("上树",PCRGuildCmdType.ClimbTree);
+            PCRGuildCommands.Add("下树",PCRGuildCmdType.LeaveTree);
         }
     }
 }

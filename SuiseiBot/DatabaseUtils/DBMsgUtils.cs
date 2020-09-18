@@ -8,7 +8,7 @@ namespace SuiseiBot.Code.DatabaseUtils
         /// <summary>
         /// 数据库发生错误时的消息提示
         /// </summary>
-        public static void DatabaseFaildTips(CQGroupMessageEventArgs groupEventArgs)
+        public static void DatabaseFailedTips(CQGroupMessageEventArgs groupEventArgs)
         {
             groupEventArgs.FromGroup.SendGroupMessage(CQApi.CQCode_At(groupEventArgs.FromQQ.Id),
                                             "\r\nERROR",
