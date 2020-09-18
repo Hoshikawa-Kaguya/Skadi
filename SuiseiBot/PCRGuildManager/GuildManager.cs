@@ -395,12 +395,8 @@ namespace SuiseiBot.Code.PCRGuildManager
                                 result = 2;
                             }
                         }
-                        else //自分の退会
-                        {
-                            result = dbAction.LeaveGuild(GMgrEventArgs.FromQQ, QQGroup.Id);
-                        }
-                    }
 
+                   
                     if (deletedQQList.Where(x => x.Value == -1).ToList().Count > 0)
                     {
                         result = -1;
@@ -506,7 +502,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                                                          : "");
                             break;
                     }
-
+                    }
                     break;
                 case PCRGuildCmdType.QuitAll: //清空成员
                     if (!isAdminAction)
