@@ -43,19 +43,6 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         }
 
         /// <summary>
-        /// 查树
-        /// </summary>
-        /// <returns>挂树表</returns>
-        public List<long> CheckTree()
-        {
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            return dbClient.Queryable<MemberInfo>()
-                           .Where(member => member.Gid == GuildEventArgs.FromGroup.Id && member.Flag == FlagType.OnTree)
-                           .Select(member => member.Uid)
-                           .ToList();
-        }
-
-        /// <summary>
         /// 查询今日余刀
         /// 用于查刀和催刀
         /// </summary>
@@ -77,50 +64,6 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                    .Where(member => member.times < 3)
                    .ToDictionary(member => member.Uid,
                                  member => member.times);
-        }
-
-        /// <summary>
-        /// 修改会战进度（无视当前出刀进度和历史出刀）
-        /// </summary>
-        /// <returns>0:正常 | -1:设定的HP值超出上限 | -99:数据库错误</returns>
-        public int ModifyProgress(int round,int bossOrder,long hp)
-        {
-            //参数检查
-            if (round < 0 || bossOrder < 0 || hp < 0 || bossOrder > 5)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-
-            //查找公会服务器信息
-            Server serverId = dbClient.Queryable<GuildInfo>()
-                                      .Where(guild => guild.Gid == GuildEventArgs.FromGroup.Id)
-                                      .Select(guild => guild.ServerId)
-                                      .First();
-
-            int phase = GetRoundPhase(round);
-            long totalHp = dbClient.Queryable<GuildBattleBoss>()
-                                  .Where(boss => boss.ServerId == serverId && boss.Order == bossOrder &&
-                                                 boss.Phase    == phase)
-                                  .Select(boss => boss.HP)
-                                  .First();
-            if (hp > totalHp) return -1;
-            
-            //更新数据
-            return dbClient.Updateable(new GuildInfo
-                           {
-                               HP        = hp,
-                               TotalHP   = totalHp,
-                               Round     = round,
-                               Order     = bossOrder,
-                               BossPhase = phase,
-                           })
-                           .Where(guild => guild.Gid == GuildEventArgs.FromGroup.Id)
-                           .UpdateColumns(info => new {info.HP, info.TotalHP, info.Round, info.Order, info.BossPhase})
-                           .ExecuteCommandHasChange()
-                ? 0
-                : -99;
         }
         #endregion
 
@@ -417,6 +360,71 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         }
 
         /// <summary>
+        /// 获取指定Boss信息
+        /// </summary>
+        /// <param name="round">周目</param>
+        /// <param name="bossOrder">Boss序号</param>
+        /// <param name="server">区服</param>
+        /// <returns>
+        /// <para>Boss信息</para>
+        /// <para><see langword="null"/> 数据库错误</para>
+        /// </returns>
+        public GuildBattleBoss GetBossInfo(int round, int bossOrder, Server server)
+        {
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                //获取修订的boss相关信息
+                int phase = GetRoundPhase(round, dbClient);
+                return dbClient.Queryable<GuildBattleBoss>()
+                               .Where(boss => boss.ServerId == server && boss.Order == bossOrder &&
+                                              boss.Phase    == phase)
+                               .First();
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 修改会战进度（无视当前出刀进度和历史出刀）
+        /// </summary>
+        /// <returns>
+        /// <para><see langword="true"/> 修改成功</para>
+        /// <para><see langword="false"/> 修改失败</para>
+        /// </returns>
+        public bool ModifyProgress(int round, int bossOrder, long hp, long totalHP, int phase)
+        {
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+
+                //更新数据
+                return dbClient.Updateable(new GuildInfo
+                               {
+                                   HP        = hp,
+                                   TotalHP   = totalHP,
+                                   Round     = round,
+                                   Order     = bossOrder,
+                                   BossPhase = phase,
+                               })
+                               .Where(guild => guild.Gid == GuildEventArgs.FromGroup.Id)
+                               .UpdateColumns(info => new
+                               {
+                                   info.HP, info.TotalHP, info.Round, info.Order, info.BossPhase
+                               })
+                               .ExecuteCommandHasChange();
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                return false;
+            }
+        }
+
+        /// <summary>
         /// 进入下一个boss
         /// </summary>
         /// <param name="guildInfo">公会信息</param>
@@ -467,10 +475,12 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+
+                int nextPhase = GetNextRoundPhase(guildInfo, dbClient);
                 //获取下一个周目boss的信息
                 GuildBattleBoss nextBossData = dbClient.Queryable<GuildBattleBoss>()
                                                        .Where(i => i.ServerId == guildInfo.ServerId
-                                                                && i.Phase    == GetNextRoundPhase(guildInfo)
+                                                                && i.Phase    == nextPhase
                                                                 && i.Order    == 1)
                                                        .First();
                 GuildInfo updateBossData =
@@ -497,18 +507,18 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// <summary>
         /// 清空树上成员
         /// </summary>
-        /// <param name="guildInfo">公会信息</param>
         /// <returns>
         /// <para><see langword="true"/> 写入成功</para>
         /// <para><see langword="false"/> 数据库错误</para>
         /// </returns>
-        public bool CleanTree(GuildInfo guildInfo)
+        public bool CleanTree()
         {
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 dbClient.Updateable(new MemberInfo {Flag = FlagType.IDLE, Info = null})
-                        .Where(i => i.Flag == FlagType.OnTree || i.Flag == FlagType.EnGage)
+                        .Where(i => (i.Flag == FlagType.OnTree || i.Flag == FlagType.EnGage) &&
+                                    i.Gid == GuildEventArgs.FromGroup.Id)
                         .UpdateColumns(i => new {i.Flag, i.Info})
                         .ExecuteCommand();
                 return true;
@@ -517,6 +527,27 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
             {
                 ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// 查树
+        /// </summary>
+        /// <returns>挂树表</returns>
+        public List<long> GetTree()
+        {
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                return dbClient.Queryable<MemberInfo>()
+                               .Where(member => member.Gid == GuildEventArgs.FromGroup.Id && member.Flag == FlagType.OnTree)
+                               .Select(member => member.Uid)
+                               .ToList();
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                return null;
             }
         }
 
@@ -601,11 +632,11 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// <summary>
         /// 获取下一个周目的boss对应阶段
         /// </summary>
-        /// /// <param name="guildInfo">当前会战进度</param>
+        /// <param name="guildInfo">当前会战进度</param>
+        /// <param name="dbClient">SqlSugarClient</param>
         /// <returns>下一周目boss的阶段值</returns>
-        private int GetNextRoundPhase(GuildInfo guildInfo)
+        private int GetNextRoundPhase(GuildInfo guildInfo, SqlSugarClient dbClient)
         {
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             //boss的最大阶段
             int maxPhase =
                 dbClient.Queryable<GuildBattleBoss>()
@@ -639,13 +670,13 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// 获取指定周目的boss对应阶段
         /// </summary>
         /// <param name="Round">指定周目</param>
+        /// <param name="dbClient">SqlSugarClient</param>
         /// <returns>下一周目boss的阶段值</returns>
-        private int GetRoundPhase(int Round)
+        private int GetRoundPhase(int Round, SqlSugarClient dbClient)
         {
             //检查参数合法性
             if(Round <= 0) throw new ArgumentOutOfRangeException(nameof(Round));
 
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             //当前所处区服
             Server server =
                 dbClient.Queryable<GuildInfo>()

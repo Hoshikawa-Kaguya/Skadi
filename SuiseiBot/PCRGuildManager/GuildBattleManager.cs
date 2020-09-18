@@ -8,11 +8,14 @@ using SuiseiBot.Code.Resource.TypeEnum.GuildBattleType;
 using SuiseiBot.Code.Tool.LogUtils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using SuiseiBot.Code.DatabaseUtils;
 using SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper;
 using SuiseiBot.Code.Resource.TypeEnum;
 using SuiseiBot.Code.Tool;
+
+//TODO 加入指令的帮助文本
 
 namespace SuiseiBot.Code.PCRGuildManager
 {
@@ -133,6 +136,16 @@ namespace SuiseiBot.Code.PCRGuildManager
                 case PCRGuildCmdType.LeaveTree:
                     if(!IsAdmin() || !MemberCheck() || !InBattleCheck()) return;
                     LeaveTree();
+                    break;
+
+                case PCRGuildCmdType.ShowTree:
+                    if (!ZeroArgsCheck() || !InBattleCheck()) return;
+                    CheckTree();
+                    break;
+
+                case PCRGuildCmdType.ModifyProgress:
+                    if(!IsAdmin() || !MemberCheck() || !InBattleCheck()) return;
+                    ModifyProgress();
                     break;
 
                 default:
@@ -560,7 +573,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             if (needChangeBoss) //进入下一个boss
             {
                 //TODO 下树提示
-                if (!GuildBattleDB.CleanTree(atkGuildInfo))
+                if (!GuildBattleDB.CleanTree())
                 {
                     DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                     return;
@@ -871,7 +884,6 @@ namespace SuiseiBot.Code.PCRGuildManager
         {
             #region 参数检查
             long memberUid;
-
             switch (Utils.CheckForLength(CommandArgs,0))
             {
                 case LenType.Legitimate: //正常
@@ -902,27 +914,53 @@ namespace SuiseiBot.Code.PCRGuildManager
             switch (member.Flag)
             {
                 case FlagType.EnGage:
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(memberUid),
                                              "你 轴 歪 了\n(正在出刀不要乱用指令)");
                     return;
                 case FlagType.IDLE:
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(memberUid),
                                              "弟啊你不在树上");
                     return;
                 case FlagType.OnTree:
-                    if (!GuildBattleDB.UpdateMemberStatus(SenderQQ.Id, FlagType.IDLE, null))
+                    if (!GuildBattleDB.UpdateMemberStatus(memberUid, FlagType.IDLE, null))
                     {
                         DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                     }
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(memberUid),
                                              "已下树");
                     return;
                 default:
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(memberUid),
                                              "发生未知错误，请联系机器人管理员");
                     ConsoleLog.Error("Unknown error","member.Flag");
                     return;
             }
+        }
+
+        /// <summary>
+        /// 查树
+        /// </summary>
+        private void CheckTree()
+        {
+            List<long> treeList = GuildBattleDB.GetTree();
+            if (treeList == null || treeList.Count == 0)
+            {
+                QQGroup.SendGroupMessage("没有人在树上");
+                return;
+            }
+            //获取群成员列表
+            List<GroupMemberInfo> groupMembers = GBEventArgs.FromGroup.GetGroupMemberList().ToList();
+            //构造群消息文本
+            StringBuilder message = new StringBuilder();
+            message.Append("目前挂树的成员为:");
+            treeList.Select(member => groupMembers
+                                      .Where(groupMember => groupMember.QQ.Id == member)
+                                      .Select(groupMember => groupMember.Card)
+                                      .First())
+                    .ToList()
+                    //将成员名片添加进消息文本
+                    .ForEach(name => message.Append($"\r\n{name}"));
+            QQGroup.SendGroupMessage(message.ToString());
         }
 
         /// <summary>
@@ -937,6 +975,73 @@ namespace SuiseiBot.Code.PCRGuildManager
             message.Append($"剩余血量:{guildInfo.HP}/{guildInfo.TotalHP}");
 
             QQGroup.SendGroupMessage(message.ToString());
+        }
+
+        /// <summary>
+        /// 修改进度
+        /// </summary>
+        private void ModifyProgress()
+        {
+            #region 处理传入参数
+            //检查参数长度
+            switch (Utils.CheckForLength(CommandArgs,3))
+            {
+                case LenType.Legitimate:
+                    break;
+                case LenType.Extra:case LenType.Illegal:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "非法指令格式");
+                    return;
+                default:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "发生未知错误，请联系机器人管理员");
+                    ConsoleLog.Error("Unknown error","LenType");
+                    return;
+            }
+            //处理参数值
+            if (!int.TryParse(CommandArgs[1], out int targetRound) ||
+                targetRound < 0                                    ||
+                !int.TryParse(CommandArgs[2], out int targetOrder) ||
+                targetOrder < 0                                    ||
+                targetOrder > 5                                    ||
+                !long.TryParse(CommandArgs[3], out long targetHp)  ||
+                targetHp < 0)
+            {
+                QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                         "有非法参数");
+                return;
+            }
+            //获取公会信息
+            GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
+            if (guildInfo == null)
+            {
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
+                return;
+            }
+            //从数据获取最大血量
+            GuildBattleBoss bossInfo = GuildBattleDB.GetBossInfo(targetRound, targetOrder, guildInfo.ServerId);
+            if(bossInfo == null)
+            {
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
+                return;
+            }
+            if (targetHp >= bossInfo.HP)
+            {
+                QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                         "有非法参数");
+                return;
+            }
+            #endregion
+
+            if (!GuildBattleDB.ModifyProgress(targetRound, targetOrder, targetHp, bossInfo.HP, bossInfo.Phase))
+            {
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
+                return;
+            }
+            QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                     "公会目前进度已修改为\r\n"                 +
+                                     $"{targetRound}周目{targetOrder}王\r\n" +
+                                     $"{targetHp}/{bossInfo.HP}");
         }
         #endregion
 

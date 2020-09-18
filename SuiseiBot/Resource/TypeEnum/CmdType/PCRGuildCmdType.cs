@@ -73,7 +73,7 @@ namespace SuiseiBot.Code.Resource.TypeEnum.CmdType
         /// <summary>
         /// 查树命令
         /// </summary>
-        ShowOnTree = 111,
+        ShowTree = 111,
         /// <summary>
         /// 下树命令
         /// </summary>
@@ -93,6 +93,10 @@ namespace SuiseiBot.Code.Resource.TypeEnum.CmdType
         /// <summary>
         /// 取消出刀申请
         /// </summary>
-        UndoRequestAtk = 116
+        UndoRequestAtk = 116,
+        /// <summary>
+        /// 修改进度
+        /// </summary>
+        ModifyProgress = 117
     }
 }
