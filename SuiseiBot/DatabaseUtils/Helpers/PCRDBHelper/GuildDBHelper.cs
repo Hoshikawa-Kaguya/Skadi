@@ -95,22 +95,24 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// 检查公会是否有这个成员
         /// </summary>
         /// <param name="uid">QQ号</param>
-        /// <param name="database">数据库是否执行成功</param>
-        public bool CheckMemberExists(long uid ,out bool database)
+        /// <returns>
+        /// <para><see langword="1"/> 存在</para>
+        /// <para><see langword="0"/> 不存在</para>
+        /// <para><see langword="-1"/> 数据库错误</para>
+        /// </returns>
+        public int CheckMemberExists(long uid)
         {
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                database = true;
                 return dbClient.Queryable<MemberInfo>()
                                .Where(i => i.Uid == uid && i.Gid == GuildEventArgs.FromGroup.Id)
-                               .Any();
+                               .Any() ? 1 : 0;
             }
             catch (Exception e)
             {
                 ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
-                database = false;
-                return false;
+                return -1;
             }
         }
         /// <summary>

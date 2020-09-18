@@ -84,9 +84,10 @@ namespace SuiseiBot.Code.SqliteTool
             if (string.IsNullOrEmpty(tableName)) tableName = SugarTableUtils.GetTableName<TableClass>();
             //写入创建新表指令
             cmd.CommandText = $"CREATE TABLE {tableName} (";
-            PropertyInfo[] properties  = typeof(TableClass).GetProperties();
-            int            i           = 0;
-            List<string>   primaryKeys = new List<string>();
+            PropertyInfo[] properties   = typeof(TableClass).GetProperties();
+            int            i            = 0;
+            List<string>   primaryKeys  = new List<string>();
+            bool           haveIdentity = false;
             foreach (PropertyInfo colInfo in properties)
             {
                 i++;
@@ -97,10 +98,12 @@ namespace SuiseiBot.Code.SqliteTool
                     $"{SugarColUtils.ColIsNullable(colInfo)} " +
                     $"{SugarColUtils.ColIsIdentity(colInfo)}";
                 if (i != properties.Length) cmd.CommandText += ",";
-                if (SugarColUtils.ColIsPrimaryKey(colInfo)) primaryKeys.Add(SugarColUtils.GetColName(colInfo));
+                if (SugarColUtils.ColIsPrimaryKey(colInfo) && string.IsNullOrEmpty(SugarColUtils.ColIsIdentity(colInfo))
+                ) primaryKeys.Add(SugarColUtils.GetColName(colInfo));
+                if(!string.IsNullOrEmpty(SugarColUtils.ColIsIdentity(colInfo))) haveIdentity = true;
             }
 
-            if (primaryKeys.Count != 0) //当有主键时
+            if (primaryKeys.Count != 0 && !haveIdentity) //当有多主键时
             {
                 cmd.CommandText +=
                     $",PRIMARY KEY({string.Join(",", primaryKeys)})";

@@ -8,7 +8,6 @@ using SuiseiBot.Code.Resource.TypeEnum.GuildBattleType;
 using SuiseiBot.Code.Tool.LogUtils;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Text;
 using SuiseiBot.Code.DatabaseUtils;
 using SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper;
@@ -102,6 +101,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     break;
 
                 case PCRGuildCmdType.ShowProgress:
+                    if(!ZeroArgsCheck()) return;
                     GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
                     if (guildInfo == null)
                     {
@@ -139,8 +139,14 @@ namespace SuiseiBot.Code.PCRGuildManager
         /// </summary>
         private void BattleStart()
         {
+            GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
+            if (guildInfo == null)
+            {
+                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                return;
+            }
             //判断返回值
-            switch (GuildBattleDB.StartBattle())
+            switch (GuildBattleDB.StartBattle(guildInfo))
             {
                 case 0: //已经执行过开始命令
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
@@ -194,47 +200,17 @@ namespace SuiseiBot.Code.PCRGuildManager
             {
                 case LenType.Legitimate:
                     //检查成员
-                    if (!GuildBattleDB.CheckMemberExists(SenderQQ.Id,out bool database))
-                    {
-                        if(database)
-                        {
-                            QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n不是这个公会的还想打会战？");
-                            return;
-                        }
-                        DBMsgUtils.DatabaseFaildTips(GBEventArgs);
-                        return;
-                    }
+                    if (!MemberCheck()) return;
                     atkUid     = SenderQQ.Id;
                     substitute = false;
                     break;
                 case LenType.Extra://代刀
                     //检查是否有多余参数和AT
-                    if (GBEventArgs.Message.CQCodes.Count       == 1             &&
-                        GBEventArgs.Message.CQCodes[0].Function == CQFunction.At &&
-                        Utils.CheckForLength(CommandArgs,1)     == LenType.Legitimate)
+                    if (Utils.CheckForLength(CommandArgs,1) == LenType.Legitimate)
                     {
                         //从CQCode中获取QQ号
-                        Dictionary<string,string> codeInfo =  GBEventArgs.Message.CQCodes[0].Items;
-                        if (codeInfo.TryGetValue("qq",out string uid))
-                        {
-                            atkUid = Convert.ToInt64(uid);
-                            //检查成员
-                            if (!GuildBattleDB.CheckMemberExists(atkUid,out database))
-                            {
-                                if(database)
-                                {
-                                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n此成员不是这个公会的成员");
-                                    return;
-                                }
-                                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            ConsoleLog.Error("CQCode parse error","can't get uid in cqcode");
-                            return;
-                        }
+                        atkUid = GetUidInMsg();
+                        if (atkUid == -1 || !MemberCheck(atkUid)) return;
                     }
                     else
                     {
@@ -353,47 +329,17 @@ namespace SuiseiBot.Code.PCRGuildManager
             {
                 case LenType.Legitimate:
                     //检查成员
-                    if (!GuildBattleDB.CheckMemberExists(SenderQQ.Id,out bool database))
-                    {
-                        if(database)
-                        {
-                            QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n不是这个公会的还想打会战？");
-                            return;
-                        }
-                        DBMsgUtils.DatabaseFaildTips(GBEventArgs);
-                        return;
-                    }
+                    if (!MemberCheck()) return;
                     atkUid     = SenderQQ.Id;
                     substitute = false;
                     break;
                 case LenType.Extra://代刀
                     //检查是否有多余参数和AT
-                    if (GBEventArgs.Message.CQCodes.Count       == 1             &&
-                        GBEventArgs.Message.CQCodes[0].Function == CQFunction.At &&
-                        Utils.CheckForLength(CommandArgs,1)     == LenType.Legitimate)
+                    if (Utils.CheckForLength(CommandArgs,1) == LenType.Legitimate)
                     {
                         //从CQCode中获取QQ号
-                        Dictionary<string,string> codeInfo =  GBEventArgs.Message.CQCodes[0].Items;
-                        if (codeInfo.TryGetValue("qq",out string uid))
-                        {
-                            atkUid = Convert.ToInt64(uid);
-                            //检查成员
-                            if (!GuildBattleDB.CheckMemberExists(atkUid,out database))
-                            {
-                                if(database)
-                                {
-                                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n此成员不是这个公会的成员");
-                                    return;
-                                }
-                                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            ConsoleLog.Error("CQCode parse error","can't get uid in cqcode");
-                            return;
-                        }
+                        atkUid = GetUidInMsg();
+                        if (atkUid == -1 || !MemberCheck(atkUid)) return;
                     }
                     else
                     {
@@ -480,47 +426,17 @@ namespace SuiseiBot.Code.PCRGuildManager
                     return;
                 case LenType.Legitimate: //正常出刀
                     //检查成员
-                    if (!GuildBattleDB.CheckMemberExists(SenderQQ.Id,out bool database))
-                    {
-                        if(database)
-                        {
-                            QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n不是这个公会的还想打会战？");
-                            return;
-                        }
-                        DBMsgUtils.DatabaseFaildTips(GBEventArgs);
-                        return;
-                    }
+                    if (!MemberCheck()) return;
                     atkUid     = SenderQQ.Id;
                     substitute = false;
                     break;
                 case LenType.Extra: //代刀
                     //检查是否有多余参数和AT
-                    if (GBEventArgs.Message.CQCodes.Count       == 1             &&
-                        GBEventArgs.Message.CQCodes[0].Function == CQFunction.At &&
-                        Utils.CheckForLength(CommandArgs,2)     == LenType.Legitimate)
+                    if (Utils.CheckForLength(CommandArgs,1) == LenType.Legitimate)
                     {
                         //从CQCode中获取QQ号
-                        Dictionary<string,string> codeInfo =  GBEventArgs.Message.CQCodes[0].Items;
-                        if (codeInfo.TryGetValue("qq",out string uid))
-                        {
-                            atkUid = Convert.ToInt64(uid);
-                            //检查成员
-                            if (!GuildBattleDB.CheckMemberExists(atkUid,out database))
-                            {
-                                if(database)
-                                {
-                                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n此成员不是这个公会的成员");
-                                    return;
-                                }
-                                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            ConsoleLog.Error("CQCode parse error","can't get uid in cqcode");
-                            return;
-                        }
+                        atkUid = GetUidInMsg();
+                        if (atkUid == -1 || !MemberCheck(atkUid)) return;
                     }
                     else
                     {
@@ -719,22 +635,6 @@ namespace SuiseiBot.Code.PCRGuildManager
         /// </summary>
         private void UndoAtk()
         {
-            #region 参数检查
-            switch (Utils.CheckForLength(CommandArgs,0))
-            {
-                case LenType.Legitimate: //正常
-                    break;
-                case LenType.Extra:
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "\n有多余参数");
-                    return;
-                default:
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
-                                             "发生未知错误，请联系机器人管理员");
-                    ConsoleLog.Error("Unknown error","LenType");
-                    return;
-            }
-            #endregion
-
             //获取上一次的出刀类型
             int lastAtkAid = GuildBattleDB.GetLastAttack(SenderQQ.Id,out _);
             if (lastAtkAid == -1)
@@ -848,7 +748,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                 //判断今天是否使用过SL
                 if (member.SL >= Utils.GetUpdateStamp())
                 {
-                    QQGroup.SendGroupMessage("成员 ",CQApi.CQCode_At(SenderQQ.Id), "今天已使用过SL"); ;
+                    QQGroup.SendGroupMessage("成员 ",CQApi.CQCode_At(SenderQQ.Id), "今天已使用过SL");
                 }
                 else
                 {
@@ -872,7 +772,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     case LenType.Legitimate: //正常
                         memberUid = SenderQQ.Id;
                         break;
-                    case LenType.Extra:
+                    case LenType.Extra://管理员撤销
                         memberUid = GetUidInMsg();
                         if (memberUid == -1) return;
                         break;
@@ -1037,7 +937,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "公会战还没开呢");
                     return false;
                 case -1:
-                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);;
+                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);
                     return false;
                 case 1:
                     return true;
@@ -1084,31 +984,43 @@ namespace SuiseiBot.Code.PCRGuildManager
         private bool MemberCheck()
         {
             //检查成员
-            if (!GuildBattleDB.CheckMemberExists(SenderQQ.Id,out bool database))
+            switch (GuildBattleDB.CheckMemberExists(SenderQQ.Id))
             {
-                if(database)
-                {
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "不是这个公会的成员");
+                case 1:
                     return true;
-                }
+                case 0:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id), "不是这个公会的成员");
+                    return false;
+                case -1:
+                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                    return false;
+                default:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "发生未知错误，请联系机器人管理员");
+                    ConsoleLog.Error("Unknown error","LenType");
+                    return false;
             }
-            DBMsgUtils.DatabaseFaildTips(GBEventArgs);
-            return false;
         }
 
         private bool MemberCheck(long uid)
         {
             //检查成员
-            if (!GuildBattleDB.CheckMemberExists(uid,out bool database))
+            switch (GuildBattleDB.CheckMemberExists(uid))
             {
-                if(database)
-                {
-                    QQGroup.SendGroupMessage(CQApi.CQCode_At(uid), "不是这个公会的成员");
+                case 1:
                     return true;
-                }
+                case 0:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(uid), "不是这个公会的成员");
+                    return false;
+                case -1:
+                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                    return false;
+                default:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(uid),
+                                             "发生未知错误，请联系机器人管理员");
+                    ConsoleLog.Error("Unknown error","LenType");
+                    return false;
             }
-            DBMsgUtils.DatabaseFaildTips(GBEventArgs);
-            return false;
         }
 
         //TODO 单AT改用此函数

@@ -231,7 +231,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// <para><see langword="0"/> 未结束会战</para>
         /// <para><see langword="-1"/> 数据库错误</para>
         /// </returns>
-        public int StartBattle()
+        public int StartBattle(GuildInfo guildInfo)
         {
             try
             {
@@ -245,9 +245,28 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                 {
                     SugarUtils.CreateTable<GuildBattle>(dbClient, BattleTableName);
                     ConsoleLog.Info("会战管理数据库", "开始新的一期会战统计");
-                    return dbClient.Updateable(new GuildInfo {InBattle = true})
+                    dbClient.Updateable(new GuildInfo {InBattle = true})
                                    .Where(guild => guild.Gid == GuildEventArgs.FromGroup.Id)
                                    .UpdateColumns(i => new {i.InBattle})
+                                   .ExecuteCommandHasChange();
+                    //获取初始周目boss的信息
+                    GuildBattleBoss initBossData = dbClient.Queryable<GuildBattleBoss>()
+                                                           .Where(i => i.ServerId == guildInfo.ServerId
+                                                                    && i.Phase    == 1
+                                                                    && i.Order    == 1)
+                                                           .First();
+                    GuildInfo updateBossData =
+                        new GuildInfo()
+                        {
+                            BossPhase = initBossData.Phase,
+                            Order     = 1,
+                            Round     = 1,
+                            HP        = initBossData.HP,
+                            TotalHP   = initBossData.HP
+                        };
+                    return dbClient.Updateable(updateBossData)
+                                   .UpdateColumns(i => new {i.Order, i.HP, i.BossPhase, i.Round, i.TotalHP})
+                                   .Where(i => i.Gid == GuildEventArgs.FromGroup.Id)
                                    .ExecuteCommandHasChange()
                         ? 1
                         : -1;
@@ -512,32 +531,6 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         }
 
         /// <summary>
-        /// 清空树上成员
-        /// </summary>
-        /// <param name="guildInfo">公会信息</param>
-        /// <returns>
-        /// <para><see langword="true"/> 写入成功</para>
-        /// <para><see langword="false"/> 数据库错误</para>
-        /// </returns>
-        public bool CleanTree(GuildInfo guildInfo)
-        {
-            try
-            {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                dbClient.Updateable(new MemberInfo {Flag = FlagType.IDLE, Info = null})
-                        .Where(i => i.Flag == FlagType.OnTree || i.Flag == FlagType.EnGage)
-                        .UpdateColumns(i => new {i.Flag, i.Info})
-                        .ExecuteCommand();
-                return true;
-            }
-            catch (Exception e)
-            {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
-                return false;
-            }
-        }
-
-        /// <summary>
         /// 进入下一个周目
         /// </summary>
         /// <param name="guildInfo">公会信息</param>
@@ -569,6 +562,32 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                                .UpdateColumns(i => new {i.Order, i.HP, i.BossPhase, i.Round, i.TotalHP})
                                .Where(i => i.Gid == GuildEventArgs.FromGroup.Id)
                                .ExecuteCommandHasChange();
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 清空树上成员
+        /// </summary>
+        /// <param name="guildInfo">公会信息</param>
+        /// <returns>
+        /// <para><see langword="true"/> 写入成功</para>
+        /// <para><see langword="false"/> 数据库错误</para>
+        /// </returns>
+        public bool CleanTree(GuildInfo guildInfo)
+        {
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                dbClient.Updateable(new MemberInfo {Flag = FlagType.IDLE, Info = null})
+                        .Where(i => i.Flag == FlagType.OnTree || i.Flag == FlagType.EnGage)
+                        .UpdateColumns(i => new {i.Flag, i.Info})
+                        .ExecuteCommand();
+                return true;
             }
             catch (Exception e)
             {
