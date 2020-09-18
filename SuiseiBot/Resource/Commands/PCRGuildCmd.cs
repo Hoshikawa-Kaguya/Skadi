@@ -24,7 +24,7 @@ namespace SuiseiBot.Code.Resource.Commands
             PCRGuildCommands.Add("结束会战",PCRGuildCmdType.BattleEnd);
             PCRGuildCommands.Add("出刀",PCRGuildCmdType.Attack);
             PCRGuildCommands.Add("申请出刀",PCRGuildCmdType.RequestAttack);
-            PCRGuildCommands.Add("取消出刀",PCRGuildCmdType.UndoRequestAtk);
+            PCRGuildCommands.Add("取消申请",PCRGuildCmdType.UndoRequestAtk);
             PCRGuildCommands.Add("删刀",PCRGuildCmdType.DeleteAttack);
             PCRGuildCommands.Add("撤刀",PCRGuildCmdType.UndoAttack);
             PCRGuildCommands.Add("进度", PCRGuildCmdType.ShowProgress);

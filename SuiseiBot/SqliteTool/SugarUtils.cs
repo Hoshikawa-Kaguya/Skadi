@@ -129,8 +129,16 @@ namespace SuiseiBot.Code.SqliteTool
             //检查表名
             if (string.IsNullOrEmpty(tableName)) tableName = SugarTableUtils.GetTableName<TableClass>();
             //获取所有表的信息
-            List<DbTableInfo> tableInfos = sugarClient.DbMaintenance.GetTableInfoList();
-            return tableInfos.Exists(table => table.Name == tableName);
+
+            //ORM的返回值会返回不存在的表，暂时弃用
+            // List<DbTableInfo> tableInfos = sugarClient.DbMaintenance.GetTableInfoList();
+            // return tableInfos.Exists(table => table.Name == tableName);
+
+            //检查数据库链接
+            sugarClient.Ado.CheckConnection();
+            using IDbCommand cmd = sugarClient.Ado.Connection.CreateCommand();
+            cmd.CommandText = $"SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = '{tableName}'";
+            return Convert.ToBoolean(cmd.ExecuteScalar());
         }
         #endregion
 

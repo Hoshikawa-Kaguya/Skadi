@@ -432,7 +432,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     break;
                 case LenType.Extra: //代刀
                     //检查是否有多余参数和AT
-                    if (Utils.CheckForLength(CommandArgs,1) == LenType.Legitimate)
+                    if (Utils.CheckForLength(CommandArgs,2) == LenType.Legitimate)
                     {
                         //从CQCode中获取QQ号
                         atkUid = GetUidInMsg();
@@ -637,10 +637,15 @@ namespace SuiseiBot.Code.PCRGuildManager
         {
             //获取上一次的出刀类型
             int lastAtkAid = GuildBattleDB.GetLastAttack(SenderQQ.Id,out _);
-            if (lastAtkAid == -1)
+            switch (lastAtkAid)
             {
-                DBMsgUtils.DatabaseFaildTips(GBEventArgs);
-                return;
+                case 0:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "并没有找到出刀记录");
+                    return;
+                case -1:
+                    DBMsgUtils.DatabaseFaildTips(GBEventArgs);
+                    return;
             }
 
             //删除记录
@@ -1002,6 +1007,14 @@ namespace SuiseiBot.Code.PCRGuildManager
             }
         }
 
+        /// <summary>
+        /// 根据UID来检查成员
+        /// </summary>
+        /// <param name="uid">成员UID</param>
+        /// <returns>
+        /// <para><see langword="true"/> 存在成员</para>
+        /// <para><see langword="false"/> 不存在或有错误</para>
+        /// </returns>
         private bool MemberCheck(long uid)
         {
             //检查成员
