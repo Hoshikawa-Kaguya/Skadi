@@ -97,7 +97,18 @@ namespace SuiseiBot.Code.Tool
         /// 获取今天5点的时间戳
         /// 时间戳单位(秒)
         /// </summary>
-        public static long GetUpdateStamp() =>(long) (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Add(new TimeSpan(5,0,0)).TotalSeconds;
+        public static long GetUpdateStamp()
+        {
+            if (DateTime.Now > DateTime.Today.Add(new TimeSpan(5, 0, 0)))
+            {
+                return (long)( DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Add(new TimeSpan(5, 0, 0)).TotalSeconds;
+            }
+            else
+            {
+                return (long)( DateTime.Today.AddDays(-1) - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Add(new TimeSpan(5, 0, 0)).TotalSeconds;
+            }
+            
+        }
 
         /// <summary>
         /// 将long类型13位时间戳转换为DateTime

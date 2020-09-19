@@ -76,10 +76,6 @@ namespace SuiseiBot.Code.PCRGuildManager
                     //检查群是否已经被标记为公会
                     switch (dbAction.GuildExists())
                     {
-                        case 0:
-                            QQGroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
-                                                     "此群并未标记为公会");
-                            return;
                         case -1:
                             QQGroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
                                                      "\r\nERROR",

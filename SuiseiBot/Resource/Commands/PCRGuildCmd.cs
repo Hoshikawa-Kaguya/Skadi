@@ -34,6 +34,9 @@ namespace SuiseiBot.Code.Resource.Commands
             PCRGuildCommands.Add("下树",PCRGuildCmdType.LeaveTree);
             PCRGuildCommands.Add("查树",PCRGuildCmdType.ShowTree);
             PCRGuildCommands.Add("修改进度",PCRGuildCmdType.ModifyProgress);
+            PCRGuildCommands.Add("查刀", PCRGuildCmdType.ShowRemainAttack);
+            PCRGuildCommands.Add("催刀", PCRGuildCmdType.UrgeAttack);
+            PCRGuildCommands.Add("出刀记录", PCRGuildCmdType.ShowAttackList);
         }
     }
 }

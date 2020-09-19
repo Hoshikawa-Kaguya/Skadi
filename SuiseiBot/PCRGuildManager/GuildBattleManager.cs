@@ -148,6 +148,13 @@ namespace SuiseiBot.Code.PCRGuildManager
                     ModifyProgress();
                     break;
 
+                case PCRGuildCmdType.ShowRemainAttack:
+                    if (!ZeroArgsCheck() || !MemberCheck() || !InBattleCheck()) return;
+                    ShowRemainAttack();
+                    break;
+
+
+
                 default:
                     PCRGuildHandle.GetUnknowCommand(GBEventArgs);
                     ConsoleLog.Warning($"会战[群:{QQGroup.Id}]", $"接到未知指令{CommandType}");
@@ -1042,6 +1049,33 @@ namespace SuiseiBot.Code.PCRGuildManager
                                      "公会目前进度已修改为\r\n"                 +
                                      $"{targetRound}周目{targetOrder}王\r\n" +
                                      $"{targetHp}/{bossInfo.HP}");
+        }
+
+        /// <summary>
+        /// 查刀
+        /// </summary>
+        private void ShowRemainAttack()
+        {
+            Dictionary<long, int> remainAttacksList = GuildBattleDB.CheckTodayAttacks();
+            //首先检查是否记录为空
+            if (remainAttacksList == null || remainAttacksList.Count == 0)
+            {
+                QQGroup.SendGroupMessage("今天已经出完刀啦~\r\n恭喜下班~");
+                return;
+            }
+            //获取群成员列表
+            List<GroupMemberInfo> groupMembers = GBEventArgs.FromGroup.GetGroupMemberList().ToList();
+            //构造群消息文本
+            StringBuilder message = new StringBuilder();
+            message.Append("今日未出刀如下:\r\n");
+            remainAttacksList.Select(couple => groupMembers
+                                      .Where(groupMember => groupMember.QQ.Id == couple.Key)
+                                      .Select(groupMember => new KeyValuePair<string,int>(groupMember.Card,3 - couple.Value))
+                                      .First())
+                    .ToList()
+                    //将成员名片与对应刀数插入消息
+                    .ForEach(record => message.Append($"\r\n{record.Key}:剩余{record.Value}"));
+            QQGroup.SendGroupMessage(message.ToString());
         }
         #endregion
 

@@ -34,12 +34,20 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// <returns>出刀List</returns>
         public List<GuildBattle> GetTodayAttacks()
         {
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            return dbClient.Queryable<GuildBattle>()
-                           .AS(BattleTableName)
-                           .Where(i => i.Time >= Utils.GetUpdateStamp())
-                           .OrderBy(i => i.Aid)
-                           .ToList();
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                return dbClient.Queryable<GuildBattle>()
+                               .AS(BattleTableName)
+                               .Where(i => i.Time >= Utils.GetUpdateStamp())
+                               .OrderBy(i => i.Aid)
+                               .ToList();
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database error", ConsoleLog.ErrorLogBuilder(e));
+                return null;
+            }
         }
 
         /// <summary>
@@ -49,21 +57,29 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// <returns>余刀表</returns>
         public Dictionary<long, int> CheckTodayAttacks()
         {
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            var attackTimeList = dbClient.Queryable<GuildBattle>()
-                            .AS(BattleTableName)
-                            .Where(attack => attack.Time > Utils.GetUpdateStamp())
-                            .GroupBy(member => member.Uid)
-                            .Select(member => new
-                            {
-                                member.Uid,
-                                times = SqlFunc.AggregateCount(member.Uid)
-                            })
-                            .ToList();
-            return attackTimeList
-                   .Where(member => member.times < 3)
-                   .ToDictionary(member => member.Uid,
-                                 member => member.times);
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                var attackTimeList = dbClient.Queryable<GuildBattle>()
+                                .AS(BattleTableName)
+                                .Where(attack => attack.Time > Utils.GetUpdateStamp())
+                                .GroupBy(member => member.Uid)
+                                .Select(member => new
+                                {
+                                    member.Uid,
+                                    times = SqlFunc.AggregateCount(member.Uid)
+                                })
+                                .ToList();
+                return attackTimeList
+                       .Where(member => member.times < 3)
+                       .ToDictionary(member => member.Uid,
+                                     member => member.times);
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database error", ConsoleLog.ErrorLogBuilder(e));
+                return null;
+            }
         }
         #endregion
 
