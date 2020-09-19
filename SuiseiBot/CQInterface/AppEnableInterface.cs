@@ -23,6 +23,8 @@ namespace SuiseiBot.Code.CQInterface
 
                 //初始化配置文件
                 Config config = new Config(e.CQApi.GetLoginQQ().Id);
+                //数据库初始化
+                ConsoleLog.Info("初始化", "SuiseiBot初始化");
                 //设置Log等级
                 ConsoleLog.SetLogLevel(config.LoadedConfig.LogLevel);
                 //读取应用信息
@@ -35,8 +37,6 @@ namespace SuiseiBot.Code.CQInterface
                 //在控制台显示启用模块
                 ConsoleLog.Info("已启用的模块",
                                 $"\n{config.LoadedConfig.ModuleSwitch}");
-                //数据库初始化
-                ConsoleLog.Info("初始化", "SuiseiBot初始化");
                 DatabaseInit.Init(e);
 
                 //将关键词和帮助文本写入内存
