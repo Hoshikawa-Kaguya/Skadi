@@ -11,7 +11,7 @@ using Native.Sdk.Cqp;
 using Newtonsoft.Json.Linq;
 using SuiseiBot.Code.DatabaseUtils.Helpers;
 using SuiseiBot.Code.IO.Config;
-using SuiseiBot.Code.IO.Config.ConfigFile;
+using SuiseiBot.Code.IO.Config.ConfigClass;
 using SuiseiBot.Code.Tool.LogUtils;
 
 namespace SuiseiBot.Code.TimerEvent.Event

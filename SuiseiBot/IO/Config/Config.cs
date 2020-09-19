@@ -1,10 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
 using SharpYaml.Serialization;
-using SuiseiBot.Code.IO.Config.ConfigFile;
-using SuiseiBot.Code.Resource.TypeEnum;
+using SuiseiBot.Code.IO.Config.ConfigClass;
+using SuiseiBot.Code.IO.Config.Res;
 using SuiseiBot.Code.Tool.LogUtils;
 
 namespace SuiseiBot.Code.IO.Config
@@ -53,48 +53,6 @@ namespace SuiseiBot.Code.IO.Config
 
         #region 私有方法
         /// <summary>
-        /// 初始化配置文件
-        /// </summary>
-        /// <returns>ConfigClass</returns>
-        private MainConfig getInitConfig()
-        {
-            return new MainConfig
-            {
-                LogLevel = LogLevel.Info,
-                ModuleSwitch = new Module
-                {
-                    Bili_Subscription = false,
-                    Debug             = false,
-                    HaveFun           = true,
-                    PCR_GuildManager  = false,
-                    PCR_GuildRank     = false,
-                    PCR_Subscription  = false,
-                    Suisei            = false,
-                    Hso               = false,
-                    Cheru             = false
-                },
-                SubscriptionConfig = new BiliSubscription
-                {
-                    FlashTime = 3600,
-                    GroupsConfig = new List<GroupSubscription>
-                    {
-                        new GroupSubscription()
-                        {
-                            GroupId          = new List<long>(),
-                            PCR_Subscription = false,
-                            SubscriptionId   = new List<long>()
-                        }
-                    }
-                },
-                HsoConfig = new HsoConfig
-                {
-                    Source       = SetuSourceType.Local,
-                    LoliconToken = null,
-                    YukariToken  = null
-                }
-            };
-        }
-        /// <summary>
         /// 初始化配置文件并返回当前配置文件内容
         /// </summary>
         private void ConfigFileInit()
@@ -108,14 +66,16 @@ namespace SuiseiBot.Code.IO.Config
                     return;
                 }
                 //没读取到文件时创建新的文件
-                ConsoleLog.Warning("ConfigIO", "未找到配置文件");
-                ConsoleLog.Info("ConfigIO", "创建新的配置文件");
-                Serializer       serializer = new Serializer(new SerializerSettings { });
-                MainConfig      config     = getInitConfig();
-                string           configText = serializer.Serialize(config);
-                using TextWriter writer     = File.CreateText(Path);
-                writer.Write(configText);
-                LoadedConfig = config;
+                ConsoleLog.Error("ConfigIO", "未找到配置文件");
+                ConsoleLog.Warning("ConfigIO", "创建新的配置文件");
+                string           initConfigText = Encoding.UTF8.GetString(InitRes.initconfig);
+                using (TextWriter writer = File.CreateText(Path))
+                {
+                    writer.Write(initConfigText);
+                    writer.Close();
+                }
+                //读取生成的配置文件
+                if (!LoadConfig()) throw new IOException("无法读取生成的配置文件");
             }
             catch (Exception e)
             {

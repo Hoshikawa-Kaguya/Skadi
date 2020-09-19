@@ -1,8 +1,8 @@
 using SuiseiBot.Code.Resource.TypeEnum;
 
-namespace SuiseiBot.Code.IO.Config.ConfigFile
+namespace SuiseiBot.Code.IO.Config.ConfigClass
 {
-    internal class HsoConfig
+    internal class Hso
     {
         /// <summary>
         /// 色图源类型

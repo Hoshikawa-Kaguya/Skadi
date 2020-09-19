@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SuiseiBot.Code.IO;
 using SuiseiBot.Code.IO.Config;
-using SuiseiBot.Code.IO.Config.ConfigFile;
+using SuiseiBot.Code.IO.Config.ConfigClass;
 using SuiseiBot.Code.Network;
 using SuiseiBot.Code.Resource.TypeEnum;
 using SuiseiBot.Code.Resource.TypeEnum.CmdType;
@@ -45,8 +45,8 @@ namespace SuiseiBot.Code.ChatHandle
             switch (cmdType)
             {
                 case WholeMatchCmdType.Hso:
-                    HsoConfig hsoConfig = config.LoadedConfig.HsoConfig;
-                    await GiveMeSetu(hsoConfig.Source,hsoConfig.LoliconToken,hsoConfig.YukariToken);
+                    Hso hso = config.LoadedConfig.HsoConfig;
+                    await GiveMeSetu(hso.Source,hso.LoliconToken,hso.YukariToken);
                     break;
                 default:
                     break;

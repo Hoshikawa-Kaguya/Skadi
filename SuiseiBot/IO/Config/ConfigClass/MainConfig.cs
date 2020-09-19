@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using SuiseiBot.Code.Tool.LogUtils;
 
-namespace SuiseiBot.Code.IO.Config.ConfigFile
+namespace SuiseiBot.Code.IO.Config.ConfigClass
 {
     internal class MainConfig
     {
@@ -21,7 +21,7 @@ namespace SuiseiBot.Code.IO.Config.ConfigFile
         /// <summary>
         /// 色图相关设置
         /// </summary>
-        public HsoConfig HsoConfig { set; get; }
+        public Hso HsoConfig { set; get; }
     }
 
     internal class Module
