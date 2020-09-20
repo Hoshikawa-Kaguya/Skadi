@@ -153,7 +153,15 @@ namespace SuiseiBot.Code.PCRGuildManager
                     ShowRemainAttack();
                     break;
 
+                case PCRGuildCmdType.UrgeAttack:
+                    if (!IsAdmin() || !ZeroArgsCheck() || !MemberCheck() || !InBattleCheck()) return;
+                    UrgeAttack();
+                    break;
 
+                case PCRGuildCmdType.ShowAttackList:
+                    if (!IsAdmin() || !ZeroArgsCheck() || !MemberCheck() || !InBattleCheck()) return;
+                    ShowAttackList();
+                    break;
 
                 default:
                     PCRGuildHandle.GetUnknowCommand(GBEventArgs);
@@ -1067,14 +1075,78 @@ namespace SuiseiBot.Code.PCRGuildManager
             List<GroupMemberInfo> groupMembers = GBEventArgs.FromGroup.GetGroupMemberList().ToList();
             //构造群消息文本
             StringBuilder message = new StringBuilder();
-            message.Append("今日未出刀如下:\r\n");
+            message.Append("今日未出刀如下:");
             remainAttacksList.Select(couple => groupMembers
                                       .Where(groupMember => groupMember.QQ.Id == couple.Key)
                                       .Select(groupMember => new KeyValuePair<string,int>(groupMember.Card,3 - couple.Value))
                                       .First())
                     .ToList()
                     //将成员名片与对应刀数插入消息
-                    .ForEach(record => message.Append($"\r\n{record.Key}:剩余{record.Value}"));
+                    .ForEach(record => message.Append($"\r\n{record.Key}：剩余{record.Value}刀"));
+            QQGroup.SendGroupMessage(message.ToString());
+        }
+
+        /// <summary>
+        /// 催刀
+        /// 只允许管理员执行
+        /// </summary>
+        private void UrgeAttack()
+        {
+            Dictionary<long, int> remainAttacksList = GuildBattleDB.CheckTodayAttacks();
+            //首先检查是否记录为空
+            if (remainAttacksList == null || remainAttacksList.Count == 0)
+            {
+                QQGroup.SendGroupMessage("别催了别催了，孩子都出完刀了呜呜呜");
+                return;
+            }
+            //获取群成员列表
+            List<GroupMemberInfo> groupMembers = GBEventArgs.FromGroup.GetGroupMemberList().ToList();
+            //构造群消息文本
+            StringBuilder message = new StringBuilder();
+            message.Append("还没出完刀的朋友萌：");
+            remainAttacksList.Select(couple => groupMembers
+                    .Where(groupMember => groupMember.QQ.Id == couple.Key)
+                    .Select(groupMember => new KeyValuePair<long, int>(couple.Key, 3 - couple.Value))
+                    .First())
+                .ToList()
+                //艾特成员并展示其剩余刀数
+                .ForEach(record => message.Append($"\r\n{CQApi.CQCode_At(record.Key)}：剩余{record.Value}刀"));
+            message.Append("\r\n快来出刀啦~");
+            QQGroup.SendGroupMessage(message.ToString());
+        }
+
+        /// <summary>
+        /// 查询出刀列表
+        /// </summary>
+        private void ShowAttackList()
+        {
+            List<GuildBattle> todayAttacksList = GuildBattleDB.GetTodayAttacks();
+            //首先检查是否记录为空
+            if (todayAttacksList == null || todayAttacksList.Count == 0)
+            {
+                QQGroup.SendGroupMessage("今天还没人出刀呢！");
+                return;
+            }
+            //获取群成员列表
+            List<GroupMemberInfo> groupMembers = GBEventArgs.FromGroup.GetGroupMemberList().ToList();
+            //构造群消息文本
+            StringBuilder message = new StringBuilder();
+            message.Append("今日已出刀如下：\r\n");
+            message.Append("刀号|出刀人|伤害目标|伤害");
+            todayAttacksList.Select(record => groupMembers
+                                      .Where(groupMember => groupMember.QQ.Id == record.Uid)
+                                      .Select(groupMember => new KeyValuePair<string, GuildBattle>(groupMember.Card, record))
+                                      .First())
+                    .ToList()
+                    //艾特成员并展示其剩余刀数
+                    .ForEach(record => message.Append(
+                                $"\r\n" +
+                                $"{record.Value.Aid}|" +
+                                $"{record.Key}|" +
+                                $"{record.Value.Round}周目{record.Value.Order}王" +
+                                $"{record.Value.Damage}"
+                                )
+                    );
             QQGroup.SendGroupMessage(message.ToString());
         }
         #endregion

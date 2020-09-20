@@ -70,10 +70,24 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                                     times = SqlFunc.AggregateCount(member.Uid)
                                 })
                                 .ToList();
-                return attackTimeList
-                       .Where(member => member.times < 3)
-                       .ToDictionary(member => member.Uid,
-                                     member => member.times);
+                var memberList = GetAllMembersInfo();
+
+                //return attackTimeList
+                //       .Where(member => member.times < 3)
+                //       .ToDictionary(member => member.Uid,
+                //                     member => member.times);
+                return memberList
+                    .Select(member => new
+                    {
+                        member.Uid,
+                        times = attackTimeList
+                            .Where(attack => attack.Uid == member.Uid)
+                            .Count() == 0
+                            ? 0
+                            : attackTimeList.Where(attack => attack.Uid == member.Uid).First().times
+                    })
+                    .ToDictionary(member => member.Uid,
+                        member => member.times);
             }
             catch (Exception e)
             {

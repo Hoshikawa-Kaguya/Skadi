@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Native.Sdk.Cqp.EventArgs;
 using SqlSugar;
 using SuiseiBot.Code.SqliteTool;
@@ -139,6 +140,28 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
             }
         }
 
+        /// <summary>
+        /// 获取所有成员信息
+        /// </summary>
+        /// <param name="uid"></param>
+        /// <returns>
+        /// <para>成员信息</para>
+        /// <para><see langword="null"/> 数据库错误</para>
+        /// </returns>
+        public List<MemberInfo> GetAllMembersInfo()
+        {
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                return dbClient.Queryable<MemberInfo>()
+                               .ToList();
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database error", ConsoleLog.ErrorLogBuilder(e));
+                return null;
+            }
+        }
         /// <summary>
         /// 获取公会信息
         /// </summary>
