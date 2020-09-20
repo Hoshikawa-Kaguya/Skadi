@@ -65,44 +65,52 @@ namespace SuiseiBot.Code.PCRGuildManager
 
             switch (CommandType)
             {
+                //会战开始
                 case PCRGuildCmdType.BattleStart:
                     //检查执行者权限和参数
                     if(!IsAdmin() || !ZeroArgsCheck() || !MemberCheck()) return;
                     BattleStart();
                     break;
 
+                //会战结束
                 case PCRGuildCmdType.BattleEnd:
                     //检查执行者权限和参数
                     if(!IsAdmin() || !ZeroArgsCheck() || !MemberCheck()) return;
                     BattleEnd();
                     break;
 
+                //出刀
                 case PCRGuildCmdType.Attack:
                     if(!InBattleCheck() || !MemberCheck()) return;
                     Attack();
                     break;
 
+                //出刀申请
                 case PCRGuildCmdType.RequestAttack:
                     if(!InBattleCheck() || !MemberCheck()) return;
                     RequestAttack();
                     break;
 
+                //撤刀
                 case PCRGuildCmdType.UndoRequestAtk:
                     if(!InBattleCheck() || !MemberCheck()) return;
                     UndoRequest();
                     break;
 
+                //删刀
                 case PCRGuildCmdType.DeleteAttack:
                     //检查执行者权限
                     if(!IsAdmin() || !MemberCheck() || !InBattleCheck()) return;
                     DelAttack();
                     break;
-
+                
+                //撤销出刀申请
                 case PCRGuildCmdType.UndoAttack:
                     if(!ZeroArgsCheck() || !MemberCheck() || !InBattleCheck()) return;
                     UndoAtk();
                     break;
 
+                //查看进度
                 case PCRGuildCmdType.ShowProgress:
                     if(!ZeroArgsCheck()) return;
                     GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(QQGroup.Id);
@@ -117,49 +125,64 @@ namespace SuiseiBot.Code.PCRGuildManager
                     }
                     break;
 
+                //SL
                 case PCRGuildCmdType.SL:
                     if(!ZeroArgsCheck() || !MemberCheck() || !InBattleCheck()) return;
                     SL();
                     break;
                 
+                //撤销SL
                 case PCRGuildCmdType.UndoSL:
                     //检查执行者权限
                     if(!IsAdmin() || !MemberCheck() || !InBattleCheck()) return;
                     SL(true);
                     break;
 
+                //上树
                 case PCRGuildCmdType.ClimbTree:
                     if(!ZeroArgsCheck() || !MemberCheck() || !InBattleCheck()) return;
                     ClimbTree();
                     break;
 
+                //下树
                 case PCRGuildCmdType.LeaveTree:
                     if(!IsAdmin() || !MemberCheck() || !InBattleCheck()) return;
                     LeaveTree();
                     break;
 
+                //查树
                 case PCRGuildCmdType.ShowTree:
                     if (!ZeroArgsCheck() || !InBattleCheck()) return;
                     CheckTree();
                     break;
 
+                //修改进度
                 case PCRGuildCmdType.ModifyProgress:
                     if(!IsAdmin() || !MemberCheck() || !InBattleCheck()) return;
                     ModifyProgress();
                     break;
 
+                //查余刀
                 case PCRGuildCmdType.ShowRemainAttack:
                     if (!ZeroArgsCheck() || !MemberCheck() || !InBattleCheck()) return;
                     ShowRemainAttack();
                     break;
 
+                //催刀
                 case PCRGuildCmdType.UrgeAttack:
                     if (!IsAdmin() || !ZeroArgsCheck() || !MemberCheck() || !InBattleCheck()) return;
                     UrgeAttack();
                     break;
 
-                case PCRGuildCmdType.ShowAttackList:
+                //显示完整出刀表
+                case PCRGuildCmdType.ShowAllAttackList:
                     if (!IsAdmin() || !ZeroArgsCheck() || !MemberCheck() || !InBattleCheck()) return;
+                    ShowAllAttackList();
+                    break;
+
+                //显示出刀表
+                case PCRGuildCmdType.ShowAttackList:
+                    if(!ZeroArgsCheck() || !MemberCheck() || !InBattleCheck()) return;
                     ShowAttackList();
                     break;
 
@@ -1059,30 +1082,41 @@ namespace SuiseiBot.Code.PCRGuildManager
                                      $"{targetHp}/{bossInfo.HP}");
         }
 
+        //TODO 以下命令未测试
+
         /// <summary>
         /// 查刀
         /// </summary>
         private void ShowRemainAttack()
         {
-            Dictionary<long, int> remainAttacksList = GuildBattleDB.CheckTodayAttacks();
-            //首先检查是否记录为空
-            if (remainAttacksList == null || remainAttacksList.Count == 0)
+            Dictionary<long, int> remainAtkList = GetRemainAtkList();
+            if(remainAtkList == null)
             {
-                QQGroup.SendGroupMessage("今天已经出完刀啦~\r\n恭喜下班~");
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
+                return;
+            }
+            if (remainAtkList.Count == 0)
+            {
+                QQGroup.SendGroupMessage("今天已经出完刀啦~\r\n大家辛苦啦~");
                 return;
             }
             //获取群成员列表
             List<GroupMemberInfo> groupMembers = GBEventArgs.FromGroup.GetGroupMemberList().ToList();
             //构造群消息文本
             StringBuilder message = new StringBuilder();
-            message.Append("今日未出刀如下:");
-            remainAttacksList.Select(couple => groupMembers
-                                      .Where(groupMember => groupMember.QQ.Id == couple.Key)
-                                      .Select(groupMember => new KeyValuePair<string,int>(groupMember.Card,3 - couple.Value))
-                                      .First())
-                    .ToList()
-                    //将成员名片与对应刀数插入消息
-                    .ForEach(record => message.Append($"\r\n{record.Key}：剩余{record.Value}刀"));
+            message.Append("今日余刀为:");
+            //获取群成员名片和余刀数
+            remainAtkList.Select(member => new
+                         {
+                             name = groupMembers
+                                    .Where(groupMember => groupMember.QQ.Id == member.Key)
+                                    .Select(groupMember => groupMember.Card)
+                                    .First(),
+                             count = member.Value
+                         })
+                         .ToList()
+                         //将成员名片与对应刀数插入消息
+                         .ForEach(member => message.Append($"\r\n{member.name}：剩余{member.count}刀"));
             QQGroup.SendGroupMessage(message.ToString());
         }
 
@@ -1092,37 +1126,40 @@ namespace SuiseiBot.Code.PCRGuildManager
         /// </summary>
         private void UrgeAttack()
         {
-            Dictionary<long, int> remainAttacksList = GuildBattleDB.CheckTodayAttacks();
-            //首先检查是否记录为空
-            if (remainAttacksList == null || remainAttacksList.Count == 0)
+            Dictionary<long, int> remainAtkList = GetRemainAtkList();
+            if(remainAtkList == null)
+            {
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
+                return;
+            }
+            if (remainAtkList.Count == 0)
             {
                 QQGroup.SendGroupMessage("别催了别催了，孩子都出完刀了呜呜呜");
                 return;
             }
-            //获取群成员列表
-            List<GroupMemberInfo> groupMembers = GBEventArgs.FromGroup.GetGroupMemberList().ToList();
+
             //构造群消息文本
             StringBuilder message = new StringBuilder();
             message.Append("还没出完刀的朋友萌：");
-            remainAttacksList.Select(couple => groupMembers
-                    .Where(groupMember => groupMember.QQ.Id == couple.Key)
-                    .Select(groupMember => new KeyValuePair<long, int>(couple.Key, 3 - couple.Value))
-                    .First())
-                .ToList()
-                //艾特成员并展示其剩余刀数
-                .ForEach(record => message.Append($"\r\n{CQApi.CQCode_At(record.Key)}：剩余{record.Value}刀"));
+            //艾特成员并展示其剩余刀数
+            remainAtkList.ToList().ForEach(member => message.Append($"\r\n{CQApi.CQCode_At(member.Key)}：剩余{member.Value}刀"));
             message.Append("\r\n快来出刀啦~");
             QQGroup.SendGroupMessage(message.ToString());
         }
 
         /// <summary>
-        /// 查询出刀列表
+        /// 查询完整出刀列表
         /// </summary>
-        private void ShowAttackList()
+        private void ShowAllAttackList()
         {
             List<GuildBattle> todayAttacksList = GuildBattleDB.GetTodayAttacks();
             //首先检查是否记录为空
-            if (todayAttacksList == null || todayAttacksList.Count == 0)
+            if (todayAttacksList == null)
+            {
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
+                return;
+            }
+            if (todayAttacksList.Count == 0)
             {
                 QQGroup.SendGroupMessage("今天还没人出刀呢！");
                 return;
@@ -1131,22 +1168,58 @@ namespace SuiseiBot.Code.PCRGuildManager
             List<GroupMemberInfo> groupMembers = GBEventArgs.FromGroup.GetGroupMemberList().ToList();
             //构造群消息文本
             StringBuilder message = new StringBuilder();
-            message.Append("今日已出刀如下：\r\n");
-            message.Append("刀号|出刀人|伤害目标|伤害");
-            todayAttacksList.Select(record => groupMembers
-                                      .Where(groupMember => groupMember.QQ.Id == record.Uid)
-                                      .Select(groupMember => new KeyValuePair<string, GuildBattle>(groupMember.Card, record))
-                                      .First())
-                    .ToList()
-                    //艾特成员并展示其剩余刀数
-                    .ForEach(record => message.Append(
-                                $"\r\n" +
-                                $"{record.Value.Aid}|" +
-                                $"{record.Key}|" +
-                                $"{record.Value.Round}周目{record.Value.Order}王" +
-                                $"{record.Value.Damage}"
-                                )
-                    );
+            message.Append("今日出刀信息：\r\n");
+            message.Append("刀号|出刀成员|伤害目标|伤害");
+            todayAttacksList.Select(atk => new
+                            {
+                                name = groupMembers
+                                       .Where(groupMember => groupMember.QQ.Id == atk.Uid)
+                                       .Select(groupMember => groupMember.Card)
+                                       .First(),
+                                atkInfo = atk
+                            })
+                            .ToList()
+                            .ForEach(record => message.Append(
+                                                              "\r\n"                                             +
+                                                              $"{record.atkInfo.Aid}|"                           +
+                                                              $"{record.name}|"                                  +
+                                                              $"{record.atkInfo.Round}周目{record.atkInfo.Order}王" +
+                                                              $"{record.atkInfo.Damage}"
+                                                             )
+                                    );
+            QQGroup.SendGroupMessage(message.ToString());
+        }
+
+        /// <summary>
+        /// 查询个人出刀表
+        /// </summary>
+        private void ShowAttackList()
+        {
+            List<GuildBattle> todayAttacksList = GuildBattleDB.GetTodayAttacks(SenderQQ.Id);
+            //首先检查是否记录为空
+            if (todayAttacksList == null)
+            {
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
+                return;
+            }
+            if (todayAttacksList.Count == 0)
+            {
+                QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                         "你今天还没出刀呢！");
+                return;
+            }
+            //构造群消息文本
+            StringBuilder message = new StringBuilder();
+            message.Append(CQApi.CQCode_At(SenderQQ.Id));
+            message.Append("的今日出刀信息：\r\n");
+            message.Append("刀号|伤害目标|伤害");
+            todayAttacksList.ForEach(record => message.Append(
+                                                              "\r\n"                             +
+                                                              $"{record.Aid}|"                   +
+                                                              $"{record.Round}周目{record.Order}王" +
+                                                              $"{record.Damage}"
+                                                             )
+                                    );
             QQGroup.SendGroupMessage(message.ToString());
         }
         #endregion
@@ -1194,6 +1267,38 @@ namespace SuiseiBot.Code.PCRGuildManager
             if (!GuildBattleDB.DelAtkByID(aid)) return -1;
             //更新boss数据
             return GuildBattleDB.ModifyBossHP(guildInfo, guildInfo.HP + atkInfo.Damage) ? 1 : -1;
+        }
+
+        /// <summary>
+        /// 获取今日的余刀表
+        /// </summary>
+        /// <returns>
+        /// <para>余刀表</para>
+        /// <para><see langword="null"/> 数据库错误</para>
+        /// </returns>
+        private Dictionary<long,int> GetRemainAtkList()
+        {
+            Dictionary<long, int> atkCountList = GuildBattleDB.GetTodayAtkCount();
+            List<MemberInfo>      memberList   = GuildBattleDB.GetAllMembersInfo();
+            //首先检查数据库是否发生了错误
+            if (atkCountList == null || memberList == null) return null;
+
+            //计算每个成员的剩余刀量
+            return memberList.Select(atkMember => new
+                             {
+                                 atkMember.Uid,
+                                 count =
+                                     //查找出刀计数表中是否有此成员
+                                     atkCountList.Any(member => member.Key == atkMember.Uid)
+                                         ? 3 - atkCountList.First(i => i.Key == atkMember.Uid).Value //计算剩余刀量
+                                         : 3                                                         //出刀计数中没有这个成员则是一刀都没有出
+                             })
+                             .ToList()
+                             //选取还有剩余刀的成员
+                             .Where(member => member.count > 0)
+                             .Select(member => new KeyValuePair<long, int>(member.Uid, member.count))
+                             .ToDictionary(member => member.Key,
+                                           member=>member.Value);
         }
 
         /// <summary>

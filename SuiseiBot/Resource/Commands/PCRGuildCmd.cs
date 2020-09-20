@@ -36,7 +36,8 @@ namespace SuiseiBot.Code.Resource.Commands
             PCRGuildCommands.Add("修改进度",PCRGuildCmdType.ModifyProgress);
             PCRGuildCommands.Add("查刀", PCRGuildCmdType.ShowRemainAttack);
             PCRGuildCommands.Add("催刀", PCRGuildCmdType.UrgeAttack);
-            PCRGuildCommands.Add("出刀记录", PCRGuildCmdType.ShowAttackList);
+            PCRGuildCommands.Add("公会出刀记录", PCRGuildCmdType.ShowAllAttackList);
+            PCRGuildCommands.Add("出刀记录",PCRGuildCmdType.ShowAttackList);
         }
     }
 }

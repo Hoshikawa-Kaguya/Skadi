@@ -27,21 +27,37 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         }
         #endregion
 
-        #region 指令
+        #region 公有方法
         /// <summary>
         /// 获取今天的出刀列表
         /// </summary>
-        /// <returns>出刀List</returns>
-        public List<GuildBattle> GetTodayAttacks()
+        /// <returns>
+        /// <para>出刀表</para>
+        /// <para><see langword="null"/> 数据库错误</para>
+        /// </returns>
+        public List<GuildBattle> GetTodayAttacks(long? uid = null)
         {
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                return dbClient.Queryable<GuildBattle>()
-                               .AS(BattleTableName)
-                               .Where(i => i.Time >= Utils.GetUpdateStamp())
-                               .OrderBy(i => i.Aid)
-                               .ToList();
+                if (uid == null)
+                {
+                    //查询所有人的出刀表
+                    return dbClient.Queryable<GuildBattle>()
+                                   .AS(BattleTableName)
+                                   .Where(i => i.Time >= Utils.GetUpdateStamp())
+                                   .OrderBy(i => i.Aid)
+                                   .ToList();
+                }
+                else
+                {
+                    //查询单独成员的出刀表
+                    return dbClient.Queryable<GuildBattle>()
+                                   .AS(BattleTableName)
+                                   .Where(i => i.Time >= Utils.GetUpdateStamp() && i.Uid == uid)
+                                   .OrderBy(i => i.Aid)
+                                   .ToList();
+                }
             }
             catch (Exception e)
             {
@@ -55,12 +71,12 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// 用于查刀和催刀
         /// </summary>
         /// <returns>余刀表</returns>
-        public Dictionary<long, int> CheckTodayAttacks()
+        public Dictionary<long, int> GetTodayAtkCount()
         {
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                var attackTimeList = dbClient.Queryable<GuildBattle>()
+                return dbClient.Queryable<GuildBattle>()
                                 .AS(BattleTableName)
                                 .Where(attack => attack.Time > Utils.GetUpdateStamp())
                                 .GroupBy(member => member.Uid)
@@ -69,25 +85,9 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                                     member.Uid,
                                     times = SqlFunc.AggregateCount(member.Uid)
                                 })
-                                .ToList();
-                var memberList = GetAllMembersInfo();
-
-                //return attackTimeList
-                //       .Where(member => member.times < 3)
-                //       .ToDictionary(member => member.Uid,
-                //                     member => member.times);
-                return memberList
-                    .Select(member => new
-                    {
-                        member.Uid,
-                        times = attackTimeList
-                            .Where(attack => attack.Uid == member.Uid)
-                            .Count() == 0
-                            ? 0
-                            : attackTimeList.Where(attack => attack.Uid == member.Uid).First().times
-                    })
-                    .ToDictionary(member => member.Uid,
-                        member => member.times);
+                                .ToList()
+                                .ToDictionary(member => member.Uid,
+                                              member => member.times);
             }
             catch (Exception e)
             {
@@ -95,9 +95,7 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                 return null;
             }
         }
-        #endregion
-
-        #region 公有方法
+        
         /// <summary>
         /// 检查是否已进入会战
         /// </summary>

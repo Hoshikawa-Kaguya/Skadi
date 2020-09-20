@@ -79,9 +79,9 @@ namespace SuiseiBot.Code.Resource.TypeEnum.CmdType
         /// </summary>
         LeaveTree = 112,
         /// <summary>
-        /// 出刀表命令
+        /// 全出刀表命令
         /// </summary>
-        ShowAttackList = 113,
+        ShowAllAttackList = 113,
         /// <summary>
         /// 查余刀命令
         /// </summary>
@@ -97,6 +97,10 @@ namespace SuiseiBot.Code.Resource.TypeEnum.CmdType
         /// <summary>
         /// 修改进度
         /// </summary>
-        ModifyProgress = 117
+        ModifyProgress = 117,
+        /// <summary>
+        /// 单人出刀表查询
+        /// </summary>
+        ShowAttackList = 118,
     }
 }
