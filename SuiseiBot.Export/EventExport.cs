@@ -12,12 +12,12 @@ using SuiseiBot.Code.Tool.LogUtils;
 // ReSharper disable UnusedMember.Global
 // ReSharper disable UnusedMember.Local
 
-namespace Native.Core
+namespace SuiseiBot.Export
 {
 	/// <summary>	
 	/// 表示酷Q事件导出的类	
 	/// </summary>	
-	public class CQEventExport	
+	public class EventExport	
 	{
         #region 属性
         //插件的所有信息
@@ -103,7 +103,7 @@ namespace Native.Core
 			if (Event_eventPrivateMsgHandler != null)	
 			{	
 				CQPrivateMessageEventArgs args = new CQPrivateMessageEventArgs (cqApi, cqLog, 1, 21, "PrivateMessageInterface", "_eventPrivateMsg", 30000, subType, msgId, fromQQ, msg.ToString(CQApi.DefaultEncoding), false);	
-				Event_eventPrivateMsgHandler (typeof (CQEventExport), args);	
+				Event_eventPrivateMsgHandler (typeof (EventExport), args);	
 				return (int)(args.Handler ? CQMessageHandler.Intercept : CQMessageHandler.Ignore);	
 			}	
 			return 0;	
@@ -125,7 +125,7 @@ namespace Native.Core
 			if (Event_eventGroupMsgHandler != null)	
 			{	
 				CQGroupMessageEventArgs args = new CQGroupMessageEventArgs (cqApi, cqLog, 2, 2, "GroupMessageInterface", "_eventGroupMsg", 30000, subType, msgId, fromGroup, fromQQ, fromAnonymous, msg.ToString(CQApi.DefaultEncoding), false);	
-				Event_eventGroupMsgHandler (typeof (CQEventExport), args);	
+				Event_eventGroupMsgHandler (typeof (EventExport), args);	
 				return (int)(args.Handler ? CQMessageHandler.Intercept : CQMessageHandler.Ignore);	
 			}	
 			return 0;	
@@ -147,7 +147,7 @@ namespace Native.Core
 			if (Event_eventEnableHandler != null)	
 			{	
 				CQAppEnableEventArgs args = new CQAppEnableEventArgs (cqApi, cqLog, 1003, 1003, "AppEnableInterface", "_eventEnable", 30000);	
-				Event_eventEnableHandler (typeof (CQEventExport), args);	
+				Event_eventEnableHandler (typeof (EventExport), args);	
 			}	
 			return 0;	
 		}
