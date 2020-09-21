@@ -993,7 +993,9 @@ namespace SuiseiBot.Code.PCRGuildManager
             message.Append("目前挂树的成员为:");
             treeList.Select(member => groupMembers
                                       .Where(groupMember => groupMember.QQ.Id == member)
-                                      .Select(groupMember => groupMember.Card)
+                                      .Select(groupMember => (string.IsNullOrEmpty(groupMember.Card)
+                                                  ? groupMember.Nick
+                                                  : groupMember.Card))
                                       .First())
                     .ToList()
                     //将成员名片添加进消息文本
@@ -1082,8 +1084,6 @@ namespace SuiseiBot.Code.PCRGuildManager
                                      $"{targetHp}/{bossInfo.HP}");
         }
 
-        //TODO 以下命令未测试
-
         /// <summary>
         /// 查刀
         /// </summary>
@@ -1108,15 +1108,20 @@ namespace SuiseiBot.Code.PCRGuildManager
             //获取群成员名片和余刀数
             remainAtkList.Select(member => new
                          {
-                             name = groupMembers
+                             card = groupMembers
                                     .Where(groupMember => groupMember.QQ.Id == member.Key)
                                     .Select(groupMember => groupMember.Card)
+                                    .First(),
+                             name = groupMembers
+                                    .Where(groupMember => groupMember.QQ.Id == member.Key)
+                                    .Select(groupMember => groupMember.Nick)
                                     .First(),
                              count = member.Value
                          })
                          .ToList()
                          //将成员名片与对应刀数插入消息
-                         .ForEach(member => message.Append($"\r\n{member.name}：剩余{member.count}刀"));
+                         .ForEach(member => message.Append($"\r\n剩余{member.count}刀 " +
+                                                           $"| {(string.IsNullOrEmpty(member.card) ? member.name : member.card)}"));
             QQGroup.SendGroupMessage(message.ToString());
         }
 
@@ -1172,18 +1177,22 @@ namespace SuiseiBot.Code.PCRGuildManager
             message.Append("刀号|出刀成员|伤害目标|伤害");
             todayAttacksList.Select(atk => new
                             {
-                                name = groupMembers
+                                card = groupMembers
                                        .Where(groupMember => groupMember.QQ.Id == atk.Uid)
                                        .Select(groupMember => groupMember.Card)
+                                       .First(),
+                                name = groupMembers
+                                       .Where(groupMember => groupMember.QQ.Id == atk.Uid)
+                                       .Select(groupMember => groupMember.Nick)
                                        .First(),
                                 atkInfo = atk
                             })
                             .ToList()
                             .ForEach(record => message.Append(
-                                                              "\r\n"                                             +
-                                                              $"{record.atkInfo.Aid}|"                           +
-                                                              $"{record.name}|"                                  +
-                                                              $"{record.atkInfo.Round}周目{record.atkInfo.Order}王" +
+                                                              "\r\n" +
+                                                              $"{record.atkInfo.Aid} | " +
+                                                              $"{record.name} | " +
+                                                              $"{GetBossCode(record.atkInfo.Round, record.atkInfo.Order)} | " +
                                                               $"{record.atkInfo.Damage}"
                                                              )
                                     );
@@ -1214,9 +1223,9 @@ namespace SuiseiBot.Code.PCRGuildManager
             message.Append("的今日出刀信息：\r\n");
             message.Append("刀号|伤害目标|伤害");
             todayAttacksList.ForEach(record => message.Append(
-                                                              "\r\n"                             +
-                                                              $"{record.Aid}|"                   +
-                                                              $"{record.Round}周目{record.Order}王" +
+                                                              "\r\n"                                          +
+                                                              $"{record.Aid} | "                              +
+                                                              $"{GetBossCode(record.Round, record.Order)} | " +
                                                               $"{record.Damage}"
                                                              )
                                     );
@@ -1462,6 +1471,12 @@ namespace SuiseiBot.Code.PCRGuildManager
             }
             QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ), "有非法参数");
             return -1;
+        }
+
+        private string GetBossCode(int round, int order)
+        {
+            const string bossCode = "ABCDE";
+            return $"{round}{bossCode[order - 1]}";
         }
         #endregion
     }
