@@ -1288,7 +1288,7 @@ namespace SuiseiBot.Code.PCRGuildManager
         private Dictionary<long,int> GetRemainAtkList()
         {
             Dictionary<long, int> atkCountList = GuildBattleDB.GetTodayAtkCount();
-            List<MemberInfo>      memberList   = GuildBattleDB.GetAllMembersInfo();
+            List<MemberInfo>      memberList   = GuildBattleDB.GetAllMembersInfo(QQGroup.Id);
             //首先检查数据库是否发生了错误
             if (atkCountList == null || memberList == null) return null;
 
@@ -1305,9 +1305,9 @@ namespace SuiseiBot.Code.PCRGuildManager
                              .ToList()
                              //选取还有剩余刀的成员
                              .Where(member => member.count > 0)
-                             .Select(member => new KeyValuePair<long, int>(member.Uid, member.count))
-                             .ToDictionary(member => member.Key,
-                                           member=>member.Value);
+                             .Select(member => new {member.Uid, member.count})
+                             .ToDictionary(member => member.Uid,
+                                           member => member.count);
         }
 
         /// <summary>
@@ -1473,10 +1473,10 @@ namespace SuiseiBot.Code.PCRGuildManager
             return -1;
         }
 
+        const string ROUND_CODE = "ABCDEFGHIJKLNMOPQRSTUVWXYZ";
         private string GetBossCode(int round, int order)
         {
-            const string bossCode = "ABCDE";
-            return $"{round}{bossCode[order - 1]}";
+            return $"{ROUND_CODE[round - 1]}{order}";
         }
         #endregion
     }

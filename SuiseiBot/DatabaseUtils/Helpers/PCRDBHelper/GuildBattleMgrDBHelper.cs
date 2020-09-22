@@ -77,17 +77,19 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<GuildBattle>()
-                                .AS(BattleTableName)
-                                .Where(attack => attack.Time > Utils.GetUpdateStamp())
-                                .GroupBy(member => member.Uid)
-                                .Select(member => new
-                                {
-                                    member.Uid,
-                                    times = SqlFunc.AggregateCount(member.Uid)
-                                })
-                                .ToList()
-                                .ToDictionary(member => member.Uid,
-                                              member => member.times);
+                               .AS(BattleTableName)
+                               .Where(attack => attack.Time   > Utils.GetUpdateStamp() &&
+                                                attack.Attack != AttackType.Compensate &&
+                                                attack.Attack != AttackType.CompensateKill)
+                               .GroupBy(member => member.Uid)
+                               .Select(member => new
+                               {
+                                   member.Uid,
+                                   times = SqlFunc.AggregateCount(member.Uid)
+                               })
+                               .ToList()
+                               .ToDictionary(member => member.Uid,
+                                             member => member.times);
             }
             catch (Exception e)
             {

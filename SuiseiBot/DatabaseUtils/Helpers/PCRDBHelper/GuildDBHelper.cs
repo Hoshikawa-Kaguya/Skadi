@@ -143,17 +143,18 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// <summary>
         /// 获取所有成员信息
         /// </summary>
-        /// <param name="uid"></param>
+        /// <param name="gid">群号</param>
         /// <returns>
         /// <para>成员信息</para>
         /// <para><see langword="null"/> 数据库错误</para>
         /// </returns>
-        public List<MemberInfo> GetAllMembersInfo()
+        public List<MemberInfo> GetAllMembersInfo(long gid)
         {
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<MemberInfo>()
+                               .Where(group => group.Gid == gid)
                                .ToList();
             }
             catch (Exception e)
