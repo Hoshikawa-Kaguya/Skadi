@@ -48,6 +48,7 @@ namespace SuiseiBot.Code.CQInterface
                 //初始化定时器线程
                 if (config.LoadedConfig.ModuleSwitch.Bili_Subscription || config.LoadedConfig.ModuleSwitch.PCR_Subscription)
                 {
+                    ConsoleLog.Debug("Timer Init",$"flash span = {config.LoadedConfig.SubscriptionConfig.FlashTime}");
                     timer = new TimerInit(e.CQApi, config.LoadedConfig.SubscriptionConfig.FlashTime);
                 }
                 e.Handler = true;

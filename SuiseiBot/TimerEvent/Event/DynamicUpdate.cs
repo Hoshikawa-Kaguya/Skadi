@@ -16,7 +16,7 @@ using SuiseiBot.Code.Tool.LogUtils;
 
 namespace SuiseiBot.Code.TimerEvent.Event
 {
-    internal class DynamicUpdate
+    internal static class DynamicUpdate
     {
         /// <summary>
         /// 自动获取B站动态
@@ -25,24 +25,27 @@ namespace SuiseiBot.Code.TimerEvent.Event
         public static async void BiliUpdateCheck(CQApi cqApi)
         {
             //读取配置文件
-            Config           config        = new Config(cqApi.GetLoginQQ().Id);
+            Config                  config        = new Config(cqApi.GetLoginQQ().Id);
             Module                  moduleEnable  = config.LoadedConfig.ModuleSwitch;
             List<GroupSubscription> Subscriptions = config.LoadedConfig.SubscriptionConfig.GroupsConfig;
             //数据库
             SubscriptionDBHelper dbHelper = new SubscriptionDBHelper(cqApi);
             //检查模块是否启用
-            if (!moduleEnable.Bili_Subscription || !moduleEnable.PCR_Subscription) return;
+            if (!moduleEnable.Bili_Subscription && !moduleEnable.PCR_Subscription) return;
             foreach (GroupSubscription subscription in Subscriptions)
             {
                 //PCR动态订阅
-                if (subscription.PCR_Subscription)
+                if (subscription.PCR_Subscription && moduleEnable.PCR_Subscription)
                 {
                     await GetDynamic(cqApi, 353840826, subscription.GroupId, dbHelper);
                 }
                 //臭DD的订阅
-                foreach (long biliUser in subscription.SubscriptionId)
+                if (moduleEnable.Bili_Subscription)
                 {
-                    await GetDynamic(cqApi, biliUser, subscription.GroupId, dbHelper);
+                    foreach (long biliUser in subscription.SubscriptionId)
+                    {
+                        await GetDynamic(cqApi, biliUser, subscription.GroupId, dbHelper);
+                    }
                 }
             }
         }
