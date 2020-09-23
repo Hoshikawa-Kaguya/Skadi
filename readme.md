@@ -13,9 +13,11 @@
 
 本项目的名字来源于 [星街彗星](https://space.bilibili.com/9034870)
 
-由[mirai-native](https://github.com/iTXTech/mirai-native)和[mirai](https://github.com/mamoe/mirai)提供强力驱动
+由[mirai](https://github.com/mamoe/mirai)提供强力驱动
 
-本项目仍处于开发阶段，不会提供任何发行版和预览版
+依赖:[mirai-native](https://github.com/iTXTech/mirai-native)
+
+本项目仍处于开发阶段，文档还完全没写（
 
 ## 开源协议
 
