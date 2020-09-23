@@ -9,6 +9,7 @@ using Native.Sdk.Cqp.Model;
 using SuiseiBot.Code.ChatHandle.PCRHandle;
 using SuiseiBot.Code.DatabaseUtils.Helpers;
 using SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper;
+using SuiseiBot.Code.Resource.CommandHelp;
 using SuiseiBot.Code.Resource.TypeEnum;
 using SuiseiBot.Code.Resource.TypeEnum.CmdType;
 using SuiseiBot.Code.Tool;
@@ -158,7 +159,8 @@ namespace SuiseiBot.Code.PCRGuildManager
                         result = status;
                         if (atQQs.Count == 0) //没有AT任何人，参数非法
                         {
-                            PCRGuildHandle.GetIllegalArgs(GMgrEventArgs, PCRGuildCmdType.JoinGuild, "没有AT任何人");
+                            QQGroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
+                                                     $"没有AT任何人\r\n指令使用帮助：\r\n{GuildCmdHelp.JoinGuild}");
                             return;
                         }
 
@@ -368,7 +370,8 @@ namespace SuiseiBot.Code.PCRGuildManager
                         result = status;
                         if (atQQs.Count == 0) //没有AT任何人，参数非法
                         {
-                            PCRGuildHandle.GetIllegalArgs(GMgrEventArgs, PCRGuildCmdType.QuitGuild, "没有AT任何人");
+                            QQGroup.SendGroupMessage(CQApi.CQCode_At(GMgrEventArgs.FromQQ.Id),
+                                                     $"没有AT任何人\r\n指令使用帮助：\r\n{GuildCmdHelp.QuitGuild}");
                             return;
                         }
 

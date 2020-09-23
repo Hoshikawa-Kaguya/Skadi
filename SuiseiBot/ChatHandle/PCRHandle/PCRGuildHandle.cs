@@ -2,7 +2,6 @@ using System;
 using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.EventArgs;
 using SuiseiBot.Code.PCRGuildManager;
-using SuiseiBot.Code.Resource.CommandHelp;
 using SuiseiBot.Code.Resource.Commands;
 using SuiseiBot.Code.Resource.TypeEnum.CmdType;
 using SuiseiBot.Code.Tool.LogUtils;
@@ -73,35 +72,6 @@ namespace SuiseiBot.Code.ChatHandle.PCRHandle
         {
             ConsoleLog.Warning("PCR公会管理", "未知指令");
             e.FromGroup.SendGroupMessage(CQApi.CQCode_At(e.FromQQ.Id), "\n未知指令");
-        }
-
-        /// <summary>
-        /// 存在非法参数时的响应
-        /// </summary>
-        /// <param name="e">CQGroupMessageEventArgs</param>
-        /// <param name="commandType">指令类型</param>
-        /// <param name="errDescription">错误描述</param>
-        public static void GetIllegalArgs(CQGroupMessageEventArgs e, PCRGuildCmdType commandType, string errDescription)
-        {
-            ConsoleLog.Warning("PCR公会管理", "非法参数");
-            e.FromGroup.SendGroupMessage(
-                                         CQApi.CQCode_At(e.FromQQ.Id),
-                                         "\n非法参数请重新输入指令" +
-                                         $"\n错误：{errDescription}" +
-                                         $"\n指令帮助：{GetCommandHelp(commandType)}");
-        }
-        #endregion
-
-        #region 辅助函数
-        /// <summary>
-        /// 获取对应指令的帮助文本
-        /// </summary>
-        /// <returns>帮助文本</returns>
-        public static string GetCommandHelp(PCRGuildCmdType commandType)
-        {
-            GuildCommandHelp.HelpText.TryGetValue(commandType, out string helptext);
-            if (string.IsNullOrEmpty(helptext)) helptext = "该指令还在开发中，请询问机器人维护者或者开发者";
-            return helptext;
         }
         #endregion
     }

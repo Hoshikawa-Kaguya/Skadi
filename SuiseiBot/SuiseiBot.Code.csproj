@@ -135,10 +135,14 @@
     <Compile Include="Network\HTTPUtils.cs" />
     <Compile Include="Network\NetServiceUtils.cs" />
     <Compile Include="PluginInfo.cs" />
+    <Compile Include="Resource\CommandHelp\GuildCmdHelp.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>GuildCmdHelp.resx</DependentUpon>
+    </Compile>
     <Compile Include="Resource\Commands\WholeMatchCmd.cs" />
     <Compile Include="PCRGuildManager\GuildBattleManager.cs" />
     <Compile Include="PCRGuildManager\GuildManager.cs" />
-    <Compile Include="Resource\CommandHelp\GuildCommandHelp.cs" />
     <Compile Include="Resource\Commands\PCRGuildCmd.cs" />
     <Compile Include="IO\Config\ConfigClass\MainConfig.cs" />
     <Compile Include="Resource\TypeEnum\CmdType\WholeMatchCmdType.cs" />
@@ -178,6 +182,10 @@
     <EmbeddedResource Include="IO\Config\Res\InitRes.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>InitRes.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resource\CommandHelp\GuildCmdHelp.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>GuildCmdHelp.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.config" />
     <EmbeddedResource Include="IO\Config\Res\initconfig.yaml" />

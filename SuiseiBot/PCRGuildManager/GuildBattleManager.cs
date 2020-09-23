@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using SuiseiBot.Code.DatabaseUtils;
 using SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper;
+using SuiseiBot.Code.Resource.CommandHelp;
 using SuiseiBot.Code.Resource.TypeEnum;
 using SuiseiBot.Code.Tool;
 
@@ -54,7 +55,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
                                              "\r\n此群未被登记为公会",
                                              "\r\n请使用以下指令创建公会",
-                                             $"\r\n{PCRGuildHandle.GetCommandHelp(CommandType)}");
+                                             $"\r\n{GuildCmdHelp.CreateGuild}");
                     return;
                 case -1:
                     DBMsgUtils.DatabaseFailedTips(GBEventArgs);

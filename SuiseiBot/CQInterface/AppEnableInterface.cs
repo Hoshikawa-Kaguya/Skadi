@@ -42,7 +42,6 @@ namespace SuiseiBot.Code.CQInterface
                 //将关键词和帮助文本写入内存
                 WholeMatchCmd.KeywordInit();
                 PCRGuildCmd.PCRGuildCommandInit();
-                GuildCommandHelp.InitHelpText();
                 KeywordCmd.SpecialKeywordsInit(e.CQApi);
 
                 //初始化定时器线程
