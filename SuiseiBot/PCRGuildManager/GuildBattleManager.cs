@@ -182,7 +182,7 @@ namespace SuiseiBot.Code.PCRGuildManager
 
                 //显示出刀表
                 case PCRGuildCmdType.ShowAttackList:
-                    if(!ZeroArgsCheck() || !MemberCheck() || !InBattleCheck()) return;
+                    if(!MemberCheck() || !InBattleCheck()) return;
                     ShowAttackList();
                     break;
 
@@ -831,6 +831,7 @@ namespace SuiseiBot.Code.PCRGuildManager
             {
                 //仅能管理员执行 需要额外参数
                 //判断今天是否使用过SL
+
                 #region 参数检查
                 long memberUid;
 
@@ -860,6 +861,7 @@ namespace SuiseiBot.Code.PCRGuildManager
                     return;
                 }
                 #endregion
+
                 if (member.SL >= Utils.GetUpdateStamp())
                 {
                     if (!GuildBattleDB.SetMemberSL(memberUid, true))
@@ -922,15 +924,16 @@ namespace SuiseiBot.Code.PCRGuildManager
         {
             #region 参数检查
             long memberUid;
-            switch (Utils.CheckForLength(CommandArgs,0))
+            switch (Utils.CheckForLength(CommandArgs,1))
             {
                 case LenType.Legitimate: //正常
-                    memberUid = SenderQQ.Id;
-                    break;
-                case LenType.Extra: //管理员撤销
                     memberUid = GetUidInMsg();
                     if (memberUid == -1) return;
                     break;
+                case LenType.Extra:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "有多余参数");
+                    return;
                 default:
                     QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
                                              "发生未知错误，请联系机器人管理员");
@@ -1204,7 +1207,37 @@ namespace SuiseiBot.Code.PCRGuildManager
         /// </summary>
         private void ShowAttackList()
         {
-            List<GuildBattle> todayAttacksList = GuildBattleDB.GetTodayAttacks(SenderQQ.Id);
+            #region 参数检查
+            long memberUid;
+            switch (Utils.CheckForLength(CommandArgs,0))
+            {
+                case LenType.Legitimate: //正常
+                    memberUid = SenderQQ.Id;
+                    break;
+                case LenType.Extra: //管理员查询
+                    if(!IsAdmin()) return;//检查权限
+                    memberUid = GetUidInMsg();
+                    if (memberUid == -1) return;
+                    break;
+                default:
+                    QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
+                                             "发生未知错误，请联系机器人管理员");
+                    ConsoleLog.Error("Unknown error","LenType");
+                    return;
+            }
+
+            ConsoleLog.Debug("get Uid", memberUid);
+
+            //查找成员信息 
+            MemberInfo member = GuildBattleDB.GetMemberInfo(memberUid);
+            if (member == null)
+            {
+                DBMsgUtils.DatabaseFailedTips(GBEventArgs);
+                return;
+            }
+            #endregion
+
+            List<GuildBattle> todayAttacksList = GuildBattleDB.GetTodayAttacks(memberUid);
             //首先检查是否记录为空
             if (todayAttacksList == null)
             {
@@ -1213,8 +1246,9 @@ namespace SuiseiBot.Code.PCRGuildManager
             }
             if (todayAttacksList.Count == 0)
             {
-                QQGroup.SendGroupMessage(CQApi.CQCode_At(SenderQQ.Id),
-                                         "你今天还没出刀呢！");
+                QQGroup.SendGroupMessage(IsAdmin() ? "成员" : "",
+                                         CQApi.CQCode_At(SenderQQ.Id),
+                                         IsAdmin() ? "今天还没出刀呢！" : "你今天还没出刀呢！");
                 return;
             }
             //构造群消息文本
@@ -1476,7 +1510,7 @@ namespace SuiseiBot.Code.PCRGuildManager
         const string ROUND_CODE = "ABCDEFGHIJKLNMOPQRSTUVWXYZ";
         private string GetBossCode(int round, int order)
         {
-            return $"{ROUND_CODE[round - 1]}{order}";
+            return round > 26 ? $"{round} - {order}" : $"{ROUND_CODE[round - 1]}{order}";
         }
         #endregion
     }
