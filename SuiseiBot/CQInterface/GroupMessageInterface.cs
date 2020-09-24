@@ -1,3 +1,4 @@
+using System;
 using Native.Sdk.Cqp.EventArgs;
 using SuiseiBot.Code.ChatHandle;
 using SuiseiBot.Code.ChatHandle.PCRHandle;
@@ -16,6 +17,19 @@ namespace SuiseiBot.Code.CQInterface
         /// <param name="sender">事件来源</param>
         /// <param name="eventArgs">事件参数</param>
         public static void GroupMessage(object sender, CQGroupMessageEventArgs eventArgs)
+        {
+            try
+            {
+                GMsgAction(sender,eventArgs);
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.UnhandledExceptionLog(e);
+            }
+            eventArgs.Handler = true;
+        }
+
+        private static void GMsgAction(object sender, CQGroupMessageEventArgs eventArgs)
         {
             //与MiraiLog信息重复暂不显示
             //ConsoleLog.Info($"收到信息[群:{eventArgs.FromGroup.Id}]",$"{(eventArgs.Message.Text).Replace("\r\n", "\\r\\n")}");
@@ -136,8 +150,6 @@ namespace SuiseiBot.Code.CQInterface
                     dh.GetChat();
                     return;
             }
-
-            eventArgs.Handler = true;
         }
     }
 }

@@ -61,29 +61,12 @@ namespace SuiseiBot.Export
             AppInfo appInfo = new AppInfo (pInfo.name, pInfo.ret, pInfo.apiver, pInfo.name, pInfo.version, pInfo.version_id, pInfo.author, pInfo.description, authCode);
             cqApi = new CQApi(appInfo);
             cqLog = new CQLog(authCode);
-            // 注册插件全局异常捕获回调, 用于捕获未处理的异常
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             // 事件回调
             Event_eventEnableHandler     += AppEnableInterface.AppEnable;
             Event_eventGroupMsgHandler   += GroupMessageInterface.GroupMessage;
             Event_eventPrivateMsgHandler += PrivateMessageInterface.PrivateMessage;
             return 0;	
         }
-        #endregion
-		
-		#region --私有方法--	
-		/// <summary>	
-		/// 全局异常捕获, 用于捕获开发者未处理的异常, 此异常将回弹至酷Q进行处理	
-		/// </summary>	
-		/// <param name="sender">事件来源对象</param>	
-		/// <param name="e">附加的事件参数</param>	
-		private static void CurrentDomain_UnhandledException (object sender, UnhandledExceptionEventArgs e)	
-		{
-            if (e.ExceptionObject is Exception ex)
-            {
-                ConsoleLog.UnhandledExceptionLog(ex);
-            }	
-		}
         #endregion
 
         #region --导出方法及事件回调--	

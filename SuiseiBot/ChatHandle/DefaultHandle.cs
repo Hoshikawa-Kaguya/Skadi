@@ -1,3 +1,4 @@
+using System;
 using Native.Sdk.Cqp.EventArgs;
 
 namespace SuiseiBot.Code.ChatHandle
@@ -59,8 +60,9 @@ namespace SuiseiBot.Code.ChatHandle
         {
             //此区域代码均只用于测试
 #if DEBUG
-            //目前测试得到mirai发向pixiv.cat的请求依旧返回403
-            DebugEventArgs.FromGroup.SendGroupMessage("[CQ:image,url=https://pixiv.cat/69168247.png]");
+            //用于异常捕获测试
+            DebugEventArgs.FromGroup.SendGroupMessage("将会抛出一个异常");
+            throw new Exception("wow");
 #else
             DebugEventArgs.FromGroup.SendGroupMessage("哇哦");
 #endif
