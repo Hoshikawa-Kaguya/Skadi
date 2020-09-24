@@ -1,5 +1,9 @@
 using System;
+using System.IO;
+using System.Linq;
 using Native.Sdk.Cqp.EventArgs;
+using SuiseiBot.Code.IO;
+using SuiseiBot.Code.Tool.LogUtils;
 
 namespace SuiseiBot.Code.ChatHandle
 {
@@ -60,9 +64,13 @@ namespace SuiseiBot.Code.ChatHandle
         {
             //此区域代码均只用于测试
 #if DEBUG
-            //用于异常捕获测试
-            DebugEventArgs.FromGroup.SendGroupMessage("将会抛出一个异常");
-            throw new Exception("wow");
+            //检查色图文件夹大小
+            long size = new DirectoryInfo(IOUtils.GetHsoPath())
+                        .GetFiles("*", SearchOption.AllDirectories)
+                        .Select(file => file.Length)
+                        .Sum();
+            ConsoleLog.Debug("Hso Dir Size",size);
+            DebugEventArgs.FromGroup.SendGroupMessage($"DEBUG\r\nHso Dir Size = {size/1024.0/1024.0}MB");
 #else
             DebugEventArgs.FromGroup.SendGroupMessage("哇哦");
 #endif

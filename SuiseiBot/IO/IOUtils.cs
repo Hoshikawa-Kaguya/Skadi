@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -14,7 +15,7 @@ namespace SuiseiBot.Code.IO
         /// <summary>
         /// 获取错误报告路径
         /// </summary>
-        public static string GetCrashLogPath()
+        private static string GetCrashLogPath()
         {
             string path = $@"{Directory.GetCurrentDirectory()}\crash".Replace('\\', '/');
             //检查目录是否存在，不存在则新建一个
@@ -60,6 +61,17 @@ namespace SuiseiBot.Code.IO
             string fileName = $"{DateTime.Now.ToString(CultureInfo.CurrentCulture).Replace('/', '-').Replace(':','-')}.log";
             using StreamWriter streamWriter = File.CreateText($@"{GetCrashLogPath()}/{fileName}");
             streamWriter.Write(errorMessage);
+        }
+
+        /// <summary>
+        /// 获取色图文件夹的大小(Byte)
+        /// </summary>
+        public static long GetHsoSize()
+        {
+            return new DirectoryInfo(GetHsoPath())
+                   .GetFiles("*", SearchOption.AllDirectories)
+                   .Select(file => file.Length)
+                   .Sum();
         }
         #endregion
 

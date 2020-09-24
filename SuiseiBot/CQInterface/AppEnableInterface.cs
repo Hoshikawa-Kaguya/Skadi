@@ -20,7 +20,7 @@ namespace SuiseiBot.Code.CQInterface
             }
             catch (Exception exception)
             {
-                ConsoleLog.Error("error",ConsoleLog.ErrorLogBuilder(exception));
+                ConsoleLog.UnhandledExceptionLog(exception);
             }
             eventArgs.Handler = true;
         }
@@ -47,6 +47,11 @@ namespace SuiseiBot.Code.CQInterface
             //在控制台显示启用模块
             ConsoleLog.Info("已启用的模块",
                             $"\n{config.LoadedConfig.ModuleSwitch}");
+            //显示代理信息
+            if (config.LoadedConfig.ModuleSwitch.Hso && !string.IsNullOrEmpty(config.LoadedConfig.HsoConfig.PximyProxy))
+            {
+                ConsoleLog.Debug("Hso Proxy", config.LoadedConfig.HsoConfig.PximyProxy);
+            }
             DatabaseInit.Init(eventArgs);
 
             //将关键词和帮助文本写入内存

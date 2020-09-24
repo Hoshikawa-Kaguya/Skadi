@@ -41,6 +41,11 @@ namespace SuiseiBot.Code.IO.Config
                 Serializer       serializer = new Serializer();
                 using TextReader reader     = File.OpenText(Path);
                 LoadedConfig = serializer.Deserialize<MainConfig>(reader);
+                if (LoadedConfig.HsoConfig.SizeLimit <= 0)
+                {
+                    ConsoleLog.Error("ConfigIO ERROR", "SizeLimit <= 0,create a new config file");
+                    return false;
+                }
                 return true;
             }
             catch (Exception e)

@@ -26,6 +26,10 @@ ModuleSwitch:
 HsoConfig:
   #色图源 Local/Lolicon/Yukari
   Source: Local
+  #Pximy代理服务器地址，如果没有设置为null即可
+  PximyProxy: null
+  #色图缓存文件夹的大小限制(MB)
+  SizeLimit: 1024
   #Lolicon APIKEY
   LoliconToken: null
   #Yukari APIKEY

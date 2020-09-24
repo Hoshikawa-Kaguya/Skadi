@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using SuiseiBot.Code.IO;
 using SuiseiBot.Code.IO.Config;
@@ -42,11 +43,17 @@ namespace SuiseiBot.Code.ChatHandle
         public async void GetChat(WholeMatchCmdType cmdType)
         {
             Config config = new Config(HsoEventArgs.CQApi.GetLoginQQ().Id);
+            //检查色图文件夹大小
+            if (IOUtils.GetHsoSize() >= config.LoadedConfig.HsoConfig.SizeLimit * 1024 * 1024)
+            {
+                ConsoleLog.Warning("Hso","色图文件夹超出大小限制，将清空文件夹");
+                Directory.Delete(IOUtils.GetHsoPath(),true);
+            }
             switch (cmdType)
             {
                 case WholeMatchCmdType.Hso:
                     Hso hso = config.LoadedConfig.HsoConfig;
-                    await GiveMeSetu(hso.Source,hso.LoliconToken,hso.YukariToken);
+                    await GiveMeSetu(hso.Source,hso.LoliconToken,hso.YukariToken,hso.PximyProxy);
                     break;
                 default:
                     break;
@@ -62,7 +69,7 @@ namespace SuiseiBot.Code.ChatHandle
         /// <param name="setuSource">源类型</param>
         /// <param name="loliconToken">lolicon token</param>
         /// <param name="yukariToken">yukari token</param>
-        private Task GiveMeSetu(SetuSourceType setuSource, string loliconToken = null, string yukariToken = null)
+        private Task GiveMeSetu(SetuSourceType setuSource, string loliconToken = null, string yukariToken = null, string proxy = null)
         {
             string localPicPath;
             string response;
@@ -101,6 +108,11 @@ namespace SuiseiBot.Code.ChatHandle
                     break;
                 case SetuSourceType.Local:
                     string[] picNames = Directory.GetFiles(IOUtils.GetHsoPath());
+                    if (picNames.Length == 0)
+                    {
+                        QQGroup.SendGroupMessage("机器人管理者没有在服务器上塞色图\r\n你去找他要啦!");
+                        return Task.CompletedTask;
+                    }
                     Random randFile = new Random();
                     localPicPath = $"{picNames[randFile.Next(0, picNames.Length - 1)]}";
                     ConsoleLog.Debug("发送图片",localPicPath);
@@ -147,7 +159,24 @@ namespace SuiseiBot.Code.ChatHandle
                     {
                         //文件名处理(mirai发送网络图片时pixivcat会返回403暂时无法使用代理发送图片
                         //QQGroup.SendGroupMessage(CQApi.Mirai_UrlImage(picUrl));
-                        DownloadFileFromURL(picUrl, localPicPath);
+
+                        //检查是否有设置代理
+                        if (!string.IsNullOrEmpty(proxy))
+                        {
+                            string[] fileNameArgs = Regex.Split(Path.GetFileName(picUrl), "_p");
+                            StringBuilder proxyUrlBuilder = new StringBuilder();
+                            proxyUrlBuilder.Append(proxy);
+                            //图片Pid部分
+                            proxyUrlBuilder.Append(proxy.EndsWith("/") ? $"{fileNameArgs[0]}" : $"/{fileNameArgs[0]}");
+                            //图片Index部分
+                            proxyUrlBuilder.Append($"/{fileNameArgs[1].Split('.')[0]}");
+                            ConsoleLog.Debug("Get Proxy Url",proxyUrlBuilder);
+                            DownloadFileFromURL(proxyUrlBuilder.ToString(), localPicPath);
+                        }
+                        else
+                        {
+                            DownloadFileFromURL(picUrl, localPicPath);
+                        }
                     }
                     return Task.CompletedTask;
                 }
@@ -178,7 +207,7 @@ namespace SuiseiBot.Code.ChatHandle
                 int      progressPercentage = 0;
                 long     bytesReceived      = 0;
                 DateTime flashTime          = DateTime.Now;
-                Console.WriteLine("开始从网络下载文件");
+                Console.WriteLine(@"开始从网络下载文件");
                 WebClient client = new WebClient();
                 //文件下载
                 client.DownloadProgressChanged += (sender, args) =>
@@ -188,7 +217,7 @@ namespace SuiseiBot.Code.ChatHandle
                                                           progressPercentage = args.ProgressPercentage;
                                                           ConsoleLog
                                                               .Debug("Download Pic",$"Downloading {args.ProgressPercentage}% " +
-                                                                         $"({(args.BytesReceived - bytesReceived) / 1024.0 / (DateTime.Now - flashTime).TotalSeconds}KB/s) ");
+                                                                         $"({(args.BytesReceived - bytesReceived) / 1024.0 / ((DateTime.Now - flashTime).TotalMilliseconds / 1000)}KB/s) ");
                                                           flashTime     = DateTime.Now;
                                                           bytesReceived = args.BytesReceived;
                                                       }
