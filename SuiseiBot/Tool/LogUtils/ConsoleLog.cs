@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using SuiseiBot.Code.IO;
 
 namespace SuiseiBot.Code.Tool.LogUtils
 {
@@ -175,7 +176,9 @@ namespace SuiseiBot.Code.Tool.LogUtils
         /// <param name="e"></param>
         public static void UnhandledExceptionLog(Exception e)
         {
-            Fatal("UnhandledException",ErrorLogBuilder(e));
+            string errMsg = ErrorLogBuilder(e);
+            Fatal("UnhandledException",errMsg);
+            IOUtils.CrashLogGen(errMsg);
             Thread.Sleep(5000);
             Environment.Exit(0);
         }
