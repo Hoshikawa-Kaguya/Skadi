@@ -46,6 +46,7 @@ Microsoft Visual C++ 2015-2019 Redistributable
 - [x] 切噜~♪
 - [x] 角色别名的数据库
 - [x] 公会战管理模块(还没写帮助文本)
+- [x] 自定义Pixiv图片代理(支持的代理服务器轮子:[heroku-pximg-proxy](https://github.com/Tsuk1ko/heroku-pximg-proxy))
 - [ ] JJC/PJJC查询(由[公主连结Re: Dive Fan Club](https://pcrdfans.com/)提供的查询功能)
 - [ ] 数据库的同步更新
 - [ ] 抽卡模拟(沉船模拟)
@@ -54,7 +55,7 @@ Microsoft Visual C++ 2015-2019 Redistributable
 
 ## 目前正在做的
 
-- [ ] 自定义Pixiv图片代理(支持的代理服务器轮子:[heroku-pximg-proxy](https://github.com/Tsuk1ko/heroku-pximg-proxy))
+- [ ] 图片发送模式增加base64选项
 - [ ] 提醒买药小助手（其实是个定时小功能，可以自定义发送的内容）
 - [ ] 更新更多的动态类型支持和直播的订阅更新(DD狂喜
 
