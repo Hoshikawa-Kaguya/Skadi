@@ -99,6 +99,11 @@ namespace SuiseiBot.Code.DatabaseUtils
         [SugarColumn(ColumnName = "uid",ColumnDataType = "INTEGER",IsPrimaryKey = true)]
         public long Uid { get; set; }
         /// <summary>
+        /// 成员名
+        /// </summary>
+        [SugarColumn(ColumnName = "name",ColumnDataType = "VARCHAR")]
+        public string Name { get; set; }
+        /// <summary>
         /// 用户状态修改时间
         /// </summary>
         [SugarColumn(ColumnName = "time",ColumnDataType = "INTEGER")]
@@ -130,49 +135,41 @@ namespace SuiseiBot.Code.DatabaseUtils
         /// </summary>
         [SugarColumn(ColumnName = "gid",ColumnDataType = "INTEGER",IsPrimaryKey = true)]
         public long Gid { get; set; }
-
         /// <summary>
         /// 公会名
         /// </summary>
         [SugarColumn(ColumnName = "name", ColumnDataType = "VARCHAR")]
         public string GuildName { get; set; }
-
         /// <summary>
         /// 公会所在区服
         /// </summary>
         [SugarColumn(ColumnName = "server", ColumnDataType = "INTEGER")]
         public Server ServerId { get; set; }
-
         /// <summary>
         /// 当前boss的血量
         /// </summary>
         [SugarColumn(ColumnName = "hp",ColumnDataType = "INTEGER")]
         public long HP { get; set; }
-
         /// <summary>
         /// 当前boss的总血量
         /// </summary>
         [SugarColumn(ColumnName = "total_hp",ColumnDataType = "INTEGER")]
         public long TotalHP { get; set; }
-
         /// <summary>
         /// 当前公会所在周目
         /// </summary>
         [SugarColumn(ColumnName = "round",ColumnDataType = "INTEGER")]
         public int Round { get; set; }
-
         /// <summary>
         /// 当前所在boss序号
         /// </summary>
         [SugarColumn(ColumnName = "order_num",ColumnDataType = "INTEGER")]
         public int Order { get; set; }
-
         /// <summary>
         /// 当前boss阶段
         /// </summary>
         [SugarColumn(ColumnName = "boss_phase",ColumnDataType = "INTEGER")]
         public int BossPhase { get; set; }
-
         /// <summary>
         /// 公会是否在会战
         /// </summary>

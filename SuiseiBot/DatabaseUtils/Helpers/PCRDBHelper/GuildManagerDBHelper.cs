@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Native.Sdk.Cqp.EventArgs;
+using Native.Sdk.Cqp.Model;
 using SqlSugar;
 using SuiseiBot.Code.Resource.TypeEnum;
 using SuiseiBot.Code.Resource.TypeEnum.GuildBattleType;
@@ -111,13 +112,15 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
             try
             {
                 int                  retCode  = -1;
+                GroupMemberInfo      member   = GuildEventArgs.CQApi.GetGroupMemberInfo(groupid, qqid);
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 if (dbClient.Queryable<MemberInfo>().Where(i => i.Uid == qqid && i.Gid == groupid).Any())
                 {
                     var data = new MemberInfo()
                     {
                         Uid = qqid,
-                        Gid = groupid
+                        Gid = groupid,
+                        Name = string.IsNullOrEmpty(member.Card) ? member.Nick : member.Card
                     };
                     retCode = dbClient.Updateable(data)
                                       .Where(i => i.Uid == qqid && i.Gid == groupid)
@@ -127,7 +130,6 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                 }
                 else
                 {
-                    //成员状态
                     var memberStatus = new MemberInfo
                     {
                         Flag = FlagType.IDLE,
@@ -135,7 +137,8 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
                         Info = null,
                         SL = 0,
                         Time = Utils.GetNowTimeStamp(),
-                        Uid = qqid
+                        Uid = qqid,
+                        Name = string.IsNullOrEmpty(member.Card) ? member.Nick : member.Card
                     };
                     //成员信息
                     retCode = dbClient.Insertable(memberStatus).ExecuteCommand() > 0 ? 0 : -1;
