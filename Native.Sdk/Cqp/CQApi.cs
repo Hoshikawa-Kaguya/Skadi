@@ -370,7 +370,7 @@ namespace Native.Sdk.Cqp
         /// </summary>
         /// <param name="url">图片的路径, 将图片放在 酷Q\data\image 下, 并填写相对路径. 如 酷Q\data\image\1.jpg 则填写 1.jpg</param>
         /// <param name="flashImg">发送的图片是否是闪照</param>
-        /// <exception cref="ArgumentException">参数: path 是空字符串或为 null</exception>
+        /// <exception cref="ArgumentException">参数: url 是空字符串或为 null</exception>
         /// <returns>返回 <see cref="CQCode"/> 对象</returns>
         public static CQCode Mirai_UrlImage(string url, bool flashImg = false)
         {
@@ -379,12 +379,34 @@ namespace Native.Sdk.Cqp
                 throw new ArgumentException("路径不能为空", nameof(url));
             }
 
-            return new CQCode(
-                              CQFunction.Image,
+            return new CQCode(CQFunction.Image,
                               new KeyValuePair<string, string>("url", url),
                               new KeyValuePair<string, string>("type", flashImg ? "flash" : string.Empty));
 
 		}
+
+		/// <summary>
+		/// 获取酷Q "图片" 代码
+		/// 用于发送Base64编码图片
+		/// </summary>
+		/// <param name="base64str">Base64 Code</param>
+        /// <exception cref="ArgumentException">参数: base64str 是空字符串或为 null</exception>
+        /// <returns>返回 <see cref="CQCode"/> 对象</returns>
+        public static CQCode Mirai_Base64Image(string base64str)
+        {
+            if (string.IsNullOrEmpty(base64str))
+            {
+                throw new ArgumentException("内容不能为空", nameof(base64str));
+            }
+
+			StringBuilder contentBuilder = new StringBuilder();
+            contentBuilder.Append("base64://");
+            contentBuilder.Append(base64str);
+
+            return new CQCode(CQFunction.Image,
+                              new KeyValuePair<string, string>("file", contentBuilder.ToString()));
+        }
+
 		/// <summary>
 		/// 获取酷Q "语音" 代码
 		/// </summary>

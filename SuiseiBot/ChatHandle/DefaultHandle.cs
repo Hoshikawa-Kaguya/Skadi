@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Security.AccessControl;
+using Native.Sdk.Cqp;
 using Native.Sdk.Cqp.EventArgs;
 using SuiseiBot.Code.IO;
 using SuiseiBot.Code.Tool.LogUtils;
@@ -64,13 +66,11 @@ namespace SuiseiBot.Code.ChatHandle
         {
             //此区域代码均只用于测试
 #if DEBUG
-            //检查色图文件夹大小
-            long size = new DirectoryInfo(IOUtils.GetHsoPath())
-                        .GetFiles("*", SearchOption.AllDirectories)
-                        .Select(file => file.Length)
-                        .Sum();
-            ConsoleLog.Debug("Hso Dir Size",size);
-            DebugEventArgs.FromGroup.SendGroupMessage($"DEBUG\r\nHso Dir Size = {size/1024.0/1024.0}MB");
+            using FileStream fileStream =
+                new FileStream($"{IOUtils.GetHsoPath()}/69047791_p0.png", FileMode.Open, FileAccess.Read);
+            byte[] buf = new byte[fileStream.Length];
+            fileStream.Read(buf, 0, (int) fileStream.Length);
+            DebugEventArgs.FromGroup.SendGroupMessage(CQApi.Mirai_Base64Image(Convert.ToBase64String(buf)));
 #else
             DebugEventArgs.FromGroup.SendGroupMessage("哇哦");
 #endif

@@ -91,13 +91,13 @@
     <Import Project="..\packages\Fody.6.2.6\build\Fody.targets" Condition="Exists('..\packages\Fody.6.2.6\build\Fody.targets')" />
   </ImportGroup>
   <PropertyGroup>
-    <PreBuildEvent>if exist "$(TargetDir)$(TargetName)" (echo 文件夹已存在) else (md "$(TargetDir)$(TargetName)")</PreBuildEvent>
+    <PreBuildEvent>
+</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>if exist "$(TargetDir)$(TargetName).dll" (
-move "$(TargetDir)$(TargetName).dll" "$(TargetDir)$(TargetName)" 
-rename "$(TargetDir)$(TargetName)\$(TargetName).dll" "$(TargetName).dll" 
-)</PostBuildEvent>
+    <PostBuildEvent>
+
+</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <DllExportIdent>D63C3FB7-18B9-4CDE-A8F4-F2ACE3FC382F</DllExportIdent>
