@@ -13,6 +13,10 @@ namespace SuiseiBot.Code.IO.Config.ConfigClass
         /// </summary>
         public string PximyProxy { set; get; }
         /// <summary>
+        /// 是否启用本地缓存
+        /// </summary>
+        public bool UseCache { set; get; }
+        /// <summary>
         /// 色图文件夹大小限制
         /// </summary>
         public long SizeLimit { set; get; }

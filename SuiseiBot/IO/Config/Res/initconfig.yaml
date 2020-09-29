@@ -28,6 +28,8 @@ HsoConfig:
   Source: Local
   #Pximy代理服务器地址，如果没有设置为null即可
   PximyProxy: null
+  #是否将图片保存到本地
+  UseCache: false
   #色图缓存文件夹的大小限制(MB)
   SizeLimit: 1024
   #Lolicon APIKEY

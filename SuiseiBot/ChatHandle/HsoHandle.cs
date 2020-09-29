@@ -53,7 +53,7 @@ namespace SuiseiBot.Code.ChatHandle
             {
                 case WholeMatchCmdType.Hso:
                     Hso hso = config.LoadedConfig.HsoConfig;
-                    await GiveMeSetu(hso.Source,hso.LoliconToken,hso.YukariToken,hso.PximyProxy);
+                    await GiveMeSetu(hso.Source,hso.LoliconToken,hso.YukariToken,hso.PximyProxy,hso.UseCache);
                     break;
                 default:
                     break;
@@ -62,6 +62,7 @@ namespace SuiseiBot.Code.ChatHandle
         #endregion
 
         #region 私有方法
+
         /// <summary>
         /// <para>从色图源获取色图</para>
         /// <para>不会支持R18的哦</para>
@@ -69,7 +70,9 @@ namespace SuiseiBot.Code.ChatHandle
         /// <param name="setuSource">源类型</param>
         /// <param name="loliconToken">lolicon token</param>
         /// <param name="yukariToken">yukari token</param>
-        private Task GiveMeSetu(SetuSourceType setuSource, string loliconToken = null, string yukariToken = null, string proxy = null)
+        /// <param name="proxy">代理服务器地址</param>
+        /// <param name="useCache"></param>
+        private Task GiveMeSetu(SetuSourceType setuSource, string loliconToken = null, string yukariToken = null, string proxy = null, bool useCache = false)
         {
             string localPicPath;
             string response;
@@ -171,11 +174,11 @@ namespace SuiseiBot.Code.ChatHandle
                             //图片Index部分
                             proxyUrlBuilder.Append($"/{fileNameArgs[1].Split('.')[0]}");
                             ConsoleLog.Debug("Get Proxy Url",proxyUrlBuilder);
-                            DownloadFileFromURL(proxyUrlBuilder.ToString(), localPicPath);
+                            DownloadFileFromURL(proxyUrlBuilder.ToString(), localPicPath, useCache);
                         }
                         else
                         {
-                            DownloadFileFromURL(picUrl, localPicPath);
+                            DownloadFileFromURL(picUrl, localPicPath, useCache);
                         }
                     }
                     return Task.CompletedTask;
@@ -200,7 +203,8 @@ namespace SuiseiBot.Code.ChatHandle
         /// </summary>
         /// <param name="url">目标URL</param>
         /// <param name="receivePath">接收文件的地址</param>
-        private void DownloadFileFromURL(string url, string receivePath)
+        /// <param name="useCache">是否启用本地缓存</param>
+        private void DownloadFileFromURL(string url, string receivePath, bool useCache)
         {
             try
             {
@@ -229,7 +233,17 @@ namespace SuiseiBot.Code.ChatHandle
                                                     QQGroup.SendGroupMessage(CQApi.CQCode_Image(receivePath));
                                                     ConsoleLog.Debug("file",Path.GetFileName(receivePath));
                                                 };
-                client.DownloadFileAsync(new Uri(url), receivePath);
+                client.DownloadDataCompleted += (sender, args) =>
+                                                {
+                                                    ConsoleLog.Info("Hso","下载数据成功,发送图片");
+                                                    string base64Img = Convert.ToBase64String(args.Result);
+                                                    QQGroup.SendGroupMessage(CQApi.Mirai_Base64Image(base64Img));
+                                                    ConsoleLog.Debug("base64 length",base64Img.Length);
+                                                };
+                if(useCache)
+                    client.DownloadFileAsync(new Uri(url), receivePath);
+                else
+                    client.DownloadDataAsync(new Uri(url));
             }
             catch (Exception e)
             {
