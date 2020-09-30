@@ -47,18 +47,25 @@ Microsoft Visual C++ 2015-2019 Redistributable
 - [x] 角色别名的数据库
 - [x] 公会战管理模块(还没写帮助文本)
 - [x] 自定义Pixiv图片代理(支持的代理服务器轮子:[heroku-pximg-proxy](https://github.com/Tsuk1ko/heroku-pximg-proxy))
+- [x] 图片发送模式增加base64选项
 - [ ] JJC/PJJC查询(由[公主连结Re: Dive Fan Club](https://pcrdfans.com/)提供的查询功能)
 - [ ] 数据库的同步更新
 - [ ] 抽卡模拟(沉船模拟)
-
-~~可能之后还有对少女前线的支持~~
-
-## 目前正在做的
-
-- [ ] 图片发送模式增加base64选项
 - [ ] 提醒买药小助手（其实是个定时小功能，可以自定义发送的内容）
 - [ ] 更新更多的动态类型支持和直播的订阅更新(DD狂喜
 
-## 注意
+~~可能之后还有对少女前线的支持~~
 
-由于Mirai项目的特殊性，本项目随时可能会迁移至[Discord](https://discord.com/)平台
+## 插件开发计划的变更
+
+今后将不会再作为[mirai](https://github.com/mamoe/mirai)的插件存在
+
+而是一个单独的客户端
+
+正在开发的功能中公会战功能会进行完善，在团出[OneBot](https://github.com/howmanybots/onebot)服务端API封装之前其他功能将不会再进行更新
+
+目前正在计划移植[OneBot](https://github.com/howmanybots/onebot)协议，并且将会自己做一个[OneBot](https://github.com/howmanybots/onebot)协议的轮子(不过应该会很简陋
+
+## 其他平台的考虑
+
+[Discord](https://discord.com/)和[Tomon](https://beta.tomon.co/)都有可能进行支持
