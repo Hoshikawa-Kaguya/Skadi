@@ -78,7 +78,7 @@ namespace SuiseiBot.Code.TimerEvent.Event
                         biliDynamic                = textAndPicCard;
                         break;
                     default:
-                        ConsoleLog.Debug("动态获取", $"ID:{biliUser}的动态获取成功，动态类型未知");
+                        ConsoleLog.Warning("动态获取", $"ID:{biliUser}的动态获取成功，动态类型未知");
                         return Task.CompletedTask;
                 }
             }
@@ -89,7 +89,7 @@ namespace SuiseiBot.Code.TimerEvent.Event
             }
             //获取用户信息
             UserInfo sender = biliDynamic.GetUserInfo();
-            ConsoleLog.Info("动态获取", $"{sender.UserName}的动态获取成功");
+            ConsoleLog.Debug("动态获取", $"{sender.UserName}的动态获取成功");
             //检查是否是最新的
             
             List<long> targetGroups = new List<long>();
@@ -102,14 +102,14 @@ namespace SuiseiBot.Code.TimerEvent.Event
             //没有群需要发送消息
             if(targetGroups.Count == 0)
             {
-                ConsoleLog.Info("动态获取", $"{sender.UserName}的动态已是最新");
+                ConsoleLog.Debug("动态获取", $"{sender.UserName}的动态已是最新");
                 return Task.CompletedTask;
             }
             //向未发生消息的群发送消息
             string messageToSend = MsgBuilder(sender, message, biliDynamic);
             foreach (long targetGroup in targetGroups)
             {
-                ConsoleLog.Info("动态获取", $"向群{targetGroup}发送动态信息");
+                ConsoleLog.Info("动态获取", $"获取到{sender.UserName}的最新动态，向群{targetGroup}发送动态信息");
                 cqApi.SendGroupMessage(targetGroup, messageToSend);
                 dbHelper.Update(targetGroup, sender.Uid, biliDynamic.UpdateTime);
             }

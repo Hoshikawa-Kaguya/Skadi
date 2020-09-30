@@ -231,7 +231,6 @@ namespace SuiseiBot.Code.PCRGuildManager
         /// </summary>
         private void BattleEnd()
         {
-            //TODO: EXCEL导出公会战数据
             //判断返回值
             switch (GuildBattleDB.EndBattle())
             {
@@ -611,12 +610,31 @@ namespace SuiseiBot.Code.PCRGuildManager
             #region Boss状态修改
             if (needChangeBoss) //进入下一个boss
             {
-                //TODO 下树提示
-                if (!GuildBattleDB.CleanTree())
+                List<long> treeList = GuildBattleDB.GetTree();
+                if (treeList == null)
                 {
                     DBMsgUtils.DatabaseFailedTips(GBEventArgs);
                     return;
                 }
+                //下树提示
+                if (treeList.Count != 0)
+                {
+                    if (!GuildBattleDB.CleanTree())
+                    {
+                        DBMsgUtils.DatabaseFailedTips(GBEventArgs);
+                        return;
+                    }
+                    StringBuilder treeTips = new StringBuilder();
+                    treeTips.Append("以下成员已下树:\r\n");
+                    //添加AtCQCode
+                    foreach (long uid in treeList)
+                    {
+                        treeTips.Append(CQApi.CQCode_At(uid));
+                    }
+                    //发送下树提示
+                    QQGroup.SendGroupMessage(treeTips);
+                }
+                //判断周目
                 if (atkGuildInfo.Order == 5) //进入下一个周目
                 {
                     ConsoleLog.Debug("change boss","go to next round");

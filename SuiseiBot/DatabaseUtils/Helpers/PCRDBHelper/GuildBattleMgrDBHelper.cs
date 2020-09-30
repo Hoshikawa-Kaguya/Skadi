@@ -563,7 +563,10 @@ namespace SuiseiBot.Code.DatabaseUtils.Helpers.PCRDBHelper
         /// <summary>
         /// 查树
         /// </summary>
-        /// <returns>挂树表</returns>
+        /// <returns>
+        /// <para>挂树表</para>
+        /// <para><see langword="null"/> 数据库错误</para>
+        /// </returns>
         public List<long> GetTree()
         {
             try
