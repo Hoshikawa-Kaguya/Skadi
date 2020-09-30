@@ -60,7 +60,7 @@ Microsoft Visual C++ 2015-2019 Redistributable
 
 今后将不会再作为[mirai](https://github.com/mamoe/mirai)的插件存在
 
-而是一个单独的客户端
+而是一个单独的机器人服务端
 
 正在开发的功能中公会战功能会进行完善，在团出[OneBot](https://github.com/howmanybots/onebot)服务端API封装之前其他功能将不会再进行更新
 
