@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile></DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="IO\Config\Res\InitGlobalConfig.yaml" />
+    <None Remove="IO\Config\Res\InitUserConfig.yaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="IO\Config\Res\InitGlobalConfig.yaml" />
+    <EmbeddedResource Include="IO\Config\Res\InitUserConfig.yaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SharpYaml" Version="1.6.6" />
+    <PackageReference Include="Sora" Version="0.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="IO\Config\Res\InitRes.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>InitRes.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="IO\Config\Res\InitRes.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>InitRes.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>
