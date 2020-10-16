@@ -19,6 +19,10 @@
 
 本项目仍处于开发阶段，文档还完全没写（
 
+# 机器人正在迁移至OneBot协议，重构后将作为Onebot协议(也就是原CqHttp协议)下的插件存在
+
+可以在rebuild分支中查看重构进度
+
 ## 开源协议
 
 ![AGPL](https://img.shields.io/github/license/CBGan/SuiseiBot?style=for-the-badge)
