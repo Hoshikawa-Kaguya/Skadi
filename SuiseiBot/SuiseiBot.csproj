@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <PackageReference Include="SharpYaml" Version="1.6.6" />
-    <PackageReference Include="Sora" Version="0.1.4" />
+    <PackageReference Include="Sora" Version="0.1.6" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,6 +37,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>InitRes.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="CommandHandle\" />
   </ItemGroup>
 
 </Project>

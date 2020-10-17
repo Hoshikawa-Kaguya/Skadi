@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sora.Tool;
 
-namespace SuiseiBot.IO.Config
+namespace SuiseiBot.IO
 {
     internal static class IOUtils
     {

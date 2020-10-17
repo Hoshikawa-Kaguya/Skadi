@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace SuiseiBot.Resource.TypeEnum
 {
-    internal enum SetuSourceType : int
+    internal enum SetuSourceType
     {
         /// <summary>
         /// 混合源模式

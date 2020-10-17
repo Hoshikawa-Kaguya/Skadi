@@ -11,9 +11,10 @@ namespace SuiseiBot.SuiseiInterface
         /// <summary>
         /// 群聊处理
         /// </summary>
-        public static async ValueTask GroupMessageParse(object sender, GroupMessageEventArgs groupMessage)
+        public static ValueTask GroupMessageParse(object sender, GroupMessageEventArgs groupMessage)
         {
-            
+            //TODO 指令响应分发
+            return ValueTask.CompletedTask;
         }
     }
 }

@@ -4,6 +4,7 @@ using Sora;
 using Sora.Tool;
 using SuiseiBot.IO.Config;
 using SuiseiBot.IO.Config.ConfigModule;
+using SuiseiBot.Resource;
 
 namespace SuiseiBot.SuiseiInterface
 {
@@ -25,20 +26,24 @@ namespace SuiseiBot.SuiseiInterface
             ConsoleLog.SetLogLevel(globalConfig.LogLevel);
             //显示Log等级
             ConsoleLog.Debug("Log Level", globalConfig.LogLevel);
-            //TODO 指令初始化
+
+            //指令匹配初始化
+            Command.KeywordResourseInit();
+            Command.RegexResourseInit();
+            Command.BotcmdResourseInit();
 
             ConsoleLog.Info("SuiseiBot初始化","启动反向WS服务器...");
             //初始化服务器
             SoraWSServer server = new SoraWSServer(new ServerConfig
             {
                 Location         = globalConfig.Location,
-                Port             = (int)globalConfig.Port,
+                Port             = globalConfig.Port,
                 AccessToken      = globalConfig.AccessToken,
                 UniversalPath    = globalConfig.UniversalPath,
                 ApiPath          = globalConfig.ApiPath,
                 EventPath        = globalConfig.EventPath,
-                HeartBeatTimeOut = (int)globalConfig.HeartBeatTimeOut,
-                ApiTimeOut       = (int)globalConfig.ApiTimeOut
+                HeartBeatTimeOut = globalConfig.HeartBeatTimeOut,
+                ApiTimeOut       = globalConfig.ApiTimeOut
             });
 
             //服务器回调
