@@ -13,11 +13,9 @@
 
 本项目的名字来源于 [星街彗星](https://space.bilibili.com/9034870)
 
-由[mirai](https://github.com/mamoe/mirai)提供强力驱动
-
-依赖:[mirai-native](https://github.com/iTXTech/mirai-native)
-
 本项目仍处于开发阶段，文档还完全没写（
+
+# 机器人正在迁移至OneBot协议，重构后将作为Onebot协议(也就是原CqHttp协议)下的插件存在
 
 ## 开源协议
 
@@ -37,17 +35,7 @@ Microsoft Visual C++ 2015-2019 Redistributable
 
 >  目前机器人只设计为国服服务，动态更新的功能一部分与日程表更新的功能重复，将不会支持日程表更新，除非之后会添加对外服的支持（摸了）
 
-此为重构分支将在重构完成后切换为主分支
-
-## 插件开发计划的变更
-
-今后将不会再作为[mirai](https://github.com/mamoe/mirai)的插件存在
-
-而是一个单独的机器人服务端
-
-正在开发的功能中公会战功能会进行完善，在团出[OneBot](https://github.com/howmanybots/onebot)服务端API封装之前其他功能将不会再进行更新
-
-目前正在计划移植[OneBot](https://github.com/howmanybots/onebot)协议，并且将会自己做一个[OneBot](https://github.com/howmanybots/onebot)协议的轮子(不过应该会很简陋
+重构中...
 
 ## 其他平台的考虑
 
