@@ -1,13 +1,12 @@
 using System;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using SuiseiBot.Code.Tool.LogUtils;
+using Sora.Tool;
 
-namespace SuiseiBot.Code.IO
+namespace SuiseiBot.IO
 {
     internal static class IOUtils
     {
@@ -17,26 +16,52 @@ namespace SuiseiBot.Code.IO
         /// </summary>
         private static string GetCrashLogPath()
         {
-            string path = $@"{Directory.GetCurrentDirectory()}\crash".Replace('\\', '/');
+            StringBuilder pathBuilder = new StringBuilder();
+#if DEBUG
+            pathBuilder.Append(Environment.GetEnvironmentVariable("DebugDataPath"));
+#else
+            pathBuilder.Append(Environment.CurrentDirectory);
+#endif
+            pathBuilder.Append("/crashlog");
             //检查目录是否存在，不存在则新建一个
-            Directory.CreateDirectory(path);
-            return path;
+            Directory.CreateDirectory(pathBuilder.ToString());
+            return pathBuilder.ToString();
         }
 
         /// <summary>
         /// 获取应用配置文件的绝对路径
         /// </summary>
-        public static string GetConfigPath(string dirName = null)
+        public static string GetUserConfigPath(long userId)
         {
-            StringBuilder dbPath = new StringBuilder();
-            dbPath.Append(Environment.CurrentDirectory.Replace('\\', '/'));
-            dbPath.Append("/data");
-            //自定义二级文件夹
-            if (!string.IsNullOrEmpty(dirName)) dbPath.Append($"/{dirName}");
+            if (userId < 10000) return null;
+            StringBuilder pathBuilder = new StringBuilder();
+#if DEBUG
+            pathBuilder.Append(Environment.GetEnvironmentVariable("DebugDataPath"));
+#else
+            pathBuilder.Append(Environment.CurrentDirectory);
+#endif
+            pathBuilder.Append("/config/");
+            //二级文件夹
+            pathBuilder.Append(userId);
             //检查目录是否存在，不存在则新建一个
-            Directory.CreateDirectory(dbPath.ToString());
-            dbPath.Append("/config.yaml");
-            return dbPath.ToString();
+            Directory.CreateDirectory(pathBuilder.ToString());
+            pathBuilder.Append("/config.yaml");
+            return pathBuilder.ToString();
+        }
+
+        public static string GetGlobalConfigPath()
+        {
+            StringBuilder pathBuilder = new StringBuilder();
+#if DEBUG
+            pathBuilder.Append(Environment.GetEnvironmentVariable("DebugDataPath"));
+#else
+            pathBuilder.Append(Environment.CurrentDirectory);
+#endif
+            pathBuilder.Append("/config");
+            //检查目录是否存在，不存在则新建一个
+            Directory.CreateDirectory(pathBuilder.ToString());
+            pathBuilder.Append("/server_config.yaml");
+            return pathBuilder.ToString();
         }
 
         /// <summary>
@@ -44,12 +69,16 @@ namespace SuiseiBot.Code.IO
         /// </summary>
         public static string GetHsoPath()
         {
-            StringBuilder dbPath = new StringBuilder();
-            dbPath.Append(Environment.CurrentDirectory.Replace('\\', '/'));
-            dbPath.Append("/data/image/hso");
+            StringBuilder pathBuilder = new StringBuilder();
+#if DEBUG
+            pathBuilder.Append(Environment.GetEnvironmentVariable("DebugDataPath"));
+#else
+            pathBuilder.Append(Environment.CurrentDirectory);
+#endif
+            pathBuilder.Append("/data/image/hso");
             //检查目录是否存在，不存在则新建一个
-            Directory.CreateDirectory(dbPath.ToString());
-            return dbPath.ToString();
+            Directory.CreateDirectory(pathBuilder.ToString());
+            return pathBuilder.ToString();
         }
 
         /// <summary>
@@ -58,8 +87,13 @@ namespace SuiseiBot.Code.IO
         /// <param name="errorMessage">错误信息</param>
         public static void CrashLogGen(string errorMessage)
         {
-            string fileName = $"{DateTime.Now.ToString(CultureInfo.CurrentCulture).Replace('/', '-').Replace(':','-')}.log";
-            using StreamWriter streamWriter = File.CreateText($@"{GetCrashLogPath()}/{fileName}");
+            StringBuilder pathBuilder = new StringBuilder();
+            pathBuilder.Append(GetCrashLogPath());
+            pathBuilder.Append("crash-");
+            pathBuilder.Append(DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss"));
+            pathBuilder.Append(".log");
+
+            using StreamWriter streamWriter = File.CreateText(pathBuilder.ToString());
             streamWriter.Write(errorMessage);
         }
 

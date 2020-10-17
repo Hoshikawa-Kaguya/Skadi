@@ -13,15 +13,9 @@
 
 本项目的名字来源于 [星街彗星](https://space.bilibili.com/9034870)
 
-由[mirai](https://github.com/mamoe/mirai)提供强力驱动
-
-依赖:[mirai-native](https://github.com/iTXTech/mirai-native)
-
 本项目仍处于开发阶段，文档还完全没写（
 
 # 机器人正在迁移至OneBot协议，重构后将作为Onebot协议(也就是原CqHttp协议)下的插件存在
-
-可以在rebuild分支中查看重构进度
 
 ## 开源协议
 
@@ -41,34 +35,7 @@ Microsoft Visual C++ 2015-2019 Redistributable
 
 >  目前机器人只设计为国服服务，动态更新的功能一部分与日程表更新的功能重复，将不会支持日程表更新，除非之后会添加对外服的支持（摸了）
 
-- [x] 会站排名查询
-- [x] 一些奇奇怪怪的功能（掷骰子之类的）
-- [x] ~~好感度养成~~(台本还没写)
-- [x] 自动更新B站官方的动态，同时也可以自定义获取其他UP的动态（使用库[BilibiliApi](https://github.com/CBGan/BilibiliApi)）
-- [x] 通过配置文件来控制log等级和模块是否启用
-- [x] 来点色图！
-- [x] 切噜~♪
-- [x] 角色别名的数据库
-- [x] 公会战管理模块(还没写帮助文本)
-- [x] 自定义Pixiv图片代理(支持的代理服务器轮子:[heroku-pximg-proxy](https://github.com/Tsuk1ko/heroku-pximg-proxy))
-- [x] 图片发送模式增加base64选项
-- [ ] JJC/PJJC查询(由[公主连结Re: Dive Fan Club](https://pcrdfans.com/)提供的查询功能)
-- [ ] 数据库的同步更新
-- [ ] 抽卡模拟(沉船模拟)
-- [ ] 提醒买药小助手（其实是个定时小功能，可以自定义发送的内容）
-- [ ] 更新更多的动态类型支持和直播的订阅更新(DD狂喜
-
-~~可能之后还有对少女前线的支持~~
-
-## 插件开发计划的变更
-
-今后将不会再作为[mirai](https://github.com/mamoe/mirai)的插件存在
-
-而是一个单独的机器人服务端
-
-正在开发的功能中公会战功能会进行完善，在团出[OneBot](https://github.com/howmanybots/onebot)服务端API封装之前其他功能将不会再进行更新
-
-目前正在计划移植[OneBot](https://github.com/howmanybots/onebot)协议，并且将会自己做一个[OneBot](https://github.com/howmanybots/onebot)协议的轮子(不过应该会很简陋
+重构中...
 
 ## 其他平台的考虑
 

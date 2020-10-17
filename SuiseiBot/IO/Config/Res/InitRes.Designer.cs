@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace SuiseiBot.Code.IO.Config.Res {
+namespace SuiseiBot.IO.Config.Res {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace SuiseiBot.Code.IO.Config.Res {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("SuiseiBot.Code.IO.Config.Res.InitRes", typeof(InitRes).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("SuiseiBot.IO.Config.Res.InitRes", typeof(InitRes).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -47,8 +47,8 @@ namespace SuiseiBot.Code.IO.Config.Res {
         }
         
         /// <summary>
-        ///   重写当前线程的 CurrentUICulture 属性
-        ///   重写当前线程的 CurrentUICulture 属性。
+        ///   重写当前线程的 CurrentUICulture 属性，对
+        ///   使用此强类型资源类的所有资源查找执行重写。
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
         internal static global::System.Globalization.CultureInfo Culture {
@@ -63,9 +63,19 @@ namespace SuiseiBot.Code.IO.Config.Res {
         /// <summary>
         ///   查找 System.Byte[] 类型的本地化资源。
         /// </summary>
-        internal static byte[] initconfig {
+        internal static byte[] InitGlobalConfig {
             get {
-                object obj = ResourceManager.GetObject("initconfig", resourceCulture);
+                object obj = ResourceManager.GetObject("InitGlobalConfig", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Byte[] 类型的本地化资源。
+        /// </summary>
+        internal static byte[] InitUserConfig {
+            get {
+                object obj = ResourceManager.GetObject("InitUserConfig", resourceCulture);
                 return ((byte[])(obj));
             }
         }

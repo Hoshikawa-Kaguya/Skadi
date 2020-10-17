@@ -1,6 +1,6 @@
-namespace SuiseiBot.Code.Resource.TypeEnum
+namespace SuiseiBot.Resource.TypeEnum
 {
-    internal enum SetuSourceType : int
+    internal enum SetuSourceType
     {
         /// <summary>
         /// 混合源模式
