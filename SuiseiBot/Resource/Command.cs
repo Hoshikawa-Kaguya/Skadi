@@ -84,7 +84,7 @@ namespace SuiseiBot.Resource
                 DescriptionAttribute descAttr = fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false).First() as DescriptionAttribute;
                 //生成正则表达式列表
                 List<Regex> regexes = (descAttr?.Description ?? "").Split(" ")
-                                                                   .Select(cmdStr => new Regex($@"^#{cmdStr} \w+.*$"))
+                                                                   .Select(cmdStr => new Regex($@"^(?:#|＃){cmdStr} \w"))
                                                                    .ToList();
                 //添加到匹配列表
                 BotcmdList.Add((BotCommand) (fieldInfo.GetValue(null) ?? -1), regexes);

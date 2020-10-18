@@ -1,8 +1,10 @@
 using System.Threading.Tasks;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
+using SuiseiBot.DatabaseUtils;
 using SuiseiBot.IO.Config;
 using SuiseiBot.IO.Config.ConfigModule;
+using SuiseiBot.TimerEvent;
 
 namespace SuiseiBot.SuiseiInterface
 {
@@ -18,8 +20,8 @@ namespace SuiseiBot.SuiseiInterface
         {
             ConsoleLog.Info("SuiseiBot初始化","与onebot客户端连接成功，初始化资源...");
             //初始化配置文件
-            ConsoleLog.Info("SuiseiBot初始化",$"初始化用户[{connectEvent.GetLoginUserId()}]配置");
-            Config config = new Config(connectEvent.GetLoginUserId());
+            ConsoleLog.Info("SuiseiBot初始化",$"初始化用户[{connectEvent.LoginUid}]配置");
+            Config config = new Config(connectEvent.LoginUid);
             config.UserConfigFileInit();
             config.LoadUserConfig(out UserConfig userConfig, false);
 
@@ -33,8 +35,16 @@ namespace SuiseiBot.SuiseiInterface
                 ConsoleLog.Debug("Hso Proxy", userConfig.HsoConfig.PximyProxy);
             }
 
-            //TODO 数据库
-            //TODO 计时器
+            //初始化数据库
+            DatabaseInit.Init(connectEvent);
+
+            //初始化定时器线程
+            if (userConfig.ModuleSwitch.Bili_Subscription || userConfig.ModuleSwitch.PCR_Subscription)
+            {
+                ConsoleLog.Debug("Timer Init",$"flash span = {userConfig.SubscriptionConfig.FlashTime}");
+                TimerEventParse.TimerAdd(connectEvent, userConfig.SubscriptionConfig.FlashTime);
+
+            }
 
             return ValueTask.CompletedTask;
         }

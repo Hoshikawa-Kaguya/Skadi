@@ -5,6 +5,7 @@ using Sora.Tool;
 using SuiseiBot.IO.Config;
 using SuiseiBot.IO.Config.ConfigModule;
 using SuiseiBot.Resource;
+using SuiseiBot.TimerEvent;
 
 namespace SuiseiBot.SuiseiInterface
 {
@@ -53,6 +54,8 @@ namespace SuiseiBot.SuiseiInterface
             server.Event.OnGroupMessage += GroupMessageEvent.GroupMessageParse;
             //私聊事件
             server.Event.OnPrivateMessage += PrivateMessageEvent.PrivateMessageParse;
+            //关闭连接事件处理
+            server.OnCloseConnectionAsync += TimerEventParse.StopTimer;
 
             await server.StartServerAsync();
         }

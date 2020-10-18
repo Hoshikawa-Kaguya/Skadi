@@ -22,7 +22,7 @@ namespace SuiseiBot.IO.Config.ConfigModule
         /// <summary>
         /// 群组数组
         /// </summary>
-        public List<ulong> GroupId          { set; get; }
+        public List<long> GroupId          { set; get; }
         /// <summary>
         /// PCR动态订阅
         /// </summary>
