@@ -22,7 +22,7 @@
   <ItemGroup>
     <PackageReference Include="BilibiliApi" Version="0.2.2" />
     <PackageReference Include="SharpYaml" Version="1.6.6" />
-    <PackageReference Include="Sora" Version="0.1.8" />
+    <PackageReference Include="Sora" Version="0.2.1" />
     <PackageReference Include="sqlSugarCore" Version="5.0.0.19" />
   </ItemGroup>
 
@@ -42,8 +42,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="CommandHandle\" />
-    <Folder Include="DatabaseUtils\Helpers\PCRDBHelper\" />
     <Folder Include="Resource\CommandHelp\" />
   </ItemGroup>
 

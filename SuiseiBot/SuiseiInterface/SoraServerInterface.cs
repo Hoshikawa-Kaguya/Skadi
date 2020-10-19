@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using Sora;
+using Sora.Server;
 using Sora.Tool;
 using SuiseiBot.IO.Config;
 using SuiseiBot.IO.Config.ConfigModule;
@@ -31,7 +31,7 @@ namespace SuiseiBot.SuiseiInterface
             //指令匹配初始化
             Command.KeywordResourseInit();
             Command.RegexResourseInit();
-            Command.BotcmdResourseInit();
+            Command.PCRGuildBattlecmdResourseInit();
 
             ConsoleLog.Info("SuiseiBot初始化","启动反向WS服务器...");
             //初始化服务器

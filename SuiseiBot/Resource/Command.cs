@@ -23,8 +23,8 @@ namespace SuiseiBot.Resource
         /// <summary>
         /// 机器人指令字典
         /// </summary>
-        private static readonly Dictionary<BotCommand,List<Regex>> BotcmdList = 
-            new Dictionary<BotCommand, List<Regex>>();
+        private static readonly Dictionary<PCRGuildBattleCommand,List<Regex>> PCRGuildBattleCommandList = 
+            new Dictionary<PCRGuildBattleCommand, List<Regex>>();
         #endregion
 
         #region 初始化
@@ -73,21 +73,21 @@ namespace SuiseiBot.Resource
         /// <summary>
         /// 初始化机器人指令字典
         /// </summary>
-        public static void BotcmdResourseInit()
+        public static void PCRGuildBattlecmdResourseInit()
         {
             //遍历所有属性
-            FieldInfo[] fieldInfos = typeof(BotCommand).GetFields();
+            FieldInfo[] fieldInfos = typeof(PCRGuildBattleCommand).GetFields();
             foreach (FieldInfo fieldInfo in fieldInfos)
             {
                 //跳过不是枚举类型的属性
-                if(fieldInfo.FieldType != typeof(BotCommand)) continue;
+                if(fieldInfo.FieldType != typeof(PCRGuildBattleCommand)) continue;
                 DescriptionAttribute descAttr = fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false).First() as DescriptionAttribute;
                 //生成正则表达式列表
                 List<Regex> regexes = (descAttr?.Description ?? "").Split(" ")
-                                                                   .Select(cmdStr => new Regex($@"^(?:#|＃){cmdStr} \w"))
+                                                                   .Select(cmdStr => new Regex($@"^(?:#|＃){cmdStr}.*"))
                                                                    .ToList();
                 //添加到匹配列表
-                BotcmdList.Add((BotCommand) (fieldInfo.GetValue(null) ?? -1), regexes);
+                PCRGuildBattleCommandList.Add((PCRGuildBattleCommand) (fieldInfo.GetValue(null) ?? -1), regexes);
             }
         }
         #endregion
@@ -140,24 +140,24 @@ namespace SuiseiBot.Resource
         }
 
         /// <summary>
-        /// 获取机器人指令类型
+        /// 获取会战管理指令类型
         /// </summary>
         /// <param name="rawString">消息字符串</param>
-        /// <param name="commandType">指令类型</param>
+        /// <param name="guildBattleCommandType">指令类型</param>
         /// <returns>匹配是否成功</returns>
-        public static bool GetBotcmdType(string rawString, out BotCommand commandType)
+        public static bool GetPCRGuildBattlecmdType(string rawString, out PCRGuildBattleCommand guildBattleCommandType)
         {
-            IEnumerable<BotCommand> matchResult = BotcmdList.Where(regexList => regexList.Value.Any(regex => regex.IsMatch(rawString)))
+            IEnumerable<PCRGuildBattleCommand> matchResult = PCRGuildBattleCommandList.Where(regexList => regexList.Value.Any(regex => regex.IsMatch(rawString)))
                                                              .Select(regexList => regexList.Key)
                                                              .ToList();
             if (!matchResult.Any())
             {
-                commandType = (BotCommand) (-1);
+                guildBattleCommandType = (PCRGuildBattleCommand) (-1);
                 return false;
             }
             else
             {
-                commandType = matchResult.First();
+                guildBattleCommandType = matchResult.First();
                 return true;
             }
         }

@@ -1,4 +1,4 @@
-using Sora.CQCodes;
+using Sora.Entities.CQCodes;
 using Sora.EventArgs.SoraEvent;
 
 namespace SuiseiBot.DatabaseUtils

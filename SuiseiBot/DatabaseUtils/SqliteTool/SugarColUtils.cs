@@ -1,7 +1,7 @@
 using System.Reflection;
 using SqlSugar;
 
-namespace SuiseiBot.SqliteTool
+namespace SuiseiBot.DatabaseUtils.SqliteTool
 {
     internal class SugarColUtils
     {

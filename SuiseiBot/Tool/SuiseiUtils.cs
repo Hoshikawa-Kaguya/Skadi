@@ -1,10 +1,13 @@
 using System;
 using System.Text;
-using Sora.Module.Info;
+using Sora.Entities;
+using Sora.Entities.CQCodes;
+using Sora.Entities.Info;
+using SuiseiBot.Resource.TypeEnum;
 
 namespace SuiseiBot.Tool
 {
-    internal static class Utils
+    internal static class SuiseiUtils
     {
         #region 时间戳处理
         /// <summary>
@@ -97,6 +100,28 @@ namespace SuiseiBot.Tool
                 }
 
                 return sb.ToString();
+            }
+        }
+
+        /// <summary>
+        /// 检查参数数组长度
+        /// </summary>
+        /// <param name="args">指令数组</param>
+        /// <param name="len">至少需要的参数个数</param>
+        /// <param name="QQgroup">（可选，不给的话就不发送错误信息）\n报错信息要发送到的QQ群对象</param>
+        /// <param name="fromQQid">（可选，但QQgroup给了的话本参数必填）\n要通知的人的QQ Id</param>
+        /// <returns>Illegal不符合 Legitimate符合 Extra超出</returns>
+        public static LenType CheckForLength(string[] args, int len, Group QQgroup = null, long fromQQid = 0)
+        {
+            if (args.Length >= len + 1)
+            {
+                if (args.Length == len + 1) return LenType.Legitimate;
+                else return LenType.Extra;
+            }
+            else
+            {
+                QQgroup?.SendGroupMessage(CQCode.CQAt(fromQQid), " 命令参数不全，请补充。");
+                return LenType.Illegal;
             }
         }
         #endregion

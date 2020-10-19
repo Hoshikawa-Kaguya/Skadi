@@ -1,7 +1,7 @@
 using System;
 using Sora.Tool;
 using SqlSugar;
-using SuiseiBot.SqliteTool;
+using SuiseiBot.DatabaseUtils.SqliteTool;
 
 namespace SuiseiBot.DatabaseUtils.Helpers
 {
