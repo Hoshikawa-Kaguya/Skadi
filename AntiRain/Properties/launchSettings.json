@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "AntiRain": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DebugDataPath": "H:\\Desktop\\bot\\AntiRainDebug"
+      }
+    }
+  }
+}
