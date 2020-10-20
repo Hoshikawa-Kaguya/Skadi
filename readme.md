@@ -4,7 +4,7 @@
    	<img width="400" src="https://i.loli.net/2020/10/20/L9aH6eiA4EsgXDx.png" alt="DOG">
     </br>
     <font size="-6" color="#707070">
-        图片作者:Yime(图片版权归作者所有)
+        图片作者:Yime(图片版权归图片作者所有)
 	</font></br>
 因为作者是个狗厨所以就用狗图了（叉腰</br>
 </div>
