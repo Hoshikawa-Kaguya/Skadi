@@ -1,17 +1,20 @@
-# ☄ SuiseiBot
-> すいちゃんは——今日もかわいい！
+# Anti-Rain Bot
+> ### 下雨了，在平原之上
 <div align="center">
-   	<img width="400" src="https://i.loli.net/2020/08/28/VqPKcFN6m3oZ5bB.png" alt="SUISEI">
+   	<img width="400" src="https://i.loli.net/2020/10/20/L9aH6eiA4EsgXDx.png" alt="DOG">
     </br>
     <font size="-6" color="#707070">
-        图片作者:Disco(图片版权归作者所有)
+        图片作者:Yime(图片版权归作者所有)
 	</font></br>
-一个有点机器人的神经(不是)</br>
+因为作者是个狗厨所以就用狗图了（叉腰</br>
 </div>
+
 
 -----
 
-本项目的名字来源于 [星街彗星](https://space.bilibili.com/9034870)
+本项目的名字来源于 [少女前线](https://gf-cn.sunborngame.com/) 的AR(Anti-Rain)小队名
+
+~~但是这个机器人的功能其实和[少女前线](https://gf-cn.sunborngame.com/)没啥关系~~
 
 本项目仍处于开发阶段，文档还完全没写（
 
