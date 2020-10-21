@@ -638,13 +638,13 @@ namespace AntiRain.ChatModule.PCRGuildBattle
                             {
                                 await QQGroup.SendGroupMessage(CQCode.CQAt(GMgrEventArgs.Sender.Id), " 结果如下，",
                                                          sb11.ToString() != ""
-                                                             ? ("以下成员已经更新：\r\n" + sb11.ToString())
+                                                             ? ("以下成员已经更新：\r\n" + sb11)
                                                              : "",
                                                          sb12.ToString() != ""
-                                                             ? ("\r\n以下成员已添加\r\n" + sb12.ToString())
+                                                             ? ("\r\n以下成员已添加\r\n" + sb12)
                                                              : "" /*只有存在新添加成员的情况下才需要显示这一句*/,
                                                          sb13.ToString() != ""
-                                                             ? ("\r\n以下成员操作时发生错误\r\n" + sb13.ToString())
+                                                             ? ("\r\n以下成员操作时发生错误\r\n" + sb13)
                                                              : ""
                                                          );
                             }
@@ -686,10 +686,10 @@ namespace AntiRain.ChatModule.PCRGuildBattle
 
                             await QQGroup.SendGroupMessage(CQCode.CQAt(GMgrEventArgs.Sender.Id), " 有成员已经存在，",
                                                      sb2.ToString() != ""
-                                                         ? ("以下成员已经更新：\r\n" + sb2.ToString())
+                                                         ? ("以下成员已经更新：\r\n" + sb2)
                                                          : "",
                                                      sb3.ToString() != ""
-                                                         ? ("\r\n以下成员已添加\r\n" + sb3.ToString())
+                                                         ? ("\r\n以下成员已添加\r\n" + sb3)
                                                          : "" /*只有存在新添加成员的情况下才需要显示这一句*/);
                             break;
                     }

@@ -1177,7 +1177,6 @@ namespace AntiRain.ChatModule.PCRGuildBattle
 
             //构造群消息文本
             List<CQCode>  message = new List<CQCode>();
-            List<List<CQCode>> messageList = new List<List<CQCode>>();
             message.Add(CQCode.CQText("还没出完刀的朋友萌："));
             //艾特成员并展示其剩余刀数
             remainAtkList.ToList().ForEach(member =>

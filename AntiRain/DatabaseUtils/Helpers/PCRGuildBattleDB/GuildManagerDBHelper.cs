@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using AntiRain.DatabaseUtils.SqliteTool;
 using AntiRain.Resource.TypeEnum;
@@ -69,7 +67,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// </returns>
         public int LeaveGuild(long qqid, long groupid)
         {
-            int                  retCode  = -1;
+            int                  retCode;
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             if (dbClient.Queryable<MemberInfo>().Where(i => i.Uid == qqid && i.Gid == groupid).Any())
             {
@@ -112,7 +110,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                int retCode = -1;
+                int retCode;
                 //从API获取成员信息
                 (APIStatusType apiStatus, GroupMemberInfo member) =
                     await GuildEventArgs.SourceGroup.GetGroupMemberInfo(uid);

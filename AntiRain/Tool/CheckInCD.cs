@@ -10,8 +10,8 @@ namespace AntiRain.Tool
         #region 调用记录用结构体
         private struct CheckUser
         {
-            internal long GroupId;
-            internal long UserId;
+            internal long GroupId { get; set; }
+            internal long UserId  { get; set; }
         }
         #endregion
 
@@ -37,20 +37,23 @@ namespace AntiRain.Tool
                 UserId  = eventArgs.Sender.Id
             };
             //尝试从字典中取出上一次调用的时间
-            LastChatDate.TryGetValue(user, out DateTime last_use_time);
-            //计算时间间隔(s)
-            long timeSpan = (long)(time - last_use_time).TotalSeconds;
-            //刷新调用时间
-            LastChatDate[user] = time;
-            if (timeSpan <= 60)
+            if (LastChatDate.TryGetValue(user, out DateTime last_use_time) &&
+                (long)(time - last_use_time).TotalSeconds < 60)
             {
                 await eventArgs.SourceGroup.SendGroupMessage("再玩？再玩把你牙拔了当球踢\n(不要频繁使用娱乐功能)");
                 await eventArgs.SourceGroup.EnableGroupMemberMute( //禁言一小时
-                                                            eventArgs.Sender.Id,
-                                                            3600);
+                                                                  eventArgs.Sender.Id,
+                                                                  3600);
+                //刷新调用时间
+                LastChatDate[user] = time;
                 return true;
             }
-            return false;
+            else
+            {
+                //刷新/写入调用时间
+                LastChatDate[user] = time;
+                return false;
+            }
         }
         #endregion
     }

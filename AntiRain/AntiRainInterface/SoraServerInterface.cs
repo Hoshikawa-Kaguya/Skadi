@@ -11,7 +11,7 @@ namespace AntiRain.AntiRainInterface
 {
     static class SoraServerInterface
     {
-        static async Task Main(string[] args)
+        static async Task Main()
         {
             //修改控制台标题
             Console.Title = @"AntiRain";

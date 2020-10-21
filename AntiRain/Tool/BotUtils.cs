@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Text;
 using AntiRain.Resource.TypeEnum;
 using Sora.Entities;
@@ -86,7 +87,7 @@ namespace AntiRain.Tool
         {
             StringBuilder sb = new StringBuilder();
 
-            int toPadNum = int.Parse(Math.Floor(padNums - GetQQStrLength(input)).ToString());
+            int toPadNum = (int) Math.Floor(padNums - GetQQStrLength(input));
             if (toPadNum <= 0)
             {
                 return input;
