@@ -20,7 +20,7 @@ namespace AntiRain.IO.Config
 
         #region 构造函数
         /// <summary>
-        /// ConfigIO构造函数，默认构造时加载本地配置文件
+        /// Configs实例构造函数
         /// </summary>
         /// <param name="loginUid">uid</param>
         public Config(long loginUid)

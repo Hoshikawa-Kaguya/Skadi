@@ -35,6 +35,7 @@
     <PackageReference Include="SharpYaml" Version="1.6.6" />
     <PackageReference Include="Sora" Version="0.2.1" />
     <PackageReference Include="sqlSugarCore" Version="5.0.0.19" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.7.1" />
   </ItemGroup>
 
   <ItemGroup>

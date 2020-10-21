@@ -3,7 +3,7 @@ using AntiRain.Resource.TypeEnum.CommandType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
 
-namespace AntiRain.ChatModule.PCRGuildBattle
+namespace AntiRain.ChatModule.PcrGuildBattle
 {
     internal class PcrGuildBattleChatHandle
     {

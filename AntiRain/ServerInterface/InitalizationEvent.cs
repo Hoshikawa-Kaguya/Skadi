@@ -6,7 +6,7 @@ using AntiRain.TimerEvent;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
 
-namespace AntiRain.AntiRainInterface
+namespace AntiRain.ServerInterface
 {
     /// <summary>
     /// 初始化事件

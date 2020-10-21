@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
@@ -7,7 +8,7 @@ using AntiRain.TimerEvent;
 using Sora.Server;
 using Sora.Tool;
 
-namespace AntiRain.AntiRainInterface
+namespace AntiRain.ServerInterface
 {
     static class SoraServerInterface
     {
@@ -27,6 +28,9 @@ namespace AntiRain.AntiRainInterface
             ConsoleLog.SetLogLevel(globalConfig.LogLevel);
             //显示Log等级
             ConsoleLog.Debug("Log Level", globalConfig.LogLevel);
+
+            //初始化字符编码
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             //指令匹配初始化
             Command.KeywordResourseInit();

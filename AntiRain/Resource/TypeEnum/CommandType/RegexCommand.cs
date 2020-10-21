@@ -9,11 +9,6 @@ namespace AntiRain.Resource.TypeEnum.CommandType
     internal enum RegexCommand
     {
         /// <summary>
-        /// 慧酱签到
-        /// </summary>
-        [Description(@"^彗酱今天也很可爱$")]
-        SuiseiHello,
-        /// <summary>
         /// 切噜编码
         /// </summary>
         [Description(@"^切噜一下")]
@@ -22,6 +17,11 @@ namespace AntiRain.Resource.TypeEnum.CommandType
         /// 切噜翻译
         /// </summary>
         [Description(@"^切噜(?:~|～)")]
-        CheruDecode
+        CheruDecode,
+        /// <summary>
+        /// 查询排名
+        /// </summary>
+        [Description(@"^查询公会排名\S*$")]
+        GetGuildRank
     }
 }

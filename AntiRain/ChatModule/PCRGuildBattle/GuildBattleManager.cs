@@ -17,7 +17,7 @@ using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
 
-namespace AntiRain.ChatModule.PCRGuildBattle
+namespace AntiRain.ChatModule.PcrGuildBattle
 {
     internal class GuildBattleManager
     {

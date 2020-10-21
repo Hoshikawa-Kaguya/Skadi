@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Sora.Entities.CQCodes;
 using Sora.EventArgs.SoraEvent;
 
-namespace AntiRain.AntiRainInterface
+namespace AntiRain.ServerInterface
 {
     /// <summary>
     /// 私聊事件

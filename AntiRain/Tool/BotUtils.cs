@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using System.Text;
 using AntiRain.Resource.TypeEnum;
 using Sora.Entities;
