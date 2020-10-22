@@ -24,6 +24,16 @@ Anti-Rain Bot是一个主要为辅助游玩公主连结/~~少女前线~~的群�
 
 ## 平台兼容性
 
+>**注意**
+>
+>仅支持反向WebSocket通讯方式
+>
+>仅支持Array事件上报格式
+
+可以运行在支持[onebot](https://github.com/howmanybots/onebot)协议的平台下
+
+不需要任何运行环境
+
 使用单文件模式进行编译（其实还有些运行时库没法打包就是了）
 
 对Windows/Liunx/OSX平台都进行了支持（包括ARM架构）
