@@ -22,6 +22,11 @@ namespace AntiRain.Resource.TypeEnum.CommandType
         /// 查询排名
         /// </summary>
         [Description(@"^查询公会排名\S*$")]
-        GetGuildRank
+        GetGuildRank,
+        /// <summary>
+        /// 随机数
+        /// </summary>
+        [Description(@"^dice$")]
+        Dice,
     }
 }

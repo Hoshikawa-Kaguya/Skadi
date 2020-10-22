@@ -9,14 +9,9 @@ namespace AntiRain.Resource.TypeEnum.CommandType
     internal enum KeywordCommand
     {
         /// <summary>
-        /// 随机数
-        /// </summary>
-        [Description("dice")]
-        Random,
-        /// <summary>
         /// 昏睡红茶
         /// </summary>
-        [Description("优质睡眠 昏睡红茶")]
+        [Description("优质睡眠 昏睡红茶 昏睡套餐 健康睡眠")]
         RedTea,
         /// <summary>
         /// 24岁，是学生
@@ -27,6 +22,11 @@ namespace AntiRain.Resource.TypeEnum.CommandType
         /// 来点色图！
         /// </summary>
         [Description("来点色图 来点涩图 我要看色图")]
-        Hso
+        Hso,
+        /// <summary>
+        /// 随机禁言
+        /// </summary>
+        [Description("随机禁言")]
+        RandomBan
     }
 }

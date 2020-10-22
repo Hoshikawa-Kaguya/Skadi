@@ -17,9 +17,13 @@ namespace AntiRain.IO.Config.ConfigModule
         /// </summary>
         public bool UseCache { set; get; }
         /// <summary>
+        /// 是否使用装逼大图
+        /// </summary>
+        public bool CardImage { set; get; }
+        /// <summary>
         /// 色图文件夹大小限制
         /// </summary>
-        public ulong SizeLimit { set; get; }
+        public long SizeLimit { set; get; }
         /// <summary>
         /// LoliconToken
         /// </summary>

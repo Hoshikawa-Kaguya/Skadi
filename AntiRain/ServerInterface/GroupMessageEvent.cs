@@ -1,4 +1,6 @@
 using System.Threading.Tasks;
+using AntiRain.ChatModule;
+using AntiRain.ChatModule.HsoModule;
 using AntiRain.ChatModule.PcrGuildBattle;
 using AntiRain.ChatModule.PcrUtils;
 using AntiRain.IO.Config;
@@ -51,6 +53,24 @@ namespace AntiRain.ServerInterface
             if (Command.GetKeywordType(groupMessage.Message.RawText, out KeywordCommand keywordCommand))
             {
                 ConsoleLog.Info("关键词触发",$"触发关键词[{keywordCommand}]");
+                switch (keywordCommand)
+                {
+                    case KeywordCommand.Hso:
+                        if (userConfig.ModuleSwitch.Hso)
+                        {
+                            HsoHandle hso = new HsoHandle(sender, groupMessage);
+                            hso.GetChat();
+                        }
+                        break;
+                    //将其他的的全部交给娱乐模块处理
+                    default:
+                        if (userConfig.ModuleSwitch.HaveFun)
+                        {
+                            Surprise surprise = new Surprise(sender, groupMessage);
+                            surprise.GetChat(keywordCommand);
+                        }
+                        break;
+                }
             }
 
             //正则匹配
@@ -75,8 +95,13 @@ namespace AntiRain.ServerInterface
                             guildRank.GetChat(regexCommand);
                         }
                         break;
+                    //将其他的的全部交给娱乐模块处理
                     default:
-                        ConsoleLog.Error("AntiRain Bot", "解析发生未知错误");
+                        if (userConfig.ModuleSwitch.HaveFun)
+                        {
+                            Surprise surprise = new Surprise(sender, groupMessage);
+                            surprise.GetChat(regexCommand);
+                        }
                         break;
                 }
             }

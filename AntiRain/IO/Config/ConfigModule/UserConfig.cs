@@ -36,10 +36,6 @@ namespace AntiRain.IO.Config.ConfigModule
         /// </summary>
         public bool PCR_GuildManager { set; get; }
         /// <summary>
-        /// 慧酱每日签到模块
-        /// </summary>
-        public bool Suisei { set; get; }
-        /// <summary>
         /// 调试模块
         /// </summary>
         public bool Debug { set; get; }
