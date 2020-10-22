@@ -1140,14 +1140,22 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             //获取群成员名片和余刀数
             remainAtkList.Select(member => new
                          {
-                             card = groupMembers
-                                    .Where(groupMember => groupMember.UserId == member.Key)
-                                    .Select(groupMember => groupMember.Card)
-                                    .First(),
-                             name = groupMembers
-                                    .Where(groupMember => groupMember.UserId == member.Key)
-                                    .Select(groupMember => groupMember.Nick)
-                                    .First(),
+                             card = !groupMembers
+                                     .Where(groupMember => groupMember.UserId == member.Key)
+                                     .Select(groupMember => groupMember.Card).Any() ? 
+                                 string.Empty : 
+                                 groupMembers
+                                     .Where(groupMember => groupMember.UserId == member.Key)
+                                     .Select(groupMember => groupMember.Card)
+                                     .First(),
+                             name = !groupMembers
+                                     .Where(groupMember => groupMember.UserId == member.Key)
+                                     .Select(groupMember => groupMember.Nick).Any() ? 
+                                 string.Empty : 
+                                 groupMembers
+                                     .Where(groupMember => groupMember.UserId == member.Key)
+                                     .Select(groupMember => groupMember.Nick)
+                                     .First(),
                              count = member.Value
                          })
                          .ToList()
