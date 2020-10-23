@@ -20,7 +20,7 @@
 
 ## 简介
 
-Anti-Rain Bot是一个主要为辅助游玩公主连结/~~少女前线~~的群聊机器人~~（当然还有一堆乱七八糟的功能）~~
+Anti-Rain Bot是一个主要为辅助游玩公主连结/~~少女前线~~的群聊机器人   ~~当然还有一堆乱七八糟的功能~~
 
 ## 平台兼容性
 
@@ -80,7 +80,7 @@ Anti-Rain Bot是一个主要为辅助游玩公主连结/~~少女前线~~的群�
 
 [Lancercmd](https://github.com/Lancercmd) | [Dihe Chen](https://github.com/Chendihe4975)~~老婆！~~ | [Ice-Cirno](https://github.com/Ice-Cirno) | [yuudi](https://github.com/yuudi)
 
-同时本Bot的开发时也参考了大量的开项目，感谢他们对机器人开发过程中的帮助
+同时本Bot的开发时也使用或参考了大量的开源项目，感谢他们对机器人开发过程中的帮助
 
 ### 底层框架
 
