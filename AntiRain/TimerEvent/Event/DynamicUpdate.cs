@@ -34,21 +34,18 @@ namespace AntiRain.TimerEvent.Event
             //数据库
             SubscriptionDBHelper dbHelper = new SubscriptionDBHelper(connectEventArgs.LoginUid);
             //检查模块是否启用
-            if (!moduleEnable.Bili_Subscription && !moduleEnable.PCR_Subscription) return;
+            if (!moduleEnable.Bili_Subscription) return;
             foreach (GroupSubscription subscription in Subscriptions)
             {
                 //PCR动态订阅
-                if (subscription.PCR_Subscription && moduleEnable.PCR_Subscription)
+                if (subscription.PCR_Subscription)
                 {
                     await GetDynamic(connectEventArgs.SoraApi, 353840826, subscription.GroupId, dbHelper);
                 }
                 //臭DD的订阅
-                if (moduleEnable.Bili_Subscription)
+                foreach (ulong biliUser in subscription.SubscriptionId)
                 {
-                    foreach (ulong biliUser in subscription.SubscriptionId)
-                    {
-                        await GetDynamic(connectEventArgs.SoraApi, biliUser, subscription.GroupId, dbHelper);
-                    }
+                    await GetDynamic(connectEventArgs.SoraApi, biliUser, subscription.GroupId, dbHelper);
                 }
             }
         }

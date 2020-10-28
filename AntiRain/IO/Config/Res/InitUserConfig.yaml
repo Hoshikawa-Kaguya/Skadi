@@ -2,8 +2,6 @@
 ModuleSwitch:
   #B站动态订阅
   Bili_Subscription: false
-  #公主连结国服动态订阅
-  PCR_Subscription: false
   #切噜语翻译
   Cheru: false
   #奇怪的娱乐功能 (随机禁言啥的)
@@ -14,8 +12,6 @@ ModuleSwitch:
   PCR_GuildManager: false
   #公会排名查询
   PCR_GuildRank: false
-  #调试模块
-  Debug: false
 
 # 随机色图设置
 HsoConfig:
@@ -43,5 +39,5 @@ SubscriptionConfig:
   #群组订阅设置
   GroupsConfig:
     - GroupId: [] #群号，可以一次设置多个群
-      PCR_Subscription: true #PCR国服动态订阅
-      SubscriptionId: [] #B站用户ID
+      PCR_Subscription: false #PCR国服动态订阅
+      SubscriptionId: [] #订阅的B站用户ID

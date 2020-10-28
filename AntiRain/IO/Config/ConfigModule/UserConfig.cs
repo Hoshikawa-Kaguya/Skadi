@@ -36,17 +36,9 @@ namespace AntiRain.IO.Config.ConfigModule
         /// </summary>
         public bool PCR_GuildManager { set; get; }
         /// <summary>
-        /// 调试模块
-        /// </summary>
-        public bool Debug { set; get; }
-        /// <summary>
         /// 公会排名查询
         /// </summary>
         public bool PCR_GuildRank { set; get; }
-        /// <summary>
-        /// PCR国服动态订阅
-        /// </summary>
-        public bool PCR_Subscription { set; get; }
         /// <summary>
         /// B站UP主动态订阅
         /// </summary>

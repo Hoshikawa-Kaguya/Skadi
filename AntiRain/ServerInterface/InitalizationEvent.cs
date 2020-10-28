@@ -39,11 +39,10 @@ namespace AntiRain.ServerInterface
             DatabaseInit.Init(connectEvent);
 
             //初始化定时器线程
-            if (userConfig.ModuleSwitch.Bili_Subscription || userConfig.ModuleSwitch.PCR_Subscription)
+            if (userConfig.ModuleSwitch.Bili_Subscription)
             {
                 ConsoleLog.Debug("Timer Init",$"flash span = {userConfig.SubscriptionConfig.FlashTime}");
                 TimerEventParse.TimerAdd(connectEvent, userConfig.SubscriptionConfig.FlashTime);
-
             }
 
             return ValueTask.CompletedTask;
