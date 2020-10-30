@@ -304,61 +304,25 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     var list = dbAction.ShowMembers(QQGroup.Id);
                     if (list.Any())
                     {
-                        StringBuilder sb                 = new StringBuilder();
-                        double        maxLenghtOfQQ      = 0; //最长的QQ号长度，用于Pad对齐
-                        double        maxLenghtOfNick    = 0; //最长的昵称长度，用于Pad对齐
-                        int           maxLenghtOfQQint   = 0; //最长的QQ号长度，用于Pad对齐
-                        int           maxLenghtOfNickint = 0; //最长的昵称长度，用于Pad对齐
-                        list.ForEach(async i =>
+                        var           groupMemberList = await GMgrEventArgs.SoraApi.GetGroupMemberList(QQGroup.Id);
+                        StringBuilder sb              = new StringBuilder();
+                        list.ForEach(i =>
                                      {
-                                         await GMgrEventArgs.SourceGroup.GetGroupMemberInfo(i.Uid);
-                                         (APIStatusType status, GroupMemberInfo groupMemberInfo) = await GMgrEventArgs.SourceGroup.GetGroupMemberInfo(i.Uid);
-                                         if (status != APIStatusType.OK)
+                                         if (groupMemberList.groupMemberList.Any(member => member.UserId == i.Uid))
                                          {
-                                             ConsoleLog.Error("API Error",$"API ret error {status}");
-                                             return;
-                                         }
-                                         if (BotUtils.GetQQStrLength(i.Uid.ToString()) > maxLenghtOfQQ)
-                                         {
-                                             maxLenghtOfQQ = BotUtils.GetQQStrLength(i.Uid.ToString());
-                                         }
-
-                                         if (BotUtils.GetQQStrLength(groupMemberInfo.Nick) > maxLenghtOfNick)
-                                         {
-                                             maxLenghtOfNick = BotUtils.GetQQStrLength(groupMemberInfo.Nick);
-                                         }
-
-                                         if (i.Uid.ToString().Length > maxLenghtOfQQint)
-                                         {
-                                             maxLenghtOfQQint = i.Uid.ToString().Length;
-                                         }
-
-                                         if (groupMemberInfo.Nick.Length > maxLenghtOfNickint)
-                                         {
-                                             maxLenghtOfNickint = groupMemberInfo.Nick.Length;
+                                             sb.Append("\n"     + i.Uid +
+                                                       "  |   " + groupMemberList
+                                                                  .groupMemberList.Where(member => member.UserId == i.Uid)
+                                                                  .Select(member => string.IsNullOrEmpty(member.Card)
+                                                                              ? member.Nick
+                                                                              : member.Card)
+                                                                  .First());
                                          }
                                      });
-                        maxLenghtOfQQ++;
-                        maxLenghtOfQQ++;
-                        list.ForEach(async i =>
-                                     {
-                                         (APIStatusType status, GroupMemberInfo member) = await GMgrEventArgs.SoraApi.GetGroupMemberInfo(i.Gid, i.Uid);
-                                         if (status != APIStatusType.OK)
-                                         {
-                                             ConsoleLog.Error("API Error",$"API ret error {status}");
-                                             return;
-                                         }
-                                         
-                                         sb.Append("\n"     + BotUtils.PadRightQQ(i.Uid.ToString(), maxLenghtOfQQ) +
-                                                   "  |   " +
-                                                   member.Nick);
-                                     });
 
-                        string listHeader = "\n\t" + dbAction.GetGuildName(QQGroup.Id);
-                        listHeader += "\n\t公会成员列表";
-                        listHeader += "\n".PadRight(maxLenghtOfNickint + maxLenghtOfQQint + 6, '=');
-                        listHeader += "\n" + BotUtils.PadRightQQ("QQ号", maxLenghtOfQQ) + "  |   昵称";
-                        await QQGroup.SendGroupMessage(CQCode.CQAt(GMgrEventArgs.Sender.Id), listHeader, sb.ToString());
+                        await QQGroup.SendGroupMessage(CQCode.CQAt(GMgrEventArgs.Sender.Id),
+                                                       $"公会[{dbAction.GetGuildName(QQGroup.Id)}]成员[{list.Count}|30]\r\n-----------------\r\nQQ号  |   昵称",
+                                                       sb.ToString());
                     }
                     else
                     {

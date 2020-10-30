@@ -31,7 +31,5 @@ namespace AntiRain.IO.Config.ConfigModule
         /// UID动态订阅
         /// </summary>
         public List<long> SubscriptionId   { set; get; }
-
-        public List<>
     }
 }
