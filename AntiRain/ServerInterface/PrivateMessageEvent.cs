@@ -15,9 +15,9 @@ namespace AntiRain.ServerInterface
         public static async ValueTask PrivateMessageParse(object sender, PrivateMessageEventArgs privateMessage)
         {
             //简单的机器人响应
-            if (privateMessage.Message.RawText.Equals("在吗"))
+            if (privateMessage.Message.RawText.Equals("在"))
             {
-                await privateMessage.Sender.SendPrivateMessage(CQCode.CQImage("https://i.loli.net/2020/10/20/zWPyocxFEVp2tDT.jpg"));
+                await privateMessage.Sender.SendPrivateMessage(CQCode.CQImage("https://i.loli.net/2020/11/02/2OgZ1M6YNV5kntS.gif"));
             }
         }
     }

@@ -26,24 +26,21 @@ namespace AntiRain.Tool
         /// 检查用户调用时是否在CD中
         /// 对任何可能刷屏的指令都有效
         /// </summary>
-        /// <param name="eventArgs">CQGroupMessageEventArgs</param>
+        /// <param name="groupId">群号</param>
+        /// <param name="userId">用户ID</param>
         /// <returns>是否在CD中</returns>
-        public static async Task<bool> isInCD(GroupMessageEventArgs eventArgs)
+        public static bool isInCD(long groupId, long userId)
         {
             DateTime time = DateTime.Now; //获取当前时间
             CheckUser user = new CheckUser
             {
-                GroupId = eventArgs.SourceGroup.Id,
-                UserId  = eventArgs.Sender.Id
+                GroupId = groupId,
+                UserId  = userId
             };
             //尝试从字典中取出上一次调用的时间
             if (LastChatDate.TryGetValue(user, out DateTime last_use_time) &&
                 (long)(time - last_use_time).TotalSeconds < 60)
             {
-                await eventArgs.SourceGroup.SendGroupMessage("再玩？再玩把你牙拔了当球踢\n(不要频繁使用娱乐功能)");
-                await eventArgs.SourceGroup.EnableGroupMemberMute( //禁言一小时
-                                                                  eventArgs.Sender.Id,
-                                                                  3600);
                 //刷新调用时间
                 LastChatDate[user] = time;
                 return true;

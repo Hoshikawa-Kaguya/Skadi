@@ -58,6 +58,8 @@ namespace AntiRain.ServerInterface
             server.Event.OnGroupMessage += GroupMessageEvent.GroupMessageParse;
             //私聊事件
             server.Event.OnPrivateMessage += PrivateMessageEvent.PrivateMessageParse;
+            //群聊戳一戳
+            server.Event.OnGroupPoke += GroupPokeEvent.GroupPokeEventParse;
             //关闭连接事件处理
             server.OnCloseConnectionAsync += TimerEventParse.StopTimer;
 
