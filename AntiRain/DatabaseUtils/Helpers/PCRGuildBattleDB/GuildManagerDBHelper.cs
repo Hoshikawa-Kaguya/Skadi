@@ -102,9 +102,9 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// <param name="groupid">成员所在群号</param>
         /// <param name="nickName">成员昵称</param>
         /// <returns>状态值
-        /// 0：正常添加
-        /// 1：该成员已存在，更新信息
-        /// -1：数据库出错/API错误
+        /// <para><see langword="0"/> 正常添加</para>
+        /// <para><see langword="1"/> 该成员已存在，更新信息</para>
+        /// <para><see langword="-1"/> 数据库出错/API错误</para>
         /// </returns>
         public async Task<int> JoinToGuild(long uid, long groupid, string nickName)
         {

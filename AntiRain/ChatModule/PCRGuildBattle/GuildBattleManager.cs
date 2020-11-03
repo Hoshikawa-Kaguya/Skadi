@@ -54,14 +54,14 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 //会战开始
                 case PCRGuildBattleCommand.BattleStart:
                     //检查执行者权限和参数
-                    if(!IsAdmin || !await ZeroArgsCheck(base.CommandArgs) || !await MemberCheck()) return;
+                    if(!await AuthCheck() || !await ZeroArgsCheck() || !await MemberCheck()) return;
                     BattleStart();
                     break;
 
                 //会战结束
                 case PCRGuildBattleCommand.BattleEnd:
                     //检查执行者权限和参数
-                    if(!IsAdmin || !await ZeroArgsCheck(base.CommandArgs) || !await MemberCheck()) return;
+                    if(!await AuthCheck() || !await ZeroArgsCheck() || !await MemberCheck()) return;
                     BattleEnd();
                     break;
 
@@ -86,19 +86,19 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 //删刀
                 case PCRGuildBattleCommand.DeleteAttack:
                     //检查执行者权限
-                    if(!IsAdmin || !await MemberCheck() || !await InBattleCheck()) return;
+                    if(!await AuthCheck() || !await MemberCheck() || !await InBattleCheck()) return;
                     DelAttack();
                     break;
                 
                 //撤销出刀申请
                 case PCRGuildBattleCommand.UndoAttack:
-                    if(!await ZeroArgsCheck(base.CommandArgs) || !await MemberCheck() || !await InBattleCheck()) return;
+                    if(!await ZeroArgsCheck() || !await MemberCheck() || !await InBattleCheck()) return;
                     UndoAtk();
                     break;
 
                 //查看进度
                 case PCRGuildBattleCommand.ShowProgress:
-                    if(!await ZeroArgsCheck(base.CommandArgs)) return;
+                    if(!await ZeroArgsCheck()) return;
                     GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(SourceGroup.Id);
                     if (guildInfo == null)
                     {
@@ -113,56 +113,56 @@ namespace AntiRain.ChatModule.PcrGuildBattle
 
                 //SL
                 case PCRGuildBattleCommand.SL:
-                    if(!await ZeroArgsCheck(base.CommandArgs) || !await MemberCheck() || !await InBattleCheck()) return;
+                    if(!await ZeroArgsCheck() || !await MemberCheck() || !await InBattleCheck()) return;
                     SL();
                     break;
                 
                 //撤销SL
                 case PCRGuildBattleCommand.UndoSL:
                     //检查执行者权限
-                    if(!IsAdmin || !await MemberCheck() || !await InBattleCheck()) return;
+                    if(!await AuthCheck() || !await MemberCheck() || !await InBattleCheck()) return;
                     SL(true);
                     break;
 
                 //上树
                 case PCRGuildBattleCommand.ClimbTree:
-                    if(!await ZeroArgsCheck(base.CommandArgs) || !await MemberCheck() || !await InBattleCheck()) return;
+                    if(!await ZeroArgsCheck() || !await MemberCheck() || !await InBattleCheck()) return;
                     ClimbTree();
                     break;
 
                 //下树
                 case PCRGuildBattleCommand.LeaveTree:
-                    if(!IsAdmin || !await MemberCheck() || !await InBattleCheck()) return;
+                    if(!await AuthCheck() || !await MemberCheck() || !await InBattleCheck()) return;
                     LeaveTree();
                     break;
 
                 //查树
                 case PCRGuildBattleCommand.ShowTree:
-                    if (!await ZeroArgsCheck(base.CommandArgs) || !await InBattleCheck()) return;
+                    if (!await ZeroArgsCheck() || !await InBattleCheck()) return;
                     CheckTree();
                     break;
 
                 //修改进度
                 case PCRGuildBattleCommand.ModifyProgress:
-                    if(!IsAdmin || !await MemberCheck() || !await InBattleCheck()) return;
+                    if(!await AuthCheck() || !await MemberCheck() || !await InBattleCheck()) return;
                     ModifyProgress();
                     break;
 
                 //查余刀
                 case PCRGuildBattleCommand.ShowRemainAttack:
-                    if (!await ZeroArgsCheck(base.CommandArgs) || !await MemberCheck() || !await InBattleCheck()) return;
+                    if (!await ZeroArgsCheck() || !await MemberCheck() || !await InBattleCheck()) return;
                     ShowRemainAttack();
                     break;
 
                 //催刀
                 case PCRGuildBattleCommand.UrgeAttack:
-                    if (!IsAdmin || !await ZeroArgsCheck(base.CommandArgs) || !await MemberCheck() || !await InBattleCheck()) return;
+                    if (!await AuthCheck() || !await ZeroArgsCheck() || !await MemberCheck() || !await InBattleCheck()) return;
                     UrgeAttack();
                     break;
 
                 //显示完整出刀表
                 case PCRGuildBattleCommand.ShowAllAttackList:
-                    if (!IsAdmin || !await ZeroArgsCheck(base.CommandArgs) || !await MemberCheck() || !await InBattleCheck()) return;
+                    if (!await AuthCheck() || !await ZeroArgsCheck() || !await MemberCheck() || !await InBattleCheck()) return;
                     ShowAllAttackList();
                     break;
 
