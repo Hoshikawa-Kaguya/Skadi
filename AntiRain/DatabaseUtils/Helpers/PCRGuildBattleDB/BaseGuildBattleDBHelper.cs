@@ -170,6 +170,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<MemberInfo>()
                                .Where(group => group.Gid == gid)
+                               .OrderBy(member => member.Uid)
                                .ToList();
             }
             catch (Exception e)

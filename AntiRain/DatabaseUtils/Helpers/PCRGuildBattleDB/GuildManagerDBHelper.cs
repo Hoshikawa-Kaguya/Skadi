@@ -65,7 +65,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// 1：该成员并不在公会内
         /// -1：数据库出错
         /// </returns>
-        public int LeaveGuild(long qqid, long groupid)
+        public int QuitGuild(long qqid, long groupid)
         {
             int                  retCode;
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
@@ -100,53 +100,49 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// </summary>
         /// <param name="uid">成员QQ号</param>
         /// <param name="groupid">成员所在群号</param>
-        /// <param name="nickName">成员昵称</param>
+        /// <param name="name">成员昵称</param>
         /// <returns>状态值
         /// <para><see langword="0"/> 正常添加</para>
         /// <para><see langword="1"/> 该成员已存在，更新信息</para>
         /// <para><see langword="-1"/> 数据库出错/API错误</para>
         /// </returns>
-        public async Task<int> JoinToGuild(long uid, long groupid, string nickName)
+        public int JoinGuild(long uid, long groupid, string name)
         {
             try
             {
-                int retCode;
-                //从API获取成员信息
-                (APIStatusType apiStatus, GroupMemberInfo member) =
-                    await GuildEventArgs.SourceGroup.GetGroupMemberInfo(uid);
-                if (apiStatus != APIStatusType.OK) return -1;
                 //读取数据库
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                if (dbClient.Queryable<MemberInfo>().Where(i => i.Uid == uid && i.Gid == groupid).Any())
+                //已存在成员则更新
+                if (dbClient.Queryable<MemberInfo>().Any(i => i.Uid == uid && i.Gid == groupid))
                 {
                     var data = new MemberInfo()
                     {
-                        Uid = uid,
-                        Gid = groupid,
-                        Name = string.IsNullOrEmpty(member.Card) ? member.Nick : member.Card
+                        Uid  = uid,
+                        Gid  = groupid,
+                        Name = name
                     };
-                    retCode = await dbClient.Updateable(data)
-                                            .Where(i => i.Uid == uid && i.Gid == groupid)
-                                            .ExecuteCommandHasChangeAsync()
+                    return dbClient.Updateable(data)
+                                   .Where(i => i.Uid == uid && i.Gid == groupid)
+                                   .ExecuteCommandHasChange()
                         ? 1
                         : -1;
                 }
+                //加入成员并写入成员信息
                 else
                 {
                     var memberStatus = new MemberInfo
                     {
                         Flag = FlagType.IDLE,
-                        Gid = groupid,
+                        Gid  = groupid,
                         Info = null,
-                        SL = 0,
+                        SL   = 0,
                         Time = Utils.GetNowTimeStamp(),
-                        Uid = uid,
-                        Name = string.IsNullOrEmpty(member.Card) ? member.Nick : member.Card
+                        Uid  = uid,
+                        Name = name
                     };
                     //成员信息
-                    retCode = await dbClient.Insertable(memberStatus).ExecuteCommandAsync() > 0 ? 0 : -1;
+                    return dbClient.Insertable(memberStatus).ExecuteCommand() > 0 ? 0 : -1;
                 }
-                return retCode;
             }
             catch (Exception e)
             {

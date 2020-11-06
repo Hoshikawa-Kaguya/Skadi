@@ -274,6 +274,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             //获取成员信息和上一次的出刀类型
             MemberInfo member    = GuildBattleDB.GetMemberInfo(atkUid);
             GuildInfo  guildInfo = GuildBattleDB.GetGuildInfo(SourceGroup.Id);
+            //数据库错误
             if (member == null || GuildBattleDB.GetLastAttack(atkUid, out AttackType lastAttack) == -1)
             {
                 DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);

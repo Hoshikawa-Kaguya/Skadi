@@ -83,7 +83,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             else
             {
                 await SourceGroup.SendGroupMessage(CQCode.CQAt(Sender.Id),
-                                                   " 你没有权限这样做~");
+                                                   " 你没有执行此指令的权限");
                 ConsoleLog.Warning($"会战[群:{SourceGroup.Id}]", $"群成员{MessageEventArgs.SenderInfo.Nick}正在尝试执行指令{CommandType}");
                 return false;
             }
