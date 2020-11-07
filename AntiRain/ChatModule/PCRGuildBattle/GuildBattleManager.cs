@@ -43,7 +43,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                                              "\r\n此群未被登记为公会");
                     return;
                 case -1:
-                    DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                    await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                     return;
             }
             
@@ -102,7 +102,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(SourceGroup.Id);
                     if (guildInfo == null)
                     {
-                        DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                        await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                         break;
                     }
                     if (await InBattleCheck())
@@ -187,7 +187,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(SourceGroup.Id);
             if (guildInfo == null)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             //判断返回值
@@ -204,7 +204,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                                              "\r\n新的一期会战开始啦！");
                     break;
                 case -1:
-                    DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                    await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                     break;
             }
         }
@@ -227,7 +227,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                                              "\r\n会战结束啦~");
                     break;
                 case -1:
-                    DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                    await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                     break;
             }
         }
@@ -277,7 +277,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             //数据库错误
             if (member == null || GuildBattleDB.GetLastAttack(atkUid, out AttackType lastAttack) == -1)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
 
@@ -323,7 +323,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             ConsoleLog.Debug("atk count",todayAtkCount);
             if (todayAtkCount == -1)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             //检查今日出刀数量
@@ -358,7 +358,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             }
             else
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
             }
         }
 
@@ -405,7 +405,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             MemberInfo member = GuildBattleDB.GetMemberInfo(atkUid);
             if (member == null)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             ConsoleLog.Debug("member status",member.Flag);
@@ -444,7 +444,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     }
                     else
                     {
-                        DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                        await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                         return;
                     }
                 default: //如果跑到这了，我完蛋了
@@ -513,7 +513,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             MemberInfo atkMemberInfo = GuildBattleDB.GetMemberInfo(atkUid);
             if (atkMemberInfo == null)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             //成员状态检查
@@ -543,7 +543,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             GuildInfo atkGuildInfo = GuildBattleDB.GetGuildInfo(SourceGroup.Id);
             if (atkGuildInfo == null)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             ConsoleLog.Debug("guild info check",$"DEBUG\r\nguild = {atkGuildInfo.Gid} | flag = {atkMemberInfo.Flag}");
@@ -552,7 +552,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             //获取上一刀的信息
             if (GuildBattleDB.GetLastAttack(atkUid, out AttackType lastAttackType) == -1)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             //判断是否进入下一个boss
@@ -587,7 +587,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             int attackId = GuildBattleDB.NewAttack(atkUid, atkGuildInfo, dmg, curAttackType);
             if (attackId == -1)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
 
@@ -597,7 +597,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 List<long> treeList = GuildBattleDB.GetTree();
                 if (treeList == null)
                 {
-                    DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                    await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                     return;
                 }
                 //下树提示
@@ -605,7 +605,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 {
                     if (!GuildBattleDB.CleanTree())
                     {
-                        DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                        await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                         return;
                     }
                     List<CQCode>  treeTips = new List<CQCode>();
@@ -624,7 +624,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     ConsoleLog.Debug("change boss","go to next round");
                     if (!GuildBattleDB.GotoNextRound(atkGuildInfo))
                     {
-                        DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                        await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                         return;
                     }
                 }
@@ -633,7 +633,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     ConsoleLog.Debug("change boss","go to next boss");
                     if (!GuildBattleDB.GotoNextBoss(atkGuildInfo))
                     {
-                        DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                        await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                         return;
                     }
                 }
@@ -643,7 +643,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 //更新boss数据
                 if (!GuildBattleDB.ModifyBossHP(atkGuildInfo, atkGuildInfo.HP - dmg))
                 {
-                    DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                    await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                     return;
                 }
             }
@@ -652,7 +652,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             //报刀后成员变为空闲
             if (!GuildBattleDB.UpdateMemberStatus(atkUid, FlagType.IDLE, null))
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
 
@@ -667,7 +667,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             GuildInfo latestGuildInfo = GuildBattleDB.GetGuildInfo(SourceGroup.Id);
             if (latestGuildInfo == null)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             message.Add(CQCode.CQText($"{latestGuildInfo.Round}周目{latestGuildInfo.Order}王\r\n"));
@@ -709,7 +709,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                                                        "并没有找到出刀记录");
                     return;
                 case -1:
-                    DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                    await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                     return;
             }
 
@@ -721,7 +721,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 case 1:
                     break;
                 default:
-                    DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                    await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                     return;
             }
             await SourceGroup.SendGroupMessage(CQCode.CQAt(Sender.Id),
@@ -730,7 +730,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(SourceGroup.Id);
             if (guildInfo == null)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             //显示进度
@@ -779,7 +779,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 case 1:
                     break;
                 default:
-                    DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                    await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                     return;
             }
             await SourceGroup.SendGroupMessage(CQCode.CQAt(Sender.Id),
@@ -788,7 +788,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(SourceGroup.Id);
             if (guildInfo == null)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             //显示进度
@@ -806,7 +806,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 MemberInfo member = GuildBattleDB.GetMemberInfo(Sender.Id);
                 if (member == null)
                 {
-                    DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                    await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                     return;
                 }
                 //判断成员状态
@@ -824,7 +824,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 {
                     if (!GuildBattleDB.SetMemberSL(Sender.Id))
                     {
-                        DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                        await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                         return;
                     }
                     await SourceGroup.SendGroupMessage("成员 ", CQCode.CQAt(Sender.Id), "已使用SL");
@@ -860,7 +860,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 MemberInfo member = GuildBattleDB.GetMemberInfo(memberUid);
                 if (member == null)
                 {
-                    DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                    await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                     return;
                 }
                 #endregion
@@ -869,7 +869,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 {
                     if (!GuildBattleDB.SetMemberSL(memberUid, true))
                     {
-                        DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                        await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                         return;
                     }
                     await SourceGroup.SendGroupMessage("成员 ",CQCode.CQAt(memberUid), "已撤回今天的SL");
@@ -890,7 +890,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             MemberInfo member = GuildBattleDB.GetMemberInfo(Sender.Id);
             if (member == null)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
 
@@ -899,7 +899,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 case FlagType.EnGage:
                     if (!GuildBattleDB.UpdateMemberStatus(Sender.Id, FlagType.OnTree, null))
                     {
-                        DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                        await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                     }
                     await SourceGroup.SendGroupMessage(CQCode.CQAt(Sender.Id),
                                                        "已上树");
@@ -954,7 +954,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             MemberInfo member = GuildBattleDB.GetMemberInfo(memberUid);
             if (member == null)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             #endregion
@@ -972,7 +972,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 case FlagType.OnTree:
                     if (!GuildBattleDB.UpdateMemberStatus(memberUid, FlagType.IDLE, null))
                     {
-                        DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                        await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                     }
                     await SourceGroup.SendGroupMessage(CQCode.CQAt(memberUid),
                                                        "已下树");
@@ -1070,14 +1070,14 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(SourceGroup.Id);
             if (guildInfo == null)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             //从数据获取最大血量
             GuildBattleBoss bossInfo = GuildBattleDB.GetBossInfo(targetRound, targetOrder, guildInfo.ServerId);
             if(bossInfo == null)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             if (targetHp >= bossInfo.HP)
@@ -1090,7 +1090,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
 
             if (!GuildBattleDB.ModifyProgress(targetRound, targetOrder, targetHp, bossInfo.HP, bossInfo.Phase))
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             await SourceGroup.SendGroupMessage(CQCode.CQAt(Sender.Id),
@@ -1107,7 +1107,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             Dictionary<long, int> remainAtkList = GetRemainAtkList();
             if(remainAtkList == null)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             if (remainAtkList.Count == 0)
@@ -1162,7 +1162,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             Dictionary<long, int> remainAtkList = GetRemainAtkList();
             if(remainAtkList == null)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             if (remainAtkList.Count == 0)
@@ -1194,7 +1194,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             //首先检查是否记录为空
             if (todayAttacksList == null)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             if (todayAttacksList.Count == 0)
@@ -1267,7 +1267,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             MemberInfo member = GuildBattleDB.GetMemberInfo(memberUid);
             if (member == null)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             #endregion
@@ -1276,7 +1276,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             //首先检查是否记录为空
             if (todayAttacksList == null)
             {
-                DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             if (todayAttacksList.Count == 0)
@@ -1395,7 +1395,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     await SourceGroup.SendGroupMessage(CQCode.CQAt(Sender.Id), "公会战还没开呢");
                     return false;
                 case -1:
-                    DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                    await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                     return false;
                 case 1:
                     return true;
@@ -1423,7 +1423,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     await SourceGroup.SendGroupMessage(CQCode.CQAt(Sender.Id), "不是这个公会的成员");
                     return false;
                 case -1:
-                    DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                    await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                     return false;
                 default:
                     await SourceGroup.SendGroupMessage(CQCode.CQAt(Sender.Id),
@@ -1452,7 +1452,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     await SourceGroup.SendGroupMessage(CQCode.CQAt(uid), "不是这个公会的成员");
                     return false;
                 case -1:
-                    DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                    await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                     return false;
                 default:
                     await SourceGroup.SendGroupMessage(CQCode.CQAt(uid),

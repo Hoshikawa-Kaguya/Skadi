@@ -43,14 +43,14 @@ namespace AntiRain.TimerEvent.Event
                     await GetDynamic(connectEventArgs.SoraApi, 353840826, subscription.GroupId, dbHelper);
                 }
                 //臭DD的订阅
-                foreach (ulong biliUser in subscription.SubscriptionId)
+                foreach (long biliUser in subscription.SubscriptionId)
                 {
                     await GetDynamic(connectEventArgs.SoraApi, biliUser, subscription.GroupId, dbHelper);
                 }
             }
         }
 
-        private static Task GetDynamic(SoraApi soraApi, ulong biliUser, List<long> groupId, SubscriptionDBHelper dbHelper)
+        private static Task GetDynamic(SoraApi soraApi, long biliUser, List<long> groupId, SubscriptionDBHelper dbHelper)
         {
             string       textMessage;
             Dynamic      biliDynamic;
@@ -58,7 +58,7 @@ namespace AntiRain.TimerEvent.Event
             //获取动态文本
             try
             {
-                JObject cardData = DynamicAPIs.GetBiliDynamicJson(biliUser, out CardType cardType);
+                JObject cardData = DynamicAPIs.GetBiliDynamicJson((ulong)biliUser, out CardType cardType);
                 switch (cardType)
                 {
                     //检查动态类型

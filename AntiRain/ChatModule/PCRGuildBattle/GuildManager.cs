@@ -7,7 +7,6 @@ using AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB;
 using AntiRain.Resource.TypeEnum;
 using AntiRain.Resource.TypeEnum.CommandType;
 using AntiRain.Tool;
-using Sora.Entities.Base;
 using Sora.Entities.CQCodes;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiEnum;
