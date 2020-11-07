@@ -34,7 +34,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// 1：公会不存在
         /// -1：删除时发生错误
         /// </returns>
-        public int EmptyMember(long groupid)
+        public int QuitAll(long groupid)
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             var                  data     = dbClient.Queryable<MemberInfo>().Where(i => i.Gid == groupid);
@@ -82,17 +82,6 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
 
             return retCode;
-        }
-
-        /// <summary>
-        /// 查询公会所有成员
-        /// </summary>
-        /// <param name="groupid">QQ群号</param>
-        /// <returns>成员列表</returns>
-        public List<MemberInfo> ShowMembers(long groupid)
-        {
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-            return dbClient.Queryable<MemberInfo>().Where(i => i.Gid == groupid).ToList();
         }
 
         /// <summary>

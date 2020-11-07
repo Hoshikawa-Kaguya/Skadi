@@ -30,7 +30,7 @@ namespace AntiRain.Resource.TypeEnum.CommandType
         /// <summary>
         /// 清空成员
         /// </summary>
-        [Description("清空成员")]
+        [Description("一键退会")]
         QuitAll = 5,
         /// <summary>
         /// 一键入会
