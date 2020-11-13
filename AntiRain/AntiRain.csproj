@@ -6,7 +6,7 @@
     <Authors>Yukari316</Authors>
     <Copyright>Yukari316</Copyright>
     <Platforms>AnyCPU;x64;x86</Platforms>
-    <Version>0.4.1</Version>
+    <Version>0.4.2</Version>
     <FileVersion>0.4.2.0</FileVersion>
   </PropertyGroup>
 
@@ -35,9 +35,9 @@
   <ItemGroup>
     <PackageReference Include="BilibiliApi" Version="0.2.2" />
     <PackageReference Include="SharpYaml" Version="1.6.6" />
-    <PackageReference Include="Sora" Version="0.2.3" />
+    <PackageReference Include="Sora" Version="0.3.3" />
     <PackageReference Include="sqlSugarCore" Version="5.0.0.19" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.7.1" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>

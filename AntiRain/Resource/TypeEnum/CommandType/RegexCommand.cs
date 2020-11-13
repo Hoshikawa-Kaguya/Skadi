@@ -28,5 +28,7 @@ namespace AntiRain.Resource.TypeEnum.CommandType
         /// </summary>
         [Description(@"^dice$")]
         Dice,
+        [Description(@"^debug")]
+        Debug
     }
 }

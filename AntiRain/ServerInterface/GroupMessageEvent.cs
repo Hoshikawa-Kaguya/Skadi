@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using AntiRain.ChatModule;
 using AntiRain.ChatModule.HsoModule;
@@ -7,6 +8,8 @@ using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
 using AntiRain.Resource;
 using AntiRain.Resource.TypeEnum.CommandType;
+using Sora.Entities.CQCodes;
+using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
 
@@ -20,16 +23,16 @@ namespace AntiRain.ServerInterface
         /// <summary>
         /// 群聊处理和事件触发分发
         /// </summary>
-        public static ValueTask GroupMessageParse(object sender, GroupMessageEventArgs groupMessage)
+        public static async ValueTask GroupMessageParse(object sender, GroupMessageEventArgs groupMessage)
         {
             //配置文件实例
             Config config = new Config(groupMessage.LoginUid);
             //读取配置文件
             if (!config.LoadUserConfig(out UserConfig userConfig))
             {
-                groupMessage.SourceGroup.SendGroupMessage("读取配置文件(User)时发生错误\r\n请联系机器人管理员");
+                await groupMessage.SourceGroup.SendGroupMessage("读取配置文件(User)时发生错误\r\n请联系机器人管理员");
                 ConsoleLog.Error("AntiRain会战管理", "无法读取用户配置文件");
-                return ValueTask.CompletedTask;
+                return;
             }
             //指令匹配
             //#开头的指令(会战) -> 关键词 -> 正则
@@ -95,6 +98,16 @@ namespace AntiRain.ServerInterface
                             guildRank.GetChat(regexCommand);
                         }
                         break;
+                    //调试
+                    case RegexCommand.Debug:
+                        if (groupMessage.SenderInfo.Role == MemberRoleType.Member)
+                        {
+                            ConsoleLog.Warning("Auth Warning",$"成员[{groupMessage.Sender.Id}]正尝试执行调试指令");
+                        }
+                        else
+                        {
+                        }
+                        break;
                     //将其他的的全部交给娱乐模块处理
                     default:
                         if (userConfig.ModuleSwitch.HaveFun)
@@ -105,7 +118,6 @@ namespace AntiRain.ServerInterface
                         break;
                 }
             }
-            return ValueTask.CompletedTask;
         }
     }
 }

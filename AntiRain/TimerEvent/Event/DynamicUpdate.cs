@@ -64,13 +64,13 @@ namespace AntiRain.TimerEvent.Event
                     //检查动态类型
                     case CardType.PlainText:
                         PlainTextCard plainTextCard = new PlainTextCard(cardData);
-                        textMessage                   = plainTextCard.ToString();
-                        biliDynamic               = plainTextCard;
+                        textMessage = plainTextCard.ToString();
+                        biliDynamic = plainTextCard;
                         break;
                     case CardType.TextAndPic:
                         TextAndPicCard textAndPicCard = new TextAndPicCard(cardData);
                         imgList.AddRange(textAndPicCard.ImgList);
-                        textMessage     = textAndPicCard.ToString();
+                        textMessage = textAndPicCard.ToString();
                         biliDynamic = textAndPicCard;
                         break;
                     default:
@@ -120,7 +120,8 @@ namespace AntiRain.TimerEvent.Event
             {
                 ConsoleLog.Info("动态获取", $"获取到{sender.UserName}的最新动态，向群{targetGroup}发送动态信息");
                 soraApi.SendGroupMessage(targetGroup, msgList);
-                dbHelper.Update(targetGroup, sender.Uid, biliDynamic.UpdateTime);
+                if(!dbHelper.Update(targetGroup, sender.Uid, biliDynamic.UpdateTime)) 
+                    ConsoleLog.Error("数据库","更新动态记录时发生了数据库错误");
             }
             return Task.CompletedTask;
         }
