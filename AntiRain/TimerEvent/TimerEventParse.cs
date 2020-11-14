@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AntiRain.TimerEvent.Event;
+using Fleck;
 using Sora.EventArgs.SoraEvent;
 using Sora.EventArgs.WSSeverEvent;
+using Sora.Tool;
 
 namespace AntiRain.TimerEvent
 {
@@ -37,16 +39,14 @@ namespace AntiRain.TimerEvent
         /// <summary>
         /// 删除定时器
         /// </summary>
-        /// <param name="id">uid</param>
+        /// <param name="sender">消息源</param>
         /// <param name="connectionEventArgs">ConnectEventArgs</param>
-        internal static ValueTask StopTimer(string id, ConnectionEventArgs connectionEventArgs)
+        internal static ValueTask StopTimer(IWebSocketConnectionInfo sender, ConnectionEventArgs connectionEventArgs)
         {
-            if (long.TryParse(id, out long uid))
-            {
-                //停止计时器
-                Timers[uid].Dispose();
-                Timers.Remove(uid);
-            }
+            //停止计时器
+            Timers[connectionEventArgs.SelfId].Dispose();
+            Timers.Remove(connectionEventArgs.SelfId);
+            ConsoleLog.Debug("SubTimer",$"Timer stopped user[{connectionEventArgs.SelfId}]");
             return ValueTask.CompletedTask;
         }
         #endregion

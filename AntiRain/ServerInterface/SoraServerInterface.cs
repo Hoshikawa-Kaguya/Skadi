@@ -61,7 +61,8 @@ namespace AntiRain.ServerInterface
             //群聊戳一戳
             server.Event.OnGroupPoke += GroupPokeEvent.GroupPokeEventParse;
             //关闭连接事件处理
-            server.OnCloseConnectionAsync += TimerEventParse.StopTimer;
+            server.ConnManager.OnCloseConnectionAsync += TimerEventParse.StopTimer;
+            server.ConnManager.OnHeartBeatTimeOut += TimerEventParse.StopTimer;
 
             await server.StartServerAsync();
         }
