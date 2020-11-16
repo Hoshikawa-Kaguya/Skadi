@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -10,7 +11,9 @@ using AntiRain.IO.Config.ConfigModule;
 using AntiRain.Network;
 using AntiRain.Resource.TypeEnum;
 using Newtonsoft.Json.Linq;
+using PyLibSharp.Requests;
 using Sora.Entities.CQCodes;
+using Sora.Enumeration.ApiEnum;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
 using Group = Sora.Entities.Group;
@@ -61,88 +64,97 @@ namespace AntiRain.ChatModule.HsoModule
         /// <param name="hso">hso配置实例</param>
         private async Task GiveMeSetu(Hso hso)
         {
-            string localPicPath;
-            string response;
-            StringBuilder urlBuilder = new StringBuilder();
+            string  localPicPath;
+            JObject response;
             ConsoleLog.Debug("源",hso.Source);
-            //源选择
-            switch (hso.Source)
+            //本地模式
+            if (hso.Source == SetuSourceType.Local)
             {
-                //混合源
-                case SetuSourceType.Mix:
-                    Random randSource = new Random();
-                    if (randSource.Next(1, 100) > 50)
-                    {
-                        urlBuilder.Append("https://api.lolicon.app/setu/");
-                        if (!string.IsNullOrEmpty(hso.LoliconToken)) urlBuilder.Append($"?token={hso.LoliconToken}");
-                        ConsoleLog.Debug("色图源","Lolicon");
-                    }
-                    else
-                    {
-                        urlBuilder.Append("https://api.yukari.one/setu/");
-                        if (!string.IsNullOrEmpty(hso.YukariToken)) urlBuilder.Append($"?token={hso.YukariToken}");
-                        ConsoleLog.Debug("色图源", "Yukari");
-                    }
-                    break;
-                //lolicon
-                case SetuSourceType.Lolicon:
-                    urlBuilder.Append("https://api.lolicon.app/setu/");
-                    if (!string.IsNullOrEmpty(hso.LoliconToken)) urlBuilder.Append($"?token={hso.LoliconToken}");
-                    ConsoleLog.Debug("色图源", "Lolicon");
-                    break;
-                //Yukari
-                case SetuSourceType.Yukari:
-                    urlBuilder.Append("https://api.yukari.one/setu/");
-                    if (!string.IsNullOrEmpty(hso.YukariToken)) urlBuilder.Append($"?token={hso.YukariToken}");
-                    ConsoleLog.Debug("色图源", "Yukari");
-                    break;
-                case SetuSourceType.Local:
-                    string[] picNames = Directory.GetFiles(IOUtils.GetHsoPath());
-                    if (picNames.Length == 0)
-                    {
-                        await QQGroup.SendGroupMessage("机器人管理者没有在服务器上塞色图\r\n你去找他要啦!");
-                        return;
-                    }
-                    Random randFile = new Random();
-                    localPicPath = $"{picNames[randFile.Next(0, picNames.Length - 1)]}";
-                    ConsoleLog.Debug("发送图片",localPicPath);
-                    await QQGroup.SendGroupMessage(hso.CardImage
-                                                 ? CQCode.CQCardImage(localPicPath)
-                                                 : CQCode.CQImage(localPicPath));
+                string[] picNames = Directory.GetFiles(IOUtils.GetHsoPath());
+                if (picNames.Length == 0)
+                {
+                    await QQGroup.SendGroupMessage("机器人管理者没有在服务器上塞色图\r\n你去找他要啦!");
                     return;
+                }
+                Random randFile = new Random();
+                localPicPath = $"{picNames[randFile.Next(0, picNames.Length - 1)]}";
+                ConsoleLog.Debug("发送图片",localPicPath);
+                await QQGroup.SendGroupMessage(hso.CardImage
+                                                   ? CQCode.CQCardImage(localPicPath)
+                                                   : CQCode.CQImage(localPicPath));
+                return;
             }
             //网络部分
             try
             {
                 ConsoleLog.Info("NET", "尝试获取色图");
                 await QQGroup.SendGroupMessage("正在获取色图中...");
-                response = HTTPUtils.GetHttpResponse(urlBuilder.ToString());
-                ConsoleLog.Debug("Get Json",response);
-                if (string.IsNullOrEmpty(response))//没有获取到任何返回
+                string apiKey;
+                string serverUrl;
+                //源切换
+                switch (hso.Source)
                 {
-                    ConsoleLog.Error("网络错误","获取到的响应数据为空");
-                    await HsoEventArgs.SourceGroup.SendGroupMessage("哇哦~发生了网络错误，请联系机器人所在服务器管理员");
+                    case SetuSourceType.Mix:
+                        Random randSource = new Random();
+                        if (randSource.Next(1, 100) > 50)
+                        {
+                            serverUrl = "https://api.lolicon.app/setu/";
+                            apiKey    = hso.LoliconApiKey ?? string.Empty;
+                        }
+                        else
+                        {
+                            serverUrl = "https://api.yukari.one/setu/";
+                            apiKey    = hso.YukariApiKey ?? string.Empty;
+                        }
+                        break;
+                    case SetuSourceType.Yukari:
+                        serverUrl = "https://api.yukari.one/setu/";
+                        apiKey    = hso.YukariApiKey ?? string.Empty;
+                        break;
+                    case SetuSourceType.Lolicon:
+                        serverUrl = "https://api.yukari.one/setu/";
+                        apiKey    = hso.YukariApiKey ?? string.Empty;
+                        break;
+                    default:
+                        await QQGroup.SendGroupMessage("发生了未知错误");
+                        ConsoleLog.Error("Hso","发生了未知错误");
+                        return;
+                }
+                //向服务器发送请求
+                ReqResponse reqResponse = await Requests.GetAsync(serverUrl, new ReqParams
+                {
+                    Timeout = 3000,
+                    Params = new Dictionary<string, string>
+                    {
+                        {"apikey", apiKey}
+                    }
+                });
+                if (reqResponse.StatusCode != HttpStatusCode.OK)
+                {
+                    ConsoleLog.Error("Net",$"{serverUrl} return code {(int)reqResponse.StatusCode}");
+                    await HsoEventArgs.SourceGroup.SendGroupMessage($"哇哦~发生了网络错误[{reqResponse.StatusCode}]，请联系机器人所在服务器管理员");
                     return;
                 }
+                response = reqResponse.Json();
+                ConsoleLog.Debug("Get Json",response);
             }
             catch (Exception e)
             {
                 //网络错误
                 await QQGroup.SendGroupMessage("哇哦~发生了网络错误，请联系机器人所在服务器管理员");
-                ConsoleLog.Error("网络发生错误", ConsoleLog.ErrorLogBuilder(e));
+                ConsoleLog.Error("网络发生错误", ConsoleLog.ErrorLogBuilder(e.InnerException));
                 return;
             }
             //json处理
             try
             {
-                JObject picJson = JObject.Parse(response);
-                if ((int)picJson["code"] == 0)
+                if ((int)response["code"] == 0)
                 {
                     //图片链接
-                    string picUrl        = picJson["data"]?[0]?["url"]?.ToString() ?? "";
+                    string picUrl        = response["data"]?[0]?["url"]?.ToString() ?? "";
                     ConsoleLog.Debug("获取到图片",picUrl);
                     //本地图片存储路径
-                    localPicPath = $"{IOUtils.GetHsoPath()}/{Path.GetFileName(picUrl)}";
+                    localPicPath = $"{IOUtils.GetHsoPath()}/{Path.GetFileName(picUrl)}".Replace('\\','/');
                     if (File.Exists(localPicPath)) //检查是否已缓存过图片
                     {
                         await QQGroup.SendGroupMessage(hso.CardImage
@@ -174,9 +186,9 @@ namespace AntiRain.ChatModule.HsoModule
                     }
                     return;
                 }
-                if (((int) picJson["code"] == 401 || (int) picJson["code"] == 429) &&
+                if (((int) response["code"] == 401 || (int) response["code"] == 429) &&
                     hso.Source == SetuSourceType.Lolicon) 
-                    ConsoleLog.Warning("API Token 失效",$"code:{picJson["code"]}");
+                    ConsoleLog.Warning("API Token 失效",$"code:{response["code"]}");
                 else
                     ConsoleLog.Warning("没有找到图片信息","服务器拒绝提供信息");
                 await QQGroup.SendGroupMessage("哇奧色图不见了\n请联系机器人服务器管理员");
@@ -218,10 +230,31 @@ namespace AntiRain.ChatModule.HsoModule
                 client.DownloadFileCompleted += async (sender, args) =>
                                                 {
                                                     ConsoleLog.Info("Hso","下载数据成功,发送图片");
-                                                    await QQGroup.SendGroupMessage(cardImg
-                                                                                 ? CQCode.CQCardImage(receivePath.Replace('/','\\'))
-                                                                                 : CQCode.CQImage(receivePath.Replace('/','\\')));
+                                                    var (code, _) = await QQGroup.SendGroupMessage(cardImg
+                                                        ? CQCode.CQCardImage(receivePath)
+                                                        : CQCode.CQImage(receivePath));
                                                     ConsoleLog.Debug("file",Path.GetFileName(receivePath));
+                                                    if(code == APIStatusType.OK) ConsoleLog.Info("Hso","色图发送成功");
+                                                    else
+                                                    {
+                                                        ConsoleLog.Error("Hso", $"色图发送失败 code={(int) code}");
+                                                        await QQGroup.SendGroupMessage($"哇奧色图不见了\r\n色图发送失败了\r\nAPI ERROR [{code}]");
+                                                    }
+                                                    //检查是否出现空文件
+                                                    if (code == APIStatusType.OK || !File.Exists(receivePath)) return;
+                                                    FileInfo file = new FileInfo(receivePath);
+                                                    ConsoleLog.Debug("File Size Check", file.Length);
+                                                    if (file.Length != 0) return;
+                                                    ConsoleLog.Error("Hso", "色图下载失败");
+                                                    //删除下载失败的文件
+                                                    try
+                                                    {
+                                                        file.Delete();
+                                                    }
+                                                    catch (Exception e)
+                                                    {
+                                                        ConsoleLog.Error("IO",ConsoleLog.ErrorLogBuilder(e));
+                                                    }
                                                 };
                 client.DownloadDataCompleted += async (sender, args) =>
                                                 {
@@ -231,9 +264,15 @@ namespace AntiRain.ChatModule.HsoModule
                                                         StringBuilder ImgBase64Str = new StringBuilder();
                                                         ImgBase64Str.Append("base64://");
                                                         ImgBase64Str.Append(Convert.ToBase64String(args.Result));
-                                                        await QQGroup.SendGroupMessage(cardImg
+                                                        var (code, _) = await QQGroup.SendGroupMessage(cardImg
                                                             ? CQCode.CQCardImage(ImgBase64Str.ToString())
                                                             : CQCode.CQImage(ImgBase64Str.ToString()));
+                                                        if(code == APIStatusType.OK) ConsoleLog.Info("Hso","色图发送成功");
+                                                        else
+                                                        {
+                                                            ConsoleLog.Error("Hso", $"色图发送失败 code={(int) code}");
+                                                            await QQGroup.SendGroupMessage($"哇奧色图不见了\r\n色图发送失败了\r\nAPI ERROR [{code}]");
+                                                        }
                                                         ConsoleLog.Debug("base64 length",ImgBase64Str.Length);
                                                     }
                                                     catch (Exception e)

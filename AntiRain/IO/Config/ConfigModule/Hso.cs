@@ -27,10 +27,10 @@ namespace AntiRain.IO.Config.ConfigModule
         /// <summary>
         /// LoliconToken
         /// </summary>
-        public string LoliconToken { set; get; }
+        public string LoliconApiKey { set; get; }
         /// <summary>
         /// YukariToken
         /// </summary>
-        public string YukariToken { set; get; }
+        public string YukariApiKey { set; get; }
     }
 }

@@ -28,9 +28,9 @@ HsoConfig:
   #色图缓存文件夹的大小限制(MB)
   SizeLimit: 1024
   #Lolicon APIKEY
-  LoliconToken: null
+  LoliconApiKey: null
   #Yukari APIKEY
-  YukariToken: null
+  YukariApiKey: null
 
 # 动态订阅设置
 SubscriptionConfig:
