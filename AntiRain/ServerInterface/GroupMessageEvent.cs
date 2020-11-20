@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using AntiRain.ChatModule;
 using AntiRain.ChatModule.HsoModule;
@@ -8,7 +7,6 @@ using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
 using AntiRain.Resource;
 using AntiRain.Resource.TypeEnum.CommandType;
-using Sora.Entities.CQCodes;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;

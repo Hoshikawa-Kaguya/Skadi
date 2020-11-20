@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using AntiRain.IO;
 using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
-using AntiRain.Network;
 using AntiRain.Resource.TypeEnum;
 using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;

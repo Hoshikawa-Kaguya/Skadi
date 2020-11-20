@@ -64,7 +64,7 @@ namespace AntiRain.ServerInterface
             server.ConnManager.OnCloseConnectionAsync += TimerEventParse.StopTimer;
             server.ConnManager.OnHeartBeatTimeOut += TimerEventParse.StopTimer;
 
-            await server.StartServerAsync();
+            await server.StartServer();
         }
     }
 }
