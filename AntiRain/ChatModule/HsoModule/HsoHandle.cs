@@ -12,7 +12,7 @@ using AntiRain.Resource.TypeEnum;
 using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
 using Sora.Entities.CQCodes;
-using Sora.Enumeration.ApiEnum;
+using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
 using Group = Sora.Entities.Group;
@@ -64,10 +64,10 @@ namespace AntiRain.ChatModule.HsoModule
         private async Task GiveMeSetu(Hso hso)
         {
             string  localPicPath;
-            JObject response;
+            JToken response;
             ConsoleLog.Debug("源",hso.Source);
             //本地模式
-            if (hso.Source == SetuSourceType.Local)
+            if (hso.Source.Equals("Local"))
             {
                 string[] picNames = Directory.GetFiles(IOUtils.GetHsoPath());
                 if (picNames.Length == 0)
@@ -93,7 +93,7 @@ namespace AntiRain.ChatModule.HsoModule
                 //源切换
                 switch (hso.Source)
                 {
-                    case SetuSourceType.Mix:
+                    case "Mix":
                         Random randSource = new Random();
                         if (randSource.Next(1, 100) > 50)
                         {
@@ -106,27 +106,29 @@ namespace AntiRain.ChatModule.HsoModule
                             apiKey    = hso.YukariApiKey ?? string.Empty;
                         }
                         break;
-                    case SetuSourceType.Yukari:
+                    case "Yukari":
                         serverUrl = "https://api.yukari.one/setu/";
                         apiKey    = hso.YukariApiKey ?? string.Empty;
                         break;
-                    case SetuSourceType.Lolicon:
+                    case "Lolicon":
                         serverUrl = "https://api.yukari.one/setu/";
                         apiKey    = hso.YukariApiKey ?? string.Empty;
                         break;
                     default:
-                        await QQGroup.SendGroupMessage("发生了未知错误");
-                        ConsoleLog.Error("Hso","发生了未知错误");
-                        return;
+                        serverUrl = hso.Source;
+                        apiKey    = string.Empty;
+                        break;
                 }
                 //向服务器发送请求
+                ConsoleLog.Debug("hso api server",serverUrl);
                 ReqResponse reqResponse = await Requests.GetAsync(serverUrl, new ReqParams
                 {
                     Timeout = 3000,
                     Params = new Dictionary<string, string>
                     {
                         {"apikey", apiKey}
-                    }
+                    },
+                    isCheckSSLCert = hso.CheckSSLCert
                 });
                 if (reqResponse.StatusCode != HttpStatusCode.OK)
                 {
@@ -134,14 +136,14 @@ namespace AntiRain.ChatModule.HsoModule
                     await HsoEventArgs.SourceGroup.SendGroupMessage($"哇哦~发生了网络错误[{reqResponse.StatusCode}]，请联系机器人所在服务器管理员");
                     return;
                 }
-                response = reqResponse.Json();
+                response = JToken.Parse(reqResponse.Text);
                 ConsoleLog.Debug("Get Json",response);
             }
             catch (Exception e)
             {
                 //网络错误
                 await QQGroup.SendGroupMessage("哇哦~发生了网络错误，请联系机器人所在服务器管理员");
-                ConsoleLog.Error("网络发生错误", ConsoleLog.ErrorLogBuilder(e.InnerException));
+                ConsoleLog.Error("网络发生错误", $"{ConsoleLog.ErrorLogBuilder(e)}\r\n\r\n{PyLibSharp.Requests.Utils.GetInnerExceptionMessages(e)}");
                 return;
             }
             //json处理
@@ -186,7 +188,7 @@ namespace AntiRain.ChatModule.HsoModule
                     return;
                 }
                 if (((int) response["code"] == 401 || (int) response["code"] == 429) &&
-                    hso.Source == SetuSourceType.Lolicon) 
+                    hso.Source.Equals("Lolicon")) 
                     ConsoleLog.Warning("API Token 失效",$"code:{response["code"]}");
                 else
                     ConsoleLog.Warning("没有找到图片信息","服务器拒绝提供信息");

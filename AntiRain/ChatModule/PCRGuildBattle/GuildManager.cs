@@ -9,7 +9,7 @@ using AntiRain.Resource.TypeEnum.CommandType;
 using AntiRain.Tool;
 using Sora.Entities.CQCodes;
 using Sora.Entities.Info;
-using Sora.Enumeration.ApiEnum;
+using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
 

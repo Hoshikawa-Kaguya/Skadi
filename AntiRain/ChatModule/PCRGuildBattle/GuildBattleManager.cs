@@ -11,7 +11,7 @@ using AntiRain.Resource.TypeEnum.GuildBattleType;
 using AntiRain.Tool;
 using Sora.Entities.CQCodes;
 using Sora.Entities.Info;
-using Sora.Enumeration.ApiEnum;
+using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
 

@@ -69,7 +69,7 @@ namespace AntiRain.ChatModule
         private async void RandomNumber()
         {
             Random randomGen = new Random();
-            await QQGroup.SendGroupMessage(CQCode.CQAt(MFKEventArgs.Sender.Id), "丢出了\r\n", randomGen.Next(0, 100));
+            await QQGroup.SendGroupMessage(CQCode.CQAt(MFKEventArgs.Sender.Id), "丢出了\r\n", randomGen.Next(1, 6));
         }
 
         private async void RandomBan()

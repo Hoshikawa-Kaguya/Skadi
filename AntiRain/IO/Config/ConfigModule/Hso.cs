@@ -1,5 +1,3 @@
-using AntiRain.Resource.TypeEnum;
-
 namespace AntiRain.IO.Config.ConfigModule
 {
     internal class Hso
@@ -7,7 +5,11 @@ namespace AntiRain.IO.Config.ConfigModule
         /// <summary>
         /// 色图源类型
         /// </summary>
-        public SetuSourceType Source { set; get; }
+        public string Source { set; get; }
+        /// <summary>
+        /// 检查源证书
+        /// </summary>
+        public bool CheckSSLCert { set; get; }
         /// <summary>
         /// Pximy代理
         /// </summary>

@@ -9,7 +9,6 @@ using BilibiliApi.Dynamic;
 using BilibiliApi.Dynamic.Enums;
 using BilibiliApi.Dynamic.Models;
 using BilibiliApi.Dynamic.Models.Card;
-using Newtonsoft.Json.Linq;
 using Sora.Entities.Base;
 using Sora.Entities.CQCodes;
 using Sora.EventArgs.SoraEvent;
@@ -50,7 +49,13 @@ namespace AntiRain.TimerEvent.Event
             }
         }
 
-        private static Task GetDynamic(SoraApi soraApi, long biliUser, List<long> groupId, SubscriptionDBHelper dbHelper)
+        private static ValueTask GetLiveStatus(SoraApi soraApi, long biliUser, List<long> groupId, SubscriptionDBHelper dbHelper)
+        {
+
+            return ValueTask.CompletedTask;
+        }
+
+        private static ValueTask GetDynamic(SoraApi soraApi, long biliUser, List<long> groupId, SubscriptionDBHelper dbHelper)
         {
             string       textMessage;
             Dynamic      biliDynamic;
@@ -58,30 +63,44 @@ namespace AntiRain.TimerEvent.Event
             //获取动态文本
             try
             {
-                JObject cardData = DynamicAPIs.GetBiliDynamicJson((ulong)biliUser, out CardType cardType);
-                switch (cardType)
+                var cardData = DynamicAPIs.GetLatestDynamic(biliUser);
+                switch (cardData.cardType)
                 {
                     //检查动态类型
                     case CardType.PlainText:
-                        PlainTextCard plainTextCard = new PlainTextCard(cardData);
+                        PlainTextCard plainTextCard = (PlainTextCard) cardData.cardObj;
                         textMessage = plainTextCard.ToString();
                         biliDynamic = plainTextCard;
                         break;
                     case CardType.TextAndPic:
-                        TextAndPicCard textAndPicCard = new TextAndPicCard(cardData);
+                        TextAndPicCard textAndPicCard = (TextAndPicCard) cardData.cardObj;
                         imgList.AddRange(textAndPicCard.ImgList);
                         textMessage = textAndPicCard.ToString();
                         biliDynamic = textAndPicCard;
                         break;
+                    case CardType.Forward:
+                        ForwardCard forwardCard = (ForwardCard) cardData.cardObj;
+                        textMessage = forwardCard.ToString();
+                        biliDynamic = forwardCard;
+                        break;
+                    case CardType.Video:
+                        VideoCard videoCard = (VideoCard) cardData.cardObj;
+                        imgList.Add(videoCard.CoverUrl);
+                        textMessage = videoCard.ToString();
+                        biliDynamic = videoCard;
+                        break;
+                    case CardType.Error:
+                        ConsoleLog.Error("动态获取", $"ID:{biliUser}的动态获取失败");
+                        return ValueTask.CompletedTask;
                     default:
-                        ConsoleLog.Warning("动态获取", $"ID:{biliUser}的动态获取成功，动态类型未知");
-                        return Task.CompletedTask;
+                        ConsoleLog.Debug("动态获取", $"ID:{biliUser}的动态获取成功，动态类型未知");
+                        return ValueTask.CompletedTask;
                 }
             }
             catch (Exception e)
             {
                 ConsoleLog.Error("获取动态更新时发生错误",ConsoleLog.ErrorLogBuilder(e));
-                return Task.CompletedTask;
+                return ValueTask.CompletedTask;
             }
             //获取用户信息
             BiliUserInfo sender = biliDynamic.GetUserInfo();
@@ -99,7 +118,7 @@ namespace AntiRain.TimerEvent.Event
             if(targetGroups.Count == 0)
             {
                 ConsoleLog.Debug("动态获取", $"{sender.UserName}的动态已是最新");
-                return Task.CompletedTask;
+                return ValueTask.CompletedTask;
             }
             //构建消息
             List<CQCode>  msgList = new List<CQCode>();
@@ -123,7 +142,7 @@ namespace AntiRain.TimerEvent.Event
                 if(!dbHelper.Update(targetGroup, sender.Uid, biliDynamic.UpdateTime)) 
                     ConsoleLog.Error("数据库","更新动态记录时发生了数据库错误");
             }
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
         }
     }
 }
