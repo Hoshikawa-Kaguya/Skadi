@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using AntiRain.IO;
 using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
-using AntiRain.Resource.TypeEnum;
 using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
 using Sora.Entities.CQCodes;
@@ -239,7 +238,8 @@ namespace AntiRain.ChatModule.HsoModule
                                                     else
                                                     {
                                                         ConsoleLog.Error("Hso", $"色图发送失败 code={(int) code}");
-                                                        await QQGroup.SendGroupMessage($"哇奧色图不见了\r\n色图发送失败了\r\nAPI ERROR [{code}]");
+                                                        if(code != APIStatusType.TimeOut)
+                                                            await QQGroup.SendGroupMessage($"哇奧色图不见了\r\n色图发送失败了\r\nAPI ERROR [{code}]");
                                                     }
                                                     //检查是否出现空文件
                                                     if (code == APIStatusType.OK || !File.Exists(receivePath)) return;
@@ -272,7 +272,8 @@ namespace AntiRain.ChatModule.HsoModule
                                                         else
                                                         {
                                                             ConsoleLog.Error("Hso", $"色图发送失败 code={(int) code}");
-                                                            await QQGroup.SendGroupMessage($"哇奧色图不见了\r\n色图发送失败了\r\nAPI ERROR [{code}]");
+                                                            if(code != APIStatusType.TimeOut)
+                                                                await QQGroup.SendGroupMessage($"哇奧色图不见了\r\n色图发送失败了\r\nAPI ERROR [{code}]");
                                                         }
                                                         ConsoleLog.Debug("base64 length",ImgBase64Str.Length);
                                                     }
