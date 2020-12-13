@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BilibiliApi" Version="0.3.4" />
+    <PackageReference Include="BilibiliApi" Version="0.3.5" />
     <PackageReference Include="PyLibSharp" Version="1.2.3" />
     <PackageReference Include="SharpYaml" Version="1.6.6" />
     <PackageReference Include="Sora" Version="0.4.10" />
