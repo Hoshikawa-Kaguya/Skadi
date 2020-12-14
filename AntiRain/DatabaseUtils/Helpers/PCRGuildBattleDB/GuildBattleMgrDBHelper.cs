@@ -547,8 +547,34 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 dbClient.Updateable(new MemberInfo {Flag = FlagType.IDLE, Info = null})
-                        .Where(i => (i.Flag == FlagType.OnTree || i.Flag == FlagType.EnGage) &&
-                                    i.Gid == GuildEventArgs.SourceGroup.Id)
+                        .Where(i => i.Flag == FlagType.OnTree &&
+                                    i.Gid  == GuildEventArgs.SourceGroup.Id)
+                        .UpdateColumns(i => new {i.Flag, i.Info})
+                        .ExecuteCommand();
+                return true;
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 清空正在出刀的成员
+        /// </summary>
+        /// <returns>
+        /// <para><see langword="true"/> 写入成功</para>
+        /// <para><see langword="false"/> 数据库错误</para>
+        /// </returns>
+        public bool CleanAtkStatus()
+        {
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                dbClient.Updateable(new MemberInfo {Flag = FlagType.IDLE, Info = null})
+                        .Where(i => i.Flag == FlagType.EnGage &&
+                                    i.Gid  == GuildEventArgs.SourceGroup.Id)
                         .UpdateColumns(i => new {i.Flag, i.Info})
                         .ExecuteCommand();
                 return true;
@@ -573,7 +599,33 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<MemberInfo>()
-                               .Where(member => member.Gid == GuildEventArgs.SourceGroup.Id && member.Flag == FlagType.OnTree)
+                               .Where(member => member.Gid  == GuildEventArgs.SourceGroup.Id &&
+                                                member.Flag == FlagType.OnTree)
+                               .Select(member => member.Uid)
+                               .ToList();
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 获取正在出刀中的成员列表
+        /// </summary>
+        /// <returns>
+        /// <para>出刀成员列表</para>
+        /// <para><see langword="null"/> 数据库错误</para>
+        /// </returns>
+        public List<long> GetInAtk()
+        {
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                return dbClient.Queryable<MemberInfo>()
+                               .Where(member => member.Gid  == GuildEventArgs.SourceGroup.Id &&
+                                                member.Flag == FlagType.EnGage)
                                .Select(member => member.Uid)
                                .ToList();
             }

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using AntiRain.IO;
 using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
+using AntiRain.Tool;
 using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
 using Sora.Entities.CQCodes;
@@ -21,8 +22,8 @@ namespace AntiRain.ChatModule.HsoModule
     internal class HsoHandle
     {
         #region 属性
-        public object                  Sender       { private set; get; }
-        public Group                   QQGroup      { private set; get; }
+        public object                Sender       { private set; get; }
+        public Group                 QQGroup      { private set; get; }
         public GroupMessageEventArgs HsoEventArgs { private set; get; }
         #endregion
 
@@ -43,6 +44,11 @@ namespace AntiRain.ChatModule.HsoModule
         {
             Config config = new Config(HsoEventArgs.LoginUid);
             config.LoadUserConfig(out UserConfig userConfig);
+            if (CheckInCD.isInCD(HsoEventArgs.SourceGroup, HsoEventArgs.Sender))
+            {
+                await HsoEventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(HsoEventArgs.Sender), "你是不是只会要色图");
+                return;
+            }
             //检查色图文件夹大小
             if (IOUtils.GetHsoSize() >= userConfig.HsoConfig.SizeLimit * 1024 * 1024)
             {

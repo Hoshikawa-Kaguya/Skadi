@@ -237,8 +237,9 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         /// </summary>
         private async void RequestAttack()
         {
-            bool substitute;//代刀标记
-            long atkUid;
+            bool       substitute; //代刀标记
+            long       atkUid;
+            
             //指令检查
             switch (BotUtils.CheckForLength(base.CommandArgs,0))
             {
@@ -345,15 +346,36 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             //修改成员状态
             if (GuildBattleDB.UpdateMemberStatus(atkUid, FlagType.EnGage, $"{guildInfo.Round}:{guildInfo.Order}")) 
             {
+                List<long> atkMemberList = GuildBattleDB.GetInAtk();//正在出刀中的成员列表
+                if (atkMemberList == null)
+                {
+                    await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                    return;
+                }
+
+                //发送消息段
+                List<CQCode> msgToSend = new List<CQCode>();
+
                 if (substitute)
                 {
-                    await SourceGroup.SendGroupMessage("成员",CQCode.CQAt(atkUid),
-                                                       "开始出刀！");
+                    msgToSend.Add(CQCode.CQText("成员"));
+                    msgToSend.Add(CQCode.CQAt(atkUid));
+                    msgToSend.Add(CQCode.CQText("开始出刀！"));
+                    if (atkMemberList.Count != 0)
+                    {
+                        msgToSend.Add(CQCode.CQText($"\r\n当前正在出刀人数 {atkMemberList.Count}"));
+                    }
+                    await SourceGroup.SendGroupMessage(msgToSend);
                 }
                 else
                 {
-                    await SourceGroup.SendGroupMessage(CQCode.CQAt(Sender.Id),
-                                                       "开始出刀！");
+                    msgToSend.Add(CQCode.CQAt(atkUid));
+                    msgToSend.Add(CQCode.CQText("开始出刀！"));
+                    if (atkMemberList.Count != 0)
+                    {
+                        msgToSend.Add(CQCode.CQText($"\r\n当前正在出刀人数 {atkMemberList.Count}"));
+                    }
+                    await SourceGroup.SendGroupMessage(msgToSend);
                 }
             }
             else
@@ -594,12 +616,16 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             #region Boss状态修改
             if (needChangeBoss) //进入下一个boss
             {
-                List<long> treeList = GuildBattleDB.GetTree();
-                if (treeList == null)
+                //获取需要修改的成员列表
+                List<long> treeList      = GuildBattleDB.GetTree();
+                List<long> atkMemberList = GuildBattleDB.GetInAtk();
+                if (treeList == null || atkMemberList == null)
                 {
                     await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                     return;
                 }
+
+                #region 下树检查
                 //下树提示
                 if (treeList.Count != 0)
                 {
@@ -608,7 +634,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                         await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
                         return;
                     }
-                    List<CQCode>  treeTips = new List<CQCode>();
+                    List<CQCode> treeTips = new List<CQCode>();
                     treeTips.Add(CQCode.CQText("以下成员已下树:\r\n"));
                     //添加AtCQCode
                     foreach (long uid in treeList)
@@ -618,7 +644,20 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     //发送下树提示
                     await SourceGroup.SendGroupMessage(treeTips);
                 }
-                //判断周目
+                #endregion
+
+                #region 成员状态重置
+                if (atkMemberList.Count != 0)
+                {
+                    if (!GuildBattleDB.CleanAtkStatus())
+                    {
+                        await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                        return;
+                    }
+                }
+                #endregion
+
+                #region 周目交换检查
                 if (atkGuildInfo.Order == 5) //进入下一个周目
                 {
                     ConsoleLog.Debug("change boss","go to next round");
@@ -637,6 +676,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                         return;
                     }
                 }
+                #endregion
             }
             else
             {
@@ -657,7 +697,6 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             }
 
             #region 消息提示
-
             List<CQCode> message = new List<CQCode>();
             if (curAttackType == AttackType.FinalOutOfRange) message.Add(CQCode.CQText("过度伤害！ 已自动修正boss血量\r\n"));
             message.Add(CQCode.CQAt(atkUid));
