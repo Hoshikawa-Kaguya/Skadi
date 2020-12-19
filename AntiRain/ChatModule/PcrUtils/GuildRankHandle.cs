@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB;
 using AntiRain.Resource.TypeEnum.CommandType;
 using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
@@ -19,6 +20,10 @@ namespace AntiRain.ChatModule.PcrUtils
         public object                Sender       { private set; get; }
         public Group                 QQGroup      { private set; get; }
         public GroupMessageEventArgs PCREventArgs { private set; get; }
+        /// <summary>
+        /// 数据库实例
+        /// </summary>
+        private GuildManagerDBHelper DBHelper { get; set; }
         #endregion
 
         #region 构造函数
@@ -52,7 +57,7 @@ namespace AntiRain.ChatModule.PcrUtils
                             ConsoleLog.Error("api error",$"调用onebot API时发生错误 Status={groupInfo.apiStatus}");
                             return;
                         }
-                        await BiliWikiRank(groupInfo.groupInfo.GroupName);
+                        await BiliWikiRank(DBHelper.GetGuildName(PCREventArgs.SourceGroup));
                     }
                     else //手动指定
                     {
