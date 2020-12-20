@@ -132,7 +132,7 @@ namespace AntiRain.TimerEvent.Event
             imgList.ForEach(imgUrl => msgList.Add(CQCode.CQImage(imgUrl)));
             sb.Clear();
             sb.Append("\r\n更新时间：");
-            sb.Append(biliDynamic.UpdateTime);
+            sb.Append(biliDynamic.UpdateTime.ToString("MM-dd HH:mm:ss"));
             msgList.Add(CQCode.CQText(sb.ToString()));
             //向未发生消息的群发送消息
             foreach (long targetGroup in targetGroups)
