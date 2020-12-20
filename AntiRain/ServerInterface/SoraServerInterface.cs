@@ -5,6 +5,7 @@ using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
 using AntiRain.Resource;
 using AntiRain.TimerEvent;
+using AntiRain.WebConsole;
 using Sora.Server;
 using Sora.Tool;
 
@@ -12,6 +13,9 @@ namespace AntiRain.ServerInterface
 {
     static class SoraServerInterface
     {
+        //控制台实例
+        private static ConsoleInterface ConsoleInterface;
+
         static async Task Main()
         {
             //修改控制台标题
@@ -24,7 +28,6 @@ namespace AntiRain.ServerInterface
             config.GlobalConfigFileInit();
             config.LoadGlobalConfig(out GlobalConfig globalConfig, false);
 
-
             ConsoleLog.SetLogLevel(globalConfig.LogLevel);
             //显示Log等级
             ConsoleLog.Debug("Log Level", globalConfig.LogLevel);
@@ -36,6 +39,10 @@ namespace AntiRain.ServerInterface
             Command.KeywordResourseInit();
             Command.RegexResourseInit();
             Command.PCRGuildBattlecmdResourseInit();
+
+            //启动机器人控制台后端
+            ConsoleLog.Info("AntiRain初始化","启动机器人Web控制台...");
+            ConsoleInterface = new ConsoleInterface("127.0.0.1", 8080);
 
             ConsoleLog.Info("AntiRain初始化","启动反向WS服务器...");
             //初始化服务器
