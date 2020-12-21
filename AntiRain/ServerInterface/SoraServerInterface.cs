@@ -42,7 +42,7 @@ namespace AntiRain.ServerInterface
 
             //启动机器人控制台后端
             ConsoleLog.Info("AntiRain初始化","启动机器人Web控制台...");
-            ConsoleInterface = new ConsoleInterface("127.0.0.1", 8080);
+            ConsoleInterface = new ConsoleInterface(globalConfig.AntiRainAPILocation, globalConfig.AntiRainAPIPort);
 
             ConsoleLog.Info("AntiRain初始化","启动反向WS服务器...");
             //初始化服务器
@@ -55,7 +55,7 @@ namespace AntiRain.ServerInterface
                 ApiPath          = globalConfig.ApiPath,
                 EventPath        = globalConfig.EventPath,
                 HeartBeatTimeOut = globalConfig.HeartBeatTimeOut,
-                ApiTimeOut       = globalConfig.ApiTimeOut
+                ApiTimeOut       = globalConfig.OnebotApiTimeOut
             });
 
             //服务器回调

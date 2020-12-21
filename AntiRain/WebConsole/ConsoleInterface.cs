@@ -1,5 +1,6 @@
 using BeetleX.EventArgs;
 using BeetleX.FastHttpApi;
+using Sora.Tool;
 
 namespace AntiRain.WebConsole
 {
@@ -22,8 +23,9 @@ namespace AntiRain.WebConsole
             {
                 AllowOrigin = "*"
             };
-            AntiRainApiServer.Register(typeof(GetApi).Assembly);
+            AntiRainApiServer.Register(typeof(UtilApi).Assembly);
             AntiRainApiServer.Open();
+            ConsoleLog.Debug("AntiRain初始化",$"AntiRain API服务正在运行[{location}:{port}]");
         }
         #endregion
     }

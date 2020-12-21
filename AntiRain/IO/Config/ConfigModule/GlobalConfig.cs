@@ -49,6 +49,16 @@ namespace AntiRain.IO.Config.ConfigModule
         /// <para>客户端API调用超时设置(毫秒)</para>
         /// <para>默认为1000无需修改</para>
         /// </summary>
-        public uint ApiTimeOut { get; set; }
+        public uint OnebotApiTimeOut { get; set; }
+
+        /// <summary>
+        /// <para>API管理接口监听地址</para>
+        /// </summary>
+        public string AntiRainAPILocation { get; set; }
+
+        /// <summary>
+        /// <para>API管理接口监听端口</para>
+        /// </summary>
+        public int AntiRainAPIPort { get; set; }
     }
 }
