@@ -107,6 +107,28 @@ namespace AntiRain.IO
                    .Select(file => file.Length)
                    .Sum();
         }
+
+        /// <summary>
+        /// 检查文件是否存在，如果不存在则创建新的空文件
+        /// </summary>
+        /// <param name="path">文件路径</param>
+        public static bool CheckFileExists(string path)
+        {
+            try
+            {
+                if (File.Exists(path)) return true;
+                //数据库文件不存在，新建数据库
+                ConsoleLog.Warning("数据库初始化", "未找到数据库文件，创建新的数据库");
+                Directory.CreateDirectory(Path.GetPathRoot(path) ?? string.Empty);
+                File.Create(path).Close();
+                return true;
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("File Check Error", ConsoleLog.ErrorLogBuilder(e));
+                return false;
+            }
+        }
         #endregion
 
         #region 文件读取工具

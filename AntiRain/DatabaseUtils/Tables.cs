@@ -308,4 +308,22 @@ namespace AntiRain.DatabaseUtils
     #endregion
 
     #endregion
+
+    #region 机器人数据库数据表格定义
+    [SugarTable("pcr_res_chara")]
+    internal class PCRChara
+    {
+        /// <summary>
+        /// 角色ID
+        /// </summary>
+        [SugarColumn(ColumnName = "chara_id", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+        public int CharaId { get; set; }
+
+        /// <summary>
+        /// 角色名（字符串
+        /// </summary>
+        [SugarColumn(ColumnName = "chara_name", ColumnDataType = "VARCHAR")]
+        public string Name { get; set; }
+    }
+    #endregion
 }

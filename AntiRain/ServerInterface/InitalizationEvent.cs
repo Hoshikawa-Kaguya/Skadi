@@ -36,7 +36,7 @@ namespace AntiRain.ServerInterface
             }
 
             //初始化数据库
-            DatabaseInit.Init(connectEvent);
+            DatabaseInit.UserDataInit(connectEvent);
 
             //初始化定时器线程
             if (userConfig.ModuleSwitch.Bili_Subscription)

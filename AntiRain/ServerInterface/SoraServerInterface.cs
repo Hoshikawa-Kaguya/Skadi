@@ -1,9 +1,10 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using AntiRain.DatabaseUtils;
+using AntiRain.IO;
 using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
-using AntiRain.Resource;
 using AntiRain.TimerEvent;
 using Sora.Server;
 using Sora.Tool;
@@ -19,23 +20,26 @@ namespace AntiRain.ServerInterface
             ConsoleLog.Info("AntiRain初始化","AntiRain初始化...");
             //初始化配置文件
             ConsoleLog.Info("AntiRain初始化","初始化服务器全局配置...");
-            //全局文件初始化不需要uid，填0仅占位，不使用构造函数重载
-            Config config = new Config(0);
+            //全局文件初始化不需要uid，不使用构造函数重载
+            Config config = new Config();
             config.GlobalConfigFileInit();
             config.LoadGlobalConfig(out GlobalConfig globalConfig, false);
-
 
             ConsoleLog.SetLogLevel(globalConfig.LogLevel);
             //显示Log等级
             ConsoleLog.Debug("Log Level", globalConfig.LogLevel);
 
+            //初始化资源数据库
+            ConsoleLog.Info("AntiRain初始化","初始化资源...");
+            DatabaseInit.GlobalDataInit();
+
             //初始化字符编码
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             //指令匹配初始化
-            Command.KeywordResourseInit();
-            Command.RegexResourseInit();
-            Command.PCRGuildBattlecmdResourseInit();
+            Command.CommandAdapter.KeywordResourseInit();
+            Command.CommandAdapter.RegexResourseInit();
+            Command.CommandAdapter.PCRGuildBattlecmdResourseInit();
 
             ConsoleLog.Info("AntiRain初始化","启动反向WS服务器...");
             //初始化服务器
@@ -64,7 +68,15 @@ namespace AntiRain.ServerInterface
             server.ConnManager.OnCloseConnectionAsync += TimerEventParse.StopTimer;
             server.ConnManager.OnHeartBeatTimeOut += TimerEventParse.StopTimer;
 
-            await server.StartServer();
+            try
+            {
+                await server.StartServer();
+            }
+            catch (Exception e)
+            {
+                //生成错误报告
+                IOUtils.CrashLogGen(ConsoleLog.ErrorLogBuilder(e));
+            }
         }
     }
 }

@@ -5,9 +5,9 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using AntiRain.Resource.TypeEnum.CommandType;
 
-namespace AntiRain.Resource
+namespace AntiRain.Command
 {
-    internal static class Command
+    internal static class CommandAdapter
     {
         #region 正则匹配字典
         /// <summary>

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading;
 using AntiRain.DatabaseUtils.SqliteTool;
+using AntiRain.IO;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
 using SqlSugar;
@@ -14,24 +15,15 @@ namespace AntiRain.DatabaseUtils
         /// 初始化数据库
         /// </summary>
         /// <param name="eventArgs">CQAppEnableEventArgs</param>
-        public static void Init(ConnectEventArgs eventArgs)
+        public static void UserDataInit(ConnectEventArgs eventArgs)
         {
             string DBPath = SugarUtils.GetDBPath(eventArgs.LoginUid.ToString());
-            ConsoleLog.Debug("IO",$"获取数据路径{DBPath}");
-            if (!File.Exists(DBPath))//查找数据文件
-            {
-                //数据库文件不存在，新建数据库
-                ConsoleLog.Warning("数据库初始化", "未找到数据库文件，创建新的数据库");
-                Directory.CreateDirectory(Path.GetPathRoot(DBPath) ?? String.Empty);
-                File.Create(DBPath).Close();
-            }
-            SqlSugarClient dbClient = new SqlSugarClient(new ConnectionConfig()
-            {
-                ConnectionString      = $"DATA SOURCE={DBPath}",
-                DbType                = DbType.Sqlite,
-                IsAutoCloseConnection = true,
-                InitKeyType           = InitKeyType.Attribute
-            });
+            ConsoleLog.Debug("IO",$"获取用户数据路径{DBPath}");
+            //检查文件是否存在
+            IOUtils.CheckFileExists(DBPath);
+            //创建数据库链接
+            SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+
             try
             {
                 if (!SugarUtils.TableExists<SuiseiData>(dbClient)) //彗酱数据库初始化
@@ -66,7 +58,33 @@ namespace AntiRain.DatabaseUtils
             {
                 ConsoleLog.Fatal("数据库初始化错误",ConsoleLog.ErrorLogBuilder(exception));
                 Thread.Sleep(5000);
-                throw;
+                Environment.Exit(-1);
+            }
+        }
+
+        public static void GlobalDataInit()
+        {
+            //获取数据库路径
+            string DBPath = SugarUtils.GetDataDBPath(SugarUtils.GlobalResDBName);
+            ConsoleLog.Debug("IO",$"获取数据路径{DBPath}");
+            //检擦文件是否存在
+            IOUtils.CheckFileExists(DBPath);
+            //创建数据库链接
+            SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+
+            try
+            {
+                if (!SugarUtils.TableExists<PCRChara>(dbClient))
+                {
+                    ConsoleLog.Warning("数据库初始化", "未找到角色资源表 - 创建一个新表");
+                    SugarUtils.CreateTable<PCRChara>(dbClient);
+                }
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Fatal("数据库初始化错误",ConsoleLog.ErrorLogBuilder(e));
+                Thread.Sleep(5000);
+                Environment.Exit(-1);
             }
         }
     }

@@ -3,9 +3,9 @@ using AntiRain.ChatModule;
 using AntiRain.ChatModule.HsoModule;
 using AntiRain.ChatModule.PcrGuildBattle;
 using AntiRain.ChatModule.PcrUtils;
+using AntiRain.Command;
 using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
-using AntiRain.Resource;
 using AntiRain.Resource.TypeEnum.CommandType;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
@@ -35,7 +35,7 @@ namespace AntiRain.ServerInterface
             //指令匹配
             //#开头的指令(会战) -> 关键词 -> 正则
             //会战管理
-            if (Command.GetPCRGuildBattlecmdType(groupMessage.Message.RawText, out PCRGuildBattleCommand battleCommand))
+            if (CommandAdapter.GetPCRGuildBattlecmdType(groupMessage.Message.RawText, out PCRGuildBattleCommand battleCommand))
             {
                 ConsoleLog.Info("PCR会战管理",$"获取到指令[{battleCommand}]");
                 //判断模块使能
@@ -51,7 +51,7 @@ namespace AntiRain.ServerInterface
             }
 
             //聊天关键词
-            if (Command.GetKeywordType(groupMessage.Message.RawText, out KeywordCommand keywordCommand))
+            if (CommandAdapter.GetKeywordType(groupMessage.Message.RawText, out KeywordCommand keywordCommand))
             {
                 ConsoleLog.Info("关键词触发",$"触发关键词[{keywordCommand}]");
                 switch (keywordCommand)
@@ -75,7 +75,7 @@ namespace AntiRain.ServerInterface
             }
 
             //正则匹配
-            if (Command.GetRegexType(groupMessage.Message.RawText, out RegexCommand regexCommand))
+            if (CommandAdapter.GetRegexType(groupMessage.Message.RawText, out RegexCommand regexCommand))
             {
                 ConsoleLog.Info("正则触发",$"触发正则匹配[{regexCommand}]");
                 switch (regexCommand)

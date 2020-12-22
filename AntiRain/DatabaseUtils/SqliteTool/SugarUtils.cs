@@ -14,6 +14,11 @@ namespace AntiRain.DatabaseUtils.SqliteTool
     /// </summary>
     internal static class SugarUtils
     {
+        #region 数据库常量
+        //资源数据库名
+        public const string GlobalResDBName = "res";
+        #endregion
+
         #region IO辅助函数
         /// <summary>
         /// 获取应用数据库的绝对路径
@@ -38,7 +43,7 @@ namespace AntiRain.DatabaseUtils.SqliteTool
         /// <summary>
         /// 获取目标数据库的绝对路径
         /// </summary>
-        public static string GetCacheDBPath(string dbFileName)
+        public static string GetDataDBPath(string dbFileName)
         {
             StringBuilder dbPath = new StringBuilder();
 #if DEBUG
@@ -46,10 +51,10 @@ namespace AntiRain.DatabaseUtils.SqliteTool
 #else
             dbPath.Append(Environment.CurrentDirectory);
 #endif
-            dbPath.Append("/cache");
+            dbPath.Append("/data");
             //检查目录是否存在，不存在则新建一个
             Directory.CreateDirectory(dbPath.ToString());
-            dbPath.Append($"/{dbFileName}");
+            dbPath.Append($"/{dbFileName}.db");
             return dbPath.ToString();
         }
         #endregion

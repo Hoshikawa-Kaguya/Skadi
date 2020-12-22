@@ -23,7 +23,7 @@ namespace AntiRain.IO.Config
         /// Configs实例构造函数
         /// </summary>
         /// <param name="loginUid">uid</param>
-        public Config(long loginUid)
+        public Config(long loginUid = 0)
         {
             //获取文件存储地址
             this.UserConfigPath   = IOUtils.GetUserConfigPath(loginUid);
