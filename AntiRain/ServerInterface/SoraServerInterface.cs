@@ -6,6 +6,7 @@ using AntiRain.IO;
 using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
 using AntiRain.TimerEvent;
+using AntiRain.WebConsole;
 using Sora.Server;
 using Sora.Tool;
 
@@ -13,6 +14,9 @@ namespace AntiRain.ServerInterface
 {
     static class SoraServerInterface
     {
+        //控制台实例
+        private static ConsoleInterface ConsoleInterface;
+
         static async Task Main()
         {
             //修改控制台标题
@@ -41,6 +45,10 @@ namespace AntiRain.ServerInterface
             Command.CommandAdapter.RegexResourseInit();
             Command.CommandAdapter.PCRGuildBattlecmdResourseInit();
 
+            //启动机器人控制台后端
+            ConsoleLog.Info("AntiRain初始化","启动机器人Web控制台...");
+            ConsoleInterface = new ConsoleInterface(globalConfig.AntiRainAPILocation, globalConfig.AntiRainAPIPort);
+
             ConsoleLog.Info("AntiRain初始化","启动反向WS服务器...");
             //初始化服务器
             SoraWSServer server = new SoraWSServer(new ServerConfig
@@ -52,7 +60,7 @@ namespace AntiRain.ServerInterface
                 ApiPath          = globalConfig.ApiPath,
                 EventPath        = globalConfig.EventPath,
                 HeartBeatTimeOut = globalConfig.HeartBeatTimeOut,
-                ApiTimeOut       = globalConfig.ApiTimeOut
+                ApiTimeOut       = globalConfig.OnebotApiTimeOut
             });
 
             //服务器回调

@@ -94,7 +94,7 @@ namespace AntiRain.IO.Config
                 //参数合法性检查
                 if ((int)LoadedGlobalConfig.LogLevel is < 0 or > 3 ||
                     this.LoadedGlobalConfig.HeartBeatTimeOut == 0  ||
-                    this.LoadedGlobalConfig.ApiTimeOut       == 0  ||
+                    this.LoadedGlobalConfig.OnebotApiTimeOut       == 0  ||
                     this.LoadedGlobalConfig.Port is 0 or > 65535)
                 {
                     ConsoleLog.Error("读取全局配置", "参数值超出合法范围，重新生成配置文件");

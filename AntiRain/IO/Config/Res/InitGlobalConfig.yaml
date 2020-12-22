@@ -25,4 +25,10 @@ HeartBeatTimeOut: 10
 
 # 客户端API调用超时设置(毫秒)
 # 默认为1000无需修改
-ApiTimeOut: 1000
+OnebotApiTimeOut: 1000
+
+# API管理接口监听地址
+AntiRainAPILocation: "0.0.0.0"
+
+# API管理接口监听端口
+AntiRainAPIPort: 19200

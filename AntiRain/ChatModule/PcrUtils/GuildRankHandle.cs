@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB;
 using AntiRain.Resource.TypeEnum.CommandType;
 using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
@@ -10,6 +11,7 @@ using Sora.Entities;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
+using Utils = Sora.Tool.Utils;
 
 namespace AntiRain.ChatModule.PcrUtils
 {
@@ -19,6 +21,10 @@ namespace AntiRain.ChatModule.PcrUtils
         public object                Sender       { private set; get; }
         public Group                 QQGroup      { private set; get; }
         public GroupMessageEventArgs PCREventArgs { private set; get; }
+        /// <summary>
+        /// 数据库实例
+        /// </summary>
+        private GuildManagerDBHelper DBHelper { get; set; }
         #endregion
 
         #region 构造函数
@@ -27,6 +33,7 @@ namespace AntiRain.ChatModule.PcrUtils
             this.PCREventArgs = e;
             this.Sender       = sender;
             this.QQGroup      = PCREventArgs.SourceGroup;
+            this.DBHelper     = new GuildManagerDBHelper(e);
         }
         #endregion
 
@@ -52,11 +59,11 @@ namespace AntiRain.ChatModule.PcrUtils
                             ConsoleLog.Error("api error",$"调用onebot API时发生错误 Status={groupInfo.apiStatus}");
                             return;
                         }
-                        await BiliWikiRank(groupInfo.groupInfo.GroupName);
+                        await KyoukaRank(DBHelper.GetGuildName(PCREventArgs.SourceGroup));
                     }
                     else //手动指定
                     {
-                        await BiliWikiRank(PCREventArgs.Message.RawText.Substring(6));
+                        await KyoukaRank(PCREventArgs.Message.RawText.Substring(6));
                     }
                     break;
             }
@@ -218,16 +225,15 @@ namespace AntiRain.ChatModule.PcrUtils
                 if (!response["full"].ToString().Equals("0"))
                 {
                     if (!response["full"].ToString().Equals("1")) await QQGroup.SendGroupMessage("查询到多个公会，可能存在重名或关键词错误");
-                    string rank = response["data"]?[0]?["rank"]?.ToString();
-                    string totalScore = response["data"]?[0]?["damage"]?.ToString();
-                    string leaderName = response["data"]?[0]?["leader_name"]?.ToString();
                     ConsoleLog.Info("JSON处理成功", "向用户发送数据");
-                    await QQGroup.SendGroupMessage("查询成功！\n" +
-                                             $"公会:{guildName}\n" +
-                                             $"排名:{rank}\n" +
-                                             $"总分数:{totalScore}\n" +
-                                             $"会长:{leaderName}\n" +
-                                             "如果查询到的信息有误，有可能关键词错误或公会排名在20060之后");
+                    long.TryParse(response["ts"]?.ToString() ?? "0", out long updateTimeStamp);
+                    await QQGroup.SendGroupMessage("查询成功！\n",
+                                                   $"公会:{guildName}\n",
+                                                   $"排名:{response["data"]?[0]?["rank"]}\n",
+                                                   $"总分数:{response["data"]?[0]?["damage"]}\n",
+                                                   $"会长:{response["data"]?[0]?["leader_name"]}\n",
+                                                   $"数据更新时间:{Utils.TimeStampToDateTime(updateTimeStamp):MM-dd HH:mm:ss}\n",
+                                                   "如果查询到的信息有误，有可能关键词错误或公会排名在20060之后");
                 }
                 else
                 {
