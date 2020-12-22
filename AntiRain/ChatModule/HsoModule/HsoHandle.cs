@@ -42,8 +42,8 @@ namespace AntiRain.ChatModule.HsoModule
         /// </summary>
         public async void GetChat()
         {
-            Config config = new Config(HsoEventArgs.LoginUid);
-            config.LoadUserConfig(out UserConfig userConfig);
+            ConfigManager configManager = new ConfigManager(HsoEventArgs.LoginUid);
+            configManager.LoadUserConfig(out UserConfig userConfig);
             if (CheckInCD.isInCD(HsoEventArgs.SourceGroup, HsoEventArgs.Sender))
             {
                 await HsoEventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(HsoEventArgs.Sender), "你是不是只会要色图");

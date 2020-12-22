@@ -1,6 +1,6 @@
 using System;
 using System.Text;
-using AntiRain.Resource.TypeEnum;
+using AntiRain.TypeEnum;
 using Sora.Entities;
 using Sora.Entities.CQCodes;
 using Sora.Entities.Info;

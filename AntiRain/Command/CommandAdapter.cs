@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using AntiRain.Resource.TypeEnum.CommandType;
+using AntiRain.TypeEnum.CommandType;
 
 namespace AntiRain.Command
 {

@@ -1,4 +1,4 @@
-namespace AntiRain.Resource.TypeEnum
+namespace AntiRain.TypeEnum
 {
     internal enum LenType
     {

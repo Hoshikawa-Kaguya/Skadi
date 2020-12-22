@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AntiRain.Resource.TypeEnum;
-using AntiRain.Resource.TypeEnum.CommandType;
+using AntiRain.TypeEnum;
+using AntiRain.TypeEnum.CommandType;
 using AntiRain.Tool;
 using Sora.Entities;
 using Sora.Entities.CQCodes;

@@ -1,5 +1,5 @@
 using System;
-using AntiRain.Resource.TypeEnum.CommandType;
+using AntiRain.TypeEnum.CommandType;
 using Sora.Entities;
 using Sora.Entities.CQCodes;
 using Sora.EventArgs.SoraEvent;

@@ -9,7 +9,7 @@ using AntiRain.IO.Config.Res;
 
 namespace AntiRain.IO.Config
 {
-    internal class Config
+    internal class ConfigManager
     {
         #region 属性
         private string       UserConfigPath     { set; get; }
@@ -23,7 +23,7 @@ namespace AntiRain.IO.Config
         /// Configs实例构造函数
         /// </summary>
         /// <param name="loginUid">uid</param>
-        public Config(long loginUid = 0)
+        public ConfigManager(long loginUid = 0)
         {
             //获取文件存储地址
             this.UserConfigPath   = IOUtils.GetUserConfigPath(loginUid);

@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace AntiRain.Resource.TypeEnum.CommandType
+namespace AntiRain.TypeEnum.CommandType
 {
     /// <summary>
     /// 机器人指令

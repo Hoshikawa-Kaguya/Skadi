@@ -1,32 +1,10 @@
 using System.Collections.Generic;
-using AntiRain.Resource.TypeEnum;
-using AntiRain.Resource.TypeEnum.GuildBattleType;
+using AntiRain.TypeEnum;
+using AntiRain.TypeEnum.GuildBattleType;
 using SqlSugar;
 
 namespace AntiRain.DatabaseUtils
 {
-    #region 彗酱签到表定义
-    /// <summary>
-    /// 用于存放彗酱信息的表定义
-    /// </summary>
-    [SugarTable("suisei", "suisei data table")]
-    internal class SuiseiData
-    {
-        //用户QQ
-        [SugarColumn(ColumnName = "uid", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
-        public long Uid { get; set; }
-        //用户所在群号
-        [SugarColumn(ColumnName = "gid", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
-        public long Gid { get; set; }
-        //好感度（大概
-        [SugarColumn(ColumnName = "favor_rate", ColumnDataType = "INTEGER")]
-        public int FavorRate { get; set; }
-        //签到时间(使用时间戳）
-        [SugarColumn(ColumnName = "use_date", ColumnDataType = "INTEGER")]
-        public long ChatDate { get; set; }
-    }
-    #endregion
-
     #region 阿B订阅数据表定义
     [SugarTable("bili_subscription")]
     internal class BiliSubscription
@@ -324,6 +302,28 @@ namespace AntiRain.DatabaseUtils
         /// </summary>
         [SugarColumn(ColumnName = "chara_name", ColumnDataType = "VARCHAR")]
         public string Name { get; set; }
+    }
+
+    [SugarTable("redive_db_version")]
+    internal class RediveDBVersion
+    {
+        /// <summary>
+        /// 区服标识
+        /// </summary>
+        [SugarColumn(ColumnName = "server_id", ColumnDataType = "VARCHAR", IsPrimaryKey = true)]
+        public Server Server { get; set; }
+
+        /// <summary>
+        /// 版本号
+        /// </summary>
+        [SugarColumn(ColumnName = "ver", ColumnDataType = "INTEGER")]
+        public long Version { get; set; }
+
+        /// <summary>
+        /// HASH
+        /// </summary>
+        [SugarColumn(ColumnName = "hash", ColumnDataType = "VARCHAR")]
+        public string Hash { get; set; }
     }
     #endregion
 }

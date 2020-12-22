@@ -1,4 +1,4 @@
-namespace AntiRain.Resource.TypeEnum
+namespace AntiRain.TypeEnum
 {
     #region 区服标识
     internal enum Server

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using AntiRain.Resource.TypeEnum.CommandType;
+using AntiRain.TypeEnum.CommandType;
 using Sora.EventArgs.SoraEvent;
 
 namespace AntiRain.ChatModule.PcrUtils

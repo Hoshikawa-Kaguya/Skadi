@@ -25,11 +25,6 @@ namespace AntiRain.DatabaseUtils
 
             try
             {
-                if (!SugarUtils.TableExists<SuiseiData>(dbClient)) //彗酱数据库初始化
-                {
-                    ConsoleLog.Warning("数据库初始化", "未找到慧酱数据表 - 创建一个新表");
-                    SugarUtils.CreateTable<SuiseiData>(dbClient);
-                }
                 if (!SugarUtils.TableExists<MemberInfo>(dbClient)) //成员状态表的初始化
                 {
                     ConsoleLog.Warning("数据库初始化", "未找到成员状态表 - 创建一个新表");
@@ -73,6 +68,11 @@ namespace AntiRain.DatabaseUtils
 
             try
             {
+                if (!SugarUtils.TableExists<RediveDBVersion>(dbClient))
+                {
+                    ConsoleLog.Warning("数据库初始化", "未找到版本记录表 - 创建一个新表");
+                    SugarUtils.CreateTable<RediveDBVersion>(dbClient);
+                }
                 if (!SugarUtils.TableExists<PCRChara>(dbClient))
                 {
                     ConsoleLog.Warning("数据库初始化", "未找到角色资源表 - 创建一个新表");

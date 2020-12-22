@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace AntiRain.Resource.TypeEnum.CommandType
+namespace AntiRain.TypeEnum.CommandType
 {
     /// <summary>
     /// 关键字触发

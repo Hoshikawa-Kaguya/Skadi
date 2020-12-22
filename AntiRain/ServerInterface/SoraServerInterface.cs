@@ -5,6 +5,7 @@ using AntiRain.DatabaseUtils;
 using AntiRain.IO;
 using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
+using AntiRain.Resource.PCRResource;
 using AntiRain.TimerEvent;
 using AntiRain.WebConsole;
 using Sora.Server;
@@ -15,7 +16,7 @@ namespace AntiRain.ServerInterface
     static class SoraServerInterface
     {
         //控制台实例
-        private static ConsoleInterface ConsoleInterface;
+        public static ConsoleInterface ConsoleInterface { get; private set; }
 
         static async Task Main()
         {
@@ -25,9 +26,9 @@ namespace AntiRain.ServerInterface
             //初始化配置文件
             ConsoleLog.Info("AntiRain初始化","初始化服务器全局配置...");
             //全局文件初始化不需要uid，不使用构造函数重载
-            Config config = new Config();
-            config.GlobalConfigFileInit();
-            config.LoadGlobalConfig(out GlobalConfig globalConfig, false);
+            ConfigManager configManager = new ConfigManager();
+            configManager.GlobalConfigFileInit();
+            configManager.LoadGlobalConfig(out GlobalConfig globalConfig, false);
 
             ConsoleLog.SetLogLevel(globalConfig.LogLevel);
             //显示Log等级
@@ -36,6 +37,13 @@ namespace AntiRain.ServerInterface
             //初始化资源数据库
             ConsoleLog.Info("AntiRain初始化","初始化资源...");
             DatabaseInit.GlobalDataInit();
+            //更新Redive数据库
+            RediveDataParse rediveData = new RediveDataParse();
+            rediveData.UpdateRediveData();
+            //更新PCR角色数据库
+            CharaParser charaParser = new CharaParser();
+            charaParser.UpdateCharaNameByCloud();
+            ConsoleLog.Debug("T",charaParser.FindCharaIdByName("🐶"));
 
             //初始化字符编码
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);

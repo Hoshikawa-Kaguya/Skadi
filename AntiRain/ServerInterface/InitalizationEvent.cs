@@ -21,10 +21,9 @@ namespace AntiRain.ServerInterface
             ConsoleLog.Info("AntiRain初始化","与onebot客户端连接成功，初始化资源...");
             //初始化配置文件
             ConsoleLog.Info("AntiRain初始化",$"初始化用户[{connectEvent.LoginUid}]配置");
-            Config config = new Config(connectEvent.LoginUid);
-            config.UserConfigFileInit();
-            config.LoadUserConfig(out UserConfig userConfig, false);
-
+            ConfigManager configManager = new ConfigManager(connectEvent.LoginUid);
+            configManager.UserConfigFileInit();
+            configManager.LoadUserConfig(out UserConfig userConfig, false);
 
             //在控制台显示启用模块
             ConsoleLog.Info("已启用的模块",

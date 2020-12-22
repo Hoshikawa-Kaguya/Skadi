@@ -1,4 +1,4 @@
-namespace AntiRain.Resource.TypeEnum.GuildBattleType
+namespace AntiRain.TypeEnum.GuildBattleType
 {
     /// <summary>
     /// 出刀类型

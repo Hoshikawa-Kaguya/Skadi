@@ -6,7 +6,7 @@ using AntiRain.ChatModule.PcrUtils;
 using AntiRain.Command;
 using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
-using AntiRain.Resource.TypeEnum.CommandType;
+using AntiRain.TypeEnum.CommandType;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
@@ -24,9 +24,9 @@ namespace AntiRain.ServerInterface
         public static async ValueTask GroupMessageParse(object sender, GroupMessageEventArgs groupMessage)
         {
             //配置文件实例
-            Config config = new Config(groupMessage.LoginUid);
+            ConfigManager configManager = new ConfigManager(groupMessage.LoginUid);
             //读取配置文件
-            if (!config.LoadUserConfig(out UserConfig userConfig))
+            if (!configManager.LoadUserConfig(out UserConfig userConfig))
             {
                 await groupMessage.SourceGroup.SendGroupMessage("读取配置文件(User)时发生错误\r\n请联系机器人管理员");
                 ConsoleLog.Error("AntiRain会战管理", "无法读取用户配置文件");

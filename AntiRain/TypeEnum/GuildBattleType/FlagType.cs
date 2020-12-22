@@ -1,4 +1,4 @@
-namespace AntiRain.Resource.TypeEnum.GuildBattleType
+namespace AntiRain.TypeEnum.GuildBattleType
 {
     /// <summary>
     /// 成员状态标识

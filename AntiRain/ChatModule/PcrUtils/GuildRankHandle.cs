@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB;
-using AntiRain.Resource.TypeEnum.CommandType;
+using AntiRain.TypeEnum.CommandType;
 using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
 using Sora.Entities;

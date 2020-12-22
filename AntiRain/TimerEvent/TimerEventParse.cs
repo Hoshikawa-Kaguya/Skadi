@@ -18,7 +18,7 @@ namespace AntiRain.TimerEvent
         /// 一般情况下应该只有一个账号接入
         /// Key为接入的账号id
         /// </summary>
-        internal static readonly Dictionary<long, Timer> Timers = new Dictionary<long, Timer>();
+        private static readonly Dictionary<long, Timer> Timers = new Dictionary<long, Timer>();
         #endregion
 
         #region 计时器初始化/停止

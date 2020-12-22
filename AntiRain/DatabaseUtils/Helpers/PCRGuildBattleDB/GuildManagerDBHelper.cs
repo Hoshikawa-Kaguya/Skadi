@@ -1,7 +1,7 @@
 using System;
 using AntiRain.DatabaseUtils.SqliteTool;
-using AntiRain.Resource.TypeEnum;
-using AntiRain.Resource.TypeEnum.GuildBattleType;
+using AntiRain.TypeEnum;
+using AntiRain.TypeEnum.GuildBattleType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
 using SqlSugar;
