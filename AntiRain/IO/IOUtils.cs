@@ -184,32 +184,5 @@ namespace AntiRain.IO
             }
         }
         #endregion
-
-        #region 文件处理工具
-        /// <summary>
-        /// 解压程序，解压出的文件和原文件同路径
-        /// </summary>
-        /// <param name="LocalDBPath">数据文件路径</param>
-        /// <param name="BinPath">二进制执行文件路径</param>
-        public static void DecompressDBFile(string LocalDBPath, string BinPath)
-        {
-            string InputFile = LocalDBPath + "redive_cn.db.br";
-            string outputFilePath = LocalDBPath;
-            string outputFileName = "redive_cn.db";
-
-            if (!File.Exists(outputFilePath + outputFileName))
-            {
-                try
-                {
-                    System.Diagnostics.Process.Start(BinPath, "-bd " + InputFile + " " + outputFilePath + " " + outputFileName);
-                    //GC.Collect();
-                }
-                catch (Exception e)
-                {
-                    ConsoleLog.Error("BOSS信息数据库", $"BOSS信息数据库解压错误，请检查文件路径 错误:\n{e}");
-                }
-            }
-        }
-        #endregion
     }
 }

@@ -39,10 +39,13 @@ namespace AntiRain.ServerInterface
             DatabaseInit.GlobalDataInit();
             //更新Redive数据库
             RediveDataParse rediveData = new RediveDataParse();
-            rediveData.UpdateRediveData();
+            if(!rediveData.UpdateRediveData()) ConsoleLog.Error("AntiRain初始化","更新Redive数据库失败");
             //更新PCR角色数据库
             CharaParser charaParser = new CharaParser();
-            charaParser.UpdateCharaNameByCloud();
+            if(!charaParser.UpdateCharaNameByCloud()) ConsoleLog.Error("AntiRain初始化","更新角色数据库失败");
+
+            //强制清理解压产生的数据占用
+            GC.Collect();
 
             //初始化字符编码
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
