@@ -155,6 +155,36 @@ namespace AntiRain.IO
 
         #endregion
 
+        #region 文件写入工具
+        /// <summary>
+        /// 将byte数组转换为文件并保存到指定地址
+        /// </summary>
+        /// <param name="buff">byte数组</param>
+        /// <param name="savePath">保存地址</param>
+        public static bool Bytes2File(byte[] buff, string savePath)
+        {
+            try
+            {
+                if (File.Exists(savePath))
+                {
+                    File.Delete(savePath);
+                }
+                //将byte数组数据写入文件流
+                using FileStream   fileStream   = new FileStream(savePath, FileMode.CreateNew);
+                using BinaryWriter binaryWriter = new BinaryWriter(fileStream);
+                binaryWriter.Write(buff, 0, buff.Length);
+                binaryWriter.Close();
+                fileStream.Close();
+                return true;
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("IO",$"保存文件时发生错误\n{ConsoleLog.ErrorLogBuilder(e)}");
+                return false;
+            }
+        }
+        #endregion
+
         #region 文件处理工具
         /// <summary>
         /// 解压程序，解压出的文件和原文件同路径

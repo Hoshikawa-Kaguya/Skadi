@@ -43,7 +43,6 @@ namespace AntiRain.ServerInterface
             //更新PCR角色数据库
             CharaParser charaParser = new CharaParser();
             charaParser.UpdateCharaNameByCloud();
-            ConsoleLog.Debug("T",charaParser.FindCharaIdByName("🐶"));
 
             //初始化字符编码
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);

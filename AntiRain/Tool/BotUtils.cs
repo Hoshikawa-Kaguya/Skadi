@@ -1,6 +1,8 @@
 using System;
+using System.IO;
 using System.Text;
 using AntiRain.TypeEnum;
+using Brotli;
 using Sora.Entities;
 using Sora.Entities.CQCodes;
 using Sora.Entities.Info;
@@ -123,6 +125,24 @@ namespace AntiRain.Tool
                 QQgroup?.SendGroupMessage(CQCode.CQAt(fromQQid), " 命令参数不全，请补充。");
                 return LenType.Illegal;
             }
+        }
+        #endregion
+
+        #region BR压缩数据处理
+        /// <summary>
+        /// 将压缩的byte数组解压
+        /// </summary>
+        /// <param name="input">需要解压缩的数据</param>
+        /// <returns>解压的数据</returns>
+        public static byte[] BrotliDecompress(byte[] input)
+        {
+            using MemoryStream msInput      = new MemoryStream(input);
+            using BrotliStream brotliStream = new BrotliStream(msInput, System.IO.Compression.CompressionMode.Decompress);
+            using MemoryStream msOutput     = new MemoryStream();
+            brotliStream.CopyTo(msOutput);
+            msOutput.Seek(0, SeekOrigin.Begin);
+            byte[] output = msOutput.ToArray();
+            return output;
         }
         #endregion
     }
