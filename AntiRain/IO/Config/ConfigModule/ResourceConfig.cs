@@ -1,5 +1,3 @@
-using AntiRain.TypeEnum;
-
 namespace AntiRain.IO.Config.ConfigModule
 {
     /// <summary>
@@ -8,10 +6,8 @@ namespace AntiRain.IO.Config.ConfigModule
     internal class ResourceConfig
     {
         /// <summary>
-        /// PCR数据库区服选择
-        /// CN,JP,TW
-        /// 可以为单独区服
+        /// 使用Redive数据库
         /// </summary>
-        public Server[] PCRDatabaseArea { get; set; }
+        public bool UseRediveDatabase { get; set; }
     }
 }

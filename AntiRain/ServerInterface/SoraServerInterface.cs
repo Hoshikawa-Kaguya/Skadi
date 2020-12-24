@@ -37,15 +37,17 @@ namespace AntiRain.ServerInterface
             //初始化资源数据库
             ConsoleLog.Info("AntiRain初始化","初始化资源...");
             DatabaseInit.GlobalDataInit();
-            //更新Redive数据库
-            RediveDataParse rediveData = new RediveDataParse();
-            if(!rediveData.UpdateRediveData()) ConsoleLog.Error("AntiRain初始化","更新Redive数据库失败");
-            //更新PCR角色数据库
-            CharaParser charaParser = new CharaParser();
-            if(!charaParser.UpdateCharaNameByCloud()) ConsoleLog.Error("AntiRain初始化","更新角色数据库失败");
 
-            //强制清理解压产生的数据占用
-            GC.Collect();
+            //检查是否开启资源数据下载
+            if (globalConfig.ResourceConfig.UseRediveDatabase)
+            {
+                //更新Redive数据库
+                RediveDataParse rediveData = new RediveDataParse();
+                if(!rediveData.UpdateRediveData()) ConsoleLog.Error("AntiRain初始化","更新Redive数据库失败");
+                //更新PCR角色数据库
+                CharaParser charaParser = new CharaParser();
+                if(!charaParser.UpdateCharaNameByCloud()) ConsoleLog.Error("AntiRain初始化","更新角色数据库失败");
+            }
 
             //初始化字符编码
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);

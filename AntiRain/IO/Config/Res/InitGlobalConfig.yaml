@@ -30,7 +30,7 @@ OnebotApiTimeOut: 1000
 # 资源选项
 ResourceConfig:
   # 更新的区服数据选择
-  PCRDatabaseArea: [CN]
+  UseRediveDatabase: true
 
 # API管理接口监听地址
 AntiRainAPILocation: "0.0.0.0"
