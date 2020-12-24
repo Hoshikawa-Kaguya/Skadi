@@ -44,6 +44,10 @@ namespace AntiRain.ServerInterface
                 //更新Redive数据库
                 RediveDataParse rediveData = new RediveDataParse();
                 if(!rediveData.UpdateRediveData()) ConsoleLog.Error("AntiRain初始化","更新Redive数据库失败");
+            }
+            //检查是否开启角色数据下载
+            if (globalConfig.ResourceConfig.UseCharaDatabase)
+            {
                 //更新PCR角色数据库
                 CharaParser charaParser = new CharaParser();
                 if(!charaParser.UpdateCharaNameByCloud()) ConsoleLog.Error("AntiRain初始化","更新角色数据库失败");

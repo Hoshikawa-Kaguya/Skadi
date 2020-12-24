@@ -3,7 +3,7 @@ using AntiRain.TypeEnum;
 using AntiRain.TypeEnum.GuildBattleType;
 using SqlSugar;
 
-namespace AntiRain.DatabaseUtils
+namespace AntiRain.DatabaseUtils.Tables
 {
     #region 阿B订阅数据表定义
     [SugarTable("bili_subscription")]
@@ -302,6 +302,18 @@ namespace AntiRain.DatabaseUtils
         /// </summary>
         [SugarColumn(ColumnName = "chara_name", ColumnDataType = "VARCHAR")]
         public string Name { get; set; }
+
+        /// <summary>
+        /// 获取角色中文名
+        /// </summary>
+        internal string GetCharaNameCN() =>
+            this.Name.Split(',')[0];
+
+        /// <summary>
+        /// 获取角色日文名
+        /// </summary>
+        internal string GetCharaNameJP() =>
+            this.Name.Split(',')[1];
     }
 
     [SugarTable("redive_db_version")]

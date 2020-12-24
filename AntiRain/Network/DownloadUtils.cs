@@ -1,7 +1,7 @@
 using System;
 using System.Net;
-using AntiRain.DatabaseUtils;
 using AntiRain.DatabaseUtils.SqliteTool;
+using AntiRain.DatabaseUtils.Tables;
 using AntiRain.IO;
 using AntiRain.Tool;
 using AntiRain.TypeEnum;

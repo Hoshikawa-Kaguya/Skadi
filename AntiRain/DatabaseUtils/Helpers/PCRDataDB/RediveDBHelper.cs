@@ -1,4 +1,5 @@
 using AntiRain.DatabaseUtils.SqliteTool;
+using AntiRain.DatabaseUtils.Tables;
 using AntiRain.TypeEnum;
 using SqlSugar;
 

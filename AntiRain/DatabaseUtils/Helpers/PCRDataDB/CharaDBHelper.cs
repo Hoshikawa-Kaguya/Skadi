@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AntiRain.DatabaseUtils.SqliteTool;
+using AntiRain.DatabaseUtils.Tables;
 using Sora.Tool;
 using SqlSugar;
 
@@ -49,10 +50,10 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRDataDB
         }
 
         /// <summary>
-        /// 通过关键词查找角色ID
+        /// 通过关键词查找角色信息
         /// </summary>
         /// <param name="keyWord">关键词</param>
-        internal int FindCharaId(string keyWord)
+        internal PCRChara FindChara(string keyWord)
         {
             try
             {
@@ -61,16 +62,34 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRDataDB
                 List<PCRChara> chara = dbClient.Queryable<PCRChara>().Where(name => name.Name.Contains(keyWord))
                                                .ToList();
                 //检查是否检索到
-                if (chara == null || chara.Count == 0) return -1;
+                if (chara == null || chara.Count == 0) return null;
 
-                return chara.First().CharaId;
+                return chara.First();
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("查找角色名时发生错误",ConsoleLog.ErrorLogBuilder(e));
-                return -1;
+                ConsoleLog.Error("数据库错误",ConsoleLog.ErrorLogBuilder(e));
+                return null;
             }
-        } 
+        }
+
+        /// <summary>
+        /// 由角色ID查找角色信息
+        /// </summary>
+        /// <param name="charaId">角色ID</param>
+        internal PCRChara FindChara(int charaId)
+        {
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                return dbClient.Queryable<PCRChara>().InSingle(charaId);
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("数据库错误",ConsoleLog.ErrorLogBuilder(e));
+                return null;
+            }
+        }
         #endregion
     }
 }

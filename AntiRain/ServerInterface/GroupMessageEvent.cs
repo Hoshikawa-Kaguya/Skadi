@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AntiRain.ChatModule;
 using AntiRain.ChatModule.HsoModule;
@@ -6,7 +7,9 @@ using AntiRain.ChatModule.PcrUtils;
 using AntiRain.Command;
 using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
+using AntiRain.Resource.PCRResource;
 using AntiRain.TypeEnum.CommandType;
+using Sora.Entities.CQCodes;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
@@ -104,6 +107,18 @@ namespace AntiRain.ServerInterface
                         }
                         else
                         {
+                            if (groupMessage.Message.RawText.Length <= 5) return;
+                            string para =
+                                groupMessage.Message.RawText.Substring(5, groupMessage.Message.RawText.Length - 5);
+                            if (int.TryParse(para, out int id))
+                            {
+                                CharaParser charaParser = new CharaParser();
+                                List<CQCode> message = new List<CQCode>();
+                                message.Add(CQCode.CQText(id.ToString()));
+                                message.Add(CQCode.CQText(charaParser.FindChara(id)?.GetCharaNameCN() ?? string.Empty));
+                                message.Add(CQCode.CQImage($"https://redive.estertion.win/icon/unit/{id}31.webp"));
+                                await groupMessage.SourceGroup.SendGroupMessage(message);
+                            }
                         }
                         break;
                     //将其他的的全部交给娱乐模块处理

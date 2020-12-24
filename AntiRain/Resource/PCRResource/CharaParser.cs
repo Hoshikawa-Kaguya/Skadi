@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Text.RegularExpressions;
-using AntiRain.DatabaseUtils;
 using AntiRain.DatabaseUtils.Helpers.PCRDataDB;
+using AntiRain.DatabaseUtils.Tables;
 using PyLibSharp.Requests;
 using Sora.Tool;
 
@@ -37,7 +37,7 @@ namespace AntiRain.Resource.PCRResource
             ConsoleLog.Info("角色数据更新","尝试从云端获取更新");
             try
             {
-                res = Requests.Get("https://api.redive.lolikon.icu/gacha/unitdata.py",
+                res = Requests.Get("https://api.yukari.one/pcr/unit_data.py",
                                    new ReqParams {Timeout = 5000});
             }
             catch (Exception e)
@@ -47,12 +47,13 @@ namespace AntiRain.Resource.PCRResource
             }
             
             //python字典数据匹配正则
-            Regex PyDict = new Regex(@"\d+:\[\'.+\'],", RegexOptions.IgnoreCase);
+            Regex PyDict = new Regex(@"\d+:\s*\[\"".+\""\],", RegexOptions.IgnoreCase);
             
             if (res.StatusCode == HttpStatusCode.OK)
             {
                 //匹配所有名称数据
-                MatchCollection DictMatchRes = PyDict.Matches(res.Text);
+                MatchCollection DictMatchRes = PyDict.Matches(res.Text.Substring(res.Text.IndexOf('{'),
+                                                                  res.Text.IndexOf('}') - res.Text.IndexOf('{') + 1));
                 ConsoleLog.Info("角色数据更新",$"角色数据获取成功({DictMatchRes.Count})");
                 //名称数据列表
                 List<PCRChara> chareNameList = new List<PCRChara>();
@@ -63,8 +64,8 @@ namespace AntiRain.Resource.PCRResource
                     //角色ID
                     int.TryParse(charaData[0], out int charaId);
                     //角色名
-                    string charaNames = charaData[1].Substring(1, charaData[1].Length - 3)
-                                                    .Replace("\'", string.Empty)
+                    string charaNames = charaData[1].Substring(2, charaData[1].Length - 4)
+                                                    .Replace("\"", string.Empty)
                                                     .Replace(" ", string.Empty);
                     //添加至列表
                     chareNameList.Add(new PCRChara
@@ -80,14 +81,18 @@ namespace AntiRain.Resource.PCRResource
         }
 
         /// <summary>
-        /// 查找角色ID
+        /// 查找角色
         /// </summary>
-        /// <param name="name"></param>
-        internal int FindCharaIdByName(string name)
-            => CharaDBHelper.FindCharaId(name);
+        /// <param name="keyWord">关键词</param>
+        internal PCRChara FindChara(string keyWord)
+            => CharaDBHelper.FindChara(keyWord);
 
-        //TODO 根据别名查找角色名
-        //TODO 根据ID查找角色名
+        /// <summary>
+        /// 查找角色
+        /// </summary>
+        /// <param name="charaId">id</param>
+        internal PCRChara FindChara(int charaId)
+            => CharaDBHelper.FindChara(charaId);
         #endregion
     }
 }

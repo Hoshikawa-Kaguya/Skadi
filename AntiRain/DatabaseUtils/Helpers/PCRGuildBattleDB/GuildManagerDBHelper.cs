@@ -1,5 +1,6 @@
 using System;
 using AntiRain.DatabaseUtils.SqliteTool;
+using AntiRain.DatabaseUtils.Tables;
 using AntiRain.TypeEnum;
 using AntiRain.TypeEnum.GuildBattleType;
 using Sora.EventArgs.SoraEvent;

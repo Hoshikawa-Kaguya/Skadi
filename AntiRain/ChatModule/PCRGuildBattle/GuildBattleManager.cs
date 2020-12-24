@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AntiRain.DatabaseUtils;
 using AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB;
+using AntiRain.DatabaseUtils.Tables;
 using AntiRain.TypeEnum;
 using AntiRain.TypeEnum.CommandType;
 using AntiRain.TypeEnum.GuildBattleType;

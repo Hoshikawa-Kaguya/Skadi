@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using AntiRain.DatabaseUtils.SqliteTool;
+using AntiRain.DatabaseUtils.Tables;
 using AntiRain.IO;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;

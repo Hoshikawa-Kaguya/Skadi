@@ -9,5 +9,9 @@ namespace AntiRain.IO.Config.ConfigModule
         /// 使用Redive数据库
         /// </summary>
         public bool UseRediveDatabase { get; set; }
+        /// <summary>
+        /// 使用角色名数据库
+        /// </summary>
+        public bool UseCharaDatabase { get; set; }
     }
 }

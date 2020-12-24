@@ -28,6 +28,11 @@ namespace AntiRain.TypeEnum.CommandType
         /// </summary>
         [Description(@"^dice$")]
         Dice,
+        /// <summary>
+        /// 查找角色
+        /// </summary>
+        [Description(@"^谁是[\u4e00-\u9fa5]+$")]
+        FindChara,
         [Description(@"^debug")]
         Debug
     }

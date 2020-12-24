@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AntiRain.DatabaseUtils.SqliteTool;
+using AntiRain.DatabaseUtils.Tables;
 using AntiRain.TypeEnum;
 using AntiRain.TypeEnum.GuildBattleType;
 using AntiRain.Tool;

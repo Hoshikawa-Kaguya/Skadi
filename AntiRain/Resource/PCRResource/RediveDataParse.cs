@@ -1,6 +1,6 @@
 using System;
-using AntiRain.DatabaseUtils;
 using AntiRain.DatabaseUtils.Helpers.PCRDataDB;
+using AntiRain.DatabaseUtils.Tables;
 using AntiRain.Network;
 using AntiRain.TypeEnum;
 using Sora.Tool;

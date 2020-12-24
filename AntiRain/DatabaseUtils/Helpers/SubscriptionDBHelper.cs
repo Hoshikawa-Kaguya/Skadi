@@ -1,5 +1,6 @@
 using System;
 using AntiRain.DatabaseUtils.SqliteTool;
+using AntiRain.DatabaseUtils.Tables;
 using Sora.Tool;
 using SqlSugar;
 
