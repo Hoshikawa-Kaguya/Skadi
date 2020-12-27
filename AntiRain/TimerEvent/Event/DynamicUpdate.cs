@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AntiRain.DatabaseUtils.Helpers;
 using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
+using AntiRain.Tool;
 using BilibiliApi.Dynamic;
 using BilibiliApi.Dynamic.Enums;
 using BilibiliApi.Dynamic.Models;
@@ -94,6 +95,11 @@ namespace AntiRain.TimerEvent.Event
                         return ValueTask.CompletedTask;
                     default:
                         ConsoleLog.Debug("动态获取", $"ID:{biliUser}的动态获取成功，动态类型未知");
+                        foreach (long gid in groupId)
+                        {
+                            if(!dbHelper.Update(gid, biliUser, BotUtils.GetNowStampLong()))
+                                ConsoleLog.Error("数据库","更新动态记录时发生了数据库错误");
+                        }
                         return ValueTask.CompletedTask;
                 }
             }

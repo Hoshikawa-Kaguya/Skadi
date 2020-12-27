@@ -23,17 +23,20 @@ namespace AntiRain.DatabaseUtils.Helpers
         /// <summary>
         /// 检查记录的动态是否为最新的
         /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="biliUserId">B站用户ID</param>
+        /// <param name="updateTime">当前获取的记录</param>
         /// <returns></returns>
         public bool IsLatest(long groupId, long biliUserId, DateTime updateTime)
         {
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                //查询是否存在相同记录subscriptionId
+                //查询是否存在相同或时间大于记录subscriptionId
                 return dbClient.Queryable<BiliSubscription>()
-                               .Where(currDynamic => currDynamic.SubscriptionId == biliUserId &&
-                                                     currDynamic.Gid            == groupId    &&
-                                                     currDynamic.UpdateTime     == Utils.DateTimeToTimeStamp(updateTime))
+                               .Where(lastDynamic => lastDynamic.SubscriptionId == biliUserId &&
+                                                     lastDynamic.Gid            == groupId    &&
+                                                     lastDynamic.UpdateTime     >= Utils.DateTimeToTimeStamp(updateTime))
                                .Any();
             }
             catch (Exception e)
@@ -78,6 +81,51 @@ namespace AntiRain.DatabaseUtils.Helpers
                         dbClient.Updateable<BiliSubscription>(newBiliDynamic =>
                                                                   newBiliDynamic.UpdateTime ==
                                                                   Utils.DateTimeToTimeStamp(updateTime))
+                                .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId &&
+                                                      biliDynamic.Gid            == groupId)
+                                .ExecuteCommandHasChange();
+                }
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database Error",ConsoleLog.ErrorLogBuilder(e));
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 更新数据库数据
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <param name="biliUserId"></param>
+        /// <param name="updateTime"></param>
+        /// <returns>是否成功修改</returns>
+        public bool Update(long groupId, long biliUserId, long updateTime)
+        {
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                //查找是否有历史记录
+                if (!dbClient.Queryable<BiliSubscription>()
+                             .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId &&
+                                                   biliDynamic.Gid            == groupId)
+                             .Any())
+                {
+                    //没有记录插入新行
+                    return
+                        dbClient.Insertable(new BiliSubscription()
+                        {
+                            Gid            = groupId,
+                            SubscriptionId = biliUserId,
+                            UpdateTime     = updateTime
+                        }).ExecuteCommand() > 0;
+                }
+                else
+                {
+                    //有记录更新时间
+                    return
+                        dbClient.Updateable<BiliSubscription>(newBiliDynamic =>
+                                                                  newBiliDynamic.UpdateTime == updateTime)
                                 .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId &&
                                                       biliDynamic.Gid            == groupId)
                                 .ExecuteCommandHasChange();

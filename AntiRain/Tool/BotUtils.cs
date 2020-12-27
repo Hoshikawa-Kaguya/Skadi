@@ -19,6 +19,12 @@ namespace AntiRain.Tool
         public static long GetTodayStampLong() =>(long) (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;
 
         /// <summary>
+        /// 获取现在的时间戳
+        /// 时间戳单位(秒)
+        /// </summary>
+        public static long GetNowStampLong() =>(long) (DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;
+
+        /// <summary>
         /// 获取游戏刷新的时间戳
         /// 时间戳单位(秒)
         /// </summary>
