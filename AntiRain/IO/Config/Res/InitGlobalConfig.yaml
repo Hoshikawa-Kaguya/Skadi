@@ -29,9 +29,6 @@ OnebotApiTimeOut: 1000
 
 # 资源选项
 ResourceConfig:
-  # 使用Redive数据库
-  # 此选项仅用于自动更新boss数据，且会占用大量内存，不建议开启此功能
-  UseRediveDatabase: false
   # 使用角色名数据库
   UseCharaDatabase: true
 

@@ -330,12 +330,6 @@ namespace AntiRain.DatabaseUtils.Tables
         /// </summary>
         [SugarColumn(ColumnName = "ver", ColumnDataType = "INTEGER")]
         public long Version { get; set; }
-
-        /// <summary>
-        /// HASH
-        /// </summary>
-        [SugarColumn(ColumnName = "hash", ColumnDataType = "VARCHAR")]
-        public string Hash { get; set; }
     }
     #endregion
 }

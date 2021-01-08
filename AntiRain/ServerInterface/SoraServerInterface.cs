@@ -2,11 +2,13 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using AntiRain.DatabaseUtils;
+using AntiRain.DatabaseUtils.Helpers.PCRDataDB;
 using AntiRain.IO;
 using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
 using AntiRain.Resource.PCRResource;
 using AntiRain.TimerEvent;
+using AntiRain.TypeEnum;
 using AntiRain.WebConsole;
 using Sora.Server;
 using Sora.Tool;
@@ -37,20 +39,15 @@ namespace AntiRain.ServerInterface
             //初始化资源数据库
             ConsoleLog.Info("AntiRain初始化","初始化资源...");
             DatabaseInit.GlobalDataInit();
+            RediveDBHelper redive = new RediveDBHelper();
+            ConsoleLog.Debug("WOW",redive.GetVersion(Server.CN).Version);
 
-            //检查是否开启资源数据下载
-            if (globalConfig.ResourceConfig.UseRediveDatabase)
-            {
-                //更新Redive数据库
-                RediveDataParse rediveData = new RediveDataParse();
-                if(!rediveData.UpdateRediveData()) ConsoleLog.Error("AntiRain初始化","更新Redive数据库失败");
-            }
             //检查是否开启角色数据下载
             if (globalConfig.ResourceConfig.UseCharaDatabase)
             {
                 //更新PCR角色数据库
                 CharaParser charaParser = new CharaParser();
-                if(!charaParser.UpdateCharaNameByCloud()) ConsoleLog.Error("AntiRain初始化","更新角色数据库失败");
+                if(!await charaParser.UpdateCharaNameByCloud()) ConsoleLog.Error("AntiRain初始化","更新角色数据库失败");
             }
 
             //初始化字符编码
