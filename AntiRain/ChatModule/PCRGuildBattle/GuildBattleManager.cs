@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using AntiRain.DatabaseUtils;
 using AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB;
-using AntiRain.DatabaseUtils.Tables;
 using AntiRain.TypeEnum;
 using AntiRain.TypeEnum.CommandType;
 using AntiRain.TypeEnum.GuildBattleType;
@@ -1249,6 +1248,13 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 ConsoleLog.Error("API Error",$"API ret error {apiStatus}");
                 return;
             }
+            //获取公会区服
+            Server server = GuildBattleDB.GetGuildInfo(base.SourceGroup)?.ServerId ?? (Server) 4;
+            if ((int)server == 4)
+            {
+                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                return;
+            }
             //构造群消息文本
             StringBuilder message = new StringBuilder();
             message.Append("今日出刀信息：\r\n");
@@ -1270,7 +1276,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                                                               "\r\n" +
                                                               $"{record.atkInfo.Aid} | " +
                                                               $"{record.name} | " +
-                                                              $"{GetBossCode(record.atkInfo.Round, record.atkInfo.Order)} | " +
+                                                              $"{GetBossCode(GuildBattleDB.GetRoundPhase(server, record.atkInfo.Round), record.atkInfo.Order)} | " +
                                                               $"{record.atkInfo.Damage}"
                                                              )
                                     );
@@ -1502,10 +1508,10 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             }
         }
 
-        const string ROUND_CODE = "ABCDEFGHIJKLNMOPQRSTUVWXYZ";
-        private string GetBossCode(int round, int order)
+        const string PHASE_CODE = "ABCD";
+        private string GetBossCode(int phase, int order)
         {
-            return round > 26 ? $"{round} - {order}" : $"{ROUND_CODE[round - 1]}{order}";
+            return phase > 4 ? $"{phase} - {order}" : $"{PHASE_CODE[phase - 1]}{order}";
         }
         #endregion
     }

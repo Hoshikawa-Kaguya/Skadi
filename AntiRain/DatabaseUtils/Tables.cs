@@ -3,7 +3,7 @@ using AntiRain.TypeEnum;
 using AntiRain.TypeEnum.GuildBattleType;
 using SqlSugar;
 
-namespace AntiRain.DatabaseUtils.Tables
+namespace AntiRain.DatabaseUtils
 {
     #region 阿B订阅数据表定义
     [SugarTable("bili_subscription")]
@@ -179,109 +179,22 @@ namespace AntiRain.DatabaseUtils.Tables
         public int Phase { set; get; }
 
         /// <summary>
-        /// 进入下一阶段的所需的周目数
+        /// 当前阶段的开始周目数
         /// </summary>
-        [SugarColumn(ColumnName = "round",ColumnDataType = "INTEGER")]
-        public int Round { set; get; }
+        [SugarColumn(ColumnName = "round_from",ColumnDataType = "INTEGER")]
+        public int RoundFrom { set; get; }
+
+        /// <summary>
+        /// 当前阶段的结束周目数
+        /// </summary>
+        [SugarColumn(ColumnName = "round_to",ColumnDataType = "INTEGER")]
+        public int RoundTo { get; set; }
 
         /// <summary>
         /// boss的血量
         /// </summary>
         [SugarColumn(ColumnName = "hp",ColumnDataType = "INTEGER")]
         public long HP { set; get; }
-
-        public static List<GuildBattleBoss> GetInitBossInfos()
-        {
-            List<GuildBattleBoss> initInfos = new List<GuildBattleBoss>();
-
-            #region 一阶段
-            initInfos.Add(new GuildBattleBoss
-            {
-                ServerId = Server.CN,
-                HP       = 6000000,
-                Order    = 1,
-                Phase    = 1,
-                Round    = 1
-            });
-            initInfos.Add(new GuildBattleBoss
-            {
-                ServerId = Server.CN,
-                HP       = 8000000,
-                Order    = 2,
-                Phase    = 1,
-                Round    = 1
-            });
-            initInfos.Add(new GuildBattleBoss
-            {
-                ServerId = Server.CN,
-                HP       = 10000000,
-                Order    = 3,
-                Phase    = 1,
-                Round    = 1
-            });
-            initInfos.Add(new GuildBattleBoss
-            {
-                ServerId = Server.CN,
-                HP       = 12000000,
-                Order    = 4,
-                Phase    = 1,
-                Round    = 1
-            });
-            initInfos.Add(new GuildBattleBoss
-            {
-                ServerId = Server.CN,
-                HP       = 20000000,
-                Order    = 5,
-                Phase    = 1,
-                Round    = 1
-            });
-            #endregion
-            
-            #region 二阶段
-            initInfos.Add(new GuildBattleBoss
-            {
-                ServerId = Server.CN,
-                HP       = 6000000,
-                Order    = 1,
-                Phase    = 2,
-                Round    = -1
-            });
-            initInfos.Add(new GuildBattleBoss
-            {
-                ServerId = Server.CN,
-                HP       = 8000000,
-                Order    = 2,
-                Phase    = 2,
-                Round    = -1
-            });
-            initInfos.Add(new GuildBattleBoss
-            {
-                ServerId = Server.CN,
-                HP       = 10000000,
-                Order    = 3,
-                Phase    = 2,
-                Round    = -1
-            });
-            initInfos.Add(new GuildBattleBoss
-            {
-                ServerId = Server.CN,
-                HP       = 12000000,
-                Order    = 4,
-                Phase    = 2,
-                Round    = -1
-            });
-            initInfos.Add(new GuildBattleBoss
-            {
-                ServerId = Server.CN,
-                HP       = 20000000,
-                Order    = 5,
-                Phase    = 2,
-                Round    = -1
-            });
-            #endregion
-
-            return initInfos;
-        }
     }
     #endregion
 

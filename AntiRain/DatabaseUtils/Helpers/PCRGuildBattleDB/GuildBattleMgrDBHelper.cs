@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AntiRain.DatabaseUtils.SqliteTool;
-using AntiRain.DatabaseUtils.Tables;
 using AntiRain.TypeEnum;
 using AntiRain.TypeEnum.GuildBattleType;
 using AntiRain.Tool;
@@ -406,7 +405,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 //获取修订的boss相关信息
-                int phase = GetRoundPhase(round, dbClient);
+                int phase = GetRoundPhase(server, round);
                 return dbClient.Queryable<GuildBattleBoss>()
                                .Where(boss => boss.ServerId == server && boss.Order == bossOrder &&
                                               boss.Phase    == phase)
@@ -507,7 +506,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
 
-                int nextPhase = GetNextRoundPhase(guildInfo, dbClient);
+                int nextPhase = GetRoundPhase(guildInfo.ServerId, guildInfo.Round + 1);
                 //获取下一个周目boss的信息
                 GuildBattleBoss nextBossData = dbClient.Queryable<GuildBattleBoss>()
                                                        .Where(i => i.ServerId == guildInfo.ServerId
@@ -712,86 +711,26 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                 return false;
             }
         }
-        #endregion
-
-        #region 私有方法
-        /// <summary>
-        /// 获取下一个周目的boss对应阶段
-        /// </summary>
-        /// <param name="guildInfo">当前会战进度</param>
-        /// <param name="dbClient">SqlSugarClient</param>
-        /// <returns>下一周目boss的阶段值</returns>
-        private int GetNextRoundPhase(GuildInfo guildInfo, SqlSugarClient dbClient)
-        {
-            //boss的最大阶段
-            int maxPhase =
-                dbClient.Queryable<GuildBattleBoss>()
-                        .Where(boss => boss.Round == -1)
-                        .Select(boss => boss.Phase)
-                        .First();
-            //已到最后一个阶段
-            if (guildInfo.BossPhase == maxPhase) return maxPhase;
-            //未达到最后一个阶段
-            int nextRound = guildInfo.Round + 1;
-            int nextPhase = guildInfo.BossPhase;
-            //获取除了最后一阶段的所有round值，在获取到相应阶段后终止循环
-            for (int i = 1; i < maxPhase; i++)
-            {
-                nextRound -= dbClient.Queryable<GuildBattleBoss>()
-                                     .Where(boss => boss.Phase == i && boss.ServerId == guildInfo.ServerId)
-                                     .Select(boss => boss.Round)
-                                     .First();
-                if (nextRound <= 0) //得到下一个周目的阶段终止循环
-                {
-                    nextPhase = i;
-                    break;
-                }
-            }
-
-            if (nextRound > 0) nextPhase = maxPhase;
-            return nextPhase;
-        }
 
         /// <summary>
         /// 获取指定周目的boss对应阶段
         /// </summary>
-        /// <param name="Round">指定周目</param>
-        /// <param name="dbClient">SqlSugarClient</param>
-        /// <returns>下一周目boss的阶段值</returns>
-        private int GetRoundPhase(int Round, SqlSugarClient dbClient)
+        /// <param name="server">区服</param>
+        /// <param name="round">指定周目</param>
+        /// <returns>
+        /// <para>指定周目boss的阶段值</para>
+        /// <para>如果没有查询刀则为0</para>
+        /// </returns>
+        public int GetRoundPhase(Server server, int round)
         {
-            //检查参数合法性
-            if(Round <= 0) throw new ArgumentOutOfRangeException(nameof(Round));
-
-            //当前所处区服
-            Server server =
-                dbClient.Queryable<GuildInfo>()
-                        .Where(guild => guild.Gid == GuildEventArgs.SourceGroup.Id)
-                        .Select(guild => guild.ServerId)
-                        .First();
-            //boss的最大阶段
-            int maxPhase =
-                dbClient.Queryable<GuildBattleBoss>()
-                        .Where(boss => boss.Round == -1)
-                        .Select(boss => boss.Phase)
-                        .First();
-            //未达到最后一个阶段
-            int nextPhase = 0;
-            //获取除了最后一阶段的所有round值，在获取到相应阶段后终止循环
-            for (int i = 1; i < maxPhase; i++)
-            {
-                Round -= dbClient.Queryable<GuildBattleBoss>()
-                                 .Where(boss => boss.Phase == i && boss.ServerId == server)
-                                 .Select(boss => boss.Round)
-                                 .First();
-                if (Round <= 0) //得到下一个周目的阶段终止循环
-                {
-                    nextPhase = i;
-                    break;
-                }
-            }
-            if (Round > 0) nextPhase = maxPhase;
-            return nextPhase;
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            //查找阶段数据
+            return dbClient.Queryable<GuildBattleBoss>()
+                           .Where(area => area.ServerId  == server &&
+                                          area.RoundFrom <= round  && area.RoundTo >= round ||
+                                          area.RoundFrom <= round && area.RoundTo == -1)
+                           .Select(phase => phase.Phase)
+                           .First();
         }
         #endregion
     }

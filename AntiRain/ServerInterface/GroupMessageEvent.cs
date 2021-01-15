@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AntiRain.ChatModule;
@@ -5,9 +6,11 @@ using AntiRain.ChatModule.HsoModule;
 using AntiRain.ChatModule.PcrGuildBattle;
 using AntiRain.ChatModule.PcrUtils;
 using AntiRain.Command;
+using AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB;
 using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
 using AntiRain.Resource.PCRResource;
+using AntiRain.TypeEnum;
 using AntiRain.TypeEnum.CommandType;
 using Sora.Entities.CQCodes;
 using Sora.Enumeration.EventParamsType;

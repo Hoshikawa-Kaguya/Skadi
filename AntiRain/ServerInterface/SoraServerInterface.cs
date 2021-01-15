@@ -2,12 +2,13 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using AntiRain.DatabaseUtils;
-using AntiRain.IO;
+using AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB;
 using AntiRain.IO.Config;
-using AntiRain.IO.Config.ConfigModule;
 using AntiRain.Resource.PCRResource;
 using AntiRain.TimerEvent;
+using AntiRain.Tool;
 using AntiRain.WebConsole;
+using Sora.Extensions;
 using Sora.Server;
 using Sora.Tool;
 
@@ -26,9 +27,9 @@ namespace AntiRain.ServerInterface
             //初始化配置文件
             ConsoleLog.Info("AntiRain初始化","初始化服务器全局配置...");
             //全局文件初始化不需要uid，不使用构造函数重载
-            ConfigManager configManager = new ConfigManager();
+            ConfigManager configManager = new();
             configManager.GlobalConfigFileInit();
-            configManager.LoadGlobalConfig(out GlobalConfig globalConfig, false);
+            configManager.LoadGlobalConfig(out var globalConfig, false);
 
             ConsoleLog.SetLogLevel(globalConfig.LogLevel);
             //显示Log等级
@@ -54,13 +55,13 @@ namespace AntiRain.ServerInterface
             Command.CommandAdapter.RegexResourseInit();
             Command.CommandAdapter.PCRGuildBattlecmdResourseInit();
 
-            //启动机器人控制台后端
-            ConsoleLog.Info("AntiRain初始化","启动机器人Web控制台...");
+            //启动机器人WebAPI服务器
+            ConsoleLog.Info("AntiRain初始化","启动机器人WebAPI服务器...");
             ConsoleInterface = new ConsoleInterface(globalConfig.AntiRainAPILocation, globalConfig.AntiRainAPIPort);
 
             ConsoleLog.Info("AntiRain初始化","启动反向WS服务器...");
             //初始化服务器
-            SoraWSServer server = new SoraWSServer(new ServerConfig
+            SoraWSServer server = new (new ServerConfig
             {
                 Location         = globalConfig.Location,
                 Port             = globalConfig.Port,
@@ -85,15 +86,8 @@ namespace AntiRain.ServerInterface
             server.ConnManager.OnCloseConnectionAsync += TimerEventParse.StopTimer;
             server.ConnManager.OnHeartBeatTimeOut += TimerEventParse.StopTimer;
 
-            try
-            {
-                await server.StartServer();
-            }
-            catch (Exception e)
-            {
-                //生成错误报告
-                IOUtils.CrashLogGen(ConsoleLog.ErrorLogBuilder(e));
-            }
+            //启动服务器
+            await server.StartServer().RunCatch(BotUtils.BotCrash);
         }
     }
 }

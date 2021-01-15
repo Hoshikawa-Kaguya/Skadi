@@ -29,7 +29,7 @@ namespace AntiRain.DatabaseUtils.SqliteTool
         /// </summary>
         public static string GetDBPath(string dirName = null)
         {
-            StringBuilder dbPath = new StringBuilder();
+            StringBuilder dbPath = new();
 #if DEBUG
             dbPath.Append(Environment.GetEnvironmentVariable("DebugDataPath"));
 #else
@@ -49,7 +49,7 @@ namespace AntiRain.DatabaseUtils.SqliteTool
         /// </summary>
         public static string GetDataDBPath(string dbFileName)
         {
-            StringBuilder dbPath = new StringBuilder();
+            StringBuilder dbPath = new();
 #if DEBUG
             dbPath.Append(Environment.GetEnvironmentVariable("DebugDataPath"));
 #else
@@ -103,9 +103,9 @@ namespace AntiRain.DatabaseUtils.SqliteTool
             cmd.CommandText = $"CREATE TABLE {tableName} (";
             PropertyInfo[] properties   = typeof(TableClass).GetProperties();
             int            i            = 0;
-            List<string>   primaryKeys  = new List<string>();
+            List<string>   primaryKeys  = new();
             bool           haveIdentity = false;
-            foreach (PropertyInfo colInfo in properties)
+            foreach (var colInfo in properties)
             {
                 i++;
                 //写入字段信息
@@ -188,7 +188,7 @@ namespace AntiRain.DatabaseUtils.SqliteTool
         /// <returns>默认开启的SqlSugarClient</returns>
         internal static SqlSugarClient CreateSqlSugarClient(string DBPath)
         {
-            return new SqlSugarClient(new ConnectionConfig()
+            return new (new ConnectionConfig
             {
                 ConnectionString      = $"DATA SOURCE={DBPath}",
                 DbType                = SqlSugar.DbType.Sqlite,

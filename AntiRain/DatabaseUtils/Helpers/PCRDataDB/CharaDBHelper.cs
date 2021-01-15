@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AntiRain.DatabaseUtils.SqliteTool;
-using AntiRain.DatabaseUtils.Tables;
 using Sora.Tool;
 using SqlSugar;
 

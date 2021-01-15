@@ -1,9 +1,11 @@
 using System;
 using System.Text;
+using AntiRain.IO;
 using AntiRain.TypeEnum;
 using Sora.Entities;
 using Sora.Entities.CQCodes;
 using Sora.Entities.Info;
+using Sora.Tool;
 
 namespace AntiRain.Tool
 {
@@ -129,6 +131,18 @@ namespace AntiRain.Tool
                 QQgroup?.SendGroupMessage(CQCode.CQAt(fromQQid), " 命令参数不全，请补充。");
                 return LenType.Illegal;
             }
+        }
+        #endregion
+
+        #region crash处理
+        /// <summary>
+        /// bot崩溃日志生成
+        /// </summary>
+        /// <param name="e">错误</param>
+        public static void BotCrash(Exception e)
+        {
+            //生成错误报告
+            IOUtils.CrashLogGen(ConsoleLog.ErrorLogBuilder(e));
         }
         #endregion
     }

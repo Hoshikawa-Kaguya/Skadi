@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AntiRain.DatabaseUtils;
 using AntiRain.DatabaseUtils.Helpers.PCRDataDB;
-using AntiRain.DatabaseUtils.Tables;
 using Sora.Tool;
 
 namespace AntiRain.Resource.PCRResource
@@ -37,9 +37,11 @@ namespace AntiRain.Resource.PCRResource
             ConsoleLog.Info("角色数据更新","尝试从云端获取更新");
             try
             {
-                HttpClient client = new();
-                //设置超时
-                client.Timeout = TimeSpan.FromSeconds(5);
+                HttpClient client = new HttpClient
+                {
+                    //设置超时
+                    Timeout = TimeSpan.FromSeconds(5)
+                };
                 //下载信息
                 res = await client.GetStringAsync("https://api.yukari.one/pcr/unit_data.py");
                 // res = Requests.Get("https://api.yukari.one/pcr/unit_data.py",

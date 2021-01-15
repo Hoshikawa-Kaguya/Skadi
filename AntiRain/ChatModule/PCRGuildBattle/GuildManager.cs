@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using AntiRain.DatabaseUtils;
 using AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB;
-using AntiRain.DatabaseUtils.Tables;
 using AntiRain.TypeEnum;
 using AntiRain.TypeEnum.CommandType;
 using AntiRain.Tool;

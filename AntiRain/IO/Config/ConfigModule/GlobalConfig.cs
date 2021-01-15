@@ -1,4 +1,4 @@
-using Fleck;
+using Sora.Enumeration;
 
 namespace AntiRain.IO.Config.ConfigModule
 {

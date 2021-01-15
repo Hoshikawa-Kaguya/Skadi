@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using AntiRain.DatabaseUtils.SqliteTool;
-using AntiRain.DatabaseUtils.Tables;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
 using SqlSugar;

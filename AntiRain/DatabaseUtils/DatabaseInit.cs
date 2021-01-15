@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using AntiRain.DatabaseUtils.SqliteTool;
-using AntiRain.DatabaseUtils.Tables;
 using AntiRain.IO;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
@@ -40,8 +39,6 @@ namespace AntiRain.DatabaseUtils
                 {
                     ConsoleLog.Warning("数据库初始化", "未找到会战数据表 - 创建一个新表");
                     SugarUtils.CreateTable<GuildBattleBoss>(dbClient);
-                    //写入初始化数据
-                    dbClient.Insertable(GuildBattleBoss.GetInitBossInfos()).ExecuteCommand();
                 }
                 if (!SugarUtils.TableExists<GuildInfo>(dbClient)) //会战状态表的初始化
                 {

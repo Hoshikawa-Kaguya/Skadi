@@ -14,7 +14,6 @@ using Sora.Entities.Base;
 using Sora.Entities.CQCodes;
 using Sora.EventArgs.SoraEvent;
 using Sora.Tool;
-using BiliUserInfo = BilibiliApi.Dynamic.Models.UserInfo;
 
 namespace AntiRain.TimerEvent.Event
 {
@@ -27,15 +26,15 @@ namespace AntiRain.TimerEvent.Event
         public static async void BiliUpdateCheck(ConnectEventArgs connectEventArgs)
         {
             //读取配置文件
-            ConfigManager configManager = new ConfigManager(connectEventArgs.LoginUid);
-            configManager.LoadUserConfig(out UserConfig loadedConfig);
+            ConfigManager configManager = new(connectEventArgs.LoginUid);
+            configManager.LoadUserConfig(out var loadedConfig);
             ModuleSwitch            moduleEnable  = loadedConfig.ModuleSwitch;
             List<GroupSubscription> Subscriptions = loadedConfig.SubscriptionConfig.GroupsConfig;
             //数据库
             SubscriptionDBHelper dbHelper = new SubscriptionDBHelper(connectEventArgs.LoginUid);
             //检查模块是否启用
             if (!moduleEnable.Bili_Subscription) return;
-            foreach (GroupSubscription subscription in Subscriptions)
+            foreach (var subscription in Subscriptions)
             {
                 //PCR动态订阅
                 if (subscription.PCR_Subscription)
@@ -43,7 +42,7 @@ namespace AntiRain.TimerEvent.Event
                     await GetDynamic(connectEventArgs.SoraApi, 353840826, subscription.GroupId, dbHelper);
                 }
                 //臭DD的订阅
-                foreach (long biliUser in subscription.SubscriptionId)
+                foreach (var biliUser in subscription.SubscriptionId)
                 {
                     await GetDynamic(connectEventArgs.SoraApi, biliUser, subscription.GroupId, dbHelper);
                 }
@@ -60,7 +59,7 @@ namespace AntiRain.TimerEvent.Event
         {
             string       textMessage;
             Dynamic      biliDynamic;
-            List<string> imgList = new List<string>();
+            List<string> imgList = new();
             //获取动态文本
             try
             {
@@ -95,7 +94,7 @@ namespace AntiRain.TimerEvent.Event
                         return ValueTask.CompletedTask;
                     default:
                         ConsoleLog.Debug("动态获取", $"ID:{biliUser}的动态获取成功，动态类型未知");
-                        foreach (long gid in groupId)
+                        foreach (var gid in groupId)
                         {
                             if(!dbHelper.Update(gid, biliUser, BotUtils.GetNowStampLong()))
                                 ConsoleLog.Error("数据库","更新动态记录时发生了数据库错误");
@@ -109,12 +108,12 @@ namespace AntiRain.TimerEvent.Event
                 return ValueTask.CompletedTask;
             }
             //获取用户信息
-            BiliUserInfo sender = biliDynamic.GetUserInfo();
+            UserInfo sender = biliDynamic.GetUserInfo();
             ConsoleLog.Debug("动态获取", $"{sender.UserName}的动态获取成功");
             //检查是否是最新的
             
-            List<long> targetGroups = new List<long>();
-            foreach (long group in groupId)
+            List<long> targetGroups = new();
+            foreach (var group in groupId)
             {
                 //检查是否已经发送过消息
                 if (!dbHelper.IsLatest(group, sender.Uid, biliDynamic.UpdateTime))
@@ -127,21 +126,21 @@ namespace AntiRain.TimerEvent.Event
                 return ValueTask.CompletedTask;
             }
             //构建消息
-            List<CQCode>  msgList = new List<CQCode>();
-            StringBuilder sb      = new StringBuilder();
-            sb.Append("获取到了来自 ");
-            sb.Append(sender.UserName);
-            sb.Append(" 的动态：\r\n");
-            sb.Append(textMessage);
-            msgList.Add(CQCode.CQText(sb.ToString()));
+            List<CQCode>  msgList    = new();
+            StringBuilder msgBuilder = new();
+            msgBuilder.Append("获取到了来自 ");
+            msgBuilder.Append(sender.UserName);
+            msgBuilder.Append(" 的动态：\r\n");
+            msgBuilder.Append(textMessage);
+            msgList.Add(CQCode.CQText(msgBuilder.ToString()));
             //添加图片
             imgList.ForEach(imgUrl => msgList.Add(CQCode.CQImage(imgUrl)));
-            sb.Clear();
-            sb.Append("\r\n更新时间：");
-            sb.Append(biliDynamic.UpdateTime.ToString("MM-dd HH:mm:ss"));
-            msgList.Add(CQCode.CQText(sb.ToString()));
+            msgBuilder.Clear();
+            msgBuilder.Append("\r\n更新时间：");
+            msgBuilder.Append(biliDynamic.UpdateTime.ToString("MM-dd HH:mm:ss"));
+            msgList.Add(CQCode.CQText(msgBuilder.ToString()));
             //向未发生消息的群发送消息
-            foreach (long targetGroup in targetGroups)
+            foreach (var targetGroup in targetGroups)
             {
                 ConsoleLog.Info("动态获取", $"获取到{sender.UserName}的最新动态，向群{targetGroup}发送动态信息");
                 soraApi.SendGroupMessage(targetGroup, msgList);
