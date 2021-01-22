@@ -29,11 +29,14 @@ namespace AntiRain.Tool
         /// <returns>是否在CD中</returns>
         public static bool isInCD(long groupId, long userId)
         {
+#if DEBUG
+            return false;
+#else
             DateTime time = DateTime.Now; //获取当前时间
             CheckUser user = new CheckUser
             {
                 GroupId = groupId,
-                UserId  = userId
+                UserId = userId
             };
             //尝试从字典中取出上一次调用的时间
             if (LastChatDate.TryGetValue(user, out DateTime last_use_time) &&
@@ -49,6 +52,7 @@ namespace AntiRain.Tool
                 LastChatDate[user] = time;
                 return false;
             }
+#endif
         }
         #endregion
     }

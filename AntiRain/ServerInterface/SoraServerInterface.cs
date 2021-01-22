@@ -40,12 +40,13 @@ namespace AntiRain.ServerInterface
             DatabaseInit.GlobalDataInit();
 
             //检查是否开启角色数据下载
-            if (globalConfig.ResourceConfig.UseCharaDatabase)
-            {
-                //更新PCR角色数据库
-                CharaParser charaParser = new CharaParser();
-                if(!await charaParser.UpdateCharaNameByCloud()) ConsoleLog.Error("AntiRain初始化","更新角色数据库失败");
-            }
+            //TODO 咕一段时间
+            // if (globalConfig.ResourceConfig.UseCharaDatabase)
+            // {
+            //     //更新PCR角色数据库
+            //     CharaParser charaParser = new CharaParser();
+            //     if(!await charaParser.UpdateCharaNameByCloud()) ConsoleLog.Error("AntiRain初始化","更新角色数据库失败");
+            // }
 
             //初始化字符编码
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using AntiRain.TypeEnum;
 using AntiRain.TypeEnum.GuildBattleType;
 using SqlSugar;

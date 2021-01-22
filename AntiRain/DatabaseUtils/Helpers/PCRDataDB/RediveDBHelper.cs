@@ -14,27 +14,12 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRDataDB
         /// 数据库路径
         /// </summary>
         private readonly string ResDBPath;
-        /// <summary>
-        /// 游戏数据库路径
-        /// </summary>
-        private readonly string JPDBPath;
-        /// <summary>
-        /// 游戏数据库路径
-        /// </summary>
-        private readonly string CNDBPath;
-        /// <summary>
-        /// 游戏数据库路径
-        /// </summary>
-        private readonly string TWDBPath;
         #endregion
 
         #region 构造函数
         internal RediveDBHelper()
         {
             this.ResDBPath = SugarUtils.GetDataDBPath(SugarUtils.GlobalResDBName);
-            this.JPDBPath  = SugarUtils.GetDataDBPath(SugarUtils.GameDBNameJP);
-            this.CNDBPath  = SugarUtils.GetDataDBPath(SugarUtils.GameDBNameCN);
-            this.TWDBPath  = SugarUtils.GetDataDBPath(SugarUtils.GameDBNameTW);
         }
         #endregion
 
