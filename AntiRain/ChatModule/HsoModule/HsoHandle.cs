@@ -91,21 +91,21 @@ namespace AntiRain.ChatModule.HsoModule
                         Random randSource = new Random();
                         if (randSource.Next(1, 100) > 50)
                         {
-                            serverUrl = "https://api.lolicon.app/setu";
+                            serverUrl = "https://api.lolicon.app/setu/";
                             apiKey    = hso.LoliconApiKey ?? string.Empty;
                         }
                         else
                         {
-                            serverUrl = "https://api.yukari.one/setu";
+                            serverUrl = "https://api.yukari.one/setu/";
                             apiKey    = hso.YukariApiKey ?? string.Empty;
                         }
                         break;
                     case "Yukari":
-                        serverUrl = "https://api.yukari.one/setu";
+                        serverUrl = "https://api.yukari.one/setu/";
                         apiKey    = hso.YukariApiKey ?? string.Empty;
                         break;
                     case "Lolicon":
-                        serverUrl = "https://api.yukari.one/setu";
+                        serverUrl = "https://api.yukari.one/setu/";
                         apiKey    = hso.YukariApiKey ?? string.Empty;
                         break;
                     default:
