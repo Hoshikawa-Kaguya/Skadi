@@ -33,6 +33,9 @@ HsoConfig:
   LoliconApiKey: null
   # Yukari APIKEY
   YukariApiKey: null
+  # 群组屏蔽设置
+  # 数组中的群号不会触发色图功能
+  GroupBlock: []
 
 # 动态订阅设置
 SubscriptionConfig:

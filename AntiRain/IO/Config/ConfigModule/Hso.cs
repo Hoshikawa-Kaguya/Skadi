@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace AntiRain.IO.Config.ConfigModule
 {
     internal class Hso
@@ -34,5 +36,9 @@ namespace AntiRain.IO.Config.ConfigModule
         /// YukariToken
         /// </summary>
         public string YukariApiKey { set; get; }
+        /// <summary>
+        /// 群组屏蔽
+        /// </summary>
+        public List<long> GroupBlock { get; set; }
     }
 }

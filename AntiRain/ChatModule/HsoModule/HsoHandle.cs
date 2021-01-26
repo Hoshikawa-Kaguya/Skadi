@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -44,6 +45,7 @@ namespace AntiRain.ChatModule.HsoModule
         {
             ConfigManager configManager = new ConfigManager(HsoEventArgs.LoginUid);
             configManager.LoadUserConfig(out UserConfig userConfig);
+            if (CheckGroupBlock(userConfig)) return;
             if (CheckInCD.isInCD(HsoEventArgs.SourceGroup, HsoEventArgs.Sender))
             {
                 await HsoEventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(HsoEventArgs.Sender), "你是不是只会要色图");
@@ -332,6 +334,14 @@ namespace AntiRain.ChatModule.HsoModule
             msg.Add(CQCode.CQText(textBuilder.ToString()));
             return msg;
         }
+
+        /// <summary>
+        /// 检查群是否被屏蔽
+        /// </summary>
+        /// <param name="config">配置文件</param>
+        /// <param name="groupId">群号</param>
+        private bool CheckGroupBlock(UserConfig config)
+            => config.HsoConfig.GroupBlock.Any(gid => gid == HsoEventArgs.SourceGroup);
         #endregion
     }
 }
