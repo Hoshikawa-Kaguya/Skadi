@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Sora.Entities.CQCodes;
 using Sora.EventArgs.SoraEvent;
-using Sora.Tool;
+using YukariToolBox.Console;
 
 namespace AntiRain.DatabaseUtils
 {

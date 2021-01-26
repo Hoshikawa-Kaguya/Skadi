@@ -12,7 +12,7 @@ using AntiRain.TypeEnum.CommandType;
 using Sora.Entities.CQCodes;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
-using Sora.Tool;
+using YukariToolBox.Console;
 
 namespace AntiRain.ServerInterface
 {

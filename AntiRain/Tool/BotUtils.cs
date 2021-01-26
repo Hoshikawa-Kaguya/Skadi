@@ -4,8 +4,7 @@ using AntiRain.IO;
 using AntiRain.TypeEnum;
 using Sora.Entities;
 using Sora.Entities.CQCodes;
-using Sora.Entities.Info;
-using Sora.Tool;
+using YukariToolBox.Console;
 
 namespace AntiRain.Tool
 {
@@ -38,16 +37,6 @@ namespace AntiRain.Tool
             {
                 return (long)( DateTime.Today.AddDays(-1) - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Add(new TimeSpan(5, 0, 0)).TotalSeconds;
             } 
-        }
-        #endregion
-
-        #region 群成员处理
-        /// <summary>
-        /// 获取群成员的名片，没有则获取昵称
-        /// </summary>
-        public static string getNick(GroupMemberInfo input)
-        {
-            return input.Card == "" ? input.Nick : input.Card;
         }
         #endregion
 

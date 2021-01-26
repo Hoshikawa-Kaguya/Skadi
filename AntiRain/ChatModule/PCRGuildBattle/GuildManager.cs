@@ -11,7 +11,7 @@ using Sora.Entities.CQCodes;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
-using Sora.Tool;
+using YukariToolBox.Console;
 
 namespace AntiRain.ChatModule.PcrGuildBattle
 {

@@ -6,7 +6,6 @@ using AntiRain.TimerEvent.Event;
 using Fleck;
 using Sora.EventArgs.SoraEvent;
 using Sora.EventArgs.WSSeverEvent;
-using Sora.Tool;
 
 namespace AntiRain.TimerEvent
 {

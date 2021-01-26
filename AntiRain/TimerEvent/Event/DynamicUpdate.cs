@@ -13,7 +13,7 @@ using BilibiliApi.Dynamic.Models.Card;
 using Sora.Entities.Base;
 using Sora.Entities.CQCodes;
 using Sora.EventArgs.SoraEvent;
-using Sora.Tool;
+using YukariToolBox.Console;
 
 namespace AntiRain.TimerEvent.Event
 {

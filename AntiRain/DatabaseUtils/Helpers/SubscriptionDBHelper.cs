@@ -1,7 +1,8 @@
 using System;
 using AntiRain.DatabaseUtils.SqliteTool;
-using Sora.Tool;
 using SqlSugar;
+using YukariToolBox.Console;
+using YukariToolBox.Time;
 
 namespace AntiRain.DatabaseUtils.Helpers
 {
@@ -35,7 +36,7 @@ namespace AntiRain.DatabaseUtils.Helpers
                 return dbClient.Queryable<BiliSubscription>()
                                .Where(lastDynamic => lastDynamic.SubscriptionId == biliUserId &&
                                                      lastDynamic.Gid            == groupId    &&
-                                                     lastDynamic.UpdateTime     >= Utils.DateTimeToTimeStamp(updateTime))
+                                                     lastDynamic.UpdateTime     >= updateTime.ToTimeStamp())
                                .Any();
             }
             catch (Exception e)
@@ -70,7 +71,7 @@ namespace AntiRain.DatabaseUtils.Helpers
                         {
                             Gid            = groupId,
                             SubscriptionId = biliUserId,
-                            UpdateTime     = Utils.DateTimeToTimeStamp(updateTime)
+                            UpdateTime     = updateTime.ToTimeStamp()
                         }).ExecuteCommand() > 0;
                 }
                 else
@@ -79,7 +80,7 @@ namespace AntiRain.DatabaseUtils.Helpers
                     return
                         dbClient.Updateable<BiliSubscription>(newBiliDynamic =>
                                                                   newBiliDynamic.UpdateTime ==
-                                                                  Utils.DateTimeToTimeStamp(updateTime))
+                                                                  updateTime.ToTimeStamp())
                                 .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId &&
                                                       biliDynamic.Gid            == groupId)
                                 .ExecuteCommandHasChange();

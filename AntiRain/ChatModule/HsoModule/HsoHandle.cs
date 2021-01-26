@@ -14,7 +14,7 @@ using PyLibSharp.Requests;
 using Sora.Entities.CQCodes;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
-using Sora.Tool;
+using YukariToolBox.Console;
 using Group = Sora.Entities.Group;
 
 namespace AntiRain.ChatModule.HsoModule
@@ -136,7 +136,7 @@ namespace AntiRain.ChatModule.HsoModule
             {
                 //网络错误
                 await QQGroup.SendGroupMessage("哇哦~发生了网络错误，请联系机器人所在服务器管理员");
-                ConsoleLog.Error("网络发生错误", $"{ConsoleLog.ErrorLogBuilder(e)}\r\n\r\n{PyLibSharp.Requests.Utils.GetInnerExceptionMessages(e)}");
+                ConsoleLog.Error("网络发生错误", $"{ConsoleLog.ErrorLogBuilder(e)}\r\n\r\n{Utils.GetInnerExceptionMessages(e)}");
                 return;
             }
             //json处理

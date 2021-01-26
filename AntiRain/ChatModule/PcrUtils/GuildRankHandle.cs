@@ -10,8 +10,8 @@ using PyLibSharp.Requests;
 using Sora.Entities;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
-using Sora.Tool;
-using Utils = Sora.Tool.Utils;
+using YukariToolBox.Console;
+using YukariToolBox.Time;
 
 namespace AntiRain.ChatModule.PcrUtils
 {
@@ -232,7 +232,7 @@ namespace AntiRain.ChatModule.PcrUtils
                                                    $"排名:{response["data"]?[0]?["rank"]}\n",
                                                    $"总分数:{response["data"]?[0]?["damage"]}\n",
                                                    $"会长:{response["data"]?[0]?["leader_name"]}\n",
-                                                   $"数据更新时间:{Utils.TimeStampToDateTime(updateTimeStamp):MM-dd HH:mm:ss}\n",
+                                                   $"数据更新时间:{updateTimeStamp.ToDateTime():MM-dd HH:mm:ss}\n",
                                                    "如果查询到的信息有误，有可能关键词错误或公会排名在20060之后");
                 }
                 else

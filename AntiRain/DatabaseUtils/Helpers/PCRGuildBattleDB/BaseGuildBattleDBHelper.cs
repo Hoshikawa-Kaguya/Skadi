@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using AntiRain.DatabaseUtils.SqliteTool;
 using Sora.EventArgs.SoraEvent;
-using Sora.Tool;
 using SqlSugar;
+using YukariToolBox.Console;
 
 namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
 {

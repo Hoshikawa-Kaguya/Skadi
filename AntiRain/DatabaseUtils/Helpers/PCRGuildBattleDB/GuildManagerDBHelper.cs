@@ -3,8 +3,9 @@ using AntiRain.DatabaseUtils.SqliteTool;
 using AntiRain.TypeEnum;
 using AntiRain.TypeEnum.GuildBattleType;
 using Sora.EventArgs.SoraEvent;
-using Sora.Tool;
 using SqlSugar;
+using YukariToolBox.Console;
+using YukariToolBox.Time;
 
 namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
 {
@@ -121,7 +122,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                         Gid  = groupid,
                         Info = null,
                         SL   = 0,
-                        Time = Utils.GetNowTimeStamp(),
+                        Time = TimeStamp.GetNowTimeStamp(),
                         Uid  = uid,
                         Name = name
                     };

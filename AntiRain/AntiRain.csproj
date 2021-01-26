@@ -43,7 +43,7 @@
     <PackageReference Include="BilibiliApi" Version="0.3.6" />
     <PackageReference Include="PyLibSharp" Version="1.2.3" />
     <PackageReference Include="SharpYaml" Version="1.6.6" />
-    <PackageReference Include="Sora" Version="0.4.19" />
+    <PackageReference Include="Sora" Version="0.5.1" />
     <PackageReference Include="sqlSugarCore" Version="5.0.2.2" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
   </ItemGroup>

@@ -8,7 +8,7 @@ using Sora.Entities;
 using Sora.Entities.CQCodes;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
-using Sora.Tool;
+using YukariToolBox.Console;
 
 namespace AntiRain.ChatModule.PcrGuildBattle
 {

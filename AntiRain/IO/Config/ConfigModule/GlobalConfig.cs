@@ -1,4 +1,4 @@
-using Sora.Enumeration;
+using YukariToolBox.Console;
 
 namespace AntiRain.IO.Config.ConfigModule
 {

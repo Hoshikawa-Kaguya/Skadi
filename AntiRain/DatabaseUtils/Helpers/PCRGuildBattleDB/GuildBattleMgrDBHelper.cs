@@ -6,8 +6,9 @@ using AntiRain.TypeEnum;
 using AntiRain.TypeEnum.GuildBattleType;
 using AntiRain.Tool;
 using Sora.EventArgs.SoraEvent;
-using Sora.Tool;
 using SqlSugar;
+using YukariToolBox.Console;
+using YukariToolBox.Time;
 
 namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
 {
@@ -345,7 +346,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                 var insertData = new GuildBattle()
                 {
                     Uid    = uid,
-                    Time   = Utils.GetNowTimeStamp(),
+                    Time   = TimeStamp.GetNowTimeStamp(),
                     Order  = guildInfo.Order,
                     Round  = guildInfo.Round,
                     Damage = dmg,
@@ -656,7 +657,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                 {
                     Flag = newFlag,
                     Info = newInfo,
-                    Time = Utils.GetNowTimeStamp(),
+                    Time = TimeStamp.GetNowTimeStamp(),
                 };
                 return dbClient.Updateable(memberInfo)
                                .UpdateColumns(i => new{i.Flag,i.Info,i.Time})
@@ -699,7 +700,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                 {
                     return dbClient
                            .Updateable(new MemberInfo
-                                           {Flag = FlagType.IDLE, SL = Utils.GetNowTimeStamp(), Time = Utils.GetNowTimeStamp(), Info = null})
+                                           {Flag = FlagType.IDLE, SL = TimeStamp.GetNowTimeStamp(), Time = TimeStamp.GetNowTimeStamp(), Info = null})
                            .UpdateColumns(i => new {i.Flag, i.SL, i.Time, i.Info})
                            .Where(i => i.Gid == GuildEventArgs.SourceGroup.Id && i.Uid == uid)
                            .ExecuteCommandHasChange();

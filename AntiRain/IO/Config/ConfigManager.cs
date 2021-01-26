@@ -4,8 +4,8 @@ using System.Text;
 using System.Threading;
 using AntiRain.IO.Config.ConfigModule;
 using SharpYaml.Serialization;
-using Sora.Tool;
 using AntiRain.IO.Config.Res;
+using YukariToolBox.Console;
 
 namespace AntiRain.IO.Config
 {

@@ -3,8 +3,8 @@ using System.Threading;
 using AntiRain.DatabaseUtils.SqliteTool;
 using AntiRain.IO;
 using Sora.EventArgs.SoraEvent;
-using Sora.Tool;
 using SqlSugar;
+using YukariToolBox.Console;
 
 namespace AntiRain.DatabaseUtils
 {

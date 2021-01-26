@@ -1,7 +1,7 @@
 using System;
 using AntiRain.TypeEnum.CommandType;
 using Sora.EventArgs.SoraEvent;
-using Sora.Tool;
+using YukariToolBox.Console;
 
 namespace AntiRain.ChatModule.PcrGuildBattle
 {

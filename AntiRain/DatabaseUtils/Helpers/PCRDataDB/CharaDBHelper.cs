@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AntiRain.DatabaseUtils.SqliteTool;
-using Sora.Tool;
 using SqlSugar;
+using YukariToolBox.Console;
 
 namespace AntiRain.DatabaseUtils.Helpers.PCRDataDB
 {
