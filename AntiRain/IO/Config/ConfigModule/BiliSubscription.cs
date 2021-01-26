@@ -31,5 +31,10 @@ namespace AntiRain.IO.Config.ConfigModule
         /// UID动态订阅
         /// </summary>
         public List<long> SubscriptionId   { set; get; }
+
+        /// <summary>
+        /// UID直播订阅
+        /// </summary>
+        public List<long> LiveSubscriptionId { set; get; }
     }
 }

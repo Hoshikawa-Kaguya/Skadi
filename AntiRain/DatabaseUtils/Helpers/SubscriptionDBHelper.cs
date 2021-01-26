@@ -1,5 +1,6 @@
 using System;
 using AntiRain.DatabaseUtils.SqliteTool;
+using BilibiliApi.Live.Enums;
 using SqlSugar;
 using YukariToolBox.Console;
 using YukariToolBox.Time;
@@ -27,13 +28,13 @@ namespace AntiRain.DatabaseUtils.Helpers
         /// <param name="biliUserId">B站用户ID</param>
         /// <param name="updateTime">当前获取的记录</param>
         /// <returns></returns>
-        public bool IsLatest(long groupId, long biliUserId, DateTime updateTime)
+        public bool IsLatestDynamic(long groupId, long biliUserId, DateTime updateTime)
         {
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 //查询是否存在相同或时间大于记录subscriptionId
-                return dbClient.Queryable<BiliSubscription>()
+                return dbClient.Queryable<BiliDynamicSubscription>()
                                .Where(lastDynamic => lastDynamic.SubscriptionId == biliUserId &&
                                                      lastDynamic.Gid            == groupId    &&
                                                      lastDynamic.UpdateTime     >= updateTime.ToTimeStamp())
@@ -54,20 +55,20 @@ namespace AntiRain.DatabaseUtils.Helpers
         /// <param name="biliUserId"></param>
         /// <param name="updateTime"></param>
         /// <returns>是否成功修改</returns>
-        public bool Update(long groupId, long biliUserId, DateTime updateTime)
+        public bool UpdateDynamic(long groupId, long biliUserId, DateTime updateTime)
         {
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 //查找是否有历史记录
-                if (!dbClient.Queryable<BiliSubscription>()
+                if (!dbClient.Queryable<BiliDynamicSubscription>()
                              .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId &&
                                                    biliDynamic.Gid            == groupId)
                              .Any())
                 {
                     //没有记录插入新行
                     return
-                        dbClient.Insertable(new BiliSubscription()
+                        dbClient.Insertable(new BiliDynamicSubscription()
                         {
                             Gid            = groupId,
                             SubscriptionId = biliUserId,
@@ -78,7 +79,7 @@ namespace AntiRain.DatabaseUtils.Helpers
                 {
                     //有记录更新时间
                     return
-                        dbClient.Updateable<BiliSubscription>(newBiliDynamic =>
+                        dbClient.Updateable<BiliDynamicSubscription>(newBiliDynamic =>
                                                                   newBiliDynamic.UpdateTime ==
                                                                   updateTime.ToTimeStamp())
                                 .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId &&
@@ -100,20 +101,20 @@ namespace AntiRain.DatabaseUtils.Helpers
         /// <param name="biliUserId"></param>
         /// <param name="updateTime"></param>
         /// <returns>是否成功修改</returns>
-        public bool Update(long groupId, long biliUserId, long updateTime)
+        public bool UpdateDynamic(long groupId, long biliUserId, long updateTime)
         {
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 //查找是否有历史记录
-                if (!dbClient.Queryable<BiliSubscription>()
+                if (!dbClient.Queryable<BiliDynamicSubscription>()
                              .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId &&
                                                    biliDynamic.Gid            == groupId)
                              .Any())
                 {
                     //没有记录插入新行
                     return
-                        dbClient.Insertable(new BiliSubscription()
+                        dbClient.Insertable(new BiliDynamicSubscription()
                         {
                             Gid            = groupId,
                             SubscriptionId = biliUserId,
@@ -124,7 +125,7 @@ namespace AntiRain.DatabaseUtils.Helpers
                 {
                     //有记录更新时间
                     return
-                        dbClient.Updateable<BiliSubscription>(newBiliDynamic =>
+                        dbClient.Updateable<BiliDynamicSubscription>(newBiliDynamic =>
                                                                   newBiliDynamic.UpdateTime == updateTime)
                                 .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId &&
                                                       biliDynamic.Gid            == groupId)
@@ -137,8 +138,67 @@ namespace AntiRain.DatabaseUtils.Helpers
                 return false;
             }
         }
+        #endregion
 
-        //TODO 获取到未知动态时更新数据库
+        #region 直播订阅数据库
+        /// <summary>
+        /// 获取最新的直播状态
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="biliUserId">B站用户ID</param>
+        /// <returns>直播间状态</returns>
+        public LiveStatusType GetLastLiveStatus(long groupId, long biliUserId)
+        {
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            //查找是否有历史记录
+            if (dbClient.Queryable<BiliLiveSubscription>()
+                         .Where(biliLive => biliLive.SubscriptionId == biliUserId &&
+                                            biliLive.Gid            == groupId)
+                         .Any())
+            {
+                //没有记录插入新行
+                return dbClient.Queryable<BiliLiveSubscription>()
+                               .Where(biliLive => biliLive.SubscriptionId == biliUserId &&
+                                                  biliLive.Gid            == groupId)
+                               .Select(biliLive => biliLive.LiveStatus)
+                               .First();
+            }
+            return LiveStatusType.Unknown;
+        }
+
+        /// <summary>
+        /// 更新直播状态
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="biliUserId">B站用户ID</param>
+        /// <param name="newStatus">新状态</param>
+        public bool UpdateLiveStatus(long groupId, long biliUserId, LiveStatusType newStatus)
+        {
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            //查找是否有历史记录
+            if (!dbClient.Queryable<BiliLiveSubscription>()
+                         .Where(biliLive => biliLive.SubscriptionId == biliUserId &&
+                                            biliLive.Gid            == groupId)
+                         .Any())
+            {
+                //没有记录插入新行
+                return dbClient.Insertable(new BiliLiveSubscription()
+                {
+                    Gid            = groupId,
+                    SubscriptionId = biliUserId,
+                    LiveStatus     = newStatus
+                }).ExecuteCommand() > 0;
+            }
+            else
+            {
+                //有记录更新时间
+                return dbClient.Updateable<BiliLiveSubscription>(biliLive =>
+                                                                     biliLive.LiveStatus == newStatus)
+                               .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId &&
+                                                     biliDynamic.Gid            == groupId)
+                               .ExecuteCommandHasChange();
+            }
+        }
         #endregion
     }
 }

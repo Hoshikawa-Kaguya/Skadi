@@ -60,7 +60,7 @@ namespace AntiRain.TimerEvent
         {
             if (msgObject is ConnectEventArgs connectEventArgs)
             {
-                DynamicUpdate.BiliUpdateCheck(connectEventArgs);
+                SubscriptionUpdate.BiliUpdateCheck(connectEventArgs);
             }
         }
         #endregion

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AntiRain.DatabaseUtils.Helpers;
@@ -10,6 +11,11 @@ using BilibiliApi.Dynamic;
 using BilibiliApi.Dynamic.Enums;
 using BilibiliApi.Dynamic.Models;
 using BilibiliApi.Dynamic.Models.Card;
+using BilibiliApi.Live;
+using BilibiliApi.Live.Enums;
+using BilibiliApi.Live.Models;
+using BilibiliApi.User;
+using BilibiliApi.User.Models;
 using Sora.Entities.Base;
 using Sora.Entities.CQCodes;
 using Sora.EventArgs.SoraEvent;
@@ -17,7 +23,7 @@ using YukariToolBox.Console;
 
 namespace AntiRain.TimerEvent.Event
 {
-    internal static class DynamicUpdate
+    internal static class SubscriptionUpdate
     {
         /// <summary>
         /// 自动获取B站动态
@@ -46,16 +52,67 @@ namespace AntiRain.TimerEvent.Event
                 {
                     await GetDynamic(connectEventArgs.SoraApi, biliUser, subscription.GroupId, dbHelper);
                 }
+                //直播动态订阅
+                foreach (var biliUser in subscription.LiveSubscriptionId)
+                {
+                    await GetLiveStatus(connectEventArgs.SoraApi, biliUser, subscription.GroupId, dbHelper);
+                }
             }
         }
 
-        private static ValueTask GetLiveStatus(SoraApi soraApi, long biliUser, List<long> groupId, SubscriptionDBHelper dbHelper)
+        private static async ValueTask GetLiveStatus(SoraApi soraApi, long biliUser, List<long> groupId, SubscriptionDBHelper dbHelper)
         {
-
-            return ValueTask.CompletedTask;
+            LiveInfo      live;
+            UserSpaceInfo biliUserInfo;
+            //获取数据
+            try
+            {
+                biliUserInfo = UserApis.GetLiveRoomInfo(biliUser);
+                live         = LiveAPIs.GetLiveRoomInfo(biliUserInfo.LiveRoomInfo.ShortId);
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("获取直播状态时发生错误",ConsoleLog.ErrorLogBuilder(e));
+                return;
+            }
+            //需要更新数据的群
+            Dictionary<long, LiveStatusType> updateDict = groupId
+                                                          .Where(gid => dbHelper.GetLastLiveStatus(gid, biliUser) !=
+                                                                        live.LiveStatus)
+                                                          .ToDictionary(gid => gid, _ => live.LiveStatus);
+            //更新数据库
+            foreach (var status in updateDict)
+            {
+                if(!dbHelper.UpdateLiveStatus(status.Key, biliUser, live.LiveStatus))
+                {
+                    ConsoleLog.Error("Database","更新直播订阅数据失败");
+                }
+            }
+            //需要消息提示的群
+            var targetGroup = updateDict.Where(group => group.Value == LiveStatusType.Online)
+                                        .Select(group => group.Key)
+                                        .ToList();
+            if (targetGroup.Count == 0) return;
+            //构建提示消息
+            List<CQCode>  msgList = new();
+            StringBuilder message = new StringBuilder();
+            message.Append(biliUserInfo.Name);
+            message.Append(" 正在直播！\r\n");
+            message.Append(biliUserInfo.LiveRoomInfo.Title);
+            msgList.Add(CQCode.CQText(message.ToString()));
+            msgList.Add(CQCode.CQImage(biliUserInfo.LiveRoomInfo.CoverUrl));
+            message.Clear();
+            message.Append("直播间地址:");
+            message.Append(biliUserInfo.LiveRoomInfo.LiveUrl);
+            msgList.Add(CQCode.CQText(message.ToString()));
+            foreach (var gid in targetGroup)
+            {
+                ConsoleLog.Info("直播订阅", $"获取到{biliUserInfo.Name}正在直播，向群[{gid}]发送动态信息");
+                await soraApi.SendGroupMessage(gid, msgList);
+            }
         }
 
-        private static ValueTask GetDynamic(SoraApi soraApi, long biliUser, List<long> groupId, SubscriptionDBHelper dbHelper)
+        private static async ValueTask GetDynamic(SoraApi soraApi, long biliUser, List<long> groupId, SubscriptionDBHelper dbHelper)
         {
             string       textMessage;
             Dynamic      biliDynamic;
@@ -90,40 +147,36 @@ namespace AntiRain.TimerEvent.Event
                         biliDynamic = videoCard;
                         break;
                     case CardType.Error:
-                        ConsoleLog.Error("动态获取", $"ID:{biliUser}的动态获取失败");
-                        return ValueTask.CompletedTask;
+                        //ConsoleLog.Error("动态获取", $"ID:{biliUser}的动态获取失败");
+                        return;
                     default:
                         ConsoleLog.Debug("动态获取", $"ID:{biliUser}的动态获取成功，动态类型未知");
                         foreach (var gid in groupId)
                         {
-                            if(!dbHelper.Update(gid, biliUser, BotUtils.GetNowStampLong()))
+                            if(!dbHelper.UpdateDynamic(gid, biliUser, BotUtils.GetNowStampLong()))
                                 ConsoleLog.Error("数据库","更新动态记录时发生了数据库错误");
                         }
-                        return ValueTask.CompletedTask;
+                        return;
                 }
             }
             catch (Exception e)
             {
                 ConsoleLog.Error("获取动态更新时发生错误",ConsoleLog.ErrorLogBuilder(e));
-                return ValueTask.CompletedTask;
+                return;
             }
             //获取用户信息
             UserInfo sender = biliDynamic.GetUserInfo();
             ConsoleLog.Debug("动态获取", $"{sender.UserName}的动态获取成功");
             //检查是否是最新的
-            
-            List<long> targetGroups = new();
-            foreach (var group in groupId)
-            {
-                //检查是否已经发送过消息
-                if (!dbHelper.IsLatest(group, sender.Uid, biliDynamic.UpdateTime))
-                    targetGroups.Add(group);
-            }
+            List<long> targetGroups = groupId
+                                      .Where(@group => !dbHelper.IsLatestDynamic(@group, sender.Uid,
+                                                 biliDynamic.UpdateTime))
+                                      .ToList();
             //没有群需要发送消息
             if(targetGroups.Count == 0)
             {
                 ConsoleLog.Debug("动态获取", $"{sender.UserName}的动态已是最新");
-                return ValueTask.CompletedTask;
+                return;
             }
             //构建消息
             List<CQCode>  msgList    = new();
@@ -143,11 +196,10 @@ namespace AntiRain.TimerEvent.Event
             foreach (var targetGroup in targetGroups)
             {
                 ConsoleLog.Info("动态获取", $"获取到{sender.UserName}的最新动态，向群{targetGroup}发送动态信息");
-                soraApi.SendGroupMessage(targetGroup, msgList);
-                if(!dbHelper.Update(targetGroup, sender.Uid, biliDynamic.UpdateTime)) 
+                await soraApi.SendGroupMessage(targetGroup, msgList);
+                if(!dbHelper.UpdateDynamic(targetGroup, sender.Uid, biliDynamic.UpdateTime)) 
                     ConsoleLog.Error("数据库","更新动态记录时发生了数据库错误");
             }
-            return ValueTask.CompletedTask;
         }
     }
 }

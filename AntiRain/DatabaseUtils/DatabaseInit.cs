@@ -30,15 +30,20 @@ namespace AntiRain.DatabaseUtils
                     ConsoleLog.Warning("数据库初始化", "未找到成员状态表 - 创建一个新表");
                     SugarUtils.CreateTable<MemberInfo>(dbClient);
                 }
-                if (!SugarUtils.TableExists<BiliSubscription>(dbClient)) //动态记录表的初始化
+                if (!SugarUtils.TableExists<BiliDynamicSubscription>(dbClient)) //动态记录表的初始化
                 {
-                    ConsoleLog.Warning("数据库初始化", "未找到动态记录表 - 创建一个新表");
-                    SugarUtils.CreateTable<BiliSubscription>(dbClient);
+                    ConsoleLog.Warning("数据库初始化", "未找到动态订阅表 - 创建一个新表");
+                    SugarUtils.CreateTable<BiliDynamicSubscription>(dbClient);
                 }
                 if (!SugarUtils.TableExists<GuildBattleBoss>(dbClient)) //会战数据表的初始化
                 {
                     ConsoleLog.Warning("数据库初始化", "未找到会战数据表 - 创建一个新表");
                     SugarUtils.CreateTable<GuildBattleBoss>(dbClient);
+                }
+                if (!SugarUtils.TableExists<BiliLiveSubscription>(dbClient))
+                {
+                    ConsoleLog.Warning("数据库初始化", "未找到直播订阅表 - 创建一个新表");
+                    SugarUtils.CreateTable<BiliLiveSubscription>(dbClient);
                 }
                 if (!SugarUtils.TableExists<GuildInfo>(dbClient)) //会战状态表的初始化
                 {

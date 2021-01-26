@@ -339,7 +339,6 @@ namespace AntiRain.ChatModule.HsoModule
         /// 检查群是否被屏蔽
         /// </summary>
         /// <param name="config">配置文件</param>
-        /// <param name="groupId">群号</param>
         private bool CheckGroupBlock(UserConfig config)
             => config.HsoConfig.GroupBlock.Any(gid => gid == HsoEventArgs.SourceGroup);
         #endregion
