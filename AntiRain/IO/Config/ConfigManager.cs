@@ -129,7 +129,7 @@ namespace AntiRain.IO.Config
                 //没读取到文件时创建新的文件
                 ConsoleLog.Error("ConfigIO", "未找到配置文件");
                 ConsoleLog.Warning("ConfigIO", "创建新的配置文件");
-                string           initConfigText = Encoding.UTF8.GetString(InitRes.InitUserConfig);
+                string initConfigText = Encoding.UTF8.GetString(InitRes.InitUserConfig);
                 using (TextWriter writer = File.CreateText(UserConfigPath))
                 {
                     writer.Write(initConfigText);

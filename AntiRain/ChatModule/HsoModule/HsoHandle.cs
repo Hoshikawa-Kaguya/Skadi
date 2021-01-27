@@ -160,9 +160,8 @@ namespace AntiRain.ChatModule.HsoModule
                 string localPicPath = $"{IOUtils.GetHsoPath()}/{Path.GetFileName(picUrl)}".Replace('\\', '/');
                 if (File.Exists(localPicPath)) //检查是否已缓存过图片
                 {
-                    await QQGroup.SendGroupMessage(hso.CardImage
-                                                       ? CQCode.CQCardImage(localPicPath)
-                                                       : CQCode.CQImage(localPicPath));
+                    await QQGroup.SendGroupMessage(HsoMessageBuilder(response["data"]?[0], hso.CardImage,
+                                                                     localPicPath));
                 }
                 else
                 {
