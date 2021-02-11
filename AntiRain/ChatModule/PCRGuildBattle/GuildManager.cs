@@ -137,7 +137,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             switch (this.DBHelper.CreateGuild(guildServer, guildName, base.SourceGroup))
             {
                 case -1:
-                    await DBMsgUtils.DatabaseFailedTips(MessageEventArgs);
+                    await BotUtils.DatabaseFailedTips(MessageEventArgs);
                     break;
                 case 0:
                     await base.SourceGroup.SendGroupMessage($"公会[{guildName}]已创建");
@@ -474,7 +474,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     ConsoleLog.Error("database",$"guild {SourceGroup.Id} not found");
                     break;
                 case -1:
-                    await DBMsgUtils.DatabaseFailedTips(MessageEventArgs);
+                    await BotUtils.DatabaseFailedTips(MessageEventArgs);
                     break;
                 default:
                     await SourceGroup.SendGroupMessage("发生了未知错误");
@@ -500,7 +500,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             switch (memberCount)
             {
                 case -1:
-                    await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                    await BotUtils.DatabaseFailedTips(base.MessageEventArgs);
                     return;
                 case 0:
                     await SourceGroup.SendGroupMessage("公会并没有成员");
@@ -513,7 +513,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             //检查数据库错误
             if (guildName == null || guildMembers == null)//数据库错误
             {
-                await DBMsgUtils.DatabaseFailedTips(base.MessageEventArgs);
+                await BotUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
             //构建消息文本

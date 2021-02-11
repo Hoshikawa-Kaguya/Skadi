@@ -1,9 +1,11 @@
 using System;
 using System.Text;
+using System.Threading.Tasks;
 using AntiRain.IO;
 using AntiRain.TypeEnum;
 using Sora.Entities;
 using Sora.Entities.CQCodes;
+using Sora.EventArgs.SoraEvent;
 using YukariToolBox.Console;
 
 namespace AntiRain.Tool
@@ -132,6 +134,19 @@ namespace AntiRain.Tool
         {
             //生成错误报告
             IOUtils.CrashLogGen(ConsoleLog.ErrorLogBuilder(e));
+        }
+        #endregion
+
+        #region 重复的消息提示
+        /// <summary>
+        /// 数据库发生错误时的消息提示
+        /// </summary>
+        public static async ValueTask DatabaseFailedTips(GroupMessageEventArgs groupEventArgs)
+        {
+            await groupEventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(groupEventArgs.Sender.Id),
+                                                              "\r\nERROR",
+                                                              "\r\n数据库错误");
+            ConsoleLog.Error("database","database error");
         }
         #endregion
     }

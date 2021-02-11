@@ -327,6 +327,34 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         }
 
         /// <summary>
+        /// 获取今日的总出刀数量
+        /// </summary>
+        /// <returns>
+        /// <para>今日出刀数</para>
+        /// <para><see langword="-1"/> 数据库错误</para>
+        /// </returns>
+        public int GetTodayAttackCount()
+        {
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                //出刀数
+                return dbClient.Queryable<GuildBattle>()
+                               .AS(BattleTableName)
+                               //今天5点之后出刀的
+                               .Where(i => i.Time   >= BotUtils.GetUpdateStamp() &&
+                                           i.Attack != AttackType.Compensate && i.Attack != AttackType.CompensateKill)
+                               //筛选出刀总数
+                               .Count();
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                return -1;
+            }
+        }
+
+        /// <summary>
         /// 向数据库插入一刀数据
         /// </summary>
         /// <param name="uid">出刀者UID</param>
