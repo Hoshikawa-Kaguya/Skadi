@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AntiRain.ChatModule.PCRGuildBattle;
 using AntiRain.DatabaseUtils;
 using AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB;
 using AntiRain.TypeEnum;
@@ -731,7 +732,12 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     message.Add(CQCode.CQText("\r\n注意！你使用补时刀击杀了boss,没有时间补偿"));
                     break;
             }
-            if(atkMemberInfo.Flag == FlagType.OnTree) message.Add(CQCode.CQText("\r\n已自动下树"));
+            //下树检查
+            if(atkMemberInfo.Flag == FlagType.OnTree)
+            {
+                message.Add(CQCode.CQText("\r\n已自动下树"));
+                TreeTipManager.DelTreeMember(Sender);
+            }
             message.Add(CQCode.CQText($"\r\n今日总余刀数量:{remainCount}"));
             await SourceGroup.SendGroupMessage(message);
 
@@ -946,6 +952,8 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     }
                     await SourceGroup.SendGroupMessage(CQCode.CQAt(Sender.Id),
                                                        "已上树");
+                    //添加上树提示
+                    TreeTipManager.AddTreeMember(SourceGroup, Sender, DateTime.Now);
                     return;
                 case FlagType.IDLE:
                     await SourceGroup.SendGroupMessage(CQCode.CQAt(Sender.Id),
@@ -1001,6 +1009,8 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 return;
             }
             #endregion
+
+            TreeTipManager.DelTreeMember(Sender);
 
             switch (member.Flag)
             {
@@ -1513,10 +1523,10 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         }
 
         const string PHASE_CODE = "ABCD";
+
         private string GetBossCode(int phase, int order)
-        {
-            return phase > 4 ? $"{phase} - {order}" : $"{PHASE_CODE[phase - 1]}{order}";
-        }
+            => phase > 4 ? $"{phase} - {order}" : $"{PHASE_CODE[phase - 1]}{order}";
+
         #endregion
     }
 }

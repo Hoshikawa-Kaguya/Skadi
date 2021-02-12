@@ -4,6 +4,7 @@ using AntiRain.DatabaseUtils.SqliteTool;
 using Sora.EventArgs.SoraEvent;
 using SqlSugar;
 using YukariToolBox.Console;
+using YukariToolBox.Time;
 
 namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
 {
@@ -199,6 +200,30 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             {
                 ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// 获取状态的刷新时间
+        /// </summary>
+        /// <param name="uid">uid</param>
+        /// <param name="time">刷新时间</param>
+        /// <returns>成功与失败</returns>
+        public bool GetStatusUpdateTime(long uid, out DateTime time)
+        {
+            try
+            {
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                time = dbClient.Queryable<MemberInfo>()
+                               .Where(member => member.Uid == uid && member.Gid == GuildEventArgs.SourceGroup)
+                               .First().Time.ToDateTime();
+                return true;
+            }
+            catch (Exception e)
+            {
+                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                time = new DateTime(0);
+                return false;
             }
         }
         #endregion
