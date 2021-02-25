@@ -4,11 +4,11 @@ using AntiRain.DatabaseUtils.SqliteTool;
 using AntiRain.IO;
 using Sora.EventArgs.SoraEvent;
 using SqlSugar;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 
 namespace AntiRain.DatabaseUtils
 {
-    internal static class DatabaseInit//数据库初始化类
+    internal static class DatabaseInit //数据库初始化类
     {
         /// <summary>
         /// 初始化数据库
@@ -17,7 +17,7 @@ namespace AntiRain.DatabaseUtils
         public static void UserDataInit(ConnectEventArgs eventArgs)
         {
             string DBPath = SugarUtils.GetDBPath(eventArgs.LoginUid.ToString());
-            ConsoleLog.Debug("IO",$"获取用户数据路径{DBPath}");
+            Log.Debug("IO", $"获取用户数据路径{DBPath}");
             //检查文件是否存在
             IOUtils.CheckFileExists(DBPath);
             //创建数据库链接
@@ -27,33 +27,37 @@ namespace AntiRain.DatabaseUtils
             {
                 if (!SugarUtils.TableExists<MemberInfo>(dbClient)) //成员状态表的初始化
                 {
-                    ConsoleLog.Warning("数据库初始化", "未找到成员状态表 - 创建一个新表");
+                    Log.Warning("数据库初始化", "未找到成员状态表 - 创建一个新表");
                     SugarUtils.CreateTable<MemberInfo>(dbClient);
                 }
+
                 if (!SugarUtils.TableExists<BiliDynamicSubscription>(dbClient)) //动态记录表的初始化
                 {
-                    ConsoleLog.Warning("数据库初始化", "未找到动态订阅表 - 创建一个新表");
+                    Log.Warning("数据库初始化", "未找到动态订阅表 - 创建一个新表");
                     SugarUtils.CreateTable<BiliDynamicSubscription>(dbClient);
                 }
+
                 if (!SugarUtils.TableExists<GuildBattleBoss>(dbClient)) //会战数据表的初始化
                 {
-                    ConsoleLog.Warning("数据库初始化", "未找到会战数据表 - 创建一个新表");
+                    Log.Warning("数据库初始化", "未找到会战数据表 - 创建一个新表");
                     SugarUtils.CreateTable<GuildBattleBoss>(dbClient);
                 }
+
                 if (!SugarUtils.TableExists<BiliLiveSubscription>(dbClient))
                 {
-                    ConsoleLog.Warning("数据库初始化", "未找到直播订阅表 - 创建一个新表");
+                    Log.Warning("数据库初始化", "未找到直播订阅表 - 创建一个新表");
                     SugarUtils.CreateTable<BiliLiveSubscription>(dbClient);
                 }
+
                 if (!SugarUtils.TableExists<GuildInfo>(dbClient)) //会战状态表的初始化
                 {
-                    ConsoleLog.Warning("数据库初始化", "未找到会战状态表 - 创建一个新表");
+                    Log.Warning("数据库初始化", "未找到会战状态表 - 创建一个新表");
                     SugarUtils.CreateTable<GuildInfo>(dbClient);
                 }
             }
             catch (Exception exception)
             {
-                ConsoleLog.Fatal("数据库初始化错误",ConsoleLog.ErrorLogBuilder(exception));
+                Log.Fatal("数据库初始化错误", Log.ErrorLogBuilder(exception));
                 Thread.Sleep(5000);
                 Environment.Exit(-1);
             }
@@ -63,7 +67,7 @@ namespace AntiRain.DatabaseUtils
         {
             //获取数据库路径
             string DBPath = SugarUtils.GetDataDBPath(SugarUtils.GlobalResDBName);
-            ConsoleLog.Debug("IO",$"获取数据路径{DBPath}");
+            Log.Debug("IO", $"获取数据路径{DBPath}");
             //检擦文件是否存在
             IOUtils.CheckFileExists(DBPath);
             //创建数据库链接
@@ -73,18 +77,19 @@ namespace AntiRain.DatabaseUtils
             {
                 if (!SugarUtils.TableExists<RediveDBVersion>(dbClient))
                 {
-                    ConsoleLog.Warning("数据库初始化", "未找到版本记录表 - 创建一个新表");
+                    Log.Warning("数据库初始化", "未找到版本记录表 - 创建一个新表");
                     SugarUtils.CreateTable<RediveDBVersion>(dbClient);
                 }
+
                 if (!SugarUtils.TableExists<PCRChara>(dbClient))
                 {
-                    ConsoleLog.Warning("数据库初始化", "未找到角色资源表 - 创建一个新表");
+                    Log.Warning("数据库初始化", "未找到角色资源表 - 创建一个新表");
                     SugarUtils.CreateTable<PCRChara>(dbClient);
                 }
             }
             catch (Exception e)
             {
-                ConsoleLog.Fatal("数据库初始化错误",ConsoleLog.ErrorLogBuilder(e));
+                Log.Fatal("数据库初始化错误", Log.ErrorLogBuilder(e));
                 Thread.Sleep(5000);
                 Environment.Exit(-1);
             }

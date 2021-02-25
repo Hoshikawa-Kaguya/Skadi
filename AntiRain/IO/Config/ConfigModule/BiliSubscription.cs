@@ -7,7 +7,8 @@ namespace AntiRain.IO.Config.ConfigModule
         /// <summary>
         /// 刷新间隔
         /// </summary>
-        public uint                     FlashTime    { set; get; }
+        public uint FlashTime { set; get; }
+
         /// <summary>
         /// 群组订阅数组
         /// </summary>
@@ -22,15 +23,17 @@ namespace AntiRain.IO.Config.ConfigModule
         /// <summary>
         /// 群组数组
         /// </summary>
-        public List<long> GroupId          { set; get; }
+        public List<long> GroupId { set; get; }
+
         /// <summary>
         /// PCR动态订阅
         /// </summary>
-        public bool       PCR_Subscription { set; get; }
+        public bool PCR_Subscription { set; get; }
+
         /// <summary>
         /// UID动态订阅
         /// </summary>
-        public List<long> SubscriptionId   { set; get; }
+        public List<long> SubscriptionId { set; get; }
 
         /// <summary>
         /// UID直播订阅

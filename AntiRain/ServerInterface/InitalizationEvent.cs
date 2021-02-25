@@ -4,7 +4,7 @@ using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
 using AntiRain.TimerEvent;
 using Sora.EventArgs.SoraEvent;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 
 namespace AntiRain.ServerInterface
 {
@@ -18,20 +18,20 @@ namespace AntiRain.ServerInterface
         /// </summary>
         internal static ValueTask Initalization(object sender, ConnectEventArgs connectEvent)
         {
-            ConsoleLog.Info("AntiRain初始化","与onebot客户端连接成功，初始化资源...");
+            Log.Info("AntiRain初始化", "与onebot客户端连接成功，初始化资源...");
             //初始化配置文件
-            ConsoleLog.Info("AntiRain初始化",$"初始化用户[{connectEvent.LoginUid}]配置");
+            Log.Info("AntiRain初始化", $"初始化用户[{connectEvent.LoginUid}]配置");
             ConfigManager configManager = new ConfigManager(connectEvent.LoginUid);
             configManager.UserConfigFileInit();
             configManager.LoadUserConfig(out UserConfig userConfig, false);
 
             //在控制台显示启用模块
-            ConsoleLog.Info("已启用的模块",
-                            $"\n{userConfig.ModuleSwitch}");
+            Log.Info("已启用的模块",
+                     $"\n{userConfig.ModuleSwitch}");
             //显示代理信息
             if (userConfig.ModuleSwitch.Hso && !string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
             {
-                ConsoleLog.Debug("Hso Proxy", userConfig.HsoConfig.PximyProxy);
+                Log.Debug("Hso Proxy", userConfig.HsoConfig.PximyProxy);
             }
 
             //初始化数据库
@@ -40,7 +40,7 @@ namespace AntiRain.ServerInterface
             //初始化定时器线程
             if (userConfig.ModuleSwitch.Bili_Subscription)
             {
-                ConsoleLog.Debug("Timer Init",$"flash span = {userConfig.SubscriptionConfig.FlashTime}");
+                Log.Debug("Timer Init", $"flash span = {userConfig.SubscriptionConfig.FlashTime}");
                 TimerEventParse.TimerAdd(connectEvent, userConfig.SubscriptionConfig.FlashTime);
             }
 

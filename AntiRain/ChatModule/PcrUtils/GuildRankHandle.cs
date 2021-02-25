@@ -10,7 +10,7 @@ using PyLibSharp.Requests;
 using Sora.Entities;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 using YukariToolBox.Time;
 
 namespace AntiRain.ChatModule.PcrUtils
@@ -18,16 +18,20 @@ namespace AntiRain.ChatModule.PcrUtils
     internal class GuildRankHandle
     {
         #region 参数
+
         public object                Sender       { private set; get; }
         public Group                 QQGroup      { private set; get; }
         public GroupMessageEventArgs PCREventArgs { private set; get; }
+
         /// <summary>
         /// 数据库实例
         /// </summary>
         private GuildManagerDBHelper DBHelper { get; set; }
+
         #endregion
 
         #region 构造函数
+
         public GuildRankHandle(object sender, GroupMessageEventArgs e)
         {
             this.PCREventArgs = e;
@@ -35,9 +39,11 @@ namespace AntiRain.ChatModule.PcrUtils
             this.QQGroup      = PCREventArgs.SourceGroup;
             this.DBHelper     = new GuildManagerDBHelper(e);
         }
+
         #endregion
 
         #region 消息响应函数
+
         /// <summary>
         /// 收到信息的函数
         /// 并匹配相应指令
@@ -56,21 +62,25 @@ namespace AntiRain.ChatModule.PcrUtils
                         if (groupInfo.apiStatus != APIStatusType.OK)
                         {
                             await QQGroup.SendGroupMessage("调用onebot API时发生错误");
-                            ConsoleLog.Error("api error",$"调用onebot API时发生错误 Status={groupInfo.apiStatus}");
+                            Log.Error("api error", $"调用onebot API时发生错误 Status={groupInfo.apiStatus}");
                             return;
                         }
+
                         await KyoukaRank(DBHelper.GetGuildName(PCREventArgs.SourceGroup));
                     }
                     else //手动指定
                     {
                         await KyoukaRank(PCREventArgs.Message.RawText.Substring(6));
                     }
+
                     break;
             }
         }
+
         #endregion
 
         #region 私有方法
+
         // private async void GetGuildRank(string[] commandArgs)
         // {
         //     //TODO 修改为可切换源的分发方法
@@ -86,37 +96,42 @@ namespace AntiRain.ChatModule.PcrUtils
             try
             {
                 //获取查询结果
-                ConsoleLog.Info("NET", $"尝试查询[{guildName}]会站排名");
+                Log.Info("NET", $"尝试查询[{guildName}]会站排名");
                 await QQGroup.SendGroupMessage($"正在查询公会[{guildName}]的排名...");
-                ReqResponse reqResponse = await Requests.GetAsync("https://tools-wiki.biligame.com/pcr/getTableInfo", new ReqParams
-                {
-                    Timeout = 3000,
-                    Params = new Dictionary<string, string>
-                    {
-                        {"type", "search"},
-                        {"search", guildName},
-                        {"page", "0"}
-                    }
-                });
+                ReqResponse reqResponse = await Requests.GetAsync("https://tools-wiki.biligame.com/pcr/getTableInfo",
+                                                                  new ReqParams
+                                                                  {
+                                                                      Timeout = 3000,
+                                                                      Params = new Dictionary<string, string>
+                                                                      {
+                                                                          {"type", "search"},
+                                                                          {"search", guildName},
+                                                                          {"page", "0"}
+                                                                      }
+                                                                  });
                 //判断响应
                 if (reqResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    await QQGroup.SendGroupMessage($"哇哦~发生了网络错误，请联系机器人所在服务器管理员\r\n{reqResponse.StatusCode}({(int)reqResponse.StatusCode})");
-                    ConsoleLog.Error("网络发生错误", $"Code[{(int)reqResponse.StatusCode}]");
+                    await
+                        QQGroup
+                            .SendGroupMessage($"哇哦~发生了网络错误，请联系机器人所在服务器管理员\r\n{reqResponse.StatusCode}({(int) reqResponse.StatusCode})");
+                    Log.Error("网络发生错误", $"Code[{(int) reqResponse.StatusCode}]");
                     //阻止下一步处理
                     return;
                 }
+
                 //读取返回值
                 response = new JArray(reqResponse.Text);
-                ConsoleLog.Info("获取JSON成功", response);
+                Log.Info("获取JSON成功", response);
             }
             catch (Exception e)
             {
                 await QQGroup.SendGroupMessage("哇哦~发生了网络错误，请联系机器人所在服务器管理员");
-                ConsoleLog.Error("网络发生错误", ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("网络发生错误", Log.ErrorLogBuilder(e));
                 //阻止下一步处理
                 return;
             }
+
             //JSON数据处理
             try
             {
@@ -124,22 +139,24 @@ namespace AntiRain.ChatModule.PcrUtils
                 if (response.Count == 0)
                 {
                     await QQGroup.SendGroupMessage("未找到任意公会\n请检查是否查询的错误的公会名或公会排名在70000之后");
-                    ConsoleLog.Info("JSON处理成功", "所查询列表为空");
+                    Log.Info("JSON处理成功", "所查询列表为空");
                     return;
                 }
+
                 JArray  dataArray = JArray.Parse(response.First?.ToString() ?? "[]");
                 JObject rankData  = dataArray[0].ToObject<JObject>();
                 if (dataArray.Count > 1) await QQGroup.SendGroupMessage("查询到多个公会，可能存在重名或关键词错误");
                 if (rankData == null || rankData.Count == 0)
                 {
                     await QQGroup.SendGroupMessage("发生了未知错误，请请向开发者反馈问题");
-                    ConsoleLog.Error("JSON数据读取错误", "从网络获取的文本为空");
+                    Log.Error("JSON数据读取错误", "从网络获取的文本为空");
                     return;
                 }
-                string  rank       = rankData["rank"]?.ToString();
-                string  totalScore = rankData["damage"]?.ToString();
-                string  leaderName = rankData["leader_name"]?.ToString();
-                ConsoleLog.Info("JSON处理成功", "向用户发送数据");
+
+                string rank       = rankData["rank"]?.ToString();
+                string totalScore = rankData["damage"]?.ToString();
+                string leaderName = rankData["leader_name"]?.ToString();
+                Log.Info("JSON处理成功", "向用户发送数据");
                 await QQGroup.SendGroupMessage("查询成功！\n"             +
                                                $"公会:{guildName}\n"   +
                                                $"排名:{rank}\n"        +
@@ -150,7 +167,7 @@ namespace AntiRain.ChatModule.PcrUtils
             catch (Exception e)
             {
                 await QQGroup.SendGroupMessage("发生了未知错误，请请向开发者反馈问题");
-                ConsoleLog.Error("JSON数据读取错误", $"从网络获取的JSON格式无法解析{ConsoleLog.ErrorLogBuilder(e)}");
+                Log.Error("JSON数据读取错误", $"从网络获取的JSON格式无法解析{Log.ErrorLogBuilder(e)}");
             }
         }
 
@@ -165,13 +182,13 @@ namespace AntiRain.ChatModule.PcrUtils
             try
             {
                 //获取查询结果
-                ConsoleLog.Info("NET", $"尝试查询[{guildName}]会站排名");
+                Log.Info("NET", $"尝试查询[{guildName}]会站排名");
                 await QQGroup.SendGroupMessage($"正在查询公会[{guildName}]的排名...");
                 ReqResponse reqResponse =
                     await Requests.PostAsync("https://service-kjcbcnmw-1254119946.gz.apigw.tencentcs.com/name/0",
                                              new ReqParams
                                              {
-                                                 Timeout  = 3000,
+                                                 Timeout = 3000,
                                                  PostJson = new JObject
                                                  {
                                                      ["clanName"] = guildName,
@@ -189,43 +206,50 @@ namespace AntiRain.ChatModule.PcrUtils
                 //判断响应
                 if (reqResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    await QQGroup.SendGroupMessage($"哇哦~发生了网络错误，请联系机器人所在服务器管理员\r\n{reqResponse.StatusCode}({(int)reqResponse.StatusCode})");
-                    ConsoleLog.Error("网络发生错误", $"Code[{(int)reqResponse.StatusCode}]");
+                    await
+                        QQGroup
+                            .SendGroupMessage($"哇哦~发生了网络错误，请联系机器人所在服务器管理员\r\n{reqResponse.StatusCode}({(int) reqResponse.StatusCode})");
+                    Log.Error("网络发生错误", $"Code[{(int) reqResponse.StatusCode}]");
                     //阻止下一步处理
                     return;
                 }
+
                 //读取返回值
                 response = reqResponse.Json();
                 //判断空数据
                 if (response == null || !response.Any())
                 {
                     await QQGroup.SendGroupMessage("发生了未知错误，请请向开发者反馈问题");
-                    ConsoleLog.Error("JSON数据读取错误", "从网络获取的文本为空");
+                    Log.Error("JSON数据读取错误", "从网络获取的文本为空");
                     return;
                 }
-                ConsoleLog.Info("获取JSON成功", response);
+
+                Log.Info("获取JSON成功", response);
             }
             catch (Exception e)
             {
                 await QQGroup.SendGroupMessage($"哇哦~发生了网络错误，请联系机器人所在服务器管理员\n{e.Message}");
-                ConsoleLog.Error("网络发生错误", e);
+                Log.Error("网络发生错误", e);
                 //阻止下一步处理
                 return;
             }
+
             //JSON数据处理
             try
             {
                 if (response["full"] == null)
                 {
                     await QQGroup.SendGroupMessage("发生了未知错误，请请向开发者反馈问题");
-                    ConsoleLog.Error("JSON数据读取错误", "从网络获取的JSON格式可能有问题");
+                    Log.Error("JSON数据读取错误", "从网络获取的JSON格式可能有问题");
                     return;
                 }
+
                 //在有查询结果时查找值
                 if (!response["full"].ToString().Equals("0"))
                 {
-                    if (!response["full"].ToString().Equals("1")) await QQGroup.SendGroupMessage("查询到多个公会，可能存在重名或关键词错误");
-                    ConsoleLog.Info("JSON处理成功", "向用户发送数据");
+                    if (!response["full"].ToString().Equals("1"))
+                        await QQGroup.SendGroupMessage("查询到多个公会，可能存在重名或关键词错误");
+                    Log.Info("JSON处理成功", "向用户发送数据");
                     long.TryParse(response["ts"]?.ToString() ?? "0", out long updateTimeStamp);
                     await QQGroup.SendGroupMessage("查询成功！\n",
                                                    $"公会:{guildName}\n",
@@ -238,15 +262,16 @@ namespace AntiRain.ChatModule.PcrUtils
                 else
                 {
                     await QQGroup.SendGroupMessage("未找到任意公会\n请检查是否查询的错误的公会名或公会排名在20060之后");
-                    ConsoleLog.Info("JSON处理成功", "所查询列表为空");
+                    Log.Info("JSON处理成功", "所查询列表为空");
                 }
             }
             catch (Exception e)
             {
                 await QQGroup.SendGroupMessage($"在处理数据时发生了错误，请请向开发者反馈问题\n{e.Message}");
-                ConsoleLog.Error("JSON数据读取错误", e);
+                Log.Error("JSON数据读取错误", e);
             }
         }
+
         #endregion
     }
 }

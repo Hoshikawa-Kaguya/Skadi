@@ -10,20 +10,25 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRDataDB
     internal class RediveDBHelper
     {
         #region 属性
+
         /// <summary>
         /// 数据库路径
         /// </summary>
         private readonly string ResDBPath;
+
         #endregion
 
         #region 构造函数
+
         internal RediveDBHelper()
         {
             this.ResDBPath = SugarUtils.GetDataDBPath(SugarUtils.GlobalResDBName);
         }
+
         #endregion
 
         #region 公有方法
+
         /// <summary>
         /// 获取数据库版本号
         /// </summary>
@@ -52,6 +57,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRDataDB
                 return dbClient.Insertable(newVersion).ExecuteCommand() > 0;
             }
         }
+
         #endregion
     }
 }

@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 
 namespace AntiRain.IO
 {
     internal static class IOUtils
     {
         #region IO工具
+
         /// <summary>
         /// 获取错误报告路径
         /// </summary>
@@ -118,20 +119,22 @@ namespace AntiRain.IO
             {
                 if (File.Exists(path)) return true;
                 //数据库文件不存在，新建数据库
-                ConsoleLog.Warning("数据库初始化", "未找到数据库文件，创建新的数据库");
+                Log.Warning("数据库初始化", "未找到数据库文件，创建新的数据库");
                 Directory.CreateDirectory(Path.GetPathRoot(path) ?? string.Empty);
                 File.Create(path).Close();
                 return true;
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("File Check Error", ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("File Check Error", Log.ErrorLogBuilder(e));
                 return false;
             }
         }
+
         #endregion
 
         #region 文件读取工具
+
         /// <summary>
         /// 读取Json文件并返回为一个JObject
         /// </summary>
@@ -141,14 +144,14 @@ namespace AntiRain.IO
         {
             try
             {
-                StreamReader jsonFile = File.OpenText(jsonPath);
-                JsonTextReader reader = new JsonTextReader(jsonFile);
-                JObject jsonObject = (JObject)JToken.ReadFrom(reader);
+                StreamReader   jsonFile   = File.OpenText(jsonPath);
+                JsonTextReader reader     = new JsonTextReader(jsonFile);
+                JObject        jsonObject = (JObject) JToken.ReadFrom(reader);
                 return jsonObject;
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("IO ERROR", $"读取文件{jsonPath}时出错，错误：\n{ConsoleLog.ErrorLogBuilder(e)}");
+                Log.Error("IO ERROR", $"读取文件{jsonPath}时出错，错误：\n{Log.ErrorLogBuilder(e)}");
                 return null;
             }
         }
@@ -156,6 +159,7 @@ namespace AntiRain.IO
         #endregion
 
         #region 文件写入工具
+
         /// <summary>
         /// 将byte数组转换为文件并保存到指定地址
         /// </summary>
@@ -169,6 +173,7 @@ namespace AntiRain.IO
                 {
                     File.Delete(savePath);
                 }
+
                 //将byte数组数据写入文件流
                 using FileStream   fileStream   = new FileStream(savePath, FileMode.CreateNew);
                 using BinaryWriter binaryWriter = new BinaryWriter(fileStream);
@@ -179,10 +184,11 @@ namespace AntiRain.IO
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("IO",$"保存文件时发生错误\n{ConsoleLog.ErrorLogBuilder(e)}");
+                Log.Error("IO", $"保存文件时发生错误\n{Log.ErrorLogBuilder(e)}");
                 return false;
             }
         }
+
         #endregion
     }
 }

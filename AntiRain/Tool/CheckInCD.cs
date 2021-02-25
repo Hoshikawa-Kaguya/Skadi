@@ -6,20 +6,25 @@ namespace AntiRain.Tool
     internal class CheckInCD
     {
         #region 调用记录用结构体
+
         private struct CheckUser
         {
             internal long GroupId { get; set; }
             internal long UserId  { get; set; }
         }
+
         #endregion
 
         #region 调用时间记录Dictionary
+
         /// <param type="long">QQ号</param>
         /// <param type="DateTime">上次调用时间</param>
         private static readonly Dictionary<CheckUser, DateTime> LastChatDate = new Dictionary<CheckUser, DateTime>();
+
         #endregion
 
         #region 调用时间检查
+
         /// <summary>
         /// 检查用户调用时是否在CD中
         /// 对任何可能刷屏的指令都有效
@@ -54,6 +59,7 @@ namespace AntiRain.Tool
             }
 #endif
         }
+
         #endregion
     }
 }

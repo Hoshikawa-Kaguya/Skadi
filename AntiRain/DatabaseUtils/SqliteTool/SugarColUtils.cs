@@ -6,6 +6,7 @@ namespace AntiRain.DatabaseUtils.SqliteTool
     internal class SugarColUtils
     {
         #region SugarColumn辅助方法
+
         /// <summary>
         /// 判断字段类型
         /// </summary>
@@ -42,6 +43,7 @@ namespace AntiRain.DatabaseUtils.SqliteTool
                 //其他类型
                 return "BLOB";
             }
+
             return columnConfig.ColumnDataType;
         }
 
@@ -92,6 +94,7 @@ namespace AntiRain.DatabaseUtils.SqliteTool
             if (columnConfig == null) return false;
             else return columnConfig.IsPrimaryKey;
         }
+
         #endregion
     }
 }

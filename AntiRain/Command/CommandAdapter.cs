@@ -10,24 +10,29 @@ namespace AntiRain.Command
     internal static class CommandAdapter
     {
         #region 正则匹配字典
+
         /// <summary>
         /// 关键字匹配模式字典
         /// </summary>
         private static readonly Dictionary<KeywordCommand, List<Regex>> KeywordList =
             new Dictionary<KeywordCommand, List<Regex>>();
+
         /// <summary>
         /// 正则匹配模式字典
         /// </summary>
-        private static readonly Dictionary<RegexCommand,List<Regex>> RegexList = 
+        private static readonly Dictionary<RegexCommand, List<Regex>> RegexList =
             new Dictionary<RegexCommand, List<Regex>>();
+
         /// <summary>
         /// 机器人指令字典
         /// </summary>
-        private static readonly Dictionary<PCRGuildBattleCommand,List<Regex>> PCRGuildBattleCommandList = 
+        private static readonly Dictionary<PCRGuildBattleCommand, List<Regex>> PCRGuildBattleCommandList =
             new Dictionary<PCRGuildBattleCommand, List<Regex>>();
+
         #endregion
 
         #region 初始化
+
         /// <summary>
         /// 初始化关键字字典
         /// </summary>
@@ -38,8 +43,9 @@ namespace AntiRain.Command
             foreach (FieldInfo fieldInfo in fieldInfos)
             {
                 //跳过不是枚举类型的属性
-                if(fieldInfo.FieldType != typeof(KeywordCommand)) continue;
-                DescriptionAttribute descAttr = fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false).First() as DescriptionAttribute;
+                if (fieldInfo.FieldType != typeof(KeywordCommand)) continue;
+                DescriptionAttribute descAttr =
+                    fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false).First() as DescriptionAttribute;
                 //生成正则表达式列表
                 List<Regex> regexes = (descAttr?.Description ?? "").Split(" ")
                                                                    .Select(keyStr => new Regex($"({keyStr})+"))
@@ -59,8 +65,9 @@ namespace AntiRain.Command
             foreach (FieldInfo fieldInfo in fieldInfos)
             {
                 //跳过不是枚举类型的属性
-                if(fieldInfo.FieldType != typeof(RegexCommand)) continue;
-                DescriptionAttribute descAttr = fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false).First() as DescriptionAttribute;
+                if (fieldInfo.FieldType != typeof(RegexCommand)) continue;
+                DescriptionAttribute descAttr =
+                    fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false).First() as DescriptionAttribute;
                 //生成正则表达式列表
                 List<Regex> regexes = (descAttr?.Description ?? "").Split(" ")
                                                                    .Select(regexStr => new Regex(regexStr))
@@ -80,8 +87,9 @@ namespace AntiRain.Command
             foreach (FieldInfo fieldInfo in fieldInfos)
             {
                 //跳过不是枚举类型的属性
-                if(fieldInfo.FieldType != typeof(PCRGuildBattleCommand)) continue;
-                DescriptionAttribute descAttr = fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false).First() as DescriptionAttribute;
+                if (fieldInfo.FieldType != typeof(PCRGuildBattleCommand)) continue;
+                DescriptionAttribute descAttr =
+                    fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false).First() as DescriptionAttribute;
                 //生成正则表达式列表
                 List<Regex> regexes = (descAttr?.Description ?? "").Split(" ")
                                                                    .Select(cmdStr => new Regex($@"^(?:#|＃){cmdStr}.*"))
@@ -90,9 +98,11 @@ namespace AntiRain.Command
                 PCRGuildBattleCommandList.Add((PCRGuildBattleCommand) (fieldInfo.GetValue(null) ?? -1), regexes);
             }
         }
+
         #endregion
 
         #region 获取指令类型
+
         /// <summary>
         /// 获取关键词模式匹配指令类型
         /// </summary>
@@ -101,9 +111,11 @@ namespace AntiRain.Command
         /// <returns>匹配是否成功</returns>
         public static bool GetKeywordType(string rawString, out KeywordCommand commandType)
         {
-            IEnumerable<KeywordCommand> matchResult = KeywordList.Where(regexList => regexList.Value.Any(regex => regex.IsMatch(rawString)))
-                                                        .Select(regexList => regexList.Key)
-                                                        .ToList();
+            IEnumerable<KeywordCommand> matchResult = KeywordList
+                                                      .Where(regexList =>
+                                                                 regexList.Value.Any(regex => regex.IsMatch(rawString)))
+                                                      .Select(regexList => regexList.Key)
+                                                      .ToList();
             if (!matchResult.Any())
             {
                 commandType = (KeywordCommand) (-1);
@@ -124,9 +136,11 @@ namespace AntiRain.Command
         /// <returns>匹配是否成功</returns>
         public static bool GetRegexType(string rawString, out RegexCommand commandType)
         {
-            IEnumerable<RegexCommand> matchResult = RegexList.Where(regexList => regexList.Value.Any(regex => regex.IsMatch(rawString)))
-                                                             .Select(regexList => regexList.Key)
-                                                             .ToList();
+            IEnumerable<RegexCommand> matchResult = RegexList
+                                                    .Where(regexList =>
+                                                               regexList.Value.Any(regex => regex.IsMatch(rawString)))
+                                                    .Select(regexList => regexList.Key)
+                                                    .ToList();
             if (!matchResult.Any())
             {
                 commandType = (RegexCommand) (-1);
@@ -147,7 +161,10 @@ namespace AntiRain.Command
         /// <returns>匹配是否成功</returns>
         public static bool GetPCRGuildBattlecmdType(string rawString, out PCRGuildBattleCommand guildBattleCommandType)
         {
-            IEnumerable<PCRGuildBattleCommand> matchResult = PCRGuildBattleCommandList.Where(regexList => regexList.Value.Any(regex => regex.IsMatch(rawString)))
+            IEnumerable<PCRGuildBattleCommand> matchResult = PCRGuildBattleCommandList
+                                                             .Where(regexList =>
+                                                                        regexList.Value.Any(regex =>
+                                                                            regex.IsMatch(rawString)))
                                                              .Select(regexList => regexList.Key)
                                                              .ToList();
             if (!matchResult.Any())
@@ -161,6 +178,7 @@ namespace AntiRain.Command
                 return true;
             }
         }
+
         #endregion
     }
 }

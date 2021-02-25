@@ -2,7 +2,7 @@ using System;
 using AntiRain.DatabaseUtils.SqliteTool;
 using BilibiliApi.Live.Enums;
 using SqlSugar;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 using YukariToolBox.Time;
 
 namespace AntiRain.DatabaseUtils.Helpers
@@ -10,17 +10,22 @@ namespace AntiRain.DatabaseUtils.Helpers
     internal class SubscriptionDBHelper
     {
         #region 属性
-        private readonly string DBPath;//数据库路径
+
+        private readonly string DBPath; //数据库路径
+
         #endregion
 
         #region 构造函数
+
         public SubscriptionDBHelper(long uid)
         {
             DBPath = SugarUtils.GetDBPath(uid.ToString());
         }
+
         #endregion
 
         #region 动态更新数据库记录
+
         /// <summary>
         /// 检查记录的动态是否为最新的
         /// </summary>
@@ -43,7 +48,7 @@ namespace AntiRain.DatabaseUtils.Helpers
             catch (Exception e)
             {
                 //数据库出错时默认输出true
-                ConsoleLog.Error("Database Error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database Error", Log.ErrorLogBuilder(e));
                 return true;
             }
         }
@@ -80,8 +85,8 @@ namespace AntiRain.DatabaseUtils.Helpers
                     //有记录更新时间
                     return
                         dbClient.Updateable<BiliDynamicSubscription>(newBiliDynamic =>
-                                                                  newBiliDynamic.UpdateTime ==
-                                                                  updateTime.ToTimeStamp())
+                                                                         newBiliDynamic.UpdateTime ==
+                                                                         updateTime.ToTimeStamp())
                                 .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId &&
                                                       biliDynamic.Gid            == groupId)
                                 .ExecuteCommandHasChange();
@@ -89,7 +94,7 @@ namespace AntiRain.DatabaseUtils.Helpers
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database Error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database Error", Log.ErrorLogBuilder(e));
                 return false;
             }
         }
@@ -126,7 +131,7 @@ namespace AntiRain.DatabaseUtils.Helpers
                     //有记录更新时间
                     return
                         dbClient.Updateable<BiliDynamicSubscription>(newBiliDynamic =>
-                                                                  newBiliDynamic.UpdateTime == updateTime)
+                                                                         newBiliDynamic.UpdateTime == updateTime)
                                 .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId &&
                                                       biliDynamic.Gid            == groupId)
                                 .ExecuteCommandHasChange();
@@ -134,13 +139,15 @@ namespace AntiRain.DatabaseUtils.Helpers
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database Error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database Error", Log.ErrorLogBuilder(e));
                 return false;
             }
         }
+
         #endregion
 
         #region 直播订阅数据库
+
         /// <summary>
         /// 获取最新的直播状态
         /// </summary>
@@ -152,9 +159,9 @@ namespace AntiRain.DatabaseUtils.Helpers
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             //查找是否有历史记录
             if (dbClient.Queryable<BiliLiveSubscription>()
-                         .Where(biliLive => biliLive.SubscriptionId == biliUserId &&
-                                            biliLive.Gid            == groupId)
-                         .Any())
+                        .Where(biliLive => biliLive.SubscriptionId == biliUserId &&
+                                           biliLive.Gid            == groupId)
+                        .Any())
             {
                 //没有记录插入新行
                 return dbClient.Queryable<BiliLiveSubscription>()
@@ -163,6 +170,7 @@ namespace AntiRain.DatabaseUtils.Helpers
                                .Select(biliLive => biliLive.LiveStatus)
                                .First();
             }
+
             return LiveStatusType.Unknown;
         }
 
@@ -199,6 +207,7 @@ namespace AntiRain.DatabaseUtils.Helpers
                                .ExecuteCommandHasChange();
             }
         }
+
         #endregion
     }
 }

@@ -4,7 +4,7 @@ using AntiRain.TypeEnum;
 using AntiRain.TypeEnum.GuildBattleType;
 using Sora.EventArgs.SoraEvent;
 using SqlSugar;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 using YukariToolBox.Time;
 
 namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
@@ -12,6 +12,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
     internal class GuildManagerDBHelper : BaseGuildBattleDBHelper
     {
         #region 构造函数
+
         /// <summary>
         /// 在接受到群消息时使用
         /// </summary>
@@ -19,9 +20,11 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         public GuildManagerDBHelper(GroupMessageEventArgs guildEventArgs) : base(guildEventArgs)
         {
         }
+
         #endregion
 
         #region 指令
+
         /// <summary>
         /// 移除所有成员
         /// </summary>
@@ -132,7 +135,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database", Log.ErrorLogBuilder(e));
                 return -1;
             }
         }
@@ -194,7 +197,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database", Log.ErrorLogBuilder(e));
                 return -1;
             }
         }
@@ -217,18 +220,20 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                     deletMemberInfo = dbClient.Deleteable<MemberInfo>().Where(member => member.Gid == gid)
                                               .ExecuteCommandHasChange();
                 }
-                
+
                 return deletMemberInfo && deletGuildInfo;
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database", Log.ErrorLogBuilder(e));
                 return false;
             }
         }
+
         #endregion
 
         #region 私有方法
+
         /// <summary>
         /// 获取对应区服的boss初始化HP
         /// </summary>
@@ -240,9 +245,10 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                            .Where(i => i.ServerId == server
                                     && i.Phase    == 1
                                     && i.Order    == 1)
-                           .Select(i=>i.HP)
+                           .Select(i => i.HP)
                            .First();
         }
+
         #endregion
     }
 }

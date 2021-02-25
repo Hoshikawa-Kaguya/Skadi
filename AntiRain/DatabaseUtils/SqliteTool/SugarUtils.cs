@@ -15,15 +15,19 @@ namespace AntiRain.DatabaseUtils.SqliteTool
     internal static class SugarUtils
     {
         #region 数据库常量
+
         //资源数据库名
         public const string GlobalResDBName = "res";
+
         //各区服游戏数据库名
         public const string GameDBNameJP = "redive_jp";
         public const string GameDBNameCN = "redive_cn";
         public const string GameDBNameTW = "redive_tw";
+
         #endregion
 
         #region IO辅助函数
+
         /// <summary>
         /// 获取应用数据库的绝对路径
         /// </summary>
@@ -61,9 +65,11 @@ namespace AntiRain.DatabaseUtils.SqliteTool
             dbPath.Append($"/{dbFileName}.db");
             return dbPath.ToString();
         }
+
         #endregion
 
         #region 表辅助函数
+
         /// <summary>
         /// 删除表
         /// </summary>
@@ -117,7 +123,7 @@ namespace AntiRain.DatabaseUtils.SqliteTool
                 if (i != properties.Length) cmd.CommandText += ",";
                 if (SugarColUtils.ColIsPrimaryKey(colInfo) && string.IsNullOrEmpty(SugarColUtils.ColIsIdentity(colInfo))
                 ) primaryKeys.Add(SugarColUtils.GetColName(colInfo));
-                if(!string.IsNullOrEmpty(SugarColUtils.ColIsIdentity(colInfo))) haveIdentity = true;
+                if (!string.IsNullOrEmpty(SugarColUtils.ColIsIdentity(colInfo))) haveIdentity = true;
             }
 
             if (primaryKeys.Count != 0 && !haveIdentity) //当有多主键时
@@ -125,6 +131,7 @@ namespace AntiRain.DatabaseUtils.SqliteTool
                 cmd.CommandText +=
                     $",PRIMARY KEY({string.Join(",", primaryKeys)})";
             }
+
             cmd.CommandText += ")";
             //检查数据库链接
             sugarClient.Ado.CheckConnection();
@@ -157,9 +164,11 @@ namespace AntiRain.DatabaseUtils.SqliteTool
             cmd.CommandText = $"SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = '{tableName}'";
             return Convert.ToBoolean(cmd.ExecuteScalar());
         }
+
         #endregion
 
         #region 简单辅助函数
+
         /// <summary>
         /// 执行sql语句
         /// </summary>
@@ -178,9 +187,11 @@ namespace AntiRain.DatabaseUtils.SqliteTool
             if (!sugarClient.CurrentConnectionConfig.IsAutoCloseConnection) sugarClient.Close();
             return ret;
         }
+
         #endregion
 
         #region Client简单创建函数
+
         /// <summary>
         /// 创建一个SQLiteClient
         /// </summary>
@@ -188,7 +199,7 @@ namespace AntiRain.DatabaseUtils.SqliteTool
         /// <returns>默认开启的SqlSugarClient</returns>
         internal static SqlSugarClient CreateSqlSugarClient(string DBPath)
         {
-            return new (new ConnectionConfig
+            return new(new ConnectionConfig
             {
                 ConnectionString      = $"DATA SOURCE={DBPath}",
                 DbType                = SqlSugar.DbType.Sqlite,
@@ -196,6 +207,7 @@ namespace AntiRain.DatabaseUtils.SqliteTool
                 InitKeyType           = InitKeyType.Attribute
             });
         }
+
         #endregion
     }
 }

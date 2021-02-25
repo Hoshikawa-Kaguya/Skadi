@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using AntiRain.DatabaseUtils.SqliteTool;
 using Sora.EventArgs.SoraEvent;
 using SqlSugar;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 using YukariToolBox.Time;
 
 namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
@@ -14,11 +14,14 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
     internal abstract class BaseGuildBattleDBHelper
     {
         #region 属性
+
         protected GroupMessageEventArgs GuildEventArgs { set; get; }
         protected string                DBPath         { get; set; }
+
         #endregion
 
         #region 构造函数
+
         /// <summary>
         /// 基类构造函数
         /// </summary>
@@ -28,9 +31,11 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             GuildEventArgs = eventArgs;
             DBPath         = SugarUtils.GetDBPath(eventArgs.LoginUid.ToString());
         }
+
         #endregion
 
         #region 通用查询函数
+
         /// <summary>
         /// 检查公会是否存在
         /// </summary>
@@ -50,7 +55,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return -1;
             }
         }
@@ -81,7 +86,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return null;
             }
         }
@@ -103,7 +108,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return -1;
             }
         }
@@ -124,14 +129,17 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<MemberInfo>()
                                .Where(i => i.Uid == uid && i.Gid == GuildEventArgs.SourceGroup.Id)
-                               .Any() ? 1 : 0;
+                               .Any()
+                    ? 1
+                    : 0;
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return -1;
             }
         }
+
         /// <summary>
         /// 获取成员信息
         /// </summary>
@@ -151,7 +159,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return null;
             }
         }
@@ -176,10 +184,11 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error", ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return null;
             }
         }
+
         /// <summary>
         /// 获取公会信息
         /// </summary>
@@ -198,7 +207,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return null;
             }
         }
@@ -221,11 +230,12 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 time = new DateTime(0);
                 return false;
             }
         }
+
         #endregion
     }
 }

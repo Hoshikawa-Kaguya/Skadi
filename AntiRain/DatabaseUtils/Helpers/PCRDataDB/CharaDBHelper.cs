@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AntiRain.DatabaseUtils.SqliteTool;
 using SqlSugar;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 
 namespace AntiRain.DatabaseUtils.Helpers.PCRDataDB
 {
@@ -13,20 +13,25 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRDataDB
     internal class CharaDBHelper
     {
         #region 属性
+
         /// <summary>
         /// 数据库路径
         /// </summary>
         private readonly string DBPath;
+
         #endregion
 
         #region 构造函数
+
         internal CharaDBHelper()
         {
             this.DBPath = SugarUtils.GetDataDBPath(SugarUtils.GlobalResDBName);
         }
+
         #endregion
 
         #region 公有方法
+
         /// <summary>
         /// 更新角色数据
         /// </summary>
@@ -43,7 +48,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRDataDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("角色数据更新数据库错误",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("角色数据更新数据库错误", Log.ErrorLogBuilder(e));
                 return false;
             }
         }
@@ -67,7 +72,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRDataDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("数据库错误",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("数据库错误", Log.ErrorLogBuilder(e));
                 return null;
             }
         }
@@ -85,10 +90,11 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRDataDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("数据库错误",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("数据库错误", Log.ErrorLogBuilder(e));
                 return null;
             }
         }
+
         #endregion
     }
 }

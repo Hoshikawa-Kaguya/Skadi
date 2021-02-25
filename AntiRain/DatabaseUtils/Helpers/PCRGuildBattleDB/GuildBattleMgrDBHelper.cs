@@ -7,7 +7,7 @@ using AntiRain.TypeEnum.GuildBattleType;
 using AntiRain.Tool;
 using Sora.EventArgs.SoraEvent;
 using SqlSugar;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 using YukariToolBox.Time;
 
 namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
@@ -15,20 +15,25 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
     internal class GuildBattleMgrDBHelper : BaseGuildBattleDBHelper
     {
         #region 属性
+
         /// <summary>
         /// 数据库表名
         /// </summary>
         private string BattleTableName { get; set; }
+
         #endregion
 
         #region 构造函数
+
         public GuildBattleMgrDBHelper(GroupMessageEventArgs eventArgs) : base(eventArgs)
         {
             BattleTableName = $"{SugarTableUtils.GetTableName<GuildBattle>()}_{GuildEventArgs.SourceGroup.Id}";
         }
+
         #endregion
 
         #region 公有方法
+
         /// <summary>
         /// 获取今天的出刀列表
         /// </summary>
@@ -62,7 +67,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error", ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return null;
             }
         }
@@ -80,7 +85,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                 return dbClient.Queryable<GuildBattle>()
                                .AS(BattleTableName)
                                .Where(attack => attack.Time   > BotUtils.GetUpdateStamp() &&
-                                                attack.Attack != AttackType.Compensate       &&
+                                                attack.Attack != AttackType.Compensate    &&
                                                 attack.Attack != AttackType.CompensateKill)
                                .GroupBy(member => member.Uid)
                                .Select(member => new
@@ -94,11 +99,11 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error", ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return null;
             }
         }
-        
+
         /// <summary>
         /// 检查是否已进入会战
         /// </summary>
@@ -116,7 +121,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return -1;
             }
         }
@@ -136,17 +141,17 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 if (SugarUtils.TableExists<GuildBattle>(dbClient, BattleTableName))
                 {
-                    ConsoleLog.Error("会战管理数据库", "会战表已经存在，请检查是否未结束上次会战统计");
+                    Log.Error("会战管理数据库", "会战表已经存在，请检查是否未结束上次会战统计");
                     return 0;
                 }
                 else
                 {
                     SugarUtils.CreateTable<GuildBattle>(dbClient, BattleTableName);
-                    ConsoleLog.Info("会战管理数据库", "开始新的一期会战统计");
+                    Log.Info("会战管理数据库", "开始新的一期会战统计");
                     dbClient.Updateable(new GuildInfo {InBattle = true})
-                                   .Where(guild => guild.Gid == GuildEventArgs.SourceGroup.Id)
-                                   .UpdateColumns(i => new {i.InBattle})
-                                   .ExecuteCommandHasChange();
+                            .Where(guild => guild.Gid == GuildEventArgs.SourceGroup.Id)
+                            .UpdateColumns(i => new {i.InBattle})
+                            .ExecuteCommandHasChange();
                     //获取初始周目boss的信息
                     GuildBattleBoss initBossData = dbClient.Queryable<GuildBattleBoss>()
                                                            .Where(i => i.ServerId == guildInfo.ServerId
@@ -172,7 +177,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return -1;
             }
         }
@@ -192,7 +197,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 if (SugarUtils.TableExists<GuildBattle>(dbClient, BattleTableName))
                 {
-                    ConsoleLog.Warning("会战管理数据库", "结束一期会战统计删除旧表");
+                    Log.Warning("会战管理数据库", "结束一期会战统计删除旧表");
                     SugarUtils.DeletTable<GuildBattle>(dbClient, BattleTableName);
                     return dbClient.Updateable(new GuildInfo {InBattle = false})
                                    .Where(guild => guild.Gid == GuildEventArgs.SourceGroup.Id)
@@ -203,13 +208,13 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                 }
                 else
                 {
-                    ConsoleLog.Info("会战管理数据库", "会战表为空，请确认是否已经开始会战统计");
+                    Log.Info("会战管理数据库", "会战表为空，请确认是否已经开始会战统计");
                     return 0;
                 }
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return -1;
             }
         }
@@ -242,7 +247,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 attackType = AttackType.Illeage;
                 return -1;
             }
@@ -267,7 +272,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return null;
             }
         }
@@ -292,7 +297,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return false;
             }
         }
@@ -314,14 +319,14 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                 return dbClient.Queryable<GuildBattle>()
                                .AS(BattleTableName)
                                //今天5点之后出刀的
-                               .Where(i => i.Uid    == uid && i.Time >= BotUtils.GetUpdateStamp() &&
+                               .Where(i => i.Uid    == uid                   && i.Time   >= BotUtils.GetUpdateStamp() &&
                                            i.Attack != AttackType.Compensate && i.Attack != AttackType.CompensateKill)
                                //筛选出刀总数
                                .Count();
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return -1;
             }
         }
@@ -349,7 +354,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return -1;
             }
         }
@@ -365,7 +370,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// <para>本次出刀刀号</para>
         /// <para><see langword="-1"/> 数据库错误</para>
         /// </returns>
-        public int NewAttack(long uid,GuildInfo guildInfo,long dmg,AttackType attackType)
+        public int NewAttack(long uid, GuildInfo guildInfo, long dmg, AttackType attackType)
         {
             try
             {
@@ -386,7 +391,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return -1;
             }
         }
@@ -404,7 +409,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                if(curBossHP>guildInfo.TotalHP) throw new ArgumentOutOfRangeException(nameof(curBossHP));
+                if (curBossHP > guildInfo.TotalHP) throw new ArgumentOutOfRangeException(nameof(curBossHP));
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 guildInfo.HP = curBossHP;
                 return dbClient.Updateable(guildInfo)
@@ -413,7 +418,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return false;
             }
         }
@@ -442,7 +447,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return null;
             }
         }
@@ -478,7 +483,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return false;
             }
         }
@@ -516,7 +521,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return false;
             }
         }
@@ -558,7 +563,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return false;
             }
         }
@@ -584,7 +589,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return false;
             }
         }
@@ -610,7 +615,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return false;
             }
         }
@@ -635,7 +640,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return null;
             }
         }
@@ -660,7 +665,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return null;
             }
         }
@@ -688,13 +693,13 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                     Time = TimeStamp.GetNowTimeStamp(),
                 };
                 return dbClient.Updateable(memberInfo)
-                               .UpdateColumns(i => new{i.Flag,i.Info,i.Time})
-                               .Where(i=>i.Gid == GuildEventArgs.SourceGroup.Id && i.Uid == uid)
+                               .UpdateColumns(i => new {i.Flag, i.Info, i.Time})
+                               .Where(i => i.Gid == GuildEventArgs.SourceGroup.Id && i.Uid == uid)
                                .ExecuteCommandHasChange();
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return false;
             }
         }
@@ -728,7 +733,10 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                 {
                     return dbClient
                            .Updateable(new MemberInfo
-                                           {Flag = FlagType.IDLE, SL = TimeStamp.GetNowTimeStamp(), Time = TimeStamp.GetNowTimeStamp(), Info = null})
+                           {
+                               Flag = FlagType.IDLE, SL                 = TimeStamp.GetNowTimeStamp(),
+                               Time = TimeStamp.GetNowTimeStamp(), Info = null
+                           })
                            .UpdateColumns(i => new {i.Flag, i.SL, i.Time, i.Info})
                            .Where(i => i.Gid == GuildEventArgs.SourceGroup.Id && i.Uid == uid)
                            .ExecuteCommandHasChange();
@@ -736,7 +744,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("Database error",ConsoleLog.ErrorLogBuilder(e));
+                Log.Error("Database error", Log.ErrorLogBuilder(e));
                 return false;
             }
         }
@@ -761,6 +769,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                            .Select(phase => phase.Phase)
                            .First();
         }
+
         #endregion
     }
 }

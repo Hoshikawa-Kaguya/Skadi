@@ -11,27 +11,33 @@ using Sora.Entities.CQCodes;
 using Sora.Entities.Info;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 
 namespace AntiRain.ChatModule.PcrGuildBattle
 {
     internal class GuildManager : BaseManager
     {
         #region 属性
+
         /// <summary>
         /// 数据库实例
         /// </summary>
         private GuildManagerDBHelper DBHelper { get; set; }
+
         #endregion
 
         #region 构造函数
-        internal GuildManager(GroupMessageEventArgs messageEventArgs, PCRGuildBattleCommand commandType) : base(messageEventArgs, commandType)
+
+        internal GuildManager(GroupMessageEventArgs messageEventArgs, PCRGuildBattleCommand commandType) :
+            base(messageEventArgs, commandType)
         {
             this.DBHelper = new GuildManagerDBHelper(messageEventArgs);
         }
+
         #endregion
 
         #region 指令分发
+
         /// <summary>
         /// 公会管理指令响应函数
         /// </summary>
@@ -41,19 +47,19 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             switch (CommandType)
             {
                 case PCRGuildBattleCommand.CreateGuild:
-                    if(!await AuthCheck()) return;
+                    if (!await AuthCheck()) return;
                     CreateGuild();
                     break;
                 case PCRGuildBattleCommand.DeleteGuild:
-                    if(!await AuthCheck() || !await ZeroArgsCheck()) return;
+                    if (!await AuthCheck() || !await ZeroArgsCheck()) return;
                     DeleteGuild();
                     break;
                 case PCRGuildBattleCommand.JoinGuild:
-                    if(!await AuthCheck()) return;
+                    if (!await AuthCheck()) return;
                     JoinGuild();
                     break;
                 case PCRGuildBattleCommand.QuitGuild:
-                    if(!await AuthCheck()) return;
+                    if (!await AuthCheck()) return;
                     QuitGuild();
                     break;
                 case PCRGuildBattleCommand.ListMember:
@@ -70,9 +76,11 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     break;
             }
         }
+
         #endregion
 
         #region 指令
+
         /// <summary>
         /// 创建公会
         /// </summary>
@@ -86,12 +94,13 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                                                             $"此群已被标记为[{DBHelper.GetGuildInfo(base.SourceGroup).GuildName}]公会");
                     return;
             }
+
             //公会名
             string guildName;
             //公会区服
             Server guildServer;
             //判断公会名
-            switch (BotUtils.CheckForLength(this.CommandArgs,1))
+            switch (BotUtils.CheckForLength(this.CommandArgs, 1))
             {
                 case LenType.Extra:
                     if (BotUtils.CheckForLength(this.CommandArgs, 2) == LenType.Legitimate)
@@ -103,20 +112,23 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                         await base.SourceGroup.SendGroupMessage(CQCode.CQAt(base.Sender), "\r\n有多余参数");
                         return;
                     }
+
                     break;
                 case LenType.Legitimate:
                     var groupInfo = await base.SourceGroup.GetGroupInfo();
                     if (groupInfo.apiStatus != APIStatusType.OK)
                     {
-                        ConsoleLog.Error("API error",$"api ret code {(int) groupInfo.apiStatus}");
+                        Log.Error("API error", $"api ret code {(int) groupInfo.apiStatus}");
                         await base.SourceGroup.SendGroupMessage(CQCode.CQAt(base.Sender), "\r\nAPI调用错误请重试");
                         return;
                     }
+
                     guildName = groupInfo.groupInfo.GroupName;
                     break;
                 default:
                     return;
             }
+
             //判断区服
             if (Enum.IsDefined(typeof(Server), CommandArgs[1]))
             {
@@ -130,7 +142,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             else
             {
                 await base.SourceGroup.SendGroupMessage(CQCode.CQAt(base.Sender),
-                                               "弟啊，你哪个服务器的");
+                                                        "弟啊，你哪个服务器的");
                 return;
             }
 
@@ -163,12 +175,13 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     await SourceGroup.SendGroupMessage(CQCode.CQAt(Sender), "\r\nERROR\r\n数据库错误");
                     return;
             }
+
             //获取当前群公会名
             string guildName = DBHelper.GetGuildName(SourceGroup);
             //删除公会
             await SourceGroup.SendGroupMessage(DBHelper.DeleteGuild(SourceGroup)
-                                               ? $" 公会[{guildName}]已被删除。"
-                                               : $" 公会[{guildName}]删除失败，数据库错误。");
+                                                   ? $" 公会[{guildName}]已被删除。"
+                                                   : $" 公会[{guildName}]删除失败，数据库错误。");
         }
 
         /// <summary>
@@ -182,41 +195,47 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 await SourceGroup.SendGroupMessage("该群未创建公会");
                 return;
             }
+
             //处理需要加入的成员列表
             List<long> joinList = new List<long>();
-            switch (BotUtils.CheckForLength(CommandArgs,1))
+            switch (BotUtils.CheckForLength(CommandArgs, 1))
             {
                 case LenType.Illegal:
                     joinList.Add(Sender);
                     break;
-                case LenType.Extra:case LenType.Legitimate:
+                case LenType.Extra:
+                case LenType.Legitimate:
                     joinList.AddRange(MessageEventArgs.Message.GetAllAtList());
                     if (joinList.Count == 0)
                     {
                         await SourceGroup.SendGroupMessage("没有At任何成员");
                         return;
                     }
+
                     break;
             }
+
             //检查列表中是否有机器人
             if (joinList.Any(member => member == MessageEventArgs.LoginUid))
             {
                 joinList.Remove(MessageEventArgs.LoginUid);
                 await SourceGroup.SendGroupMessage("不要在成员中At机器人啊kora");
-                if(joinList.Count == 0) return;
+                if (joinList.Count == 0) return;
             }
-            ConsoleLog.Debug("Guild Mgr",$"Get join list count={joinList.Count}");
+
+            Log.Debug("Guild Mgr", $"Get join list count={joinList.Count}");
             //从API获取成员信息
-            ConsoleLog.Debug("Guild Mgr","Get group member infos");
+            Log.Debug("Guild Mgr", "Get group member infos");
             var (apiStatus, groupMemberList) = await SourceGroup.GetGroupMemberList();
             if (apiStatus != APIStatusType.OK)
             {
-                ConsoleLog.Error("API error",$"api ret code {(int) apiStatus}");
+                Log.Error("API error", $"api ret code {(int) apiStatus}");
                 await SourceGroup.SendGroupMessage(CQCode.CQAt(Sender), "\r\nAPI调用错误请重试");
                 return;
             }
+
             //加入待加入的成员
-            Dictionary<long,int> databaseRet = new Dictionary<long, int>();
+            Dictionary<long, int> databaseRet = new Dictionary<long, int>();
             foreach (long member in joinList)
             {
                 //获取群成员名
@@ -232,20 +251,22 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 databaseRet.Add(member,
                                 DBHelper.JoinGuild(member, SourceGroup, memberName));
             }
+
             //构建格式化信息
             List<CQCode> responseMsg = new List<CQCode>();
-            if (databaseRet.Any(ret => ret.Value == 0))//成员成功加入
+            if (databaseRet.Any(ret => ret.Value == 0)) //成员成功加入
             {
                 responseMsg.Add(CQCode.CQText("以下成员已加入:"));
                 foreach (long member in databaseRet.Where(member => member.Value == 0)
-                                                 .Select(member => member.Key)
-                                                 .ToList())
+                                                   .Select(member => member.Key)
+                                                   .ToList())
                 {
                     responseMsg.Add(CQCode.CQText("\r\n"));
                     responseMsg.Add(CQCode.CQAt(member));
                 }
             }
-            if (databaseRet.Any(ret => ret.Value == 1))//成员已存在
+
+            if (databaseRet.Any(ret => ret.Value == 1)) //成员已存在
             {
                 if (responseMsg.Count != 0) responseMsg.Add(CQCode.CQText("\r\n"));
                 responseMsg.Add(CQCode.CQText("以下成员已在公会中，仅更新信息:"));
@@ -257,7 +278,8 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     responseMsg.Add(CQCode.CQAt(member));
                 }
             }
-            if (databaseRet.Any(ret => ret.Value == -1))//数据库错误
+
+            if (databaseRet.Any(ret => ret.Value == -1)) //数据库错误
             {
                 if (responseMsg.Count != 0) responseMsg.Add(CQCode.CQText("\r\n"));
                 responseMsg.Add(CQCode.CQText("以下成员在加入时发生错误:"));
@@ -269,6 +291,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     responseMsg.Add(CQCode.CQAt(member));
                 }
             }
+
             //发送信息
             await SourceGroup.SendGroupMessage(responseMsg);
         }
@@ -285,18 +308,20 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 await SourceGroup.SendGroupMessage("该群未创建公会");
                 return;
             }
+
             //获取所有成员的信息
             var (apiStatus, groupMemberList) = await SourceGroup.GetGroupMemberList();
             if (apiStatus != APIStatusType.OK)
             {
-                ConsoleLog.Error("API error",$"api ret code {(int) apiStatus}");
+                Log.Error("API error", $"api ret code {(int) apiStatus}");
                 await SourceGroup.SendGroupMessage(CQCode.CQAt(Sender), "\r\nAPI调用错误请重试");
                 return;
             }
+
             //移除机器人的成员信息
             groupMemberList.RemoveAt(groupMemberList.FindIndex(member => member.UserId == MessageEventArgs.LoginUid));
             //添加成员到公会
-            Dictionary<long,int> databaseRet = new Dictionary<long, int>();
+            Dictionary<long, int> databaseRet = new Dictionary<long, int>();
             foreach (GroupMemberInfo member in groupMemberList)
             {
                 //获取群成员名
@@ -312,6 +337,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 databaseRet.Add(member.UserId,
                                 DBHelper.JoinGuild(member.UserId, SourceGroup, memberName));
             }
+
             //构建格式化信息
             List<CQCode> responseMsg = new List<CQCode>();
             if (databaseRet.Any(ret => ret.Value == 0)) //成员成功加入
@@ -325,6 +351,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     responseMsg.Add(CQCode.CQAt(member));
                 }
             }
+
             if (databaseRet.Any(ret => ret.Value == 1)) //成员已存在
             {
                 if (responseMsg.Count != 0) responseMsg.Add(CQCode.CQText("\r\n"));
@@ -337,6 +364,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     responseMsg.Add(CQCode.CQAt(member));
                 }
             }
+
             if (databaseRet.Any(ret => ret.Value == -1)) //数据库错误
             {
                 if (responseMsg.Count != 0) responseMsg.Add(CQCode.CQText("\r\n"));
@@ -349,6 +377,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     responseMsg.Add(CQCode.CQAt(member));
                 }
             }
+
             //发送信息
             await SourceGroup.SendGroupMessage(responseMsg);
         }
@@ -364,9 +393,10 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 await SourceGroup.SendGroupMessage("该群未创建公会");
                 return;
             }
+
             //获取成员参数
             List<long> quitList = new List<long>();
-            switch (BotUtils.CheckForLength(CommandArgs,1))
+            switch (BotUtils.CheckForLength(CommandArgs, 1))
             {
                 case LenType.Illegal:
                     quitList.Add(Sender);
@@ -385,6 +415,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                             return;
                         }
                     }
+
                     break;
                 case LenType.Extra:
                     quitList.AddRange(MessageEventArgs.Message.GetAllAtList());
@@ -393,23 +424,27 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                         await SourceGroup.SendGroupMessage("没有At任何成员");
                         return;
                     }
+
                     break;
             }
+
             //检查列表中是否有机器人
             if (quitList.Any(member => member == MessageEventArgs.LoginUid))
             {
                 quitList.Remove(MessageEventArgs.LoginUid);
                 await SourceGroup.SendGroupMessage("不要在成员中At机器人啊kora");
-                if(quitList.Count == 0) return;
+                if (quitList.Count == 0) return;
             }
-            ConsoleLog.Debug("Guild Mgr",$"Get quit list count={quitList.Count}");
-            Dictionary<long,int> databaseRet = new Dictionary<long, int>();
+
+            Log.Debug("Guild Mgr", $"Get quit list count={quitList.Count}");
+            Dictionary<long, int> databaseRet = new Dictionary<long, int>();
             //删除退会成员
             foreach (long member in quitList)
             {
                 databaseRet.Add(member,
                                 DBHelper.QuitGuild(member, SourceGroup));
             }
+
             //构建格式化信息
             List<CQCode> responseMsg = new List<CQCode>();
             if (databaseRet.Any(ret => ret.Value == 0))
@@ -423,6 +458,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     responseMsg.Add(CQCode.CQAt(member));
                 }
             }
+
             if (databaseRet.Any(ret => ret.Value == 1))
             {
                 if (responseMsg.Count != 0) responseMsg.Add(CQCode.CQText("\r\n"));
@@ -435,6 +471,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     responseMsg.Add(CQCode.CQAt(member));
                 }
             }
+
             if (databaseRet.Any(ret => ret.Value == -1))
             {
                 if (responseMsg.Count != 0) responseMsg.Add(CQCode.CQText("\r\n"));
@@ -447,6 +484,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     responseMsg.Add(CQCode.CQAt(member));
                 }
             }
+
             //发送信息
             await SourceGroup.SendGroupMessage(responseMsg);
         }
@@ -462,7 +500,8 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 await SourceGroup.SendGroupMessage("该群未创建公会");
                 return;
             }
-            ConsoleLog.Debug("database",$"Quit guild[{SourceGroup.Id}] all members");
+
+            Log.Debug("database", $"Quit guild[{SourceGroup.Id}] all members");
             //清空成员
             switch (DBHelper.QuitAll(SourceGroup))
             {
@@ -471,14 +510,14 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     break;
                 case 1:
                     await SourceGroup.SendGroupMessage("DB ERROR:公会不存在");
-                    ConsoleLog.Error("database",$"guild {SourceGroup.Id} not found");
+                    Log.Error("database", $"guild {SourceGroup.Id} not found");
                     break;
                 case -1:
                     await BotUtils.DatabaseFailedTips(MessageEventArgs);
                     break;
                 default:
                     await SourceGroup.SendGroupMessage("发生了未知错误");
-                    ConsoleLog.Error("Guild Mgr","清空成员时发生了未知错误");
+                    Log.Error("Guild Mgr", "清空成员时发生了未知错误");
                     break;
             }
         }
@@ -494,6 +533,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 await SourceGroup.SendGroupMessage("该群未创建公会");
                 return;
             }
+
             //获取群成员数
             int memberCount = DBHelper.GetMemberCount(SourceGroup);
             //判断数据库错误和空公会
@@ -506,16 +546,18 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     await SourceGroup.SendGroupMessage("公会并没有成员");
                     return;
             }
+
             //获取公会成员表
             List<MemberInfo> guildMembers = DBHelper.GetAllMembersInfo(SourceGroup);
             //获取公会名
             string guildName = DBHelper.GetGuildName(SourceGroup);
             //检查数据库错误
-            if (guildName == null || guildMembers == null)//数据库错误
+            if (guildName == null || guildMembers == null) //数据库错误
             {
                 await BotUtils.DatabaseFailedTips(base.MessageEventArgs);
                 return;
             }
+
             //构建消息文本
             StringBuilder sendMsg = new StringBuilder();
             sendMsg.Append($"公会[{guildName}]成员列表\r\n{memberCount}/30\r\n==================\r\n     UID     |   昵称");
@@ -526,12 +568,15 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 sendMsg.Append(" | ");
                 sendMsg.Append(guildMember.Name);
             }
+
             //发送消息
             await SourceGroup.SendGroupMessage(sendMsg.ToString());
         }
+
         #endregion
 
         #region 私有方法
+
         #endregion
     }
 }

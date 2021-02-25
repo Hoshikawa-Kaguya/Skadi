@@ -11,29 +11,27 @@ namespace AntiRain.TypeEnum.CommandType
         /// <summary>
         /// 切噜编码
         /// </summary>
-        [Description(@"^切噜一下")]
-        CheruEncode,
+        [Description(@"^切噜一下")] CheruEncode,
+
         /// <summary>
         /// 切噜翻译
         /// </summary>
-        [Description(@"^切噜(?:~|～)")]
-        CheruDecode,
+        [Description(@"^切噜(?:~|～)")] CheruDecode,
+
         /// <summary>
         /// 查询排名
         /// </summary>
-        [Description(@"^查询公会排名\S*$")]
-        GetGuildRank,
+        [Description(@"^查询公会排名\S*$")] GetGuildRank,
+
         /// <summary>
         /// 随机数
         /// </summary>
-        [Description(@"^dice$")]
-        Dice,
+        [Description(@"^dice$")] Dice,
+
         /// <summary>
         /// 查找角色
         /// </summary>
-        [Description(@"^谁是[\u4e00-\u9fa5]+$")]
-        FindChara,
-        [Description(@"^debug")]
-        Debug
+        [Description(@"^谁是[\u4e00-\u9fa5]+$")] FindChara,
+        [Description(@"^debug")] Debug
     }
 }

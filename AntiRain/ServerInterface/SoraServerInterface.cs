@@ -8,9 +8,9 @@ using AntiRain.Resource.PCRResource;
 using AntiRain.TimerEvent;
 using AntiRain.Tool;
 using AntiRain.WebConsole;
-using Sora.Extensions;
 using Sora.Server;
-using YukariToolBox.Console;
+using YukariToolBox.Extensions;
+using YukariToolBox.FormatLog;
 
 namespace AntiRain.ServerInterface
 {
@@ -23,20 +23,20 @@ namespace AntiRain.ServerInterface
         {
             //修改控制台标题
             Console.Title = @"AntiRain";
-            ConsoleLog.Info("AntiRain初始化","AntiRain初始化...");
+            Log.Info("AntiRain初始化", "AntiRain初始化...");
             //初始化配置文件
-            ConsoleLog.Info("AntiRain初始化","初始化服务器全局配置...");
+            Log.Info("AntiRain初始化", "初始化服务器全局配置...");
             //全局文件初始化不需要uid，不使用构造函数重载
             ConfigManager configManager = new();
             configManager.GlobalConfigFileInit();
             configManager.LoadGlobalConfig(out var globalConfig, false);
 
-            ConsoleLog.SetLogLevel(globalConfig.LogLevel);
+            Log.SetLogLevel(globalConfig.LogLevel);
             //显示Log等级
-            ConsoleLog.Debug("Log Level", globalConfig.LogLevel);
+            Log.Debug("Log Level", globalConfig.LogLevel);
 
             //初始化资源数据库
-            ConsoleLog.Info("AntiRain初始化","初始化资源...");
+            Log.Info("AntiRain初始化", "初始化资源...");
             DatabaseInit.GlobalDataInit();
 
             //检查是否开启角色数据下载
@@ -45,7 +45,7 @@ namespace AntiRain.ServerInterface
             // {
             //     //更新PCR角色数据库
             //     CharaParser charaParser = new CharaParser();
-            //     if(!await charaParser.UpdateCharaNameByCloud()) ConsoleLog.Error("AntiRain初始化","更新角色数据库失败");
+            //     if(!await charaParser.UpdateCharaNameByCloud()) Log.Error("AntiRain初始化","更新角色数据库失败");
             // }
 
             //初始化字符编码
@@ -57,12 +57,12 @@ namespace AntiRain.ServerInterface
             Command.CommandAdapter.PCRGuildBattlecmdResourseInit();
 
             //启动机器人WebAPI服务器
-            ConsoleLog.Info("AntiRain初始化","启动机器人WebAPI服务器...");
+            Log.Info("AntiRain初始化", "启动机器人WebAPI服务器...");
             ConsoleInterface = new ConsoleInterface(globalConfig.AntiRainAPILocation, globalConfig.AntiRainAPIPort);
 
-            ConsoleLog.Info("AntiRain初始化","启动反向WS服务器...");
+            Log.Info("AntiRain初始化", "启动反向WS服务器...");
             //初始化服务器
-            SoraWSServer server = new (new ServerConfig
+            SoraWSServer server = new(new ServerConfig
             {
                 Location         = globalConfig.Location,
                 Port             = globalConfig.Port,
@@ -85,7 +85,7 @@ namespace AntiRain.ServerInterface
             server.Event.OnGroupPoke += GroupPokeEvent.GroupPokeEventParse;
             //关闭连接事件处理
             server.ConnManager.OnCloseConnectionAsync += TimerEventParse.StopTimer;
-            server.ConnManager.OnHeartBeatTimeOut += TimerEventParse.StopTimer;
+            server.ConnManager.OnHeartBeatTimeOut     += TimerEventParse.StopTimer;
 
             //启动服务器
             await server.StartServer().RunCatch(BotUtils.BotCrash);

@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 using BeetleX.FastHttpApi;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 
 namespace AntiRain.WebConsole
 {
@@ -10,8 +10,8 @@ namespace AntiRain.WebConsole
         [Get]
         public Task<object> Test(IHttpContext context)
         {
-            ConsoleLog.Debug("UtilApi",$"Get Test api request from {context.Request.RemoteEndPoint}");
-            return Task.FromResult<object>(new TextResult("好耶",true));
+            Log.Debug("UtilApi", $"Get Test api request from {context.Request.RemoteEndPoint}");
+            return Task.FromResult<object>(new TextResult("好耶", true));
         }
     }
 }

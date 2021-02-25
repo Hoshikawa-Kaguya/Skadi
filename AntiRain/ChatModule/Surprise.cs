@@ -9,21 +9,26 @@ namespace AntiRain.ChatModule
     internal class Surprise
     {
         #region 属性
+
         public  object                Sender       { private set; get; }
         public  GroupMessageEventArgs MFKEventArgs { private set; get; }
         private Group                 QQGroup      { set;         get; }
+
         #endregion
 
         #region 构造函数
+
         public Surprise(object sender, GroupMessageEventArgs eventArgs)
         {
             this.MFKEventArgs = eventArgs;
             this.Sender       = sender;
             this.QQGroup      = MFKEventArgs.SourceGroup;
         }
+
         #endregion
 
         #region 消息响应函数
+
         /// <summary>
         /// 消息接收函数
         /// </summary>
@@ -63,9 +68,11 @@ namespace AntiRain.ChatModule
                 }
             }
         }
+
         #endregion
 
         #region 私有方法
+
         private async void RandomNumber()
         {
             Random randomGen = new Random();
@@ -76,7 +83,7 @@ namespace AntiRain.ChatModule
         {
             Random banTime = new Random();
             await MFKEventArgs.SourceGroup.EnableGroupMemberMute(MFKEventArgs.Sender.Id,
-                                                           banTime.Next(1, 10) * 60);
+                                                                 banTime.Next(1, 10) * 60);
         }
 
         private async void RedTea()
@@ -84,6 +91,7 @@ namespace AntiRain.ChatModule
             await MFKEventArgs.SourceGroup.EnableGroupMemberMute(MFKEventArgs.Sender.Id,
                                                                  28800);
         }
+
         #endregion
     }
 }

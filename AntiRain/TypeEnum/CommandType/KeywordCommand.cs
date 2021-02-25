@@ -11,22 +11,21 @@ namespace AntiRain.TypeEnum.CommandType
         /// <summary>
         /// 昏睡红茶
         /// </summary>
-        [Description("优质睡眠 昏睡红茶 昏睡套餐 健康睡眠")]
-        RedTea,
+        [Description("优质睡眠 昏睡红茶 昏睡套餐 健康睡眠")] RedTea,
+
         /// <summary>
         /// 24岁，是学生
         /// </summary>
-        [Description("24岁，是学生")]
-        Student,
+        [Description("24岁，是学生")] Student,
+
         /// <summary>
         /// 来点色图！
         /// </summary>
-        [Description("来点色图 来点涩图 我要看色图")]
-        Hso,
+        [Description("来点色图 来点涩图 我要看色图")] Hso,
+
         /// <summary>
         /// 随机禁言
         /// </summary>
-        [Description("随机禁言")]
-        RandomBan
+        [Description("随机禁言")] RandomBan
     }
 }

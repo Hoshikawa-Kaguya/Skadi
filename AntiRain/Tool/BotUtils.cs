@@ -6,24 +6,27 @@ using AntiRain.TypeEnum;
 using Sora.Entities;
 using Sora.Entities.CQCodes;
 using Sora.EventArgs.SoraEvent;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 
 namespace AntiRain.Tool
 {
     internal static class BotUtils
     {
         #region 时间戳处理
+
         /// <summary>
         /// 获取今天零点的时间戳
         /// 时间戳单位(秒)
         /// </summary>
-        public static long GetTodayStampLong() =>(long) (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;
+        public static long GetTodayStampLong() =>
+            (long) (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;
 
         /// <summary>
         /// 获取现在的时间戳
         /// 时间戳单位(秒)
         /// </summary>
-        public static long GetNowStampLong() =>(long) (DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;
+        public static long GetNowStampLong() =>
+            (long) (DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;
 
         /// <summary>
         /// 获取游戏刷新的时间戳
@@ -33,16 +36,20 @@ namespace AntiRain.Tool
         {
             if (DateTime.Now > DateTime.Today.Add(new TimeSpan(5, 0, 0)))
             {
-                return (long)( DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Add(new TimeSpan(5, 0, 0)).TotalSeconds;
+                return (long) (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Add(new TimeSpan(5, 0, 0))
+                    .TotalSeconds;
             }
             else
             {
-                return (long)( DateTime.Today.AddDays(-1) - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Add(new TimeSpan(5, 0, 0)).TotalSeconds;
-            } 
+                return (long) (DateTime.Today.AddDays(-1) - new DateTime(1970, 1, 1, 8, 0, 0, 0))
+                              .Add(new TimeSpan(5, 0, 0)).TotalSeconds;
+            }
         }
+
         #endregion
 
         #region 字符串处理
+
         /// <summary>
         /// 获取字符串在QQ上显示的长度（用于PadQQ函数）
         /// </summary>
@@ -123,9 +130,11 @@ namespace AntiRain.Tool
                 return LenType.Illegal;
             }
         }
+
         #endregion
 
         #region crash处理
+
         /// <summary>
         /// bot崩溃日志生成
         /// </summary>
@@ -133,11 +142,13 @@ namespace AntiRain.Tool
         public static void BotCrash(Exception e)
         {
             //生成错误报告
-            IOUtils.CrashLogGen(ConsoleLog.ErrorLogBuilder(e));
+            IOUtils.CrashLogGen(Log.ErrorLogBuilder(e));
         }
+
         #endregion
 
         #region 重复的消息提示
+
         /// <summary>
         /// 数据库发生错误时的消息提示
         /// </summary>
@@ -146,8 +157,9 @@ namespace AntiRain.Tool
             await groupEventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(groupEventArgs.Sender.Id),
                                                               "\r\nERROR",
                                                               "\r\n数据库错误");
-            ConsoleLog.Error("database","database error");
+            Log.Error("database", "database error");
         }
+
         #endregion
     }
 }

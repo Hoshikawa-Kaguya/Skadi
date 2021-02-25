@@ -1,16 +1,20 @@
+using System.Reflection;
 using BeetleX.EventArgs;
 using BeetleX.FastHttpApi;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 
 namespace AntiRain.WebConsole
 {
     internal class ConsoleInterface
     {
         #region 属性
+
         private HttpApiServer AntiRainApiServer { get; set; }
+
         #endregion
 
         #region 构造函数
+
         internal ConsoleInterface(string location, int port)
         {
             AntiRainApiServer                      = new HttpApiServer();
@@ -23,10 +27,11 @@ namespace AntiRain.WebConsole
             {
                 AllowOrigin = "*"
             };
-            AntiRainApiServer.Register(typeof(UtilApi).Assembly);
+            AntiRainApiServer.Register(Assembly.GetExecutingAssembly());
             AntiRainApiServer.Open();
-            ConsoleLog.Debug("AntiRain初始化",$"AntiRain API服务正在运行[{location}:{port}]");
+            Log.Debug("AntiRain初始化", $"AntiRain API服务正在运行[{location}:{port}]");
         }
+
         #endregion
     }
 }

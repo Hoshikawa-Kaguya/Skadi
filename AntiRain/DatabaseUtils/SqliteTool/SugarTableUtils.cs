@@ -6,6 +6,7 @@ namespace AntiRain.DatabaseUtils.SqliteTool
     internal class SugarTableUtils
     {
         #region SugarTable辅助方法
+
         /// <summary>
         /// 获取表名
         /// </summary>
@@ -17,6 +18,7 @@ namespace AntiRain.DatabaseUtils.SqliteTool
                     new SugarTable(typeof(TableClass).Name))
                 .TableName;
         }
+
         #endregion
     }
 }

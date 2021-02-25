@@ -8,19 +8,21 @@ using Sora.Entities;
 using Sora.Entities.CQCodes;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 
 namespace AntiRain.ChatModule.PcrGuildBattle
 {
     internal abstract class BaseManager
     {
         #region 属性
+
         protected GroupMessageEventArgs MessageEventArgs { get; set; }
         protected Group                 SourceGroup      { get; set; }
         protected User                  Sender           { get; set; }
         protected string[]              CommandArgs      { get; set; }
         protected bool                  IsAdmin          { get; set; }
         protected PCRGuildBattleCommand CommandType      { get; set; }
+
         #endregion
 
         #region 构造函数
@@ -35,9 +37,11 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                            messageEventArgs.SenderInfo.Role == MemberRoleType.Owner;
             this.CommandType = commandType;
         }
+
         #endregion
 
         #region 基类管理方法
+
         /// <summary>
         /// 零参数指令的参数检查
         /// 同时检查成员是否存在
@@ -49,7 +53,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         internal async ValueTask<bool> ZeroArgsCheck()
         {
             //检查参数
-            switch (BotUtils.CheckForLength(CommandArgs,0))
+            switch (BotUtils.CheckForLength(CommandArgs, 0))
             {
                 case LenType.Extra:
                     await MessageEventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(MessageEventArgs.Sender.Id),
@@ -60,7 +64,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 default:
                     await MessageEventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(MessageEventArgs.Sender.Id),
                                                                         "发生未知错误，请联系机器人管理员");
-                    ConsoleLog.Error("Unknown error","LenType");
+                    Log.Error("Unknown error", "LenType");
                     return false;
             }
         }
@@ -84,10 +88,11 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             {
                 await SourceGroup.SendGroupMessage(CQCode.CQAt(Sender.Id),
                                                    " 你没有执行此指令的权限");
-                ConsoleLog.Warning($"会战[群:{SourceGroup.Id}]", $"群成员{MessageEventArgs.SenderInfo.Nick}正在尝试执行指令{CommandType}");
+                Log.Warning($"会战[群:{SourceGroup.Id}]", $"群成员{MessageEventArgs.SenderInfo.Nick}正在尝试执行指令{CommandType}");
                 return false;
             }
         }
+
         #endregion
     }
 }

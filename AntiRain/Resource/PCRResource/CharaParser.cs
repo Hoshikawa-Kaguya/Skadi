@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AntiRain.DatabaseUtils;
 using AntiRain.DatabaseUtils.Helpers.PCRDataDB;
-using YukariToolBox.Console;
+using YukariToolBox.FormatLog;
 
 namespace AntiRain.Resource.PCRResource
 {
@@ -15,17 +15,22 @@ namespace AntiRain.Resource.PCRResource
     internal class CharaParser
     {
         #region 属性
+
         private CharaDBHelper CharaDBHelper { get; }
+
         #endregion
 
         #region 构造函数
+
         internal CharaParser()
         {
             this.CharaDBHelper = new CharaDBHelper();
         }
+
         #endregion
 
         #region 公有方法
+
         /// <summary>
         /// <para>从云端获取数据更新</para>
         /// <para>会覆盖原有数据</para>
@@ -34,7 +39,7 @@ namespace AntiRain.Resource.PCRResource
         {
             string res;
             //从服务器获取数据
-            ConsoleLog.Info("角色数据更新","尝试从云端获取更新");
+            Log.Info("角色数据更新", "尝试从云端获取更新");
             try
             {
                 HttpClient client = new HttpClient
@@ -49,17 +54,17 @@ namespace AntiRain.Resource.PCRResource
             }
             catch (Exception e)
             {
-                ConsoleLog.Error("角色数据更新", $"发生了网络错误\n{PyLibSharp.Requests.Utils.GetInnerExceptionMessages(e)}");
+                Log.Error("角色数据更新", $"发生了网络错误\n{PyLibSharp.Requests.Utils.GetInnerExceptionMessages(e)}");
                 return false;
             }
-            
+
             //python字典数据匹配正则
             Regex PyDict = new(@"\d+:\s*\[\"".+\""\],", RegexOptions.IgnoreCase);
 
             //匹配所有名称数据
             MatchCollection DictMatchRes = PyDict.Matches(res.Substring(res.IndexOf('{'),
                                                                         res.IndexOf('}') - res.IndexOf('{') + 1));
-            ConsoleLog.Info("角色数据更新",$"角色数据获取成功({DictMatchRes.Count})");
+            Log.Info("角色数据更新", $"角色数据获取成功({DictMatchRes.Count})");
             //名称数据列表
             List<PCRChara> chareNameList = new();
             //处理匹配结果
@@ -79,6 +84,7 @@ namespace AntiRain.Resource.PCRResource
                     Name    = charaNames
                 });
             }
+
             return CharaDBHelper.UpdateCharaData(chareNameList);
         }
 
@@ -95,6 +101,7 @@ namespace AntiRain.Resource.PCRResource
         /// <param name="charaId">id</param>
         internal PCRChara FindChara(int charaId)
             => CharaDBHelper.FindChara(charaId);
+
         #endregion
     }
 }
