@@ -45,7 +45,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 if (uid == null)
                 {
                     //查询所有人的出刀表
@@ -81,7 +81,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<GuildBattle>()
                                .AS(BattleTableName)
                                .Where(attack => attack.Time   > BotUtils.GetUpdateStamp() &&
@@ -116,7 +116,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<GuildInfo>().InSingle(GuildEventArgs.SourceGroup.Id).InBattle ? 1 : 0;
             }
             catch (Exception e)
@@ -138,42 +138,38 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 if (SugarUtils.TableExists<GuildBattle>(dbClient, BattleTableName))
                 {
                     Log.Error("会战管理数据库", "会战表已经存在，请检查是否未结束上次会战统计");
                     return 0;
                 }
-                else
-                {
-                    SugarUtils.CreateTable<GuildBattle>(dbClient, BattleTableName);
-                    Log.Info("会战管理数据库", "开始新的一期会战统计");
-                    dbClient.Updateable(new GuildInfo {InBattle = true})
-                            .Where(guild => guild.Gid == GuildEventArgs.SourceGroup.Id)
-                            .UpdateColumns(i => new {i.InBattle})
-                            .ExecuteCommandHasChange();
-                    //获取初始周目boss的信息
-                    GuildBattleBoss initBossData = dbClient.Queryable<GuildBattleBoss>()
-                                                           .Where(i => i.ServerId == guildInfo.ServerId
-                                                                    && i.Phase    == 1
-                                                                    && i.Order    == 1)
-                                                           .First();
-                    GuildInfo updateBossData =
-                        new GuildInfo()
-                        {
-                            BossPhase = initBossData.Phase,
-                            Order     = 1,
-                            Round     = 1,
-                            HP        = initBossData.HP,
-                            TotalHP   = initBossData.HP
-                        };
-                    return dbClient.Updateable(updateBossData)
-                                   .UpdateColumns(i => new {i.Order, i.HP, i.BossPhase, i.Round, i.TotalHP})
-                                   .Where(i => i.Gid == GuildEventArgs.SourceGroup.Id)
-                                   .ExecuteCommandHasChange()
-                        ? 1
-                        : -1;
-                }
+
+                SugarUtils.CreateTable<GuildBattle>(dbClient, BattleTableName);
+                Log.Info("会战管理数据库", "开始新的一期会战统计");
+                dbClient.Updateable<GuildInfo>()
+                        .SetColumns(i => new GuildInfo {InBattle = true})
+                        .Where(guild => guild.Gid == GuildEventArgs.SourceGroup.Id)
+                        .ExecuteCommandHasChange();
+                //获取初始周目boss的信息
+                var initBossData = dbClient.Queryable<GuildBattleBoss>()
+                                           .Where(i => i.ServerId == guildInfo.ServerId
+                                                    && i.Phase    == 1
+                                                    && i.Order    == 1)
+                                           .First();
+                return dbClient.Updateable<GuildInfo>()
+                               .SetColumns(i => new GuildInfo()
+                               {
+                                   BossPhase = initBossData.Phase,
+                                   Order     = 1,
+                                   Round     = 1,
+                                   HP        = initBossData.HP,
+                                   TotalHP   = initBossData.HP
+                               })
+                               .Where(i => i.Gid == GuildEventArgs.SourceGroup.Id)
+                               .ExecuteCommandHasChange()
+                    ? 1
+                    : -1;
             }
             catch (Exception e)
             {
@@ -194,14 +190,14 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 if (SugarUtils.TableExists<GuildBattle>(dbClient, BattleTableName))
                 {
                     Log.Warning("会战管理数据库", "结束一期会战统计删除旧表");
                     SugarUtils.DeletTable<GuildBattle>(dbClient, BattleTableName);
-                    return dbClient.Updateable(new GuildInfo {InBattle = false})
+                    return dbClient.Updateable<GuildInfo>()
                                    .Where(guild => guild.Gid == GuildEventArgs.SourceGroup.Id)
-                                   .UpdateColumns(i => new {i.InBattle})
+                                   .SetColumns(i => new GuildInfo {InBattle = false})
                                    .ExecuteCommandHasChange()
                         ? 1
                         : -1;
@@ -233,7 +229,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 //获取最后一刀的类型出刀者UID
                 var lastAttack =
                     dbClient.Queryable<GuildBattle>()
@@ -265,7 +261,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<GuildBattle>()
                                .AS(BattleTableName)
                                .InSingle(aid);
@@ -289,7 +285,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Deleteable<GuildBattle>()
                                .AS(BattleTableName)
                                .Where(i => i.Aid == aid)
@@ -314,7 +310,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 //出刀数
                 return dbClient.Queryable<GuildBattle>()
                                .AS(BattleTableName)
@@ -342,7 +338,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 //出刀数
                 return dbClient.Queryable<GuildBattle>()
                                .AS(BattleTableName)
@@ -374,7 +370,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 //插入一刀数据
                 var insertData = new GuildBattle()
                 {
@@ -407,13 +403,14 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// </returns>
         public bool ModifyBossHP(GuildInfo guildInfo, long curBossHP)
         {
+            if (guildInfo == null) throw new ArgumentNullException(nameof(guildInfo));
             try
             {
                 if (curBossHP > guildInfo.TotalHP) throw new ArgumentOutOfRangeException(nameof(curBossHP));
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                guildInfo.HP = curBossHP;
-                return dbClient.Updateable(guildInfo)
-                               .UpdateColumns(i => new {i.HP})
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                return dbClient.Updateable<GuildInfo>()
+                               .SetColumns(i => new GuildInfo {HP = curBossHP})
+                               .Where(guild => guild.Gid == guildInfo.Gid)
                                .ExecuteCommandHasChange();
             }
             catch (Exception e)
@@ -437,7 +434,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 //获取修订的boss相关信息
                 int phase = GetRoundPhase(server, round);
                 return dbClient.Queryable<GuildBattleBoss>()
@@ -463,21 +460,18 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
 
                 //更新数据
-                return dbClient.Updateable(new GuildInfo
+                return dbClient.Updateable<GuildInfo>()
+                               .Where(guild => guild.Gid == GuildEventArgs.SourceGroup.Id)
+                               .SetColumns(info => new GuildInfo
                                {
                                    HP        = hp,
                                    TotalHP   = totalHP,
                                    Round     = round,
                                    Order     = bossOrder,
                                    BossPhase = phase,
-                               })
-                               .Where(guild => guild.Gid == GuildEventArgs.SourceGroup.Id)
-                               .UpdateColumns(info => new
-                               {
-                                   info.HP, info.TotalHP, info.Round, info.Order, info.BossPhase
                                })
                                .ExecuteCommandHasChange();
             }
@@ -500,22 +494,20 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 //获取下一个boss的信息
-                GuildBattleBoss nextBossData = dbClient.Queryable<GuildBattleBoss>()
-                                                       .Where(i => i.ServerId == guildInfo.ServerId
-                                                                && i.Phase    == guildInfo.BossPhase
-                                                                && i.Order    == guildInfo.Order + 1)
-                                                       .First();
-                GuildInfo updateBossData =
-                    new GuildInfo()
-                    {
-                        Order   = guildInfo.Order + 1,
-                        HP      = nextBossData.HP,
-                        TotalHP = nextBossData.HP
-                    };
-                return dbClient.Updateable(updateBossData)
-                               .UpdateColumns(i => new {i.Order, i.HP, i.TotalHP})
+                var nextBossData = dbClient.Queryable<GuildBattleBoss>()
+                                           .Where(i => i.ServerId == guildInfo.ServerId
+                                                    && i.Phase    == guildInfo.BossPhase
+                                                    && i.Order    == guildInfo.Order + 1)
+                                           .First();
+                return dbClient.Updateable<GuildInfo>()
+                               .SetColumns(i => new GuildInfo()
+                               {
+                                   Order   = guildInfo.Order + 1,
+                                   HP      = nextBossData.HP,
+                                   TotalHP = nextBossData.HP
+                               })
                                .Where(i => i.Gid == GuildEventArgs.SourceGroup.Id)
                                .ExecuteCommandHasChange();
             }
@@ -538,7 +530,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
 
                 int nextPhase = GetRoundPhase(guildInfo.ServerId, guildInfo.Round + 1);
                 //获取下一个周目boss的信息
@@ -547,17 +539,15 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                                                                 && i.Phase    == nextPhase
                                                                 && i.Order    == 1)
                                                        .First();
-                GuildInfo updateBossData =
-                    new GuildInfo()
-                    {
-                        BossPhase = nextBossData.Phase,
-                        Order     = 1,
-                        Round     = guildInfo.Round + 1,
-                        HP        = nextBossData.HP,
-                        TotalHP   = nextBossData.HP
-                    };
-                return dbClient.Updateable(updateBossData)
-                               .UpdateColumns(i => new {i.Order, i.HP, i.BossPhase, i.Round, i.TotalHP})
+                return dbClient.Updateable<GuildInfo>()
+                               .SetColumns(i => new GuildInfo()
+                               {
+                                   BossPhase = nextBossData.Phase,
+                                   Order     = 1,
+                                   Round     = guildInfo.Round + 1,
+                                   HP        = nextBossData.HP,
+                                   TotalHP   = nextBossData.HP
+                               })
                                .Where(i => i.Gid == GuildEventArgs.SourceGroup.Id)
                                .ExecuteCommandHasChange();
             }
@@ -579,11 +569,11 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                dbClient.Updateable(new MemberInfo {Flag = FlagType.IDLE, Info = null})
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                dbClient.Updateable<MemberInfo>()
                         .Where(i => i.Flag == FlagType.OnTree &&
                                     i.Gid  == GuildEventArgs.SourceGroup.Id)
-                        .UpdateColumns(i => new {i.Flag, i.Info})
+                        .SetColumns(i => new MemberInfo {Flag = FlagType.IDLE, Info = null})
                         .ExecuteCommand();
                 return true;
             }
@@ -605,11 +595,11 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                dbClient.Updateable(new MemberInfo {Flag = FlagType.IDLE, Info = null})
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                dbClient.Updateable<MemberInfo>()
                         .Where(i => i.Flag == FlagType.EnGage &&
                                     i.Gid  == GuildEventArgs.SourceGroup.Id)
-                        .UpdateColumns(i => new {i.Flag, i.Info})
+                        .SetColumns(i => new MemberInfo {Flag = FlagType.IDLE, Info = null})
                         .ExecuteCommand();
                 return true;
             }
@@ -631,7 +621,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<MemberInfo>()
                                .Where(member => member.Gid  == GuildEventArgs.SourceGroup.Id &&
                                                 member.Flag == FlagType.OnTree)
@@ -656,7 +646,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<MemberInfo>()
                                .Where(member => member.Gid  == GuildEventArgs.SourceGroup.Id &&
                                                 member.Flag == FlagType.EnGage)
@@ -684,16 +674,15 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 //更新成员信息
-                MemberInfo memberInfo = new MemberInfo()
-                {
-                    Flag = newFlag,
-                    Info = newInfo,
-                    Time = TimeStamp.GetNowTimeStamp(),
-                };
-                return dbClient.Updateable(memberInfo)
-                               .UpdateColumns(i => new {i.Flag, i.Info, i.Time})
+                return dbClient.Updateable<MemberInfo>()
+                               .SetColumns(i => new MemberInfo()
+                               {
+                                   Flag = newFlag,
+                                   Info = newInfo,
+                                   Time = TimeStamp.GetNowTimeStamp(),
+                               })
                                .Where(i => i.Gid == GuildEventArgs.SourceGroup.Id && i.Uid == uid)
                                .ExecuteCommandHasChange();
             }
@@ -719,25 +708,25 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 if (cleanSL) //清空SL
                 {
                     return dbClient
-                           .Updateable(new MemberInfo
+                           .Updateable<MemberInfo>()
+                           .SetColumns(i => new MemberInfo
                                            {SL = 0})
-                           .UpdateColumns(i => new {i.SL})
                            .Where(i => i.Gid == GuildEventArgs.SourceGroup.Id && i.Uid == uid)
                            .ExecuteCommandHasChange();
                 }
                 else //设置新的SL
                 {
                     return dbClient
-                           .Updateable(new MemberInfo
+                           .Updateable<MemberInfo>()
+                           .SetColumns(i => new MemberInfo
                            {
                                Flag = FlagType.IDLE, SL                 = TimeStamp.GetNowTimeStamp(),
                                Time = TimeStamp.GetNowTimeStamp(), Info = null
                            })
-                           .UpdateColumns(i => new {i.Flag, i.SL, i.Time, i.Info})
                            .Where(i => i.Gid == GuildEventArgs.SourceGroup.Id && i.Uid == uid)
                            .ExecuteCommandHasChange();
                 }
@@ -760,7 +749,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// </returns>
         public int GetRoundPhase(Server server, int round)
         {
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
             //查找阶段数据
             return dbClient.Queryable<GuildBattleBoss>()
                            .Where(area => area.ServerId  == server &&

@@ -237,6 +237,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                                                        "\r\n请检查是否未开始会战的出刀统计");
                     break;
                 case 1:
+                    GuildBattleDB.CleanTree();
                     await SourceGroup.SendGroupMessage(CQCode.CQAtAll(),
                                                        "\r\n会战结束啦~");
                     break;

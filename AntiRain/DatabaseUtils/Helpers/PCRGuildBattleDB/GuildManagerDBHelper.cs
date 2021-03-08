@@ -161,15 +161,13 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                 //更新信息时不需要更新公会战信息
                 if (dbClient.Queryable<GuildInfo>().Where(i => i.Gid == gId).Any())
                 {
-                    var data = new GuildInfo()
-                    {
-                        GuildName = gName,
-                        ServerId  = gArea,
-                        Gid       = gId
-                    };
-                    retCode = dbClient.Updateable(data)
-                                      .UpdateColumns(guildInfo =>
-                                                         new {guildInfo.GuildName, guildInfo.ServerId, guildInfo.Gid})
+                    retCode = dbClient.Updateable<GuildInfo>()
+                                      .SetColumns(guildInfo => new GuildInfo()
+                                      {
+                                          GuildName = gName,
+                                          ServerId  = gArea,
+                                          Gid       = gId
+                                      })
                                       .Where(i => i.Gid == gId)
                                       .ExecuteCommandHasChange()
                         ? 1
