@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using Sora.Entities;
 using Sora.Entities.CQCodes;
-using YukariToolBox.FormatLog;
 
 namespace AntiRain.ChatModule.PCRGuildBattle
 {
@@ -85,9 +84,8 @@ namespace AntiRain.ChatModule.PCRGuildBattle
             {
                 Dictionary<Group, List<CQCode>> messageList = new();
                 //生成上树提示信息
-                foreach (var info in treeList)
+                foreach (var info in treeList.Where(info => !((DateTime.Now - info.updateTime).TotalSeconds < 10)))
                 {
-                    if ((DateTime.Now - info.updateTime).TotalSeconds < 10) continue;
                     if (messageList.All(group => @group.Key != info.treeGroup))
                         messageList.Add(info.treeGroup, new List<CQCode>());
                     messageList[info.treeGroup].Add(CQCode.CQAt(info.uid));
@@ -97,10 +95,10 @@ namespace AntiRain.ChatModule.PCRGuildBattle
                 }
 
                 //发送上树提示信息
-                foreach (var msg in messageList)
+                foreach (var (key, value) in messageList)
                 {
-                    msg.Value.RemoveAt(msg.Value.Count - 1); //去掉最后的换行
-                    msg.Key.SendGroupMessage(msg.Value);
+                    value.RemoveAt(value.Count - 1); //去掉最后的换行
+                    key.SendGroupMessage(value);
                 }
             }
         }

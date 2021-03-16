@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AntiRain.TimerEvent.Event;
-using Fleck;
 using Sora.EventArgs.SoraEvent;
-using Sora.EventArgs.WSSeverEvent;
+using Sora.EventArgs.WebsocketEvent;
 using YukariToolBox.FormatLog;
 
 namespace AntiRain.TimerEvent
@@ -44,8 +44,9 @@ namespace AntiRain.TimerEvent
         /// </summary>
         /// <param name="sender">消息源</param>
         /// <param name="connectionEventArgs">ConnectEventArgs</param>
-        internal static ValueTask StopTimer(IWebSocketConnectionInfo sender, ConnectionEventArgs connectionEventArgs)
+        internal static ValueTask StopTimer(Guid sender, ConnectionEventArgs connectionEventArgs)
         {
+            if(Timers.All(timer => timer.Key != connectionEventArgs.SelfId)) return ValueTask.CompletedTask;
             //停止计时器
             Timers[connectionEventArgs.SelfId].Dispose();
             Timers.Remove(connectionEventArgs.SelfId);

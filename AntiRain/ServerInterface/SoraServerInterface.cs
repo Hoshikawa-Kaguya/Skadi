@@ -8,7 +8,9 @@ using AntiRain.Resource.PCRResource;
 using AntiRain.TimerEvent;
 using AntiRain.Tool;
 using AntiRain.WebConsole;
-using Sora.Server;
+using Sora.Interfaces;
+using Sora.Net;
+using Sora.OnebotModel;
 using YukariToolBox.Extensions;
 using YukariToolBox.FormatLog;
 
@@ -62,16 +64,14 @@ namespace AntiRain.ServerInterface
 
             Log.Info("AntiRain初始化", "启动反向WS服务器...");
             //初始化服务器
-            SoraWSServer server = new(new ServerConfig
+            ISoraService server = SoraServiceFactory.CreateInstance(new ServerConfig
             {
-                Location         = globalConfig.Location,
+                Host             = globalConfig.Location,
                 Port             = globalConfig.Port,
                 AccessToken      = globalConfig.AccessToken,
                 UniversalPath    = globalConfig.UniversalPath,
-                ApiPath          = globalConfig.ApiPath,
-                EventPath        = globalConfig.EventPath,
-                HeartBeatTimeOut = globalConfig.HeartBeatTimeOut,
-                ApiTimeOut       = globalConfig.OnebotApiTimeOut
+                HeartBeatTimeOut = TimeSpan.FromSeconds(globalConfig.HeartBeatTimeOut),
+                ApiTimeOut       = TimeSpan.FromMilliseconds(globalConfig.OnebotApiTimeOut)
             });
 
             //服务器回调
@@ -88,7 +88,8 @@ namespace AntiRain.ServerInterface
             server.ConnManager.OnHeartBeatTimeOut     += TimerEventParse.StopTimer;
 
             //启动服务器
-            await server.StartServer().RunCatch(BotUtils.BotCrash);
+            await server.StartService().RunCatch(BotUtils.BotCrash);
+            await Task.Delay(-1);
         }
     }
 }
