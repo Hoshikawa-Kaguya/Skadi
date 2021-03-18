@@ -50,7 +50,7 @@ namespace AntiRain.Command.PixivSearch
                 return message;
             }
 
-            var parsedPic = resData.OrderBy(pic => Convert.ToDouble(pic.Header.Similarity))
+            var parsedPic = resData.OrderByDescending(pic => Convert.ToDouble(pic.Header.Similarity))
                                    .First();
 
 
