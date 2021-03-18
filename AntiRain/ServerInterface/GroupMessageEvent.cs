@@ -1,15 +1,12 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using AntiRain.ChatModule;
 using AntiRain.ChatModule.HsoModule;
 using AntiRain.ChatModule.PcrGuildBattle;
-using AntiRain.ChatModule.PcrUtils;
 using AntiRain.Command;
+using AntiRain.Command.PcrUtils;
 using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
-using AntiRain.Resource.PCRResource;
 using AntiRain.TypeEnum.CommandType;
-using Sora.Entities.CQCodes;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
@@ -88,16 +85,6 @@ namespace AntiRain.ServerInterface
                 Log.Info("正则触发", $"触发正则匹配[{regexCommand}]");
                 switch (regexCommand)
                 {
-                    case RegexCommand.CheruDecode:
-                    case RegexCommand.CheruEncode:
-                        //判断模块使能
-                        if (userConfig.ModuleSwitch.Cheru)
-                        {
-                            CheruHandle cheru = new CheruHandle(sender, groupMessage);
-                            cheru.GetChat(regexCommand);
-                        }
-
-                        break;
                     case RegexCommand.GetGuildRank:
                         //判断模块使能
                         if (userConfig.ModuleSwitch.PCR_GuildRank)

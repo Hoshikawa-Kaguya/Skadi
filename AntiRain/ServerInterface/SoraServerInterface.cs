@@ -2,9 +2,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using AntiRain.DatabaseUtils;
-using AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB;
 using AntiRain.IO.Config;
-using AntiRain.Resource.PCRResource;
 using AntiRain.TimerEvent;
 using AntiRain.Tool;
 using AntiRain.WebConsole;
@@ -64,14 +62,15 @@ namespace AntiRain.ServerInterface
 
             Log.Info("AntiRain初始化", "启动反向WS服务器...");
             //初始化服务器
-            ISoraService server = SoraServiceFactory.CreateInstance(new ServerConfig
+            ISoraService server = SoraServiceFactory.CreateInstance(new ClientConfig
             {
-                Host             = globalConfig.Location,
-                Port             = globalConfig.Port,
-                AccessToken      = globalConfig.AccessToken,
-                UniversalPath    = globalConfig.UniversalPath,
-                HeartBeatTimeOut = TimeSpan.FromSeconds(globalConfig.HeartBeatTimeOut),
-                ApiTimeOut       = TimeSpan.FromMilliseconds(globalConfig.OnebotApiTimeOut)
+                Host                     = globalConfig.Location,
+                Port                     = globalConfig.Port,
+                AccessToken              = globalConfig.AccessToken,
+                UniversalPath            = globalConfig.UniversalPath,
+                HeartBeatTimeOut         = TimeSpan.FromSeconds(globalConfig.HeartBeatTimeOut),
+                ApiTimeOut               = TimeSpan.FromMilliseconds(globalConfig.OnebotApiTimeOut),
+                EnableSoraCommandManager = true
             });
 
             //服务器回调

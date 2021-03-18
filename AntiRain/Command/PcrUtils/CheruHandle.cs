@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using AntiRain.TypeEnum.CommandType;
+using Sora.Attributes.Command;
+using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
 
-namespace AntiRain.ChatModule.PcrUtils
+namespace AntiRain.Command.PcrUtils
 {
     /// <summary>
     /// 切噜语转换
@@ -14,57 +15,24 @@ namespace AntiRain.ChatModule.PcrUtils
     internal class CheruHandle
     {
         #region 字符集常量
-
+        //TODO 模块使能
         //切噜字符集
         const string CHERU_SET = "切卟叮咧哔唎啪啰啵嘭噜噼巴拉蹦铃";
-
-        #endregion
-
-        #region 属性
-
-        public object                Sender         { private set; get; }
-        public GroupMessageEventArgs CheruEventArgs { private set; get; }
-
-        #endregion
-
-        #region 构造函数
-
-        public CheruHandle(object sender, GroupMessageEventArgs e)
-        {
-            this.CheruEventArgs = e;
-            this.Sender         = sender;
-        }
 
         #endregion
 
         #region 公有方法
 
         /// <summary>
-        /// 获取到群消息
-        /// </summary>
-        public void GetChat(RegexCommand cmdType)
-        {
-            if (CheruEventArgs == null || Sender == null) return;
-            //检查参数
-            switch (cmdType)
-            {
-                case RegexCommand.CheruDecode:
-                    if (CheruEventArgs.Message.RawText.Length > 3)
-                        CheruToString(CheruEventArgs.Message.RawText.Substring(3));
-                    break;
-                case RegexCommand.CheruEncode:
-                    if (CheruEventArgs.Message.RawText.Length > 4)
-                        StringToCheru(CheruEventArgs.Message.RawText.Substring(4));
-                    break;
-            }
-        }
-
-        /// <summary>
         /// 将切噜语解码为原句
         /// </summary>
-        /// <param name="cheru">切噜语</param>
-        public async void CheruToString(string cheru)
+        /// <param name="eventArgs">事件参数</param>
+        [GroupCommand(CommandExpressions = new []{"^切噜一下"},
+                      MatchType = MatchType.Full)]
+        public async void CheruToString(GroupMessageEventArgs eventArgs)
         {
+            if (eventArgs.Message.RawText.Length <= 3) return;
+            string        cheru       = eventArgs.Message.RawText.Substring(3);
             Regex         isCheru     = new Regex(@"切[切卟叮咧哔唎啪啰啵嘭噜噼巴拉蹦铃]+");
             StringBuilder textBuilder = new StringBuilder();
             foreach (string cheruWord in Regex.Split(cheru, @"\b"))
@@ -72,15 +40,19 @@ namespace AntiRain.ChatModule.PcrUtils
                 textBuilder.Append(isCheru.IsMatch(cheruWord) ? CheruToWord(cheruWord) : cheruWord);
             }
 
-            await CheruEventArgs.SourceGroup.SendGroupMessage($"切噜的意思是:{textBuilder}");
+            await eventArgs.SourceGroup.SendGroupMessage($"切噜的意思是:{textBuilder}");
         }
 
         /// <summary>
         /// 将原句编码为切噜语
         /// </summary>
-        /// <param name="text">原语句</param>
-        public async void StringToCheru(string text)
+        /// <param name="eventArgs">事件参数</param>
+        [GroupCommand(CommandExpressions = new []{"^切噜(?:~|～)"},
+                      MatchType          = MatchType.Full)]
+        public async void StringToCheru(GroupMessageEventArgs eventArgs)
         {
+            if (eventArgs.Message.RawText.Length <= 4) return;
+            string        text         = eventArgs.Message.RawText.Substring(4);
             Regex         isCHN        = new Regex(@"[\u4e00-\u9fa5]");
             StringBuilder cheruBuilder = new StringBuilder();
             foreach (string word in Regex.Split(text, @"\b"))
@@ -88,7 +60,7 @@ namespace AntiRain.ChatModule.PcrUtils
                 cheruBuilder.Append(isCHN.IsMatch(word) ? WordToCheru(word) : word);
             }
 
-            await CheruEventArgs.SourceGroup.SendGroupMessage($"切噜～{cheruBuilder}");
+            await eventArgs.SourceGroup.SendGroupMessage($"切噜～{cheruBuilder}");
         }
 
         #endregion

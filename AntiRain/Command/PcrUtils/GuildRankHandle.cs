@@ -13,7 +13,7 @@ using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
 using YukariToolBox.Time;
 
-namespace AntiRain.ChatModule.PcrUtils
+namespace AntiRain.Command.PcrUtils
 {
     internal class GuildRankHandle
     {
@@ -245,9 +245,9 @@ namespace AntiRain.ChatModule.PcrUtils
                 }
 
                 //在有查询结果时查找值
-                if (!response["full"].ToString().Equals("0"))
+                if (response["full"]?.ToString().Equals("0") ?? false)
                 {
-                    if (!response["full"].ToString().Equals("1"))
+                    if (!response["full"]?.ToString().Equals("1") ?? false)
                         await QQGroup.SendGroupMessage("查询到多个公会，可能存在重名或关键词错误");
                     Log.Info("JSON处理成功", "向用户发送数据");
                     long.TryParse(response["ts"]?.ToString() ?? "0", out long updateTimeStamp);
