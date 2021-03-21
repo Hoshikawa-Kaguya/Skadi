@@ -44,7 +44,7 @@
     <PackageReference Include="BilibiliApi" Version="0.3.7" />
     <PackageReference Include="PyLibSharp.Requests" Version="1.2.8.1" />
     <PackageReference Include="SharpYaml" Version="1.6.6" />
-    <PackageReference Include="Sora" Version="0.9.6" />
+    <PackageReference Include="Sora" Version="0.9.7" />
     <PackageReference Include="sqlSugarCore" Version="5.0.2.7" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
   </ItemGroup>
