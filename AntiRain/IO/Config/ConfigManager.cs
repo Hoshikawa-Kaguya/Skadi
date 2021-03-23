@@ -59,8 +59,7 @@ namespace AntiRain.IO.Config
                 using TextReader reader     = File.OpenText(UserConfigPath);
                 this.LoadedUserConfig = serializer.Deserialize<UserConfig>(reader);
                 //参数合法性检查
-                if (LoadedUserConfig.SubscriptionConfig.FlashTime <= 10 ||
-                    LoadedUserConfig.HsoConfig.SizeLimit          < 1)
+                if (LoadedUserConfig.HsoConfig.SizeLimit < 1)
                 {
                     Log.Error("读取用户配置", "参数值超出合法范围，重新生成配置文件");
                     userConfig = null;

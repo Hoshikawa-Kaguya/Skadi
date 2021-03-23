@@ -37,7 +37,7 @@ namespace AntiRain.TimerEvent.Event
             ModuleSwitch            moduleEnable  = loadedConfig.ModuleSwitch;
             List<GroupSubscription> Subscriptions = loadedConfig.SubscriptionConfig.GroupsConfig;
             //数据库
-            SubscriptionDBHelper dbHelper = new SubscriptionDBHelper(connectEventArgs.LoginUid);
+            SubscriptionDBHelper dbHelper = new(connectEventArgs.LoginUid);
             //检查模块是否启用
             if (!moduleEnable.Bili_Subscription) return;
             foreach (var subscription in Subscriptions)
@@ -100,7 +100,7 @@ namespace AntiRain.TimerEvent.Event
             if (targetGroup.Count == 0) return;
             //构建提示消息
             List<CQCode>  msgList = new();
-            StringBuilder message = new StringBuilder();
+            StringBuilder message = new();
             message.Append(biliUserInfo.Name);
             message.Append(" 正在直播！\r\n");
             message.Append(biliUserInfo.LiveRoomInfo.Title);
@@ -126,28 +126,28 @@ namespace AntiRain.TimerEvent.Event
             //获取动态文本
             try
             {
-                var cardData = DynamicAPIs.GetLatestDynamic(biliUser);
-                switch (cardData.cardType)
+                var (cardObj, cardType) = DynamicAPIs.GetLatestDynamic(biliUser);
+                switch (cardType)
                 {
                     //检查动态类型
                     case CardType.PlainText:
-                        PlainTextCard plainTextCard = (PlainTextCard) cardData.cardObj;
+                        PlainTextCard plainTextCard = (PlainTextCard) cardObj;
                         textMessage = plainTextCard.ToString();
                         biliDynamic = plainTextCard;
                         break;
                     case CardType.TextAndPic:
-                        TextAndPicCard textAndPicCard = (TextAndPicCard) cardData.cardObj;
+                        TextAndPicCard textAndPicCard = (TextAndPicCard) cardObj;
                         imgList.AddRange(textAndPicCard.ImgList);
                         textMessage = textAndPicCard.ToString();
                         biliDynamic = textAndPicCard;
                         break;
                     case CardType.Forward:
-                        ForwardCard forwardCard = (ForwardCard) cardData.cardObj;
+                        ForwardCard forwardCard = (ForwardCard) cardObj;
                         textMessage = forwardCard.ToString();
                         biliDynamic = forwardCard;
                         break;
                     case CardType.Video:
-                        VideoCard videoCard = (VideoCard) cardData.cardObj;
+                        VideoCard videoCard = (VideoCard) cardObj;
                         imgList.Add(videoCard.CoverUrl);
                         textMessage = videoCard.ToString();
                         biliDynamic = videoCard;
@@ -157,10 +157,10 @@ namespace AntiRain.TimerEvent.Event
                         return;
                     default:
                         Log.Debug("动态获取", $"ID:{biliUser}的动态获取成功，动态类型未知");
-                        foreach (var gid in groupId)
+                        foreach (var gid in groupId.Where(gid => !dbHelper.UpdateDynamic(gid, biliUser,
+                                                              BotUtils.GetNowStampLong())))
                         {
-                            if (!dbHelper.UpdateDynamic(gid, biliUser, BotUtils.GetNowStampLong()))
-                                Log.Error("数据库", "更新动态记录时发生了数据库错误");
+                            Log.Error("数据库", $"更新群[{gid}]动态记录时发生了数据库错误");
                         }
 
                         return;
@@ -177,8 +177,8 @@ namespace AntiRain.TimerEvent.Event
             Log.Debug("动态获取", $"{sender.UserName}的动态获取成功");
             //检查是否是最新的
             List<long> targetGroups = groupId
-                                      .Where(@group => !dbHelper.IsLatestDynamic(@group, sender.Uid,
-                                                 biliDynamic.UpdateTime))
+                                      .Where(group => !dbHelper.IsLatestDynamic(@group, sender.Uid,
+                                                                                    biliDynamic.UpdateTime))
                                       .ToList();
             //没有群需要发送消息
             if (targetGroups.Count == 0)

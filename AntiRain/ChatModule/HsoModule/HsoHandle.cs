@@ -12,48 +12,31 @@ using AntiRain.IO.Config.ConfigModule;
 using AntiRain.Tool;
 using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
+using Sora.Attributes.Command;
 using Sora.Entities.CQCodes;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
-using Group = Sora.Entities.Group;
 
 namespace AntiRain.ChatModule.HsoModule
 {
-    internal class HsoHandle
+    [CommandGroup]
+    public class HsoHandle
     {
-        #region 属性
-
-        public object                Sender       { private set; get; }
-        public Group                 QQGroup      { private set; get; }
-        public GroupMessageEventArgs HsoEventArgs { private set; get; }
-
-        #endregion
-
-        #region 构造函数
-
-        public HsoHandle(object sender, GroupMessageEventArgs e)
-        {
-            this.HsoEventArgs = e;
-            this.Sender       = sender;
-            this.QQGroup      = e.SourceGroup;
-        }
-
-        #endregion
-
-        #region 指令响应分发
+        #region 指令响应
 
         /// <summary>
         /// 用于处理传入指令
         /// </summary>
-        public async void GetChat()
+        [GroupCommand(CommandExpressions = new[] {"来点色图", "来点涩图", "我要看色图"})]
+        public async void HsoPic(GroupMessageEventArgs eventArgs)
         {
-            ConfigManager configManager = new ConfigManager(HsoEventArgs.LoginUid);
+            ConfigManager configManager = new(eventArgs.LoginUid);
             configManager.LoadUserConfig(out UserConfig userConfig);
-            if (CheckGroupBlock(userConfig)) return;
-            if (CheckInCD.isInCD(HsoEventArgs.SourceGroup, HsoEventArgs.Sender))
+            if (CheckGroupBlock(userConfig, eventArgs)) return;
+            if (CheckInCD.isInCD(eventArgs.SourceGroup, eventArgs.Sender))
             {
-                await HsoEventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(HsoEventArgs.Sender), "你是不是只会要色图");
+                await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender), "你是不是只会要色图");
                 return;
             }
 
@@ -64,7 +47,7 @@ namespace AntiRain.ChatModule.HsoModule
                 Directory.Delete(IOUtils.GetHsoPath(), true);
             }
 
-            await GiveMeSetu(userConfig.HsoConfig);
+            await GiveMeSetu(userConfig.HsoConfig, eventArgs);
         }
 
         #endregion
@@ -76,14 +59,15 @@ namespace AntiRain.ChatModule.HsoModule
         /// <para>不会支持R18的哦</para>
         /// </summary>
         /// <param name="hso">hso配置实例</param>
-        private async Task GiveMeSetu(Hso hso)
+        /// <param name="eventArgs">事件参数</param>
+        private async Task GiveMeSetu(Hso hso, GroupMessageEventArgs eventArgs)
         {
             JToken response;
             Log.Debug("源", hso.Source);
             //本地模式
             if (hso.Source.Equals("Local"))
             {
-                SendLocalPic(hso);
+                SendLocalPic(hso, eventArgs);
                 return;
             }
 
@@ -91,7 +75,7 @@ namespace AntiRain.ChatModule.HsoModule
             try
             {
                 Log.Info("NET", "尝试获取色图");
-                await QQGroup.SendGroupMessage("正在获取色图中...");
+                await eventArgs.SourceGroup.SendGroupMessage("正在获取色图中...");
                 string apiKey;
                 string serverUrl;
                 //源切换
@@ -139,8 +123,8 @@ namespace AntiRain.ChatModule.HsoModule
                 if (reqResponse.StatusCode != HttpStatusCode.OK)
                 {
                     Log.Error("Net", $"{serverUrl} return code {(int) reqResponse.StatusCode}");
-                    await HsoEventArgs.SourceGroup
-                                      .SendGroupMessage($"哇哦~发生了网络错误[{reqResponse.StatusCode}]，请联系机器人所在服务器管理员");
+                    await eventArgs.SourceGroup
+                                   .SendGroupMessage($"哇哦~发生了网络错误[{reqResponse.StatusCode}]，请联系机器人所在服务器管理员");
                     return;
                 }
 
@@ -149,7 +133,7 @@ namespace AntiRain.ChatModule.HsoModule
             catch (Exception e)
             {
                 //网络错误
-                await QQGroup.SendGroupMessage("哇哦~发生了网络错误，请联系机器人所在服务器管理员");
+                await eventArgs.SourceGroup.SendGroupMessage("哇哦~发生了网络错误，请联系机器人所在服务器管理员");
                 Log.Error("网络发生错误", $"{Log.ErrorLogBuilder(e)}\r\n\r\n{Utils.GetInnerExceptionMessages(e)}");
                 return;
             }
@@ -163,7 +147,7 @@ namespace AntiRain.ChatModule.HsoModule
                               retCode == -100
                                   ? "Server response null message"
                                   : $"Server response code {retCode}");
-                    await QQGroup.SendGroupMessage("哇奧色图不见了\n请联系机器人服务器管理员");
+                    await eventArgs.SourceGroup.SendGroupMessage("哇奧色图不见了\n请联系机器人服务器管理员");
                     return;
                 }
 
@@ -174,7 +158,7 @@ namespace AntiRain.ChatModule.HsoModule
                 string localPicPath = $"{IOUtils.GetHsoPath()}/{Path.GetFileName(picUrl)}".Replace('\\', '/');
                 if (File.Exists(localPicPath)) //检查是否已缓存过图片
                 {
-                    await QQGroup.SendGroupMessage(HsoMessageBuilder(response["data"]?[0], hso.CardImage,
+                    await eventArgs.SourceGroup.SendGroupMessage(HsoMessageBuilder(response["data"]?[0], hso.CardImage,
                                                                      localPicPath));
                 }
                 else
@@ -183,7 +167,7 @@ namespace AntiRain.ChatModule.HsoModule
                     if (!string.IsNullOrEmpty(hso.PximyProxy))
                     {
                         string[]      fileNameArgs    = Regex.Split(Path.GetFileName(picUrl), "_p");
-                        StringBuilder proxyUrlBuilder = new StringBuilder();
+                        StringBuilder proxyUrlBuilder = new();
                         proxyUrlBuilder.Append(hso.PximyProxy);
                         //图片Pid部分
                         proxyUrlBuilder.Append(hso.PximyProxy.EndsWith("/")
@@ -195,11 +179,12 @@ namespace AntiRain.ChatModule.HsoModule
                                                    : $"/{fileNameArgs[1].Split('.')[0]}");
                         Log.Debug("Get Proxy Url", proxyUrlBuilder);
                         DownloadPicFromURL(proxyUrlBuilder.ToString(), response["data"]?[0], localPicPath, hso.UseCache,
-                                           hso.CardImage);
+                                           hso.CardImage, eventArgs);
                     }
                     else
                     {
-                        DownloadPicFromURL(picUrl, response["data"]?[0], localPicPath, hso.UseCache, hso.CardImage);
+                        DownloadPicFromURL(picUrl, response["data"]?[0], localPicPath, hso.UseCache, hso.CardImage,
+                                           eventArgs);
                     }
                 }
             }
@@ -209,21 +194,21 @@ namespace AntiRain.ChatModule.HsoModule
             }
         }
 
-        private async void SendLocalPic(Hso hso)
+        private async void SendLocalPic(Hso hso, GroupMessageEventArgs eventArgs)
         {
             string[] picNames = Directory.GetFiles(IOUtils.GetHsoPath());
             if (picNames.Length == 0)
             {
-                await QQGroup.SendGroupMessage("机器人管理者没有在服务器上塞色图\r\n你去找他要啦!");
+                await eventArgs.SourceGroup.SendGroupMessage("机器人管理者没有在服务器上塞色图\r\n你去找他要啦!");
                 return;
             }
 
-            Random randFile     = new Random();
+            Random randFile     = new();
             string localPicPath = $"{picNames[randFile.Next(0, picNames.Length - 1)]}";
             Log.Debug("发送图片", localPicPath);
-            await QQGroup.SendGroupMessage(hso.CardImage
-                                               ? CQCode.CQCardImage(localPicPath)
-                                               : CQCode.CQImage(localPicPath));
+            await eventArgs.SourceGroup.SendGroupMessage(hso.CardImage
+                                                             ? CQCode.CQCardImage(localPicPath)
+                                                             : CQCode.CQImage(localPicPath));
         }
 
         /// <summary>
@@ -234,7 +219,9 @@ namespace AntiRain.ChatModule.HsoModule
         /// <param name="receivePath">接收文件的地址</param>
         /// <param name="useCache">是否启用本地缓存</param>
         /// <param name="cardImg">使用装逼大图</param>
-        private void DownloadPicFromURL(string url, JToken picInfo, string receivePath, bool useCache, bool cardImg)
+        /// <param name="eventArgs">事件参数</param>
+        private void DownloadPicFromURL(string url, JToken picInfo, string receivePath, bool useCache, bool cardImg,
+                                        GroupMessageEventArgs eventArgs)
         {
             try
             {
@@ -267,23 +254,27 @@ namespace AntiRain.ChatModule.HsoModule
                                                         Log.Info("Hso", "下载数据成功,发送图片");
                                                         //发送消息
                                                         var (code, _) =
-                                                            await QQGroup.SendGroupMessage(HsoMessageBuilder(picInfo,
-                                                                cardImg, receivePath));
+                                                            await eventArgs.SourceGroup
+                                                                           .SendGroupMessage(HsoMessageBuilder(picInfo,
+                                                                               cardImg, receivePath));
                                                         Log.Debug("file", Path.GetFileName(receivePath));
-                                                        if (code == APIStatusType.OK) Log.Info("Hso", "色图发送成功");
+                                                        if (code == APIStatusType.OK)
+                                                        {
+                                                            Log.Info("Hso", "色图发送成功");
+                                                        }
                                                         else
                                                         {
                                                             Log.Error("Hso", $"色图发送失败 code={(int) code}");
                                                             if (code != APIStatusType.TimeOut)
-                                                                await QQGroup
-                                                                    .SendGroupMessage($"哇奧色图不见了\r\n色图发送失败了\r\nAPI ERROR [{code}]");
+                                                                await eventArgs.SourceGroup
+                                                                               .SendGroupMessage($"哇奧色图不见了\r\n色图发送失败了\r\nAPI ERROR [{code}]");
                                                         }
 
                                                         return;
                                                     }
 
-                                                    await QQGroup
-                                                        .SendGroupMessage($"哇奧色图不见了\r\nAPI ERROR [可能是画师把图删了.jpg]");
+                                                    await eventArgs.SourceGroup
+                                                                   .SendGroupMessage($"哇奧色图不见了\r\nAPI ERROR [可能是画师把图删了.jpg]");
                                                     Log.Error("Hso", "色图下载失败");
                                                     //删除下载失败的文件
                                                     try
@@ -304,15 +295,17 @@ namespace AntiRain.ChatModule.HsoModule
                                                         ImgBase64Str.Append("base64://");
                                                         ImgBase64Str.Append(Convert.ToBase64String(args.Result));
                                                         var (code, _) =
-                                                            await QQGroup.SendGroupMessage(HsoMessageBuilder(picInfo,
-                                                                cardImg, ImgBase64Str.ToString()));
+                                                            await eventArgs.SourceGroup
+                                                                           .SendGroupMessage(HsoMessageBuilder(picInfo,
+                                                                               cardImg,
+                                                                               ImgBase64Str.ToString()));
                                                         if (code == APIStatusType.OK) Log.Info("Hso", "色图发送成功");
                                                         else
                                                         {
                                                             Log.Error("Hso", $"色图发送失败 code={(int) code}");
                                                             if (code != APIStatusType.TimeOut)
-                                                                await QQGroup
-                                                                    .SendGroupMessage($"哇奧色图不见了\r\n色图发送失败了\r\nAPI ERROR [{code}]");
+                                                                await eventArgs.SourceGroup
+                                                                               .SendGroupMessage($"哇奧色图不见了\r\n色图发送失败了\r\nAPI ERROR [{code}]");
                                                         }
 
                                                         Log.Debug("base64 length", ImgBase64Str.Length);
@@ -366,8 +359,9 @@ namespace AntiRain.ChatModule.HsoModule
         /// 检查群是否被屏蔽
         /// </summary>
         /// <param name="config">配置文件</param>
-        private bool CheckGroupBlock(UserConfig config)
-            => config.HsoConfig.GroupBlock.Any(gid => gid == HsoEventArgs.SourceGroup);
+        /// <param name="eventArgs">事件参数</param>
+        private bool CheckGroupBlock(UserConfig config, GroupMessageEventArgs eventArgs)
+            => config.HsoConfig.GroupBlock.Any(gid => gid == eventArgs.SourceGroup);
 
         #endregion
     }

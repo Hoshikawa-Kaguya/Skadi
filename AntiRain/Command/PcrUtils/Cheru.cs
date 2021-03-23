@@ -13,9 +13,10 @@ namespace AntiRain.Command.PcrUtils
     /// 对原算法有所改进
     /// </summary>
     [CommandGroup]
-    public class CheruHandle
+    public class Cheru
     {
         #region 字符集常量
+
         //TODO 模块使能
         //切噜字符集
         const string CHERU_SET = "切卟叮咧哔唎啪啰啵嘭噜噼巴拉蹦铃";
@@ -28,8 +29,8 @@ namespace AntiRain.Command.PcrUtils
         /// 将切噜语解码为原句
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
-        [GroupCommand(CommandExpressions = new []{"^切噜(?:~|～)"},
-                      MatchType = MatchType.Regex)]
+        [GroupCommand(CommandExpressions = new[] {"^切噜(?:~|～)"},
+                      MatchType          = MatchType.Regex)]
         public async void CheruToString(GroupMessageEventArgs eventArgs)
         {
             if (eventArgs.Message.RawText.Length <= 3) return;
@@ -48,7 +49,7 @@ namespace AntiRain.Command.PcrUtils
         /// 将原句编码为切噜语
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
-        [GroupCommand(CommandExpressions = new []{"^切噜一下"},
+        [GroupCommand(CommandExpressions = new[] {"^切噜一下"},
                       MatchType          = MatchType.Regex)]
         public async void StringToCheru(GroupMessageEventArgs eventArgs)
         {

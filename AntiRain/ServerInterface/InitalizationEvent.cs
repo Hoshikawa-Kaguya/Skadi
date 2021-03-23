@@ -16,7 +16,7 @@ namespace AntiRain.ServerInterface
         /// <summary>
         /// 初始化处理
         /// </summary>
-        internal static ValueTask Initalization(object sender, ConnectEventArgs connectEvent)
+        internal static ValueTask Initalization(string sender, ConnectEventArgs connectEvent)
         {
             Log.Info("AntiRain初始化", "与onebot客户端连接成功，初始化资源...");
             //初始化配置文件
@@ -40,8 +40,7 @@ namespace AntiRain.ServerInterface
             //初始化定时器线程
             if (userConfig.ModuleSwitch.Bili_Subscription)
             {
-                Log.Debug("Timer Init", $"flash span = {userConfig.SubscriptionConfig.FlashTime}");
-                TimerEventParse.TimerAdd(connectEvent, userConfig.SubscriptionConfig.FlashTime);
+                SubscriptionTimer.TimerEventAdd(connectEvent);
             }
 
             return ValueTask.CompletedTask;

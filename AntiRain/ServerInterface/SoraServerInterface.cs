@@ -62,7 +62,7 @@ namespace AntiRain.ServerInterface
 
             Log.Info("AntiRain初始化", "启动反向WS服务器...");
             //初始化服务器
-            ISoraService server = SoraServiceFactory.CreateInstance(new ClientConfig
+            ISoraService server = SoraServiceFactory.CreateInstance(new ServerConfig
             {
                 Host                     = globalConfig.Location,
                 Port                     = globalConfig.Port,
@@ -83,8 +83,8 @@ namespace AntiRain.ServerInterface
             //群聊戳一戳
             server.Event.OnGroupPoke += GroupPokeEvent.GroupPokeEventParse;
             //关闭连接事件处理
-            server.ConnManager.OnCloseConnectionAsync += TimerEventParse.StopTimer;
-            server.ConnManager.OnHeartBeatTimeOut     += TimerEventParse.StopTimer;
+            server.ConnManager.OnCloseConnectionAsync += SubscriptionTimer.DelTimerEvent;
+            server.ConnManager.OnHeartBeatTimeOut     += SubscriptionTimer.DelTimerEvent;
 
             //启动服务器
             await server.StartService().RunCatch(BotUtils.BotCrash);

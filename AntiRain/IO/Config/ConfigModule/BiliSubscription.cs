@@ -5,11 +5,6 @@ namespace AntiRain.IO.Config.ConfigModule
     internal class BiliSubscription
     {
         /// <summary>
-        /// 刷新间隔
-        /// </summary>
-        public uint FlashTime { set; get; }
-
-        /// <summary>
         /// 群组订阅数组
         /// </summary>
         public List<GroupSubscription> GroupsConfig { set; get; }

@@ -18,7 +18,7 @@ namespace AntiRain.Command.PixivSearch
         /// 请求表
         /// </summary>
         private List<User> requestList { get; } = new();
-        
+
         [GroupCommand(CommandExpressions = new[] {"pixiv搜图"})]
         public async ValueTask SearchRequest(GroupMessageEventArgs eventArgs)
         {
@@ -41,7 +41,7 @@ namespace AntiRain.Command.PixivSearch
             requestList.RemoveAll(user => user == eventArgs.Sender);
 
             await eventArgs.Reply(await SaucenaoUtils.SearchByUrl("92a805aff18cbc56c4723d7e2d5100c6892fe256",
-                                                                   eventArgs.Message.GetAllImage()[0].Url, eventArgs));
+                                                                  eventArgs.Message.GetAllImage()[0].Url, eventArgs));
         }
     }
 }

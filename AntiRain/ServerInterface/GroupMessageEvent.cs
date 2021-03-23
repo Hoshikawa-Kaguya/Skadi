@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using AntiRain.ChatModule;
-using AntiRain.ChatModule.HsoModule;
 using AntiRain.ChatModule.PcrGuildBattle;
 using AntiRain.Command;
 using AntiRain.Command.PcrUtils;
@@ -62,8 +61,6 @@ namespace AntiRain.ServerInterface
                     case KeywordCommand.Hso:
                         if (userConfig.ModuleSwitch.Hso)
                         {
-                            HsoHandle hso = new HsoHandle(sender, groupMessage);
-                            hso.GetChat();
                         }
 
                         break;

@@ -22,12 +22,13 @@ namespace AntiRain.Command
             {
                 if (eventArgs.Message.MessageList[0].CQData is Text str && str.Content.StartsWith("echo "))
                 {
-                    if(str.Content.Equals("echo ")) eventArgs.Message.MessageList.RemoveAt(0);
+                    if (str.Content.Equals("echo ")) eventArgs.Message.MessageList.RemoveAt(0);
                     else eventArgs.Message.MessageList[0] = CQCode.CQText(str.Content.Substring(5));
                 }
             }
+
             //复读
-            if(eventArgs.Message.MessageList.Count != 0) await eventArgs.Reply(eventArgs.Message.MessageList);
+            if (eventArgs.Message.MessageList.Count != 0) await eventArgs.Reply(eventArgs.Message.MessageList);
         }
     }
 }
