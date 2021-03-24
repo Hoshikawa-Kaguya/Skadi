@@ -13,14 +13,7 @@ namespace AntiRain.Tool
     internal static class BotUtils
     {
         #region 时间戳处理
-
-        /// <summary>
-        /// 获取今天零点的时间戳
-        /// 时间戳单位(秒)
-        /// </summary>
-        public static long GetTodayStampLong() =>
-            (long) (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;
-
+        //TODO 替换为工具箱方法
         /// <summary>
         /// 获取现在的时间戳
         /// 时间戳单位(秒)

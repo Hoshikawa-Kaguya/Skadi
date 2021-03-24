@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using AntiRain.IO.Config;
+using AntiRain.IO;
+using JetBrains.Annotations;
 using Sora.Attributes.Command;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
@@ -15,13 +16,12 @@ namespace AntiRain.Command.PcrUtils
     /// 对原算法有所改进
     /// </summary>
     [CommandGroup]
-    public class Cheru
+    public static class Cheru
     {
         #region 字符集常量
 
-        //TODO 模块使能
         //切噜字符集
-        const string CHERU_SET = "切卟叮咧哔唎啪啰啵嘭噜噼巴拉蹦铃";
+        private const string CHERU_SET = "切卟叮咧哔唎啪啰啵嘭噜噼巴拉蹦铃";
 
         #endregion
 
@@ -31,20 +31,22 @@ namespace AntiRain.Command.PcrUtils
         /// 将切噜语解码为原句
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
+        [UsedImplicitly]
         [GroupCommand(CommandExpressions = new[] {"^切噜(?:~|～)"},
                       MatchType          = MatchType.Regex)]
-        public async void CheruToString(GroupMessageEventArgs eventArgs)
+        public static async void CheruToString(GroupMessageEventArgs eventArgs)
         {
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config))
             {
                 Log.Error("Config", "无法获取用户配置文件");
                 return;
             }
-            if(!config.ModuleSwitch.Cheru) return;
+
+            if (!config.ModuleSwitch.Cheru) return;
             if (eventArgs.Message.RawText.Length <= 3) return;
-            string        cheru       = eventArgs.Message.RawText.Substring(3);
-            Regex         isCheru     = new Regex(@"切[切卟叮咧哔唎啪啰啵嘭噜噼巴拉蹦铃]+");
-            StringBuilder textBuilder = new StringBuilder();
+            string        cheru       = eventArgs.Message.RawText[3..];
+            Regex         isCheru     = new(@"切[切卟叮咧哔唎啪啰啵嘭噜噼巴拉蹦铃]+");
+            StringBuilder textBuilder = new();
             foreach (string cheruWord in Regex.Split(cheru, @"\b"))
             {
                 textBuilder.Append(isCheru.IsMatch(cheruWord) ? CheruToWord(cheruWord) : cheruWord);
@@ -57,20 +59,22 @@ namespace AntiRain.Command.PcrUtils
         /// 将原句编码为切噜语
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
+        [UsedImplicitly]
         [GroupCommand(CommandExpressions = new[] {"^切噜一下"},
                       MatchType          = MatchType.Regex)]
-        public async void StringToCheru(GroupMessageEventArgs eventArgs)
+        public static async void StringToCheru(GroupMessageEventArgs eventArgs)
         {
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config))
             {
                 Log.Error("Config", "无法获取用户配置文件");
                 return;
             }
-            if(!config.ModuleSwitch.Cheru) return;
+
+            if (!config.ModuleSwitch.Cheru) return;
             if (eventArgs.Message.RawText.Length <= 4) return;
-            string        text         = eventArgs.Message.RawText.Substring(4);
-            Regex         isCHN        = new Regex(@"[\u4e00-\u9fa5]");
-            StringBuilder cheruBuilder = new StringBuilder();
+            string        text         = eventArgs.Message.RawText[4..];
+            Regex         isCHN        = new(@"[\u4e00-\u9fa5]");
+            StringBuilder cheruBuilder = new();
             foreach (string word in Regex.Split(text, @"\b"))
             {
                 cheruBuilder.Append(isCHN.IsMatch(word) ? WordToCheru(word) : word);
@@ -91,11 +95,11 @@ namespace AntiRain.Command.PcrUtils
         {
             byte[] cheruBytes = Encoding.GetEncoding("GB18030").GetBytes(word);
             //切噜语翻译
-            StringBuilder res = new StringBuilder();
+            StringBuilder res = new();
             //开始翻译(不是
-            res.Append("切");
+            res.Append('切');
             //将字符byte拆分高低四位并与字符集对应
-            foreach (byte cheruByte in cheruBytes)
+            foreach (var cheruByte in cheruBytes)
             {
                 res.Append(CHERU_SET[cheruByte        & 0x0F]);
                 res.Append(CHERU_SET[(cheruByte >> 4) & 0x0F]);
@@ -111,19 +115,17 @@ namespace AntiRain.Command.PcrUtils
         private static string CheruToWord(string cheru)
         {
             if (cheru.Length < 2 && !cheru.StartsWith("切")) return cheru;
-            string cheruContent = cheru.Substring(1);
+            string cheruContent = cheru[1..];
 
             //转换为正常语句
             List<byte> wordBytes = new List<byte>();
-            for (int i = 0; i < cheruContent.Length; i += 2)
+            for (var i = 0; i < cheruContent.Length; i += 2)
             {
-                if (i + 1 < cheruContent.Length)
-                {
-                    //将index作为高低四位合并为八位
-                    byte wordByte = (byte) (CHERU_SET.IndexOf(cheruContent[i]) +
-                                            (CHERU_SET.IndexOf(cheruContent[i + 1]) << 4));
-                    wordBytes.Add(wordByte);
-                }
+                if (i + 1 >= cheruContent.Length) continue;
+                //将index作为高低四位合并为八位
+                var wordByte = (byte) (CHERU_SET.IndexOf(cheruContent[i]) +
+                                       (CHERU_SET.IndexOf(cheruContent[i + 1]) << 4));
+                wordBytes.Add(wordByte);
             }
 
             //剩下的单字符

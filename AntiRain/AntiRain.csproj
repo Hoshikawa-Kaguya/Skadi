@@ -25,23 +25,27 @@
 
   <ItemGroup>
     <Compile Remove="Resource\CommandHelp\**" />
+    <Compile Remove="新文件夹\**" />
     <EmbeddedResource Remove="Resource\CommandHelp\**" />
+    <EmbeddedResource Remove="新文件夹\**" />
     <None Remove="Resource\CommandHelp\**" />
+    <None Remove="新文件夹\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="IO\Config\Res\InitGlobalConfig.yaml" />
-    <None Remove="IO\Config\Res\InitUserConfig.yaml" />
+    <None Remove="Config\Res\InitGlobalConfig.yaml" />
+    <None Remove="Config\Res\InitUserConfig.yaml" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="IO\Config\Res\InitGlobalConfig.yaml" />
-    <EmbeddedResource Include="IO\Config\Res\InitUserConfig.yaml" />
+    <EmbeddedResource Include="Config\Res\InitGlobalConfig.yaml" />
+    <EmbeddedResource Include="Config\Res\InitUserConfig.yaml" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BeetleX.FastHttpApi" Version="1.9.5" />
     <PackageReference Include="BilibiliApi" Version="0.3.7" />
+    <PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
     <PackageReference Include="PyLibSharp.Requests" Version="1.2.8.1" />
     <PackageReference Include="SharpYaml" Version="1.6.6" />
     <PackageReference Include="Sora" Version="0.9.9" />
@@ -50,7 +54,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="IO\Config\Res\InitRes.Designer.cs">
+    <Compile Update="Config\Res\InitRes.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>InitRes.resx</DependentUpon>
@@ -58,7 +62,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="IO\Config\Res\InitRes.resx">
+    <EmbeddedResource Update="Config\Res\InitRes.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>InitRes.Designer.cs</LastGenOutput>
     </EmbeddedResource>

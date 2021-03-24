@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
-using AntiRain.IO.Config.ConfigModule;
+using AntiRain.Config.ConfigModule;
+using AntiRain.Config.Res;
 using SharpYaml.Serialization;
-using AntiRain.IO.Config.Res;
 using YukariToolBox.FormatLog;
 
-namespace AntiRain.IO.Config
+namespace AntiRain.IO
 {
     internal static class ConfigManager
     {

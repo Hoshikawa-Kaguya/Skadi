@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Sora.Attributes.Command;
 using Sora.Entities;
 using Sora.Enumeration;
@@ -26,6 +27,7 @@ namespace AntiRain.Command.PixivSearch
         /// </summary>
         private List<User> requestList { get; } = new();
 
+        [UsedImplicitly]
         [GroupCommand(CommandExpressions = new[] {"pixiv搜图"})]
         public async ValueTask SearchRequest(GroupMessageEventArgs eventArgs)
         {
@@ -45,6 +47,7 @@ namespace AntiRain.Command.PixivSearch
             requestList.Add(eventArgs.Sender);
         }
 
+        [UsedImplicitly]
         [GroupCommand(CommandExpressions = new[] {@"^\[CQ:image,file=[a-z0-9]+\.image\]$"},
                       MatchType          = MatchType.Regex)]
         public async ValueTask PicParse(GroupMessageEventArgs eventArgs)

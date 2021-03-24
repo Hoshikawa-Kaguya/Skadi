@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace AntiRain.IO.Config.ConfigModule
+namespace AntiRain.Config.ConfigModule
 {
     internal class BiliSubscription
     {

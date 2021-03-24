@@ -16,8 +16,8 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// <summary>
         /// 在接受到群消息时使用
         /// </summary>
-        /// <param name="guildEventArgs">CQAppEnableEventArgs类</param>
-        public GuildManagerDBHelper(GroupMessageEventArgs guildEventArgs) : base(guildEventArgs)
+        /// <param name="groupId">群号</param>
+        public GuildManagerDBHelper(long groupId) : base(groupId)
         {
         }
 

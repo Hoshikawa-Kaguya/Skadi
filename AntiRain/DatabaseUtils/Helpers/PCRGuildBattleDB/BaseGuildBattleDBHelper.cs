@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using AntiRain.DatabaseUtils.SqliteTool;
-using Sora.EventArgs.SoraEvent;
 using SqlSugar;
 using YukariToolBox.FormatLog;
 using YukariToolBox.Time;
@@ -15,8 +14,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
     {
         #region 属性
 
-        protected GroupMessageEventArgs GuildEventArgs { set; get; }
-        protected string                DBPath         { get; set; }
+        protected string DBPath { get; set; }
 
         #endregion
 
@@ -25,11 +23,10 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// <summary>
         /// 基类构造函数
         /// </summary>
-        /// <param name="eventArgs">群聊事件参数</param>
-        protected BaseGuildBattleDBHelper(GroupMessageEventArgs eventArgs)
+        /// <param name="uid">登录账号ID</param>
+        protected BaseGuildBattleDBHelper(long uid)
         {
-            GuildEventArgs = eventArgs;
-            DBPath         = SugarUtils.GetDBPath(eventArgs.LoginUid.ToString());
+            DBPath = SugarUtils.GetDBPath(uid.ToString());
         }
 
         #endregion
@@ -44,12 +41,12 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// <para><see langword="0"/> 公会不存在</para>
         /// <para><see langword="-1"/> 数据库错误</para>
         /// </returns>
-        public int GuildExists()
+        public int GuildExists(long groupId)
         {
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                return dbClient.Queryable<GuildInfo>().Where(guild => guild.Gid == GuildEventArgs.SourceGroup.Id).Any()
+                return dbClient.Queryable<GuildInfo>().Where(guild => guild.Gid == groupId).Any()
                     ? 1
                     : 0;
             }
@@ -117,18 +114,19 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// 检查公会是否有这个成员
         /// </summary>
         /// <param name="uid">QQ号</param>
+        /// <param name="groupId">公会群号</param>
         /// <returns>
         /// <para><see langword="1"/> 存在</para>
         /// <para><see langword="0"/> 不存在</para>
         /// <para><see langword="-1"/> 数据库错误</para>
         /// </returns>
-        public int CheckMemberExists(long uid)
+        public int CheckMemberExists(long uid, long groupId)
         {
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<MemberInfo>()
-                               .Where(i => i.Uid == uid && i.Gid == GuildEventArgs.SourceGroup.Id)
+                               .Where(i => i.Uid == uid && i.Gid == groupId)
                                .Any()
                     ? 1
                     : 0;
@@ -144,17 +142,18 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// 获取成员信息
         /// </summary>
         /// <param name="uid"></param>
+        /// <param name="groupId"></param>
         /// <returns>
         /// <para>成员信息</para>
         /// <para><see langword="null"/> 数据库错误</para>
         /// </returns>
-        public MemberInfo GetMemberInfo(long uid)
+        public MemberInfo GetMemberInfo(long uid, long groupId)
         {
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<MemberInfo>()
-                               .Where(i => i.Uid == uid && i.Gid == GuildEventArgs.SourceGroup.Id)
+                               .Where(i => i.Uid == uid && i.Gid == groupId)
                                .First();
             }
             catch (Exception e)
@@ -203,7 +202,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<GuildInfo>()
-                               .InSingle(GuildEventArgs.SourceGroup.Id); //单主键查询
+                               .InSingle(gid); //单主键查询
             }
             catch (Exception e)
             {
@@ -216,15 +215,16 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// 获取状态的刷新时间
         /// </summary>
         /// <param name="uid">uid</param>
+        /// <param name="groupId">群号</param>
         /// <param name="time">刷新时间</param>
         /// <returns>成功与失败</returns>
-        public bool GetStatusUpdateTime(long uid, out DateTime time)
+        public bool GetStatusUpdateTime(long uid, long groupId, out DateTime time)
         {
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 time = dbClient.Queryable<MemberInfo>()
-                               .Where(member => member.Uid == uid && member.Gid == GuildEventArgs.SourceGroup)
+                               .Where(member => member.Uid == uid && member.Gid == groupId)
                                .First().Time.ToDateTime();
                 return true;
             }

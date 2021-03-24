@@ -1,6 +1,6 @@
 using YukariToolBox.FormatLog;
 
-namespace AntiRain.IO.Config.ConfigModule
+namespace AntiRain.Config.ConfigModule
 {
     internal class GlobalConfig
     {

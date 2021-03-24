@@ -19,11 +19,6 @@ namespace AntiRain.DatabaseUtils.SqliteTool
         //资源数据库名
         public const string GlobalResDBName = "res";
 
-        //各区服游戏数据库名
-        public const string GameDBNameJP = "redive_jp";
-        public const string GameDBNameCN = "redive_cn";
-        public const string GameDBNameTW = "redive_tw";
-
         #endregion
 
         #region IO辅助函数

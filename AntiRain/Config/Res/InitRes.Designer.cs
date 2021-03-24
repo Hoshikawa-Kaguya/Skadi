@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AntiRain.IO.Config.Res {
+namespace AntiRain.Config.Res {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace AntiRain.IO.Config.Res {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AntiRain.IO.Config.Res.InitRes", typeof(InitRes).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AntiRain.Config.Res.InitRes", typeof(InitRes).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

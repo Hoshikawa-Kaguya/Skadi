@@ -15,13 +15,14 @@ using YukariToolBox.Time;
 
 namespace AntiRain.Command.PcrUtils
 {
+    //TODO 适配Command
     internal class GuildRankHandle
     {
         #region 参数
 
         public object                Sender       { private set; get; }
         public Group                 QQGroup      { private set; get; }
-        public GroupMessageEventArgs PCREventArgs { private set; get; }
+        public GroupMessageEventArgs eventArgs { private set; get; }
 
         /// <summary>
         /// 数据库实例
@@ -34,10 +35,10 @@ namespace AntiRain.Command.PcrUtils
 
         public GuildRankHandle(object sender, GroupMessageEventArgs e)
         {
-            this.PCREventArgs = e;
+            this.eventArgs = e;
             this.Sender       = sender;
-            this.QQGroup      = PCREventArgs.SourceGroup;
-            this.DBHelper     = new GuildManagerDBHelper(e);
+            this.QQGroup      = eventArgs.SourceGroup;
+            this.DBHelper     = new GuildManagerDBHelper(eventArgs.SourceGroup);
         }
 
         #endregion
@@ -50,41 +51,38 @@ namespace AntiRain.Command.PcrUtils
         /// </summary>
         public async void GetChat(RegexCommand cmdType)
         {
-            if (PCREventArgs == null || Sender == null) return;
+            if (eventArgs == null || Sender == null) return;
             switch (cmdType)
             {
                 //查询公会排名
                 case RegexCommand.GetGuildRank:
-                    //以群名为查询名
-                    if (PCREventArgs.Message.RawText.Length <= 6)
-                    {
-                        var groupInfo = await QQGroup.GetGroupInfo();
-                        if (groupInfo.apiStatus != APIStatusType.OK)
-                        {
-                            await QQGroup.SendGroupMessage("调用onebot API时发生错误");
-                            Log.Error("api error", $"调用onebot API时发生错误 Status={groupInfo.apiStatus}");
-                            return;
-                        }
-
-                        await KyoukaRank(DBHelper.GetGuildName(PCREventArgs.SourceGroup));
-                    }
-                    else //手动指定
-                    {
-                        await KyoukaRank(PCREventArgs.Message.RawText.Substring(6));
-                    }
+                    
 
                     break;
+            }
+
+            //以群名为查询名
+            if (eventArgs.Message.RawText.Length <= 6)
+            {
+                var groupInfo = await QQGroup.GetGroupInfo();
+                if (groupInfo.apiStatus != APIStatusType.OK)
+                {
+                    await QQGroup.SendGroupMessage("调用onebot API时发生错误");
+                    Log.Error("api error", $"调用onebot API时发生错误 Status={groupInfo.apiStatus}");
+                    return;
+                }
+
+                await KyoukaRank(DBHelper.GetGuildName(eventArgs.SourceGroup));
+            }
+            else //手动指定
+            {
+                await KyoukaRank(eventArgs.Message.RawText[6..]);
             }
         }
 
         #endregion
 
         #region 私有方法
-
-        // private async void GetGuildRank(string[] commandArgs)
-        // {
-        //     //TODO 修改为可切换源的分发方法
-        // }
 
         /// <summary>
         /// 从比利比利源查询排名

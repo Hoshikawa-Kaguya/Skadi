@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Sora.Attributes.Command;
 using Sora.Entities.CQCodes;
 using Sora.Entities.CQCodes.CQCodeModel;
@@ -13,6 +14,10 @@ namespace AntiRain.Command
     [CommandGroup]
     public static class BotUtils
     {
+        /// <summary>
+        /// Echo
+        /// </summary>
+        [UsedImplicitly]
         [GroupCommand(CommandExpressions = new[] {@"^echo\s[\s\S]+$"},
                       MatchType          = MatchType.Regex)]
         public static async ValueTask Echo(GroupMessageEventArgs eventArgs)
@@ -23,7 +28,7 @@ namespace AntiRain.Command
                 if (eventArgs.Message.MessageList[0].CQData is Text str && str.Content.StartsWith("echo "))
                 {
                     if (str.Content.Equals("echo ")) eventArgs.Message.MessageList.RemoveAt(0);
-                    else eventArgs.Message.MessageList[0] = CQCode.CQText(str.Content.Substring(5));
+                    else eventArgs.Message.MessageList[0] = CQCode.CQText(str.Content[5..]);
                 }
             }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AntiRain.DatabaseUtils.Helpers;
+using AntiRain.IO;
 using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
 using AntiRain.Tool;

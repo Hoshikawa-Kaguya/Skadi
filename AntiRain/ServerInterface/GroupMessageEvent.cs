@@ -3,6 +3,7 @@ using AntiRain.ChatModule;
 using AntiRain.ChatModule.PcrGuildBattle;
 using AntiRain.Command;
 using AntiRain.Command.PcrUtils;
+using AntiRain.IO;
 using AntiRain.IO.Config;
 using AntiRain.IO.Config.ConfigModule;
 using AntiRain.TypeEnum.CommandType;
@@ -115,7 +116,7 @@ namespace AntiRain.ServerInterface
                     default:
                         if (userConfig.ModuleSwitch.HaveFun)
                         {
-                            Surprise surprise = new Surprise(sender, groupMessage);
+                            Surprise surprise = new(sender, groupMessage);
                             surprise.GetChat(regexCommand);
                         }
 

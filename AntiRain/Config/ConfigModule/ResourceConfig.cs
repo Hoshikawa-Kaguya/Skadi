@@ -1,4 +1,4 @@
-namespace AntiRain.IO.Config.ConfigModule
+namespace AntiRain.Config.ConfigModule
 {
     /// <summary>
     /// 资源文件配置

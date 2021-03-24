@@ -5,6 +5,7 @@ using YukariToolBox.FormatLog;
 
 namespace AntiRain.ChatModule.PcrGuildBattle
 {
+    //TODO 扬了这玩意
     internal class PcrGuildBattleChatHandle
     {
         #region 属性

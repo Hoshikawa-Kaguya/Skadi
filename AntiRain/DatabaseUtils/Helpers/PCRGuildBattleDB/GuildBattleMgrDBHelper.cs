@@ -5,7 +5,6 @@ using AntiRain.DatabaseUtils.SqliteTool;
 using AntiRain.TypeEnum;
 using AntiRain.TypeEnum.GuildBattleType;
 using AntiRain.Tool;
-using Sora.EventArgs.SoraEvent;
 using SqlSugar;
 using YukariToolBox.FormatLog;
 using YukariToolBox.Time;
@@ -25,9 +24,9 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
 
         #region 构造函数
 
-        public GuildBattleMgrDBHelper(GroupMessageEventArgs eventArgs) : base(eventArgs)
+        public GuildBattleMgrDBHelper(long gid) : base(gid)
         {
-            BattleTableName = $"{SugarTableUtils.GetTableName<GuildBattle>()}_{GuildEventArgs.SourceGroup.Id}";
+            BattleTableName = $"{SugarTableUtils.GetTableName<GuildBattle>()}_{gid}";
         }
 
         #endregion
@@ -112,12 +111,12 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// <para><see langword="0"/> 未进入</para>
         /// <para><see langword="-1"/> 数据库错误</para>
         /// </returns>
-        public int CheckInBattle()
+        public int CheckInBattle(long groupId)
         {
             try
             {
                 using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-                return dbClient.Queryable<GuildInfo>().InSingle(GuildEventArgs.SourceGroup.Id).InBattle ? 1 : 0;
+                return dbClient.Queryable<GuildInfo>().InSingle(groupId).InBattle ? 1 : 0;
             }
             catch (Exception e)
             {
@@ -149,7 +148,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                 Log.Info("会战管理数据库", "开始新的一期会战统计");
                 dbClient.Updateable<GuildInfo>()
                         .SetColumns(i => new GuildInfo {InBattle = true})
-                        .Where(guild => guild.Gid == GuildEventArgs.SourceGroup.Id)
+                        .Where(guild => guild.Gid == guildInfo.Gid)
                         .ExecuteCommandHasChange();
                 //获取初始周目boss的信息
                 var initBossData = dbClient.Queryable<GuildBattleBoss>()
@@ -166,7 +165,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                                    HP        = initBossData.HP,
                                    TotalHP   = initBossData.HP
                                })
-                               .Where(i => i.Gid == GuildEventArgs.SourceGroup.Id)
+                               .Where(i => i.Gid == guildInfo.Gid)
                                .ExecuteCommandHasChange()
                     ? 1
                     : -1;
@@ -186,7 +185,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// <para><see langword="0"/> 未开始会战</para>
         /// <para><see langword="-1"/> 数据库错误</para>
         /// </returns>
-        public int EndBattle()
+        public int EndBattle(long groupId)
         {
             try
             {
@@ -196,7 +195,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                     Log.Warning("会战管理数据库", "结束一期会战统计删除旧表");
                     SugarUtils.DeletTable<GuildBattle>(dbClient, BattleTableName);
                     return dbClient.Updateable<GuildInfo>()
-                                   .Where(guild => guild.Gid == GuildEventArgs.SourceGroup.Id)
+                                   .Where(guild => guild.Gid == groupId)
                                    .SetColumns(i => new GuildInfo {InBattle = false})
                                    .ExecuteCommandHasChange()
                         ? 1
@@ -456,7 +455,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// <para><see langword="true"/> 修改成功</para>
         /// <para><see langword="false"/> 修改失败</para>
         /// </returns>
-        public bool ModifyProgress(int round, int bossOrder, long hp, long totalHP, int phase)
+        public bool ModifyProgress(int round, int bossOrder, long hp, long totalHP, int phase, long gid)
         {
             try
             {
@@ -464,7 +463,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
 
                 //更新数据
                 return dbClient.Updateable<GuildInfo>()
-                               .Where(guild => guild.Gid == GuildEventArgs.SourceGroup.Id)
+                               .Where(guild => guild.Gid == gid)
                                .SetColumns(info => new GuildInfo
                                {
                                    HP        = hp,
@@ -508,7 +507,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                                    HP      = nextBossData.HP,
                                    TotalHP = nextBossData.HP
                                })
-                               .Where(i => i.Gid == GuildEventArgs.SourceGroup.Id)
+                               .Where(i => i.Gid == guildInfo.Gid)
                                .ExecuteCommandHasChange();
             }
             catch (Exception e)
@@ -548,7 +547,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                                    HP        = nextBossData.HP,
                                    TotalHP   = nextBossData.HP
                                })
-                               .Where(i => i.Gid == GuildEventArgs.SourceGroup.Id)
+                               .Where(i => i.Gid == guildInfo.Gid)
                                .ExecuteCommandHasChange();
             }
             catch (Exception e)
@@ -565,14 +564,14 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// <para><see langword="true"/> 写入成功</para>
         /// <para><see langword="false"/> 数据库错误</para>
         /// </returns>
-        public bool CleanTree()
+        public bool CleanTree(long groupId)
         {
             try
             {
                 using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 dbClient.Updateable<MemberInfo>()
                         .Where(i => i.Flag == FlagType.OnTree &&
-                                    i.Gid  == GuildEventArgs.SourceGroup.Id)
+                                    i.Gid  == groupId)
                         .SetColumns(i => new MemberInfo {Flag = FlagType.IDLE, Info = null})
                         .ExecuteCommand();
                 return true;
@@ -591,14 +590,14 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// <para><see langword="true"/> 写入成功</para>
         /// <para><see langword="false"/> 数据库错误</para>
         /// </returns>
-        public bool CleanAtkStatus()
+        public bool CleanAtkStatus(long groupId)
         {
             try
             {
                 using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 dbClient.Updateable<MemberInfo>()
                         .Where(i => i.Flag == FlagType.EnGage &&
-                                    i.Gid  == GuildEventArgs.SourceGroup.Id)
+                                    i.Gid  == groupId)
                         .SetColumns(i => new MemberInfo {Flag = FlagType.IDLE, Info = null})
                         .ExecuteCommand();
                 return true;
@@ -617,13 +616,13 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// <para>挂树表</para>
         /// <para><see langword="null"/> 数据库错误</para>
         /// </returns>
-        public List<long> GetTree()
+        public List<long> GetTree(long groupId)
         {
             try
             {
                 using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<MemberInfo>()
-                               .Where(member => member.Gid  == GuildEventArgs.SourceGroup.Id &&
+                               .Where(member => member.Gid  == groupId &&
                                                 member.Flag == FlagType.OnTree)
                                .Select(member => member.Uid)
                                .ToList();
@@ -642,13 +641,13 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// <para>出刀成员列表</para>
         /// <para><see langword="null"/> 数据库错误</para>
         /// </returns>
-        public List<long> GetInAtk()
+        public List<long> GetInAtk(long groupId)
         {
             try
             {
                 using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 return dbClient.Queryable<MemberInfo>()
-                               .Where(member => member.Gid  == GuildEventArgs.SourceGroup.Id &&
+                               .Where(member => member.Gid  == groupId &&
                                                 member.Flag == FlagType.EnGage)
                                .Select(member => member.Uid)
                                .ToList();
@@ -664,13 +663,14 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// 更新成员状态
         /// </summary>
         /// <param name="uid">成员UID</param>
+        /// <param name="gid">群号</param>
         /// <param name="newFlag">新的状态</param>
         /// <param name="newInfo">新的消息</param>
         /// <returns>
         /// <para><see langword="true"/> 写入成功</para>
         /// <para><see langword="false"/> 数据库错误</para>
         /// </returns>
-        public bool UpdateMemberStatus(long uid, FlagType newFlag, string newInfo)
+        public bool UpdateMemberStatus(long uid, long gid, FlagType newFlag, string newInfo)
         {
             try
             {
@@ -683,7 +683,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                                    Info = newInfo,
                                    Time = TimeStamp.GetNowTimeStamp(),
                                })
-                               .Where(i => i.Gid == GuildEventArgs.SourceGroup.Id && i.Uid == uid)
+                               .Where(i => i.Gid == gid && i.Uid == uid)
                                .ExecuteCommandHasChange();
             }
             catch (Exception e)
@@ -699,12 +699,13 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// 如果只清空则不会修改状态
         /// </summary>
         /// <param name="uid">成员UID</param>
+        /// <param name="gid">群号</param>
         /// <param name="cleanSL">是否清空SL</param>
         /// <returns>
         /// <para><see langword="true"/> 写入成功</para>
         /// <para><see langword="false"/> 数据库错误</para>
         /// </returns>
-        public bool SetMemberSL(long uid, bool cleanSL = false)
+        public bool SetMemberSL(long uid, long gid, bool cleanSL = false)
         {
             try
             {
@@ -715,7 +716,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                            .Updateable<MemberInfo>()
                            .SetColumns(i => new MemberInfo
                                            {SL = 0})
-                           .Where(i => i.Gid == GuildEventArgs.SourceGroup.Id && i.Uid == uid)
+                           .Where(i => i.Gid == gid && i.Uid == uid)
                            .ExecuteCommandHasChange();
                 }
                 else //设置新的SL
@@ -727,7 +728,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                                Flag = FlagType.IDLE, SL                 = TimeStamp.GetNowTimeStamp(),
                                Time = TimeStamp.GetNowTimeStamp(), Info = null
                            })
-                           .Where(i => i.Gid == GuildEventArgs.SourceGroup.Id && i.Uid == uid)
+                           .Where(i => i.Gid == gid && i.Uid == uid)
                            .ExecuteCommandHasChange();
                 }
             }
