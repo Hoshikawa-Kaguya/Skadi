@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using AntiRain.IO.Config;
 using Sora.Attributes.Command;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
+using YukariToolBox.FormatLog;
 
 namespace AntiRain.Command.PcrUtils
 {
@@ -33,6 +35,12 @@ namespace AntiRain.Command.PcrUtils
                       MatchType          = MatchType.Regex)]
         public async void CheruToString(GroupMessageEventArgs eventArgs)
         {
+            if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config))
+            {
+                Log.Error("Config", "无法获取用户配置文件");
+                return;
+            }
+            if(!config.ModuleSwitch.Cheru) return;
             if (eventArgs.Message.RawText.Length <= 3) return;
             string        cheru       = eventArgs.Message.RawText.Substring(3);
             Regex         isCheru     = new Regex(@"切[切卟叮咧哔唎啪啰啵嘭噜噼巴拉蹦铃]+");
@@ -53,6 +61,12 @@ namespace AntiRain.Command.PcrUtils
                       MatchType          = MatchType.Regex)]
         public async void StringToCheru(GroupMessageEventArgs eventArgs)
         {
+            if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config))
+            {
+                Log.Error("Config", "无法获取用户配置文件");
+                return;
+            }
+            if(!config.ModuleSwitch.Cheru) return;
             if (eventArgs.Message.RawText.Length <= 4) return;
             string        text         = eventArgs.Message.RawText.Substring(4);
             Regex         isCHN        = new Regex(@"[\u4e00-\u9fa5]");

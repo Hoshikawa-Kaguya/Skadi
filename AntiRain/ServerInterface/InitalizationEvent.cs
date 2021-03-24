@@ -1,7 +1,7 @@
+using System;
 using System.Threading.Tasks;
 using AntiRain.DatabaseUtils;
 using AntiRain.IO.Config;
-using AntiRain.IO.Config.ConfigModule;
 using AntiRain.TimerEvent;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
@@ -16,14 +16,17 @@ namespace AntiRain.ServerInterface
         /// <summary>
         /// 初始化处理
         /// </summary>
-        internal static ValueTask Initalization(string sender, ConnectEventArgs connectEvent)
+        internal static ValueTask Initalization(string _, ConnectEventArgs connectEvent)
         {
             Log.Info("AntiRain初始化", "与onebot客户端连接成功，初始化资源...");
             //初始化配置文件
-            Log.Info("AntiRain初始化", $"初始化用户[{connectEvent.LoginUid}]配置");
-            ConfigManager configManager = new ConfigManager(connectEvent.LoginUid);
-            configManager.UserConfigFileInit();
-            configManager.LoadUserConfig(out UserConfig userConfig, false);
+            Log.Info("AntiRain初始化", $"初始化用户[{connectEvent.LoginUid}]的配置");
+            if (!ConfigManager.UserConfigFileInit(connectEvent.LoginUid) || !ConfigManager.TryGetUserConfig(connectEvent.LoginUid, out var userConfig))
+            {
+                Log.Fatal("AntiRain初始化", "无法获取用户配置文件");
+                Environment.Exit(-1);
+                return ValueTask.CompletedTask;
+            }
 
             //在控制台显示启用模块
             Log.Info("已启用的模块",

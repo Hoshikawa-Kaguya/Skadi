@@ -24,8 +24,8 @@ EventPath: "event"
 HeartBeatTimeOut: 10
 
 # 客户端API调用超时设置(毫秒)
-# 默认为1000无需修改
-OnebotApiTimeOut: 1000
+# 默认为2000无需修改
+OnebotApiTimeOut: 2000
 
 # 资源选项
 ResourceConfig:

@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sora.Attributes.Command;
 using Sora.Entities;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
+using static AntiRain.Tool.CheckInCD;
 
 namespace AntiRain.Command.PixivSearch
 {
@@ -15,6 +17,11 @@ namespace AntiRain.Command.PixivSearch
     public class SearchCommands
     {
         /// <summary>
+        /// 调用CD记录
+        /// </summary>
+        private static Dictionary<CheckUser, DateTime> users { get; set; } = new();
+
+        /// <summary>
         /// 请求表
         /// </summary>
         private List<User> requestList { get; } = new();
@@ -22,6 +29,12 @@ namespace AntiRain.Command.PixivSearch
         [GroupCommand(CommandExpressions = new[] {"pixiv搜图"})]
         public async ValueTask SearchRequest(GroupMessageEventArgs eventArgs)
         {
+            if (users.IsInCD(eventArgs.SourceGroup, eventArgs.Sender))
+            {
+                await eventArgs.Reply("你冲的太快了，要坏掉了(请等待CD冷却)");
+                return;
+            }
+
             if (requestList.Exists(member => member == eventArgs.Sender))
             {
                 await eventArgs.Reply("dnmd图呢");

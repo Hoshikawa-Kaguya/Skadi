@@ -17,19 +17,22 @@ namespace AntiRain.ServerInterface
     static class SoraServerInterface
     {
         //控制台实例
-        public static ConsoleInterface ConsoleInterface { get; private set; }
+        private static ConsoleInterface ConsoleInterface { get; set; }
 
-        static async Task Main()
+        public static async Task Main()
         {
             //修改控制台标题
             Console.Title = @"AntiRain";
             Log.Info("AntiRain初始化", "AntiRain初始化...");
             //初始化配置文件
             Log.Info("AntiRain初始化", "初始化服务器全局配置...");
-            //全局文件初始化不需要uid，不使用构造函数重载
-            ConfigManager configManager = new();
-            configManager.GlobalConfigFileInit();
-            configManager.LoadGlobalConfig(out var globalConfig, false);
+
+            if (!ConfigManager.GlobalConfigFileInit() || !ConfigManager.TryGetGlobalConfig(out var globalConfig))
+            {
+                Log.Fatal("AntiRain初始化", "无法获取用户配置文件");
+                Environment.Exit(-1);
+                return;
+            }
 
             Log.SetLogLevel(globalConfig.LogLevel);
             //显示Log等级

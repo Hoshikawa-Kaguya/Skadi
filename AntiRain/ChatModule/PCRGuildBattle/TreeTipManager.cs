@@ -90,7 +90,7 @@ namespace AntiRain.ChatModule.PCRGuildBattle
                         messageList.Add(info.treeGroup, new List<CQCode>());
                     messageList[info.treeGroup].Add(CQCode.CQAt(info.uid));
                     messageList[info.treeGroup]
-                        .Add(CQCode.CQText($"已经上树{(DateTime.Now - info.updateTime).TotalMinutes:F0}s了!"));
+                        .Add(CQCode.CQText($"已经上树{(DateTime.Now - info.updateTime).TotalMinutes:F0}min了!"));
                     messageList[info.treeGroup].Add(CQCode.CQText("\r\n"));
                 }
 

@@ -39,8 +39,6 @@ HsoConfig:
 
 # 动态订阅设置
 SubscriptionConfig:
-  # 刷新时间(最小值10)
-  FlashTime: 60
   # 群组订阅设置
   GroupsConfig:
     - GroupId: [] # 群号，可以一次设置多个群

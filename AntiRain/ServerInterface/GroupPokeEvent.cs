@@ -1,17 +1,25 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AntiRain.Tool;
 using Sora.Entities.CQCodes;
 using Sora.EventArgs.SoraEvent;
+using static AntiRain.Tool.CheckInCD;
 
 namespace AntiRain.ServerInterface
 {
     internal static class GroupPokeEvent
     {
+        /// <summary>
+        /// 调用CD记录
+        /// </summary>
+        private static Dictionary<CheckUser, DateTime> Users { get; set; } = new();
+
         internal static async ValueTask GroupPokeEventParse(object sender, GroupPokeEventArgs groupPokeEventArgs)
         {
             if (groupPokeEventArgs.TargetUser == groupPokeEventArgs.LoginUid)
             {
-                if (!CheckInCD.isInCD(groupPokeEventArgs.SourceGroup, groupPokeEventArgs.SendUser))
+                if (!Users.IsInCD(groupPokeEventArgs.SourceGroup, groupPokeEventArgs.SendUser))
                     await groupPokeEventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(groupPokeEventArgs.SendUser),
                                                                           "\r\n你今晚必被爽哥杀害\r\n",
                                                                           CQCode

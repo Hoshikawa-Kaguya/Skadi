@@ -17,12 +17,19 @@ using Sora.Entities.CQCodes;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
+using static AntiRain.Tool.CheckInCD;
 
 namespace AntiRain.ChatModule.HsoModule
 {
     [CommandGroup]
     public class HsoHandle
     {
+        #region 属性
+
+        private Dictionary<CheckUser, DateTime> Users { get; set; } = new();
+
+        #endregion
+
         #region 指令响应
 
         /// <summary>
@@ -31,12 +38,15 @@ namespace AntiRain.ChatModule.HsoModule
         [GroupCommand(CommandExpressions = new[] {"来点色图", "来点涩图", "我要看色图"})]
         public async void HsoPic(GroupMessageEventArgs eventArgs)
         {
-            ConfigManager configManager = new(eventArgs.LoginUid);
-            configManager.LoadUserConfig(out UserConfig userConfig);
-            if (CheckGroupBlock(userConfig, eventArgs)) return;
-            if (CheckInCD.isInCD(eventArgs.SourceGroup, eventArgs.Sender))
+            if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig userConfig))
             {
-                await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender), "你是不是只会要色图");
+                Log.Error("Config", "无法获取用户配置文件");
+                return;
+            }
+            if (CheckGroupBlock(userConfig, eventArgs)) return;
+            if (Users.IsInCD(eventArgs.SourceGroup, eventArgs.Sender))
+            {
+                await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender), "你是不是只会要色图(请等待CD冷却)");
                 return;
             }
 

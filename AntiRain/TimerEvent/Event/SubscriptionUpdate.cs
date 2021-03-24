@@ -32,8 +32,7 @@ namespace AntiRain.TimerEvent.Event
         public static async void BiliUpdateCheck(ConnectEventArgs connectEventArgs)
         {
             //读取配置文件
-            ConfigManager configManager = new(connectEventArgs.LoginUid);
-            configManager.LoadUserConfig(out var loadedConfig);
+            ConfigManager.TryGetUserConfig(connectEventArgs.LoginUid, out var loadedConfig);
             ModuleSwitch            moduleEnable  = loadedConfig.ModuleSwitch;
             List<GroupSubscription> Subscriptions = loadedConfig.SubscriptionConfig.GroupsConfig;
             //数据库

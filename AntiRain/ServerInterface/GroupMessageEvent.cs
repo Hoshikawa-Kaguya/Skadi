@@ -22,10 +22,8 @@ namespace AntiRain.ServerInterface
         /// </summary>
         public static async ValueTask GroupMessageParse(object sender, GroupMessageEventArgs groupMessage)
         {
-            //配置文件实例
-            ConfigManager configManager = new ConfigManager(groupMessage.LoginUid);
             //读取配置文件
-            if (!configManager.LoadUserConfig(out UserConfig userConfig))
+            if (!ConfigManager.TryGetUserConfig(groupMessage.LoginUid, out UserConfig userConfig))
             {
                 await groupMessage.SourceGroup.SendGroupMessage("读取配置文件(User)时发生错误\r\n请联系机器人管理员");
                 Log.Error("AntiRain会战管理", "无法读取用户配置文件");
@@ -36,14 +34,13 @@ namespace AntiRain.ServerInterface
             //#开头的指令(会战) -> 关键词 -> 正则
             //会战管理
             if (CommandAdapter.GetPCRGuildBattlecmdType(groupMessage.Message.RawText,
-                                                        out PCRGuildBattleCommand battleCommand))
+                                                        out var battleCommand))
             {
                 Log.Info("PCR会战管理", $"获取到指令[{battleCommand}]");
                 //判断模块使能
                 if (userConfig.ModuleSwitch.PCR_GuildManager)
                 {
-                    PcrGuildBattleChatHandle chatHandle =
-                        new PcrGuildBattleChatHandle(sender, groupMessage, battleCommand);
+                    PcrGuildBattleChatHandle chatHandle = new(sender, groupMessage, battleCommand);
                     chatHandle.GetChat();
                 }
                 else
@@ -53,7 +50,7 @@ namespace AntiRain.ServerInterface
             }
 
             //聊天关键词
-            if (CommandAdapter.GetKeywordType(groupMessage.Message.RawText, out KeywordCommand keywordCommand))
+            if (CommandAdapter.GetKeywordType(groupMessage.Message.RawText, out var keywordCommand))
             {
                 Log.Info("关键词触发", $"触发关键词[{keywordCommand}]");
                 switch (keywordCommand)
