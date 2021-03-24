@@ -24,20 +24,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Resource\CommandHelp\**" />
-    <Compile Remove="新文件夹\**" />
-    <EmbeddedResource Remove="Resource\CommandHelp\**" />
-    <EmbeddedResource Remove="新文件夹\**" />
-    <None Remove="Resource\CommandHelp\**" />
-    <None Remove="新文件夹\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Config\Res\InitGlobalConfig.yaml" />
-    <None Remove="Config\Res\InitUserConfig.yaml" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="Config\Res\InitGlobalConfig.yaml" />
     <EmbeddedResource Include="Config\Res\InitUserConfig.yaml" />
   </ItemGroup>

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace AntiRain.IO.Config.ConfigModule
+namespace AntiRain.Config.ConfigModule
 {
     /// <summary>
     /// 单用户配置文件定义

@@ -38,7 +38,7 @@ namespace AntiRain.Command.PcrUtils
             this.eventArgs = e;
             this.Sender       = sender;
             this.QQGroup      = eventArgs.SourceGroup;
-            this.DBHelper     = new GuildManagerDBHelper(eventArgs.SourceGroup);
+            this.DBHelper     = new GuildManagerDBHelper(eventArgs.LoginUid);
         }
 
         #endregion

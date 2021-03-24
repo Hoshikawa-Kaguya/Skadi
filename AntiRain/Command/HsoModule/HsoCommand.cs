@@ -6,10 +6,10 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AntiRain.Config.ConfigModule;
 using AntiRain.IO;
-using AntiRain.IO.Config;
-using AntiRain.IO.Config.ConfigModule;
 using AntiRain.Tool;
+using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
 using Sora.Attributes.Command;
@@ -19,10 +19,10 @@ using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
 using static AntiRain.Tool.CheckInCD;
 
-namespace AntiRain.ChatModule.HsoModule
+namespace AntiRain.Command.HsoModule
 {
     [CommandGroup]
-    public class HsoHandle
+    public class HsoCommand
     {
         #region 属性
 
@@ -35,6 +35,7 @@ namespace AntiRain.ChatModule.HsoModule
         /// <summary>
         /// 用于处理传入指令
         /// </summary>
+        [UsedImplicitly]
         [GroupCommand(CommandExpressions = new[] {"来点色图", "来点涩图", "我要看色图"})]
         public async void HsoPic(GroupMessageEventArgs eventArgs)
         {

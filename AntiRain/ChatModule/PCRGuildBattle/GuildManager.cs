@@ -33,7 +33,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
 
         internal GuildManager(GroupMessageEventArgs eventArgs, PCRGuildBattleCommand commandType)
         {
-            this.DBHelper  = new GuildManagerDBHelper(eventArgs.SourceGroup);
+            this.DBHelper  = new GuildManagerDBHelper(eventArgs.LoginUid);
             this.eventArgs = eventArgs;
             CommandType    = commandType;
         }

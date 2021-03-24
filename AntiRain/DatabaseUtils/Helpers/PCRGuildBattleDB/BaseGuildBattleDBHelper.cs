@@ -23,10 +23,10 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// <summary>
         /// 基类构造函数
         /// </summary>
-        /// <param name="uid">登录账号ID</param>
-        protected BaseGuildBattleDBHelper(long uid)
+        /// <param name="loginUid">登录账号ID</param>
+        protected BaseGuildBattleDBHelper(long loginUid)
         {
-            DBPath = SugarUtils.GetDBPath(uid.ToString());
+            DBPath = SugarUtils.GetDBPath(loginUid.ToString());
         }
 
         #endregion

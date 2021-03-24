@@ -24,9 +24,9 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
 
         #region 构造函数
 
-        public GuildBattleMgrDBHelper(long gid) : base(gid)
+        public GuildBattleMgrDBHelper(long loginUid) : base(loginUid)
         {
-            BattleTableName = $"{SugarTableUtils.GetTableName<GuildBattle>()}_{gid}";
+            BattleTableName = $"{SugarTableUtils.GetTableName<GuildBattle>()}_{loginUid}";
         }
 
         #endregion

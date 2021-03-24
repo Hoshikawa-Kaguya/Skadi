@@ -36,7 +36,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         {
             eventArgs          = GBattleEventArgs;
             CommandType        = commandType;
-            this.GuildBattleDB = new GuildBattleMgrDBHelper(GBattleEventArgs.SourceGroup);
+            this.GuildBattleDB = new GuildBattleMgrDBHelper(GBattleEventArgs.LoginUid);
         }
 
         #endregion
@@ -762,7 +762,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             }
 
             //获取剩余刀数
-            int remainCount = memberCount - GuildBattleDB.GetTodayAttackCount();
+            int remainCount = memberCount*3 - GuildBattleDB.GetTodayAttackCount();
 
             #region 消息提示
 

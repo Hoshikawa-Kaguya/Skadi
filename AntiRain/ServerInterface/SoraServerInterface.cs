@@ -3,7 +3,6 @@ using System.Text;
 using System.Threading.Tasks;
 using AntiRain.DatabaseUtils;
 using AntiRain.IO;
-using AntiRain.IO.Config;
 using AntiRain.TimerEvent;
 using AntiRain.Tool;
 using AntiRain.WebConsole;

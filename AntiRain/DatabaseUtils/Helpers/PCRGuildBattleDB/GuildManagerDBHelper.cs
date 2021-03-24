@@ -2,7 +2,6 @@ using System;
 using AntiRain.DatabaseUtils.SqliteTool;
 using AntiRain.TypeEnum;
 using AntiRain.TypeEnum.GuildBattleType;
-using Sora.EventArgs.SoraEvent;
 using SqlSugar;
 using YukariToolBox.FormatLog;
 using YukariToolBox.Time;
@@ -16,8 +15,8 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
         /// <summary>
         /// 在接受到群消息时使用
         /// </summary>
-        /// <param name="groupId">群号</param>
-        public GuildManagerDBHelper(long groupId) : base(groupId)
+        /// <param name="loginUid">群号</param>
+        public GuildManagerDBHelper(long loginUid) : base(loginUid)
         {
         }
 
