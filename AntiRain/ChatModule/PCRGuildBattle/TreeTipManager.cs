@@ -10,6 +10,7 @@ namespace AntiRain.ChatModule.PCRGuildBattle
     /// <summary>
     /// 上树提示模块
     /// </summary>
+    //TODO 等待迁移
     public static class TreeTipManager
     {
         #region 私有字段

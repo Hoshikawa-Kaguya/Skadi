@@ -6,6 +6,7 @@ using Sora.EventArgs.SoraEvent;
 
 namespace AntiRain.ChatModule
 {
+    //TODO 适配Command
     internal class Surprise
     {
         #region 属性
