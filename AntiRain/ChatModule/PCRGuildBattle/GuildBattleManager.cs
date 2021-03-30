@@ -946,7 +946,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 }
 
                 //判断今天是否使用过SL
-                if (member.SL >= BotUtils.GetUpdateStamp())
+                if (member.SL >= BotUtils.GetPcrUpdateStamp())
                 {
                     await eventArgs.SourceGroup.SendGroupMessage("成员 ", CQCode.CQAt(eventArgs.Sender.Id), "今天已使用过SL");
                 }
@@ -998,7 +998,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
 
                 #endregion
 
-                if (member.SL >= BotUtils.GetUpdateStamp())
+                if (member.SL >= BotUtils.GetPcrUpdateStamp())
                 {
                     if (!GuildBattleDB.SetMemberSL(memberUid, eventArgs.SourceGroup, true))
                     {

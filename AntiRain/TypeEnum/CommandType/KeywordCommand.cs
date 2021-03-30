@@ -19,11 +19,6 @@ namespace AntiRain.TypeEnum.CommandType
         [Description("24岁，是学生")] Student,
 
         /// <summary>
-        /// 来点色图！
-        /// </summary>
-        [Description("来点色图 来点涩图 我要看色图")] Hso,
-
-        /// <summary>
         /// 随机禁言
         /// </summary>
         [Description("随机禁言")] RandomBan

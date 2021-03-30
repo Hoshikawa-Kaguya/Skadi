@@ -13,19 +13,12 @@ namespace AntiRain.Tool
     internal static class BotUtils
     {
         #region 时间戳处理
-        //TODO 替换为工具箱方法
-        /// <summary>
-        /// 获取现在的时间戳
-        /// 时间戳单位(秒)
-        /// </summary>
-        public static long GetNowStampLong() =>
-            (long) (DateTime.Now - new DateTime(1970, 1, 1, 8, 0, 0, 0)).TotalSeconds;
 
         /// <summary>
         /// 获取游戏刷新的时间戳
         /// 时间戳单位(秒)
         /// </summary>
-        public static long GetUpdateStamp()
+        public static long GetPcrUpdateStamp()
         {
             if (DateTime.Now > DateTime.Today.Add(new TimeSpan(5, 0, 0)))
             {

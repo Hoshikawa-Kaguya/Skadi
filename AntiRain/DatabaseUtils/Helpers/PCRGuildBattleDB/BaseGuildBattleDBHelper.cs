@@ -72,14 +72,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
                 var                  data     = dbClient.Queryable<GuildInfo>().Where(i => i.Gid == groupid);
-                if (data.Any())
-                {
-                    return data.First().GuildName;
-                }
-                else
-                {
-                    return string.Empty;
-                }
+                return data.Any() ? data.First().GuildName : string.Empty;
             }
             catch (Exception e)
             {

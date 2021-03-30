@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using AntiRain.ChatModule;
 using AntiRain.ChatModule.PcrGuildBattle;
 using AntiRain.Command;
-using AntiRain.Command.PcrUtils;
 using AntiRain.IO;
 using AntiRain.Config.ConfigModule;
 using AntiRain.TypeEnum.CommandType;
@@ -55,13 +54,6 @@ namespace AntiRain.ServerInterface
                 Log.Info("关键词触发", $"触发关键词[{keywordCommand}]");
                 switch (keywordCommand)
                 {
-                    case KeywordCommand.Hso:
-                        if (userConfig.ModuleSwitch.Hso)
-                        {
-                        }
-
-                        break;
-                    //将其他的的全部交给娱乐模块处理
                     default:
                         if (userConfig.ModuleSwitch.HaveFun)
                         {
@@ -79,37 +71,12 @@ namespace AntiRain.ServerInterface
                 Log.Info("正则触发", $"触发正则匹配[{regexCommand}]");
                 switch (regexCommand)
                 {
-                    case RegexCommand.GetGuildRank:
-                        //判断模块使能
-                        if (userConfig.ModuleSwitch.PCR_GuildRank)
-                        {
-                            GuildRankHandle guildRank = new GuildRankHandle(sender, groupMessage);
-                            guildRank.GetChat(regexCommand);
-                        }
-
-                        break;
                     //调试
                     case RegexCommand.Debug:
                         if (groupMessage.SenderInfo.Role == MemberRoleType.Member)
                         {
                             Log.Warning("Auth Warning", $"成员[{groupMessage.Sender.Id}]正尝试执行调试指令");
                         }
-                        else
-                        {
-                            // if (groupMessage.Message.RawText.Length <= 5) return;
-                            // string para =
-                            //     groupMessage.Message.RawText.Substring(5, groupMessage.Message.RawText.Length - 5);
-                            // if (int.TryParse(para, out int id))
-                            // {
-                            //     CharaParser charaParser = new CharaParser();
-                            //     List<CQCode> message = new List<CQCode>();
-                            //     message.Add(CQCode.CQText(id.ToString()));
-                            //     message.Add(CQCode.CQText(charaParser.FindChara(id)?.GetCharaNameCN() ?? string.Empty));
-                            //     message.Add(CQCode.CQImage($"https://redive.estertion.win/icon/unit/{id}31.webp"));
-                            //     await groupMessage.SourceGroup.SendGroupMessage(message);
-                            // }
-                        }
-
                         break;
                     //将其他的的全部交给娱乐模块处理
                     default:
