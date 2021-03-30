@@ -24,19 +24,17 @@ namespace AntiRain.ChatModule.PcrGuildBattle
     {
         #region 属性
 
-        private GroupMessageEventArgs  eventArgs     { get; init; }
-        private PCRGuildBattleCommand  CommandType   { get; set; }
-        private GuildBattleMgrDBHelper GuildBattleDB { get; set; }
-        
+        private GroupMessageEventArgs eventArgs   { get; init; }
+        private PCRGuildBattleCommand CommandType { get; }
+
         #endregion
 
         #region 构造函数
 
         public GuildBattleManager(GroupMessageEventArgs GBattleEventArgs, PCRGuildBattleCommand commandType)
         {
-            eventArgs          = GBattleEventArgs;
-            CommandType        = commandType;
-            this.GuildBattleDB = new GuildBattleMgrDBHelper(GBattleEventArgs.LoginUid);
+            eventArgs   = GBattleEventArgs;
+            CommandType = commandType;
         }
 
         #endregion
@@ -45,6 +43,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
 
         public async void GuildBattleResponse() //指令分发
         {
+            var GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
             if (eventArgs == null) throw new ArgumentNullException(nameof(eventArgs));
             //查找是否存在这个公会
             switch (GuildBattleDB.GuildExists(eventArgs.SourceGroup))
@@ -52,7 +51,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 case 0:
                     Log.Debug("GuildExists", "guild not found");
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "\r\n此群未被登记为公会");
+                                                                 "\r\n此群未被登记为公会");
                     return;
                 case -1:
                     await BotUtils.DatabaseFailedTips(eventArgs);
@@ -66,45 +65,49 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 //会战开始
                 case PCRGuildBattleCommand.BattleStart:
                     //检查执行者权限和参数
-                    if (!await eventArgs.AuthCheck(CommandType.ToString()) || !await eventArgs.ZeroArgsCheck() || !await MemberCheck()) return;
+                    if (!await eventArgs.AuthCheck(CommandType.ToString()) || !await eventArgs.ZeroArgsCheck() ||
+                        !await MemberCheck(eventArgs)) return;
                     BattleStart();
                     break;
 
                 //会战结束
                 case PCRGuildBattleCommand.BattleEnd:
                     //检查执行者权限和参数
-                    if (!await eventArgs.AuthCheck(CommandType.ToString()) || !await eventArgs.ZeroArgsCheck() || !await MemberCheck()) return;
+                    if (!await eventArgs.AuthCheck(CommandType.ToString()) || !await eventArgs.ZeroArgsCheck() ||
+                        !await MemberCheck(eventArgs)) return;
                     BattleEnd();
                     break;
 
                 //出刀
                 case PCRGuildBattleCommand.Attack:
-                    if (!await InBattleCheck() || !await MemberCheck()) return;
+                    if (!await InBattleCheck(eventArgs) || !await MemberCheck(eventArgs)) return;
                     Attack();
                     break;
 
                 //出刀申请
                 case PCRGuildBattleCommand.RequestAttack:
-                    if (!await InBattleCheck() || !await MemberCheck()) return;
+                    if (!await InBattleCheck(eventArgs) || !await MemberCheck(eventArgs)) return;
                     RequestAttack();
                     break;
 
                 //撤刀
                 case PCRGuildBattleCommand.UndoRequestAtk:
-                    if (!await InBattleCheck() || !await MemberCheck()) return;
+                    if (!await InBattleCheck(eventArgs) || !await MemberCheck(eventArgs)) return;
                     UndoRequest();
                     break;
 
                 //删刀
                 case PCRGuildBattleCommand.DeleteAttack:
                     //检查执行者权限
-                    if (!await eventArgs.AuthCheck(CommandType.ToString()) || !await MemberCheck() || !await InBattleCheck()) return;
+                    if (!await eventArgs.AuthCheck(CommandType.ToString()) || !await MemberCheck(eventArgs) ||
+                        !await InBattleCheck(eventArgs)) return;
                     DelAttack();
                     break;
 
                 //撤销出刀申请
                 case PCRGuildBattleCommand.UndoAttack:
-                    if (!await eventArgs.ZeroArgsCheck() || !await MemberCheck() || !await InBattleCheck()) return;
+                    if (!await eventArgs.ZeroArgsCheck() || !await MemberCheck(eventArgs) ||
+                        !await InBattleCheck(eventArgs)) return;
                     UndoAtk();
                     break;
 
@@ -118,7 +121,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                         break;
                     }
 
-                    if (await InBattleCheck())
+                    if (await InBattleCheck(eventArgs))
                     {
                         ShowProgress(guildInfo);
                     }
@@ -127,64 +130,72 @@ namespace AntiRain.ChatModule.PcrGuildBattle
 
                 //SL
                 case PCRGuildBattleCommand.SL:
-                    if (!await eventArgs.ZeroArgsCheck() || !await MemberCheck() || !await InBattleCheck()) return;
+                    if (!await eventArgs.ZeroArgsCheck() || !await MemberCheck(eventArgs) ||
+                        !await InBattleCheck(eventArgs)) return;
                     SL();
                     break;
 
                 //撤销SL
                 case PCRGuildBattleCommand.UndoSL:
                     //检查执行者权限
-                    if (!await eventArgs.AuthCheck(CommandType.ToString()) || !await MemberCheck() || !await InBattleCheck()) return;
+                    if (!await eventArgs.AuthCheck(CommandType.ToString()) || !await MemberCheck(eventArgs) ||
+                        !await InBattleCheck(eventArgs)) return;
                     SL(true);
                     break;
 
                 //上树
                 case PCRGuildBattleCommand.ClimbTree:
-                    if (!await eventArgs.ZeroArgsCheck() || !await MemberCheck() || !await InBattleCheck()) return;
+                    if (!await eventArgs.ZeroArgsCheck() || !await MemberCheck(eventArgs) ||
+                        !await InBattleCheck(eventArgs)) return;
                     ClimbTree();
                     break;
 
                 //下树
                 case PCRGuildBattleCommand.LeaveTree:
-                    if (!await eventArgs.AuthCheck(CommandType.ToString()) || !await MemberCheck() || !await InBattleCheck()) return;
+                    if (!await eventArgs.AuthCheck(CommandType.ToString()) || !await MemberCheck(eventArgs) ||
+                        !await InBattleCheck(eventArgs)) return;
                     LeaveTree();
                     break;
 
                 //查树
                 case PCRGuildBattleCommand.ShowTree:
-                    if (!await eventArgs.ZeroArgsCheck() || !await InBattleCheck()) return;
+                    if (!await eventArgs.ZeroArgsCheck() || !await InBattleCheck(eventArgs)) return;
                     CheckTree();
                     break;
 
                 //修改进度
                 case PCRGuildBattleCommand.ModifyProgress:
-                    if (!await eventArgs.AuthCheck(CommandType.ToString()) || !await MemberCheck() || !await InBattleCheck()) return;
+                    if (!await eventArgs.AuthCheck(CommandType.ToString()) || !await MemberCheck(eventArgs) ||
+                        !await InBattleCheck(eventArgs)) return;
                     ModifyProgress();
                     break;
 
                 //查余刀
                 case PCRGuildBattleCommand.ShowRemainAttack:
-                    if (!await eventArgs.ZeroArgsCheck() || !await MemberCheck() || !await InBattleCheck()) return;
+                    if (!await eventArgs.ZeroArgsCheck() || !await MemberCheck(eventArgs) ||
+                        !await InBattleCheck(eventArgs)) return;
                     ShowRemainAttack();
                     break;
 
                 //催刀
                 case PCRGuildBattleCommand.UrgeAttack:
-                    if (!await eventArgs.AuthCheck(CommandType.ToString()) || !await eventArgs.ZeroArgsCheck() || !await MemberCheck() ||
-                        !await InBattleCheck()) return;
+                    if (!await eventArgs.AuthCheck(CommandType.ToString()) || !await eventArgs.ZeroArgsCheck() ||
+                        !await MemberCheck(eventArgs)                      ||
+                        !await InBattleCheck(eventArgs)) return;
                     UrgeAttack();
                     break;
 
                 //显示完整出刀表
                 case PCRGuildBattleCommand.ShowAllAttackList:
-                    if (!await eventArgs.AuthCheck(CommandType.ToString()) || !await eventArgs.ZeroArgsCheck() || !await MemberCheck() ||
-                        !await InBattleCheck()) return;
+                    if (!await eventArgs.AuthCheck(CommandType.ToString()) || !await eventArgs.ZeroArgsCheck() ||
+                        !await MemberCheck(eventArgs)                      ||
+                        !await InBattleCheck(eventArgs)) return;
                     ShowAllAttackList();
                     break;
 
                 //显示出刀表
                 case PCRGuildBattleCommand.ShowAttackList:
-                    if (!await MemberCheck() || !await InBattleCheck()) return;
+                    if (!await MemberCheck(eventArgs) || !await InBattleCheck(eventArgs)) return;
                     ShowAttackList();
                     break;
                 default:
@@ -202,7 +213,8 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         /// </summary>
         private async void BattleStart()
         {
-            GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(eventArgs.SourceGroup.Id);
+            var       GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
+            GuildInfo guildInfo     = GuildBattleDB.GetGuildInfo(eventArgs.SourceGroup.Id);
             if (guildInfo == null)
             {
                 await BotUtils.DatabaseFailedTips(eventArgs);
@@ -214,13 +226,13 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             {
                 case 0: //已经执行过开始命令
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "\r\n上一次的出刀统计未结束",
-                                                       "\r\n此时会战已经开始或上一期仍未结束",
-                                                       "\r\n请检查是否未结束上期会战的出刀统计");
+                                                                 "\r\n上一次的出刀统计未结束",
+                                                                 "\r\n此时会战已经开始或上一期仍未结束",
+                                                                 "\r\n请检查是否未结束上期会战的出刀统计");
                     break;
                 case 1:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAtAll(),
-                                                       "\r\n新的一期会战开始啦！");
+                                                                 "\r\n新的一期会战开始啦！");
                     break;
                 case -1:
                     await BotUtils.DatabaseFailedTips(eventArgs);
@@ -233,18 +245,19 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         /// </summary>
         private async void BattleEnd()
         {
+            var GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
             //判断返回值
             switch (GuildBattleDB.EndBattle(eventArgs.SourceGroup))
             {
                 case 0: //已经执行过开始命令
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "\r\n出刀统计并没有启动",
-                                                       "\r\n请检查是否未开始会战的出刀统计");
+                                                                 "\r\n出刀统计并没有启动",
+                                                                 "\r\n请检查是否未开始会战的出刀统计");
                     break;
                 case 1:
                     GuildBattleDB.CleanTree(eventArgs.SourceGroup);
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAtAll(),
-                                                       "\r\n会战结束啦~");
+                                                                 "\r\n会战结束啦~");
                     break;
                 case -1:
                     await BotUtils.DatabaseFailedTips(eventArgs);
@@ -266,7 +279,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             {
                 case LenType.Legitimate:
                     //检查成员
-                    if (!await MemberCheck()) return;
+                    if (!await MemberCheck(eventArgs)) return;
                     atkUid     = eventArgs.Sender.Id;
                     substitute = false;
                     break;
@@ -281,7 +294,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     else
                     {
                         await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                           "\r\n听不见！重来！（有多余参数）");
+                                                                     "\r\n听不见！重来！（有多余参数）");
                         return;
                     }
 
@@ -289,14 +302,16 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     break;
                 default:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "发生未知错误，请联系机器人管理员");
+                                                                 "发生未知错误，请联系机器人管理员");
                     Log.Error("Unknown error", "LenType");
                     return;
             }
 
+            //实例化数据库
+            var GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
             //获取成员信息和上一次的出刀类型
-            MemberInfo member    = GuildBattleDB.GetMemberInfo(atkUid, eventArgs.SourceGroup);
-            GuildInfo  guildInfo = GuildBattleDB.GetGuildInfo(eventArgs.SourceGroup.Id);
+            var member    = GuildBattleDB.GetMemberInfo(atkUid, eventArgs.SourceGroup);
+            var guildInfo = GuildBattleDB.GetGuildInfo(eventArgs.SourceGroup.Id);
             //数据库错误
             if (member == null || GuildBattleDB.GetLastAttack(atkUid, out AttackType lastAttack) == -1)
             {
@@ -315,12 +330,12 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     if (substitute)
                     {
                         await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                           "\n兄啊", CQCode.CQAt(atkUid), "在树上啊");
+                                                                     "\n兄啊", CQCode.CQAt(atkUid), "在树上啊");
                     }
                     else
                     {
                         await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                           "\n好好爬你的树，你出个🔨的刀");
+                                                                     "\n好好爬你的树，你出个🔨的刀");
                     }
 
                     return;
@@ -328,18 +343,18 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     if (substitute)
                     {
                         await eventArgs.SourceGroup.SendGroupMessage("成员", CQCode.CQAt(atkUid),
-                                                           "\n已经在出刀中");
+                                                                     "\n已经在出刀中");
                     }
                     else
                     {
                         await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                           "\n你不是已经在出刀吗？");
+                                                                     "\n你不是已经在出刀吗？");
                     }
 
                     return;
                 default:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "发生未知错误，请联系机器人管理员");
+                                                                 "发生未知错误，请联系机器人管理员");
                     Log.Error("Unknown error", "member.Flag");
                     return;
             }
@@ -358,19 +373,20 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 if (substitute)
                 {
                     await eventArgs.SourceGroup.SendGroupMessage("成员", CQCode.CQAt(atkUid),
-                                                       "今日已出完三刀");
+                                                                 "今日已出完三刀");
                 }
                 else
                 {
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "今日已出完三刀");
+                                                                 "今日已出完三刀");
                 }
 
                 return;
             }
 
             //修改成员状态
-            if (GuildBattleDB.UpdateMemberStatus(atkUid, eventArgs.SourceGroup, FlagType.EnGage, $"{guildInfo.Round}:{guildInfo.Order}"))
+            if (GuildBattleDB.UpdateMemberStatus(atkUid, eventArgs.SourceGroup, FlagType.EnGage,
+                                                 $"{guildInfo.Round}:{guildInfo.Order}"))
             {
                 List<long> atkMemberList = GuildBattleDB.GetInAtk(eventArgs.SourceGroup); //正在出刀中的成员列表
                 if (atkMemberList == null)
@@ -426,7 +442,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             {
                 case LenType.Legitimate:
                     //检查成员
-                    if (!await MemberCheck()) return;
+                    if (!await MemberCheck(eventArgs)) return;
                     atkUid     = eventArgs.Sender.Id;
                     substitute = false;
                     break;
@@ -441,7 +457,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     else
                     {
                         await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                           "\r\n听不见！重来！（有多余参数）");
+                                                                     "\r\n听不见！重来！（有多余参数）");
                         return;
                     }
 
@@ -449,11 +465,13 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     break;
                 default:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "发生未知错误，请联系机器人管理员");
+                                                                 "发生未知错误，请联系机器人管理员");
                     Log.Error("Unknown error", "LenType");
                     return;
             }
 
+            //实例化数据库
+            var GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
             //获取成员信息
             MemberInfo member = GuildBattleDB.GetMemberInfo(atkUid, eventArgs.SourceGroup);
             if (member == null)
@@ -468,29 +486,19 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             {
                 case FlagType.IDLE:
                     if (substitute)
-                    {
                         await eventArgs.SourceGroup.SendGroupMessage("成员", CQCode.CQAt(atkUid)
-                                                         , "\n并未出刀");
-                    }
+                                                                   , "\n并未出刀");
                     else
-                    {
                         await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(atkUid)
-                                                         , "\n并未申请出刀");
-                    }
-
+                                                                   , "\n并未申请出刀");
                     break;
                 case FlagType.OnTree:
                     if (substitute)
-                    {
                         await eventArgs.SourceGroup.SendGroupMessage("成员", CQCode.CQAt(atkUid),
-                                                           "在树上挂着呢");
-                    }
+                                                                     "在树上挂着呢");
                     else
-                    {
                         await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(atkUid),
-                                                           "想下树？找管理员");
-                    }
-
+                                                                     "想下树？找管理员");
                     break;
                 case FlagType.EnGage:
                     if (GuildBattleDB.UpdateMemberStatus(atkUid, eventArgs.SourceGroup, FlagType.IDLE, null))
@@ -505,8 +513,8 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     }
                 default: //如果跑到这了，我完蛋了
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "发生未知错误，请联系机器人管理员");
-                    Log.Error("Unknown error", "member.Flag");
+                                                                 "发生未知错误，请联系机器人管理员");
+                    Log.Error("Unknown error", $"member.Flag = {member.Flag}");
                     break;
             }
         }
@@ -529,7 +537,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     return;
                 case LenType.Legitimate: //正常出刀
                     //检查成员
-                    if (!await MemberCheck()) return;
+                    if (!await MemberCheck(eventArgs)) return;
                     atkUid     = eventArgs.Sender.Id;
                     substitute = false;
                     break;
@@ -544,7 +552,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     else
                     {
                         await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                           "\r\n听不见！重来！（有多余参数）");
+                                                                     "\r\n听不见！重来！（有多余参数）");
                         return;
                     }
 
@@ -552,7 +560,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     break;
                 default:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "发生未知错误，请联系机器人管理员");
+                                                                 "发生未知错误，请联系机器人管理员");
                     Log.Error("Unknown error", "LenType");
                     return;
             }
@@ -563,7 +571,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             if (!long.TryParse(commandArgs[1], out long dmg) || dmg < 0)
             {
                 await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                   "\r\n兄啊这伤害好怪啊");
+                                                             "\r\n兄啊这伤害好怪啊");
                 return;
             }
 
@@ -571,6 +579,8 @@ namespace AntiRain.ChatModule.PcrGuildBattle
 
             #region 成员信息检查
 
+            //实例化数据库
+            var GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
             //获取成员状态信息
             MemberInfo atkMemberInfo = GuildBattleDB.GetMemberInfo(atkUid, eventArgs.SourceGroup);
             if (atkMemberInfo == null)
@@ -591,12 +601,12 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     if (substitute)
                     {
                         await eventArgs.SourceGroup.SendGroupMessage("成员", CQCode.CQAt(atkUid),
-                                                           "未申请出刀");
+                                                                     "未申请出刀");
                     }
                     else
                     {
                         await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                           "请先申请出刀再重拳出击");
+                                                                     "请先申请出刀再重拳出击");
                     }
 
                     return;
@@ -657,7 +667,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             #endregion
 
             //向数据库插入新刀
-            int attackId = GuildBattleDB.NewAttack(atkUid, atkGuildInfo, dmg, curAttackType);
+            var attackId = GuildBattleDB.NewAttack(atkUid, atkGuildInfo, dmg, curAttackType);
             if (attackId == -1)
             {
                 await BotUtils.DatabaseFailedTips(eventArgs);
@@ -754,7 +764,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 return;
             }
 
-            int memberCount = GuildBattleDB.GetMemberCount(eventArgs.SourceGroup);
+            var memberCount = GuildBattleDB.GetMemberCount(eventArgs.SourceGroup);
             if (memberCount == -1)
             {
                 await BotUtils.DatabaseFailedTips(eventArgs);
@@ -762,7 +772,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             }
 
             //获取剩余刀数
-            int remainCount = memberCount*3 - GuildBattleDB.GetTodayAttackCount();
+            var remainCount = memberCount * 3 - GuildBattleDB.GetTodayAttackCount();
 
             #region 消息提示
 
@@ -817,13 +827,15 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         /// </summary>
         private async void UndoAtk()
         {
+            //实例化数据库
+            var GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
             //获取上一次的出刀类型
             int lastAtkAid = GuildBattleDB.GetLastAttack(eventArgs.Sender.Id, out _);
             switch (lastAtkAid)
             {
                 case 0:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "并没有找到出刀记录");
+                                                                 "并没有找到出刀记录");
                     return;
                 case -1:
                     await BotUtils.DatabaseFailedTips(eventArgs);
@@ -831,7 +843,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             }
 
             //删除记录
-            switch (await DelAtkByAid(lastAtkAid))
+            switch (await DelAtkByAid(eventArgs, lastAtkAid))
             {
                 case 0:
                     return;
@@ -843,7 +855,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             }
 
             await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                               $"出刀编号为 {lastAtkAid} 的出刀记录已被删除");
+                                                         $"出刀编号为 {lastAtkAid} 的出刀记录已被删除");
             //获取目前会战进度
             GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(eventArgs.SourceGroup.Id);
             if (guildInfo == null)
@@ -878,7 +890,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     return;
                 default:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "发生未知错误，请联系机器人管理员");
+                                                                 "发生未知错误，请联系机器人管理员");
                     Log.Error("Unknown error", "LenType");
                     return;
             }
@@ -887,7 +899,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             if (!int.TryParse(commandArgs[1], out int aid) || aid < 0)
             {
                 await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                   "\r\n兄啊这不是刀号");
+                                                             "\r\n兄啊这不是刀号");
                 return;
             }
 
@@ -896,7 +908,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             #endregion
 
             //删除记录
-            switch (await DelAtkByAid(aid))
+            switch (await DelAtkByAid(eventArgs, aid))
             {
                 case 0:
                     return;
@@ -908,7 +920,9 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             }
 
             await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                               $"出刀编号为 {aid} 的出刀记录已被删除");
+                                                         $"出刀编号为 {aid} 的出刀记录已被删除");
+            //实例化数据库
+            var GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
             //获取目前会战进度
             GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(eventArgs.SourceGroup.Id);
             if (guildInfo == null)
@@ -930,6 +944,8 @@ namespace AntiRain.ChatModule.PcrGuildBattle
 
             if (!cleanSL) //设置SL
             {
+                //实例化数据库
+                var GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
                 //查找成员信息 
                 MemberInfo member = GuildBattleDB.GetMemberInfo(eventArgs.Sender.Id, eventArgs.SourceGroup);
                 if (member == null)
@@ -947,9 +963,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
 
                 //判断今天是否使用过SL
                 if (member.SL >= BotUtils.GetPcrUpdateStamp())
-                {
                     await eventArgs.SourceGroup.SendGroupMessage("成员 ", CQCode.CQAt(eventArgs.Sender.Id), "今天已使用过SL");
-                }
                 else
                 {
                     if (!GuildBattleDB.SetMemberSL(eventArgs.Sender.Id, eventArgs.SourceGroup))
@@ -981,13 +995,15 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                         break;
                     default:
                         await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                           "发生未知错误，请联系机器人管理员");
+                                                                     "发生未知错误，请联系机器人管理员");
                         Log.Error("Unknown error", "LenType");
                         return;
                 }
 
                 Log.Debug("get Uid", memberUid);
 
+                //实例化数据库
+                var GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
                 //查找成员信息 
                 MemberInfo member = GuildBattleDB.GetMemberInfo(memberUid, eventArgs.SourceGroup);
                 if (member == null)
@@ -1008,10 +1024,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
 
                     await eventArgs.SourceGroup.SendGroupMessage("成员 ", CQCode.CQAt(memberUid), "已撤回今天的SL");
                 }
-                else
-                {
-                    await eventArgs.SourceGroup.SendGroupMessage("成员 ", CQCode.CQAt(memberUid), "今天未使用过SL");
-                }
+                else await eventArgs.SourceGroup.SendGroupMessage("成员 ", CQCode.CQAt(memberUid), "今天未使用过SL");
             }
         }
 
@@ -1020,6 +1033,8 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         /// </summary>
         private async void ClimbTree()
         {
+            //实例化数据库
+            var GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
             //获取成员信息
             MemberInfo member = GuildBattleDB.GetMemberInfo(eventArgs.Sender.Id, eventArgs.SourceGroup);
             if (member == null)
@@ -1031,27 +1046,28 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             switch (member.Flag)
             {
                 case FlagType.EnGage:
-                    if (!GuildBattleDB.UpdateMemberStatus(eventArgs.Sender.Id, eventArgs.SourceGroup, FlagType.OnTree, null))
+                    if (!GuildBattleDB.UpdateMemberStatus(eventArgs.Sender.Id, eventArgs.SourceGroup, FlagType.OnTree,
+                                                          null))
                     {
                         await BotUtils.DatabaseFailedTips(eventArgs);
                     }
 
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "已上树");
+                                                                 "已上树");
                     //添加上树提示
                     TreeTipManager.AddTreeMember(eventArgs.SourceGroup, eventArgs.Sender, DateTime.Now);
                     return;
                 case FlagType.IDLE:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "闲着没事不要爬树(未申请出刀)");
+                                                                 "闲着没事不要爬树(未申请出刀)");
                     return;
                 case FlagType.OnTree:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "都在树上嫌树不够高？");
+                                                                 "都在树上嫌树不够高？");
                     return;
                 default:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "发生未知错误，请联系机器人管理员");
+                                                                 "发生未知错误，请联系机器人管理员");
                     Log.Error("Unknown error", "member.Flag");
                     return;
             }
@@ -1063,6 +1079,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         private async void LeaveTree()
         {
             string[] commandArgs = eventArgs.ToCommandArgs();
+
             #region 参数检查
 
             long memberUid;
@@ -1074,7 +1091,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     break;
                 case LenType.Extra:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "有多余参数");
+                                                                 "有多余参数");
                     return;
                 case LenType.Illegal:
                     if (!eventArgs.IsAdminSession()) return;
@@ -1082,13 +1099,15 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     break;
                 default:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "发生未知错误，请联系机器人管理员");
+                                                                 "发生未知错误，请联系机器人管理员");
                     Log.Error("Unknown error", "LenType");
                     return;
             }
 
             Log.Debug("get Uid", memberUid);
 
+            //实例化数据库
+            var GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
             //查找成员信息 
             MemberInfo member = GuildBattleDB.GetMemberInfo(memberUid, eventArgs.SourceGroup);
             if (member == null)
@@ -1105,11 +1124,11 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             {
                 case FlagType.EnGage:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(memberUid),
-                                                       "你 轴 歪 了\n(正在出刀不要乱用指令)");
+                                                                 "你 轴 歪 了\n(正在出刀不要乱用指令)");
                     return;
                 case FlagType.IDLE:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(memberUid),
-                                                       "弟啊你不在树上");
+                                                                 "弟啊你不在树上");
                     return;
                 case FlagType.OnTree:
                     if (!GuildBattleDB.UpdateMemberStatus(memberUid, eventArgs.SourceGroup, FlagType.IDLE, null))
@@ -1118,11 +1137,11 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     }
 
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(memberUid),
-                                                       "已下树");
+                                                                 "已下树");
                     return;
                 default:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(memberUid),
-                                                       "发生未知错误，请联系机器人管理员");
+                                                                 "发生未知错误，请联系机器人管理员");
                     Log.Error("Unknown error", "member.Flag");
                     return;
             }
@@ -1133,7 +1152,9 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         /// </summary>
         private async void CheckTree()
         {
-            List<long> treeList = GuildBattleDB.GetTree(eventArgs.SourceGroup);
+            //实例化数据库
+            var GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
+            var treeList      = GuildBattleDB.GetTree(eventArgs.SourceGroup);
             if (treeList == null || treeList.Count == 0)
             {
                 await eventArgs.SourceGroup.SendGroupMessage("没有人在树上");
@@ -1141,7 +1162,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             }
 
             //获取群成员列表
-            (APIStatusType apiStatus, List<GroupMemberInfo> groupMembers) = await eventArgs.SourceGroup.GetGroupMemberList();
+            var (apiStatus, groupMembers) = await eventArgs.SourceGroup.GetGroupMemberList();
             if (apiStatus != APIStatusType.OK)
             {
                 Log.Error("API Error", $"API ret error {apiStatus}");
@@ -1193,29 +1214,31 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 case LenType.Extra:
                 case LenType.Illegal:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "非法指令格式");
+                                                                 "非法指令格式");
                     return;
                 default:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "发生未知错误，请联系机器人管理员");
+                                                                 "发生未知错误，请联系机器人管理员");
                     Log.Error("Unknown error", "LenType");
                     return;
             }
 
             //处理参数值
             if (!int.TryParse(commandArgs[1], out int targetRound) ||
-                targetRound < 0                                         ||
+                targetRound < 0                                    ||
                 !int.TryParse(commandArgs[2], out int targetOrder) ||
-                targetOrder < 0                                         ||
-                targetOrder > 5                                         ||
+                targetOrder < 0                                    ||
+                targetOrder > 5                                    ||
                 !long.TryParse(commandArgs[3], out long targetHp)  ||
                 targetHp < 0)
             {
                 await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                   "有非法参数");
+                                                             "有非法参数");
                 return;
             }
 
+            //实例化数据库
+            var GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
             //获取公会信息
             GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(eventArgs.SourceGroup.Id);
             if (guildInfo == null)
@@ -1235,22 +1258,23 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             if (targetHp >= bossInfo.HP)
             {
                 await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                   "有非法参数");
+                                                             "有非法参数");
                 return;
             }
 
             #endregion
 
-            if (!GuildBattleDB.ModifyProgress(targetRound, targetOrder, targetHp, bossInfo.HP, bossInfo.Phase, eventArgs.SourceGroup))
+            if (!GuildBattleDB.ModifyProgress(targetRound, targetOrder, targetHp, bossInfo.HP, bossInfo.Phase,
+                                              eventArgs.SourceGroup))
             {
                 await BotUtils.DatabaseFailedTips(eventArgs);
                 return;
             }
 
             await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                               "公会目前进度已修改为\r\n"                     +
-                                               $"{targetRound}周目{targetOrder}王\r\n" +
-                                               $"{targetHp}/{bossInfo.HP}");
+                                                         "公会目前进度已修改为\r\n"                     +
+                                                         $"{targetRound}周目{targetOrder}王\r\n" +
+                                                         $"{targetHp}/{bossInfo.HP}");
         }
 
         /// <summary>
@@ -1258,7 +1282,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         /// </summary>
         private async void ShowRemainAttack()
         {
-            Dictionary<long, int> remainAtkList = GetRemainAtkList();
+            Dictionary<long, int> remainAtkList = GetRemainAtkList(eventArgs);
             if (remainAtkList == null)
             {
                 await BotUtils.DatabaseFailedTips(eventArgs);
@@ -1272,7 +1296,8 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             }
 
             //获取群成员列表
-            (APIStatusType apiStatus, List<GroupMemberInfo> groupMembers) = await eventArgs.SourceGroup.GetGroupMemberList();
+            (APIStatusType apiStatus, List<GroupMemberInfo> groupMembers) =
+                await eventArgs.SourceGroup.GetGroupMemberList();
             if (apiStatus != APIStatusType.OK)
             {
                 Log.Error("API Error", $"API ret error {apiStatus}");
@@ -1316,7 +1341,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         /// </summary>
         private async void UrgeAttack()
         {
-            Dictionary<long, int> remainAtkList = GetRemainAtkList();
+            Dictionary<long, int> remainAtkList = GetRemainAtkList(eventArgs);
             if (remainAtkList == null)
             {
                 await BotUtils.DatabaseFailedTips(eventArgs);
@@ -1348,6 +1373,8 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         /// </summary>
         private async void ShowAllAttackList()
         {
+            //实例化数据库
+            var               GuildBattleDB    = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
             List<GuildBattle> todayAttacksList = GuildBattleDB.GetTodayAttacks();
             //首先检查是否记录为空
             if (todayAttacksList == null)
@@ -1363,7 +1390,8 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             }
 
             //获取群成员列表
-            (APIStatusType apiStatus, List<GroupMemberInfo> groupMembers) = await eventArgs.SourceGroup.GetGroupMemberList();
+            (APIStatusType apiStatus, List<GroupMemberInfo> groupMembers) =
+                await eventArgs.SourceGroup.GetGroupMemberList();
             if (apiStatus != APIStatusType.OK)
             {
                 Log.Error("API Error", $"API ret error {apiStatus}");
@@ -1420,20 +1448,22 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 case LenType.Legitimate: //正常
                     memberUid = eventArgs.Sender.Id;
                     break;
-                case LenType.Extra:       //管理员查询
+                case LenType.Extra:                          //管理员查询
                     if (!eventArgs.IsAdminSession()) return; //检查权限
                     memberUid = eventArgs.GetFirstUidInAt();
                     if (memberUid == -1) return;
                     break;
                 default:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "发生未知错误，请联系机器人管理员");
+                                                                 "发生未知错误，请联系机器人管理员");
                     Log.Error("Unknown error", "LenType");
                     return;
             }
 
             Log.Debug("get Uid", memberUid);
 
+            //实例化数据库
+            var GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
             //查找成员信息 
             MemberInfo member = GuildBattleDB.GetMemberInfo(memberUid, eventArgs.SourceGroup);
             if (member == null)
@@ -1455,8 +1485,8 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             if (todayAttacksList.Count == 0)
             {
                 await eventArgs.SourceGroup.SendGroupMessage(eventArgs.IsAdminSession() ? "成员" : "",
-                                                   CQCode.CQAt(eventArgs.Sender.Id),
-                                                   eventArgs.IsAdminSession() ? "今天还没出刀呢！" : "你今天还没出刀呢！");
+                                                             CQCode.CQAt(eventArgs.Sender.Id),
+                                                             eventArgs.IsAdminSession() ? "今天还没出刀呢！" : "你今天还没出刀呢！");
                 return;
             }
 
@@ -1482,15 +1512,18 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         /// <summary>
         /// 由刀号删除出刀信息
         /// </summary>
+        /// <param name="eventArgs">事件参数</param>
         /// <param name="aid">刀号</param>
         /// <returns>
         /// <para><see langword="1"/> 成功</para>
         /// <para><see langword="0"/> 不允许删除</para>
         /// <para><see langword="-1"/> 数据库错误</para>
         /// </returns>
-        private async ValueTask<int> DelAtkByAid(int aid)
+        private static async ValueTask<int> DelAtkByAid(GroupMessageEventArgs eventArgs, int aid)
         {
-            GuildInfo guildInfo = GuildBattleDB.GetGuildInfo(eventArgs.SourceGroup.Id);
+            //实例化数据库
+            var       GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
+            GuildInfo guildInfo     = GuildBattleDB.GetGuildInfo(eventArgs.SourceGroup.Id);
             if (guildInfo == null) return -1;
             GuildBattle atkInfo = GuildBattleDB.GetAtkByID(aid);
 
@@ -1498,7 +1531,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             if (guildInfo.Round != atkInfo.Round || guildInfo.Order != atkInfo.Order)
             {
                 await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                   "\r\n非当前所处boss不允许删除");
+                                                             "\r\n非当前所处boss不允许删除");
                 return 0;
             }
 
@@ -1508,7 +1541,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 atkInfo.Attack == AttackType.CompensateKill)
             {
                 await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                   "\r\n尾刀不允许删除");
+                                                             "\r\n尾刀不允许删除");
                 return 0;
             }
 
@@ -1516,7 +1549,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             if (guildInfo.HP + atkInfo.Damage > guildInfo.TotalHP)
             {
                 await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                   "\r\n删刀后血量超出上线，请联系管理员检查机器人所在进度");
+                                                             "\r\n删刀后血量超出上线，请联系管理员检查机器人所在进度");
                 return 0;
             }
 
@@ -1533,10 +1566,12 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         /// <para>余刀表</para>
         /// <para><see langword="null"/> 数据库错误</para>
         /// </returns>
-        private Dictionary<long, int> GetRemainAtkList()
+        private static Dictionary<long, int> GetRemainAtkList(GroupMessageEventArgs eventArgs)
         {
-            Dictionary<long, int> atkCountList = GuildBattleDB.GetTodayAtkCount();
-            List<MemberInfo>      memberList   = GuildBattleDB.GetAllMembersInfo(eventArgs.SourceGroup.Id);
+            //实例化数据库
+            var                   GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
+            Dictionary<long, int> atkCountList  = GuildBattleDB.GetTodayAtkCount();
+            List<MemberInfo>      memberList    = GuildBattleDB.GetAllMembersInfo(eventArgs.SourceGroup.Id);
             //首先检查数据库是否发生了错误
             if (atkCountList == null || memberList == null) return null;
 
@@ -1565,8 +1600,10 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         /// <para><see langword="true"/> 已经进入会战</para>
         /// <para><see langword="false"/> 未进入或发生了其他错误</para>
         /// </returns>
-        private async ValueTask<bool> InBattleCheck()
+        private static async ValueTask<bool> InBattleCheck(GroupMessageEventArgs eventArgs)
         {
+            //实例化数据库
+            var GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
             //检查是否进入会战
             switch (GuildBattleDB.CheckInBattle(eventArgs.SourceGroup))
             {
@@ -1591,8 +1628,10 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         /// <para><see langword="true"/> 存在成员</para>
         /// <para><see langword="false"/> 不存在或有错误</para>
         /// </returns>
-        private async ValueTask<bool> MemberCheck()
+        private static async ValueTask<bool> MemberCheck(GroupMessageEventArgs eventArgs)
         {
+            //实例化数据库
+            var GuildBattleDB = new GuildBattleMgrDBHelper(eventArgs.LoginUid);
             //检查成员
             switch (GuildBattleDB.CheckMemberExists(eventArgs.Sender.Id, eventArgs.SourceGroup))
             {
@@ -1606,7 +1645,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     return false;
                 default:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id),
-                                                       "发生未知错误，请联系机器人管理员");
+                                                                 "发生未知错误，请联系机器人管理员");
                     Log.Error("Unknown error", "LenType");
                     return false;
             }
@@ -1614,7 +1653,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
 
         private const string PHASE_CODE = "ABCD";
 
-        private string GetBossCode(int phase, int order)
+        private static string GetBossCode(int phase, int order)
             => phase > 4 ? $"{phase} - {order}" : $"{PHASE_CODE[phase - 1]}{order}";
 
         #endregion

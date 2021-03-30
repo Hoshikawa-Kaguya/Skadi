@@ -84,7 +84,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                 return dbClient.Queryable<GuildBattle>()
                                .AS(BattleTableName)
                                .Where(attack => attack.Time   > BotUtils.GetPcrUpdateStamp() &&
-                                                attack.Attack != AttackType.Compensate    &&
+                                                attack.Attack != AttackType.Compensate       &&
                                                 attack.Attack != AttackType.CompensateKill)
                                .GroupBy(member => member.Uid)
                                .Select(member => new
@@ -314,7 +314,7 @@ namespace AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB
                 return dbClient.Queryable<GuildBattle>()
                                .AS(BattleTableName)
                                //今天5点之后出刀的
-                               .Where(i => i.Uid    == uid                   && i.Time   >= BotUtils.GetPcrUpdateStamp() &&
+                               .Where(i => i.Uid    == uid && i.Time >= BotUtils.GetPcrUpdateStamp() &&
                                            i.Attack != AttackType.Compensate && i.Attack != AttackType.CompensateKill)
                                //筛选出刀总数
                                .Count();

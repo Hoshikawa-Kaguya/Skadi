@@ -37,6 +37,7 @@ namespace AntiRain.Command.PcrUtils
                 await eventArgs.Reply("此群未被记录为公会\r\n请建会后再查询或输入公会名进行查询");
                 return;
             }
+
             //获取网络响应
             try
             {

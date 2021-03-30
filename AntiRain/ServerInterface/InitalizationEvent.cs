@@ -21,7 +21,8 @@ namespace AntiRain.ServerInterface
             Log.Info("AntiRain初始化", "与onebot客户端连接成功，初始化资源...");
             //初始化配置文件
             Log.Info("AntiRain初始化", $"初始化用户[{connectEvent.LoginUid}]的配置");
-            if (!ConfigManager.UserConfigFileInit(connectEvent.LoginUid) || !ConfigManager.TryGetUserConfig(connectEvent.LoginUid, out var userConfig))
+            if (!ConfigManager.UserConfigFileInit(connectEvent.LoginUid) ||
+                !ConfigManager.TryGetUserConfig(connectEvent.LoginUid, out var userConfig))
             {
                 Log.Fatal("AntiRain初始化", "无法获取用户配置文件");
                 Environment.Exit(-1);

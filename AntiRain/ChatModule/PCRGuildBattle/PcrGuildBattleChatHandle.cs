@@ -36,13 +36,13 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                 //公会管理指令
                 if (CommandType > 0 && (int) CommandType < 100)
                 {
-                    GuildManager guildManager = new GuildManager(PCRGuildEventArgs, CommandType);
+                    GuildManager guildManager = new(PCRGuildEventArgs, CommandType);
                     guildManager.GuildManagerResponse();
                 }
                 //出刀管理指令
                 else if ((int) CommandType > 100 && (int) CommandType < 200)
                 {
-                    GuildBattleManager battleManager = new GuildBattleManager(PCRGuildEventArgs, CommandType);
+                    GuildBattleManager battleManager = new(PCRGuildEventArgs, CommandType);
                     battleManager.GuildBattleResponse();
                 }
             }

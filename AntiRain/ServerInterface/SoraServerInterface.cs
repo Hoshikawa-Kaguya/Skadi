@@ -14,13 +14,14 @@ using YukariToolBox.FormatLog;
 
 namespace AntiRain.ServerInterface
 {
-    static class SoraServerInterface
+    internal static class SoraServerInterface
     {
         //控制台实例
         private static ConsoleInterface ConsoleInterface { get; set; }
 
         public static async Task Main()
         {
+            //[Description(@"^谁是[\u4e00-\u9fa5]+$")] FindChara,//TODO 最后一个PCR功能（
             //修改控制台标题
             Console.Title = @"AntiRain";
             Log.Info("AntiRain初始化", "AntiRain初始化...");
@@ -55,8 +56,6 @@ namespace AntiRain.ServerInterface
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             //指令匹配初始化
-            Command.CommandAdapter.KeywordResourseInit();
-            Command.CommandAdapter.RegexResourseInit();
             Command.CommandAdapter.PCRGuildBattlecmdResourseInit();
 
             //启动机器人WebAPI服务器

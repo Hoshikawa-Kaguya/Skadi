@@ -59,6 +59,7 @@ namespace AntiRain.TimerEvent
                 Log.Error("SubTimer", "未找到该账号的订阅信息");
                 return ValueTask.CompletedTask;
             }
+
             try
             {
                 SubDictionary.RemoveAll(args => args.LoginUid == eventArgs.SelfId);

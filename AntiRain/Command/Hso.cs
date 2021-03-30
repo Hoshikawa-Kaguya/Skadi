@@ -19,7 +19,7 @@ using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
 using static AntiRain.Tool.CheckInCD;
 
-namespace AntiRain.Command.HsoModule
+namespace AntiRain.Command
 {
     [CommandGroup]
     public class HsoCommand
@@ -44,6 +44,7 @@ namespace AntiRain.Command.HsoModule
                 Log.Error("Config", "无法获取用户配置文件");
                 return;
             }
+
             if (CheckGroupBlock(userConfig, eventArgs)) return;
             if (Users.IsInCD(eventArgs.SourceGroup, eventArgs.Sender))
             {

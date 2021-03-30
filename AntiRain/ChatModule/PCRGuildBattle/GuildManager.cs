@@ -23,7 +23,8 @@ namespace AntiRain.ChatModule.PcrGuildBattle
         /// <summary>
         /// 数据库实例
         /// </summary>
-        private GuildManagerDBHelper DBHelper { get;     set; }
+        private GuildManagerDBHelper DBHelper { get; set; }
+
         private GroupMessageEventArgs eventArgs   { get; init; }
         private PCRGuildBattleCommand CommandType { get; set; }
 
@@ -95,7 +96,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             {
                 case 1:
                     await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender),
-                                                            $"此群已被标记为[{DBHelper.GetGuildInfo(eventArgs.SourceGroup).GuildName}]公会");
+                                                                 $"此群已被标记为[{DBHelper.GetGuildInfo(eventArgs.SourceGroup).GuildName}]公会");
                     return;
             }
 
@@ -148,7 +149,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             else
             {
                 await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender),
-                                                        "弟啊，你哪个服务器的");
+                                                             "弟啊，你哪个服务器的");
                 return;
             }
 
@@ -186,8 +187,8 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             string guildName = DBHelper.GetGuildName(eventArgs.SourceGroup);
             //删除公会
             await eventArgs.SourceGroup.SendGroupMessage(DBHelper.DeleteGuild(eventArgs.SourceGroup)
-                                                   ? $" 公会[{guildName}]已被删除。"
-                                                   : $" 公会[{guildName}]删除失败，数据库错误。");
+                                                             ? $" 公会[{guildName}]已被删除。"
+                                                             : $" 公会[{guildName}]删除失败，数据库错误。");
         }
 
         /// <summary>
