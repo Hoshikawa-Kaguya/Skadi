@@ -32,7 +32,7 @@
     <PackageReference Include="BeetleX.FastHttpApi" Version="1.9.5" />
     <PackageReference Include="BilibiliApi" Version="0.3.9" />
     <PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
-    <PackageReference Include="PyLibSharp.Requests" Version="1.2.8.1" />
+    <PackageReference Include="PyLibSharp.Requests" Version="1.2.9" />
     <PackageReference Include="SharpYaml" Version="1.6.6" />
     <PackageReference Include="Sora" Version="1.0.0-rc.2" />
     <PackageReference Include="sqlSugarCore" Version="5.0.2.8" />
