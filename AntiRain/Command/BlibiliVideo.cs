@@ -34,12 +34,13 @@ namespace AntiRain.Command
                 await eventArgs.Reply($"API发生错误({videoInfo.Code})\r\nmessage:{videoInfo.Message}");
                 return;
             }
+
             //发送视频信息
             await eventArgs.Reply(GenReplyMessage(videoInfo));
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new []{@"\[CQ:json,data=.+\]"},
+        [GroupCommand(CommandExpressions = new[] {@"\[CQ:json,data=.+\]"},
                       MatchType          = MatchType.Regex,
                       Priority           = 0)]
         public static async ValueTask VideoInfoByMiniApp(GroupMessageEventArgs eventArgs)
@@ -47,7 +48,7 @@ namespace AntiRain.Command
             //获取短链
             Regex urlRegex    = new(@"https://b23\.tv/[a-zA-Z0-9]+");
             var   videoUrlStr = urlRegex.Match(eventArgs.Message.RawText).Value;
-            if(string.IsNullOrEmpty(videoUrlStr)) return;
+            if (string.IsNullOrEmpty(videoUrlStr)) return;
             //网络请求获取跳转地址
             var handler = new HttpClientHandler();
             handler.AllowAutoRedirect = false;
@@ -62,13 +63,15 @@ namespace AntiRain.Command
                 Log.Error("Mini App", "解析ID为空");
                 return;
             }
+
             //获取视频信息
-            var   videoInfo  = VideoApis.GetVideoInfo(videoIdStr);
+            var videoInfo = VideoApis.GetVideoInfo(videoIdStr);
             if (videoInfo.Code != 0)
             {
                 await eventArgs.Reply($"API发生错误({videoInfo.Code})\r\nmessage:{videoInfo.Message}");
                 return;
             }
+
             //发送视频信息
             await eventArgs.Reply("别他妈发小程序了");
             await eventArgs.Reply(GenReplyMessage(videoInfo));

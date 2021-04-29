@@ -30,7 +30,7 @@ namespace AntiRain.Command
             await eventArgs.SourceGroup.EnableGroupMemberMute(eventArgs.Sender.Id,
                                                               28800);
         }
-        
+
         [UsedImplicitly]
         [GroupCommand(CommandExpressions = new[] {"抽老婆"})]
         public async ValueTask RollWife(GroupMessageEventArgs eventArgs)
@@ -45,7 +45,7 @@ namespace AntiRain.Command
             //删除自身和发送者
             memberList.RemoveAll(i => i.UserId == eventArgs.Sender);
             memberList.RemoveAll(i => i.UserId == eventArgs.LoginUid);
-            
+
             if (memberList.Count == 0) await eventArgs.Reply("群里没人是你的老婆");
 
             await eventArgs.Reply("10秒后我将at一位幸运群友成为你的老婆\r\n究竟是谁会这么幸运呢");
@@ -53,7 +53,7 @@ namespace AntiRain.Command
             var rd = new Random();
             await eventArgs.Reply(CQCode.CQAt(memberList[rd.Next(0, memberList.Count - 1)].UserId),
                                   "\r\n恭喜成为",
-                                  CQCode.CQAt(eventArgs.Sender), 
+                                  CQCode.CQAt(eventArgs.Sender),
                                   "的老婆 ~");
         }
 

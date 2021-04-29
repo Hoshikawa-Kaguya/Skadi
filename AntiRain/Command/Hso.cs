@@ -18,6 +18,7 @@ using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
 using static AntiRain.Tool.CheckInCD;
+using MatchType = Sora.Enumeration.MatchType;
 
 namespace AntiRain.Command
 {
@@ -39,6 +40,7 @@ namespace AntiRain.Command
         [GroupCommand(CommandExpressions = new[] {"来点色图", "来点涩图", "我要看色图"})]
         public async void HsoPic(GroupMessageEventArgs eventArgs)
         {
+            eventArgs.IsContinueEventChain = false;
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig userConfig))
             {
                 Log.Error("Config", "无法获取用户配置文件");
@@ -60,6 +62,25 @@ namespace AntiRain.Command
             }
 
             await GiveMeSetu(userConfig.HsoConfig, eventArgs);
+        }
+
+        [UsedImplicitly]
+        [GroupCommand(CommandExpressions = new[] {"^让我康康 [0-9]+$"}, MatchType = MatchType.Regex)]
+        public async void HsoPicIndexSearch(GroupMessageEventArgs eventArgs)
+        {
+            eventArgs.IsContinueEventChain = false;
+            string msgStr = eventArgs.Message.ToString()[5..];
+            if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig userConfig))
+            {
+                Log.Error("Config", "无法获取用户配置文件");
+                return;
+            }
+
+            //TODO 支持非代理连接图片
+            if (!string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
+            {
+                await eventArgs.Reply(CQCode.CQImage($"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{msgStr}"));
+            }
         }
 
         #endregion

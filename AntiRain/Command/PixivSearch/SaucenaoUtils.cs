@@ -4,6 +4,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AntiRain.Config.ConfigModule;
+using AntiRain.IO;
 using PyLibSharp.Requests;
 using Sora.Entities.CQCodes;
 using Sora.EventArgs.SoraEvent;
@@ -54,18 +56,36 @@ namespace AntiRain.Command.PixivSearch
                                    .First();
 
 
-            var (success, msg, urls) = await GetPixivCatInfo(parsedPic.PixivData.PixivId);
-            if (!success)
+            if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig userConfig))
             {
+                Log.Error("Config", "无法获取用户配置文件");
                 message.Add(CQCode.CQAt(eventArgs.Sender));
-                message.Add(CQCode.CQText($"处理代理连接发生错误\r\nApi Message:{msg}"));
+                message.Add(CQCode.CQText("处理用户配置发生错误\r\nMessage:无法读取用户配置"));
                 return message;
+            }
+
+            string picUrl;
+            if (string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
+            {
+                var (success, msg, urls) = await GetPixivCatInfo(parsedPic.PixivData.PixivId);
+                if (!success)
+                {
+                    message.Add(CQCode.CQAt(eventArgs.Sender));
+                    message.Add(CQCode.CQText($"处理代理连接发生错误\r\nApi Message:{msg}"));
+                    return message;
+                }
+
+                picUrl = urls[0];
+            }
+            else
+            {
+                picUrl = $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{parsedPic.PixivData.PixivId}";
             }
 
             message.Add(CQCode.CQAt(eventArgs.Sender));
             message.Add(CQCode.CQText("\r\n"));
             message.Add(CQCode.CQText($"图片名:{parsedPic.PixivData.Title}\r\n"));
-            message.Add(CQCode.CQImage(urls[0]));
+            message.Add(CQCode.CQImage(picUrl));
             message.Add(CQCode.CQText($"id:{parsedPic.PixivData.PixivId}\r\n"));
             message.Add(CQCode.CQText($"相似度:{parsedPic.Header.Similarity}%"));
 
