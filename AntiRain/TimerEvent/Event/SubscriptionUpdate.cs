@@ -42,12 +42,6 @@ namespace AntiRain.TimerEvent.Event
             if (!moduleEnable.Bili_Subscription) return;
             foreach (var subscription in Subscriptions)
             {
-                //PCR动态订阅
-                if (subscription.PCR_Subscription)
-                {
-                    await GetDynamic(connectEventArgs.SoraApi, 353840826, subscription.GroupId, dbHelper);
-                }
-
                 //臭DD的订阅
                 foreach (var biliUser in subscription.SubscriptionId)
                 {

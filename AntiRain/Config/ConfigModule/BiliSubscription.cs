@@ -21,11 +21,6 @@ namespace AntiRain.Config.ConfigModule
         public List<long> GroupId { set; get; }
 
         /// <summary>
-        /// PCR动态订阅
-        /// </summary>
-        public bool PCR_Subscription { set; get; }
-
-        /// <summary>
         /// UID动态订阅
         /// </summary>
         public List<long> SubscriptionId { set; get; }
