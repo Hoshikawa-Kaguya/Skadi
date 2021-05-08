@@ -1,6 +1,9 @@
 # 日志等级，设置为默认即可
 LogLevel: Info
 
+# 机器人管理员用户
+SuperUsers: []
+
 # 服务器监听地址
 Location: "0.0.0.0"
 

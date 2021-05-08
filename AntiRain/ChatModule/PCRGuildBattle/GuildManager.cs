@@ -7,8 +7,8 @@ using AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB;
 using AntiRain.TypeEnum;
 using AntiRain.TypeEnum.CommandType;
 using AntiRain.Tool;
-using Sora.Entities.CQCodes;
 using Sora.Entities.Info;
+using Sora.Entities.MessageElement;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
@@ -95,7 +95,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             switch (this.DBHelper.GuildExists(eventArgs.SourceGroup))
             {
                 case 1:
-                    await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender),
+                    await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender),
                                                                  $"此群已被标记为[{DBHelper.GetGuildInfo(eventArgs.SourceGroup).GuildName}]公会");
                     return;
             }
@@ -116,17 +116,17 @@ namespace AntiRain.ChatModule.PcrGuildBattle
                     }
                     else
                     {
-                        await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender), "\r\n有多余参数");
+                        await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender), "\r\n有多余参数");
                         return;
                     }
 
                     break;
                 case LenType.Legitimate:
                     var groupInfo = await eventArgs.SourceGroup.GetGroupInfo();
-                    if (groupInfo.apiStatus != APIStatusType.OK)
+                    if (groupInfo.apiStatus.RetCode != ApiStatusType.OK)
                     {
-                        Log.Error("API error", $"api ret code {(int) groupInfo.apiStatus}");
-                        await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender), "\r\nAPI调用错误请重试");
+                        Log.Error("API error", $"api ret code {groupInfo.apiStatus.RetCode}");
+                        await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender), "\r\nAPI调用错误请重试");
                         return;
                     }
 
@@ -148,7 +148,7 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             }
             else
             {
-                await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender),
+                await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender),
                                                              "弟啊，你哪个服务器的");
                 return;
             }
@@ -176,10 +176,10 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             switch (DBHelper.GuildExists(eventArgs.SourceGroup))
             {
                 case 0:
-                    await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender), "\r\n此群并未标记为公会");
+                    await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender), "\r\n此群并未标记为公会");
                     return;
                 case -1:
-                    await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender), "\r\nERROR\r\n数据库错误");
+                    await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender), "\r\nERROR\r\n数据库错误");
                     return;
             }
 
@@ -237,10 +237,10 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             //从API获取成员信息cao 
             Log.Debug("Guild Mgr", "Get group member infos");
             var (apiStatus, groupMemberList) = await eventArgs.SourceGroup.GetGroupMemberList();
-            if (apiStatus != APIStatusType.OK)
+            if (apiStatus.RetCode != ApiStatusType.OK)
             {
-                Log.Error("API error", $"api ret code {(int) apiStatus}");
-                await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender), "\r\nAPI调用错误请重试");
+                Log.Error("API error", $"api ret code {apiStatus.RetCode}");
+                await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender), "\r\nAPI调用错误请重试");
                 return;
             }
 
@@ -266,39 +266,39 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             List<CQCode> responseMsg = new();
             if (databaseRet.Any(ret => ret.Value == 0)) //成员成功加入
             {
-                responseMsg.Add(CQCode.CQText("以下成员已加入:"));
+                responseMsg.Add(CQCodes.CQText("以下成员已加入:"));
                 foreach (long member in databaseRet.Where(member => member.Value == 0)
                                                    .Select(member => member.Key)
                                                    .ToList())
                 {
-                    responseMsg.Add(CQCode.CQText("\r\n"));
-                    responseMsg.Add(CQCode.CQAt(member));
+                    responseMsg.Add(CQCodes.CQText("\r\n"));
+                    responseMsg.Add(CQCodes.CQAt(member));
                 }
             }
 
             if (databaseRet.Any(ret => ret.Value == 1)) //成员已存在
             {
-                if (responseMsg.Count != 0) responseMsg.Add(CQCode.CQText("\r\n"));
-                responseMsg.Add(CQCode.CQText("以下成员已在公会中，仅更新信息:"));
+                if (responseMsg.Count != 0) responseMsg.Add(CQCodes.CQText("\r\n"));
+                responseMsg.Add(CQCodes.CQText("以下成员已在公会中，仅更新信息:"));
                 foreach (long member in databaseRet.Where(member => member.Value == 1)
                                                    .Select(member => member.Key)
                                                    .ToList())
                 {
-                    responseMsg.Add(CQCode.CQText("\r\n"));
-                    responseMsg.Add(CQCode.CQAt(member));
+                    responseMsg.Add(CQCodes.CQText("\r\n"));
+                    responseMsg.Add(CQCodes.CQAt(member));
                 }
             }
 
             if (databaseRet.Any(ret => ret.Value == -1)) //数据库错误
             {
-                if (responseMsg.Count != 0) responseMsg.Add(CQCode.CQText("\r\n"));
-                responseMsg.Add(CQCode.CQText("以下成员在加入时发生错误:"));
+                if (responseMsg.Count != 0) responseMsg.Add(CQCodes.CQText("\r\n"));
+                responseMsg.Add(CQCodes.CQText("以下成员在加入时发生错误:"));
                 foreach (long member in databaseRet.Where(member => member.Value == -1)
                                                    .Select(member => member.Key)
                                                    .ToList())
                 {
-                    responseMsg.Add(CQCode.CQText("\r\n"));
-                    responseMsg.Add(CQCode.CQAt(member));
+                    responseMsg.Add(CQCodes.CQText("\r\n"));
+                    responseMsg.Add(CQCodes.CQAt(member));
                 }
             }
 
@@ -321,10 +321,10 @@ namespace AntiRain.ChatModule.PcrGuildBattle
 
             //获取所有成员的信息
             var (apiStatus, groupMemberList) = await eventArgs.SourceGroup.GetGroupMemberList();
-            if (apiStatus != APIStatusType.OK)
+            if (apiStatus.RetCode != ApiStatusType.OK)
             {
-                Log.Error("API error", $"api ret code {(int) apiStatus}");
-                await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender), "\r\nAPI调用错误请重试");
+                Log.Error("API error", $"api ret code {apiStatus.RetCode}");
+                await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender), "\r\nAPI调用错误请重试");
                 return;
             }
 
@@ -352,39 +352,39 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             List<CQCode> responseMsg = new();
             if (databaseRet.Any(ret => ret.Value == 0)) //成员成功加入
             {
-                responseMsg.Add(CQCode.CQText("以下成员已加入:"));
+                responseMsg.Add(CQCodes.CQText("以下成员已加入:"));
                 foreach (long member in databaseRet.Where(member => member.Value == 0)
                                                    .Select(member => member.Key)
                                                    .ToList())
                 {
-                    responseMsg.Add(CQCode.CQText("\r\n"));
-                    responseMsg.Add(CQCode.CQAt(member));
+                    responseMsg.Add(CQCodes.CQText("\r\n"));
+                    responseMsg.Add(CQCodes.CQAt(member));
                 }
             }
 
             if (databaseRet.Any(ret => ret.Value == 1)) //成员已存在
             {
-                if (responseMsg.Count != 0) responseMsg.Add(CQCode.CQText("\r\n"));
-                responseMsg.Add(CQCode.CQText("以下成员已在公会中，仅更新信息:"));
+                if (responseMsg.Count != 0) responseMsg.Add(CQCodes.CQText("\r\n"));
+                responseMsg.Add(CQCodes.CQText("以下成员已在公会中，仅更新信息:"));
                 foreach (long member in databaseRet.Where(member => member.Value == 1)
                                                    .Select(member => member.Key)
                                                    .ToList())
                 {
-                    responseMsg.Add(CQCode.CQText("\r\n"));
-                    responseMsg.Add(CQCode.CQAt(member));
+                    responseMsg.Add(CQCodes.CQText("\r\n"));
+                    responseMsg.Add(CQCodes.CQAt(member));
                 }
             }
 
             if (databaseRet.Any(ret => ret.Value == -1)) //数据库错误
             {
-                if (responseMsg.Count != 0) responseMsg.Add(CQCode.CQText("\r\n"));
-                responseMsg.Add(CQCode.CQText("以下成员在加入时发生错误:"));
+                if (responseMsg.Count != 0) responseMsg.Add(CQCodes.CQText("\r\n"));
+                responseMsg.Add(CQCodes.CQText("以下成员在加入时发生错误:"));
                 foreach (long member in databaseRet.Where(member => member.Value == -1)
                                                    .Select(member => member.Key)
                                                    .ToList())
                 {
-                    responseMsg.Add(CQCode.CQText("\r\n"));
-                    responseMsg.Add(CQCode.CQAt(member));
+                    responseMsg.Add(CQCodes.CQText("\r\n"));
+                    responseMsg.Add(CQCodes.CQAt(member));
                 }
             }
 
@@ -461,39 +461,39 @@ namespace AntiRain.ChatModule.PcrGuildBattle
             List<CQCode> responseMsg = new();
             if (databaseRet.Any(ret => ret.Value == 0))
             {
-                responseMsg.Add(CQCode.CQText("以下成员已退出:"));
+                responseMsg.Add(CQCodes.CQText("以下成员已退出:"));
                 foreach (long member in databaseRet.Where(member => member.Value == 0)
                                                    .Select(member => member.Key)
                                                    .ToList())
                 {
-                    responseMsg.Add(CQCode.CQText("\r\n"));
-                    responseMsg.Add(CQCode.CQAt(member));
+                    responseMsg.Add(CQCodes.CQText("\r\n"));
+                    responseMsg.Add(CQCodes.CQAt(member));
                 }
             }
 
             if (databaseRet.Any(ret => ret.Value == 1))
             {
-                if (responseMsg.Count != 0) responseMsg.Add(CQCode.CQText("\r\n"));
-                responseMsg.Add(CQCode.CQText("以下成员并不在公会中:"));
+                if (responseMsg.Count != 0) responseMsg.Add(CQCodes.CQText("\r\n"));
+                responseMsg.Add(CQCodes.CQText("以下成员并不在公会中:"));
                 foreach (long member in databaseRet.Where(member => member.Value == 1)
                                                    .Select(member => member.Key)
                                                    .ToList())
                 {
-                    responseMsg.Add(CQCode.CQText("\r\n"));
-                    responseMsg.Add(CQCode.CQAt(member));
+                    responseMsg.Add(CQCodes.CQText("\r\n"));
+                    responseMsg.Add(CQCodes.CQAt(member));
                 }
             }
 
             if (databaseRet.Any(ret => ret.Value == -1))
             {
-                if (responseMsg.Count != 0) responseMsg.Add(CQCode.CQText("\r\n"));
-                responseMsg.Add(CQCode.CQText("以下成员在退出时发生错误:"));
+                if (responseMsg.Count != 0) responseMsg.Add(CQCodes.CQText("\r\n"));
+                responseMsg.Add(CQCodes.CQText("以下成员在退出时发生错误:"));
                 foreach (long member in databaseRet.Where(member => member.Value == -1)
                                                    .Select(member => member.Key)
                                                    .ToList())
                 {
-                    responseMsg.Add(CQCode.CQText("\r\n"));
-                    responseMsg.Add(CQCode.CQAt(member));
+                    responseMsg.Add(CQCodes.CQText("\r\n"));
+                    responseMsg.Add(CQCodes.CQAt(member));
                 }
             }
 

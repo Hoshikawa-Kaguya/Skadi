@@ -64,7 +64,7 @@ namespace AntiRain.ServerInterface
 
             Log.Info("AntiRain初始化", "启动反向WS服务器...");
             //初始化服务器
-            ISoraService server = SoraServiceFactory.CreateInstance(new ServerConfig
+            ISoraService server = SoraServiceFactory.CreateService(new ServerConfig
             {
                 Host                     = globalConfig.Location,
                 Port                     = globalConfig.Port,
@@ -72,6 +72,7 @@ namespace AntiRain.ServerInterface
                 UniversalPath            = globalConfig.UniversalPath,
                 HeartBeatTimeOut         = TimeSpan.FromSeconds(globalConfig.HeartBeatTimeOut),
                 ApiTimeOut               = TimeSpan.FromMilliseconds(globalConfig.OnebotApiTimeOut),
+                SuperUsers               = globalConfig.SuperUsers,
                 EnableSoraCommandManager = true
             });
 

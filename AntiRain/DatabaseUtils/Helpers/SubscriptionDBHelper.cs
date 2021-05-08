@@ -38,11 +38,12 @@ namespace AntiRain.DatabaseUtils.Helpers
             try
             {
                 using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                var                  ts       = updateTime.ToTimeStamp();
                 //查询是否存在相同或时间大于记录subscriptionId
                 return dbClient.Queryable<BiliDynamicSubscription>()
-                               .Where(lastDynamic => lastDynamic.SubscriptionId == biliUserId &&
-                                                     lastDynamic.Gid            == groupId    &&
-                                                     lastDynamic.UpdateTime     >= updateTime.ToTimeStamp())
+                               .Where(expression: lastDynamic => lastDynamic.SubscriptionId == biliUserId &&
+                                                                 lastDynamic.Gid            == groupId    &&
+                                                                 lastDynamic.UpdateTime     >= ts)
                                .Any();
             }
             catch (Exception e)
@@ -82,11 +83,12 @@ namespace AntiRain.DatabaseUtils.Helpers
                 }
                 else
                 {
+                    var ts = updateTime.ToTimeStamp();
                     //有记录更新时间
                     return
                         dbClient.Updateable<BiliDynamicSubscription>(newBiliDynamic =>
                                                                          newBiliDynamic.UpdateTime ==
-                                                                         updateTime.ToTimeStamp())
+                                                                         ts)
                                 .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId &&
                                                       biliDynamic.Gid            == groupId)
                                 .ExecuteCommandHasChange();

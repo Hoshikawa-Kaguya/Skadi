@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 using AntiRain.Config.ConfigModule;
 using AntiRain.IO;
 using PyLibSharp.Requests;
-using Sora.Entities.CQCodes;
+using Sora.Entities;
+using Sora.Entities.MessageElement;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
 
@@ -15,10 +16,9 @@ namespace AntiRain.Command.PixivSearch
 {
     public static class SaucenaoUtils
     {
-        public static async ValueTask<List<CQCode>> SearchByUrl(string apiKey, string url,
+        public static async ValueTask<MessageBody> SearchByUrl(string apiKey, string url,
                                                                 GroupMessageEventArgs eventArgs)
         {
-            List<CQCode> message = new();
             Log.Debug("pic", "send api request");
             var req =
                 await
@@ -29,28 +29,19 @@ namespace AntiRain.Command.PixivSearch
             var resCode = Convert.ToInt32(res?["header"]?["status"] ?? -1);
             Log.Debug("pic", $"get api result code [{resCode}]");
 
+            //API返回失败
             if (res == null || resCode != 0)
-            {
-                message.Add(CQCode.CQAt(eventArgs.Sender));
-                message.Add(CQCode.CQText("图片获取失败"));
-                return message;
-            }
+                return eventArgs.Sender.CQCodeAt() + "图片获取失败";
 
             var resData = res["results"]?.ToObject<List<SaucenaoResult>>();
 
+            //API返回空值
             if (resData == null)
-            {
-                message.Add(CQCode.CQAt(eventArgs.Sender));
-                message.Add(CQCode.CQText("处理API返回发生错误"));
-                return message;
-            }
+                return eventArgs.Sender.CQCodeAt() + "处理API返回发生错误";
 
+            //未找到图片
             if (resData.Count == 0)
-            {
-                message.Add(CQCode.CQAt(eventArgs.Sender));
-                message.Add(CQCode.CQText("查询到的图片相似度过低，请尝试别的图片"));
-                return message;
-            }
+                return eventArgs.Sender.CQCodeAt() + "查询到的图片相似度过低，请尝试别的图片";
 
             var parsedPic = resData.OrderByDescending(pic => Convert.ToDouble(pic.Header.Similarity))
                                    .First();
@@ -58,39 +49,31 @@ namespace AntiRain.Command.PixivSearch
 
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig userConfig))
             {
+                //用户配置获取失败
                 Log.Error("Config", "无法获取用户配置文件");
-                message.Add(CQCode.CQAt(eventArgs.Sender));
-                message.Add(CQCode.CQText("处理用户配置发生错误\r\nMessage:无法读取用户配置"));
-                return message;
+                return eventArgs.Sender.CQCodeAt() + "处理用户配置发生错误\r\nMessage:无法读取用户配置";
             }
 
             string picUrl;
             if (string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
             {
                 var (success, msg, urls) = await GetPixivCatInfo(parsedPic.PixivData.PixivId);
+                
+                //代理连接处理失败
                 if (!success)
-                {
-                    message.Add(CQCode.CQAt(eventArgs.Sender));
-                    message.Add(CQCode.CQText($"处理代理连接发生错误\r\nApi Message:{msg}"));
-                    return message;
-                }
-
+                    return eventArgs.Sender.CQCodeAt() + $"处理代理连接发生错误\r\nApi Message:{msg}";
+                
                 picUrl = urls[0];
             }
             else
             {
                 picUrl = $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{parsedPic.PixivData.PixivId}";
             }
-
-            message.Add(CQCode.CQAt(eventArgs.Sender));
-            message.Add(CQCode.CQText("\r\n"));
-            message.Add(CQCode.CQText($"图片名:{parsedPic.PixivData.Title}\r\n"));
-            message.Add(CQCode.CQImage(picUrl));
-            message.Add(CQCode.CQText($"id:{parsedPic.PixivData.PixivId}\r\n"));
-            message.Add(CQCode.CQText($"相似度:{parsedPic.Header.Similarity}%"));
-
-
-            return message;
+            
+            return eventArgs.Sender.CQCodeAt()                +
+                   $"\r\n图片名:{parsedPic.PixivData.Title}\r\n" +
+                   CQCodes.CQImage(picUrl)                    +
+                   $"id:{parsedPic.PixivData.PixivId}\r\n相似度:{parsedPic.Header.Similarity}%";
         }
 
         /// <summary>

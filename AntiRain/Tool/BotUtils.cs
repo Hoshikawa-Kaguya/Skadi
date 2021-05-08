@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using AntiRain.IO;
 using AntiRain.TypeEnum;
 using Sora.Entities;
-using Sora.Entities.CQCodes;
+using Sora.Entities.MessageElement;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
 
@@ -112,7 +112,7 @@ namespace AntiRain.Tool
             }
             else
             {
-                QQgroup?.SendGroupMessage(CQCode.CQAt(fromQQid), " 命令参数不全，请补充。");
+                QQgroup?.SendGroupMessage(CQCodes.CQAt(fromQQid), " 命令参数不全，请补充。");
                 return LenType.Illegal;
             }
         }
@@ -140,7 +140,7 @@ namespace AntiRain.Tool
         /// </summary>
         public static async ValueTask DatabaseFailedTips(GroupMessageEventArgs groupEventArgs)
         {
-            await groupEventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(groupEventArgs.Sender.Id),
+            await groupEventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(groupEventArgs.Sender.Id),
                                                               "\r\nERROR",
                                                               "\r\n数据库错误");
             Log.Error("database", "database error");

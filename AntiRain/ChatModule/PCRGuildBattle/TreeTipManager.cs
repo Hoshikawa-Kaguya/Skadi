@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Sora.Entities;
-using Sora.Entities.CQCodes;
+using Sora.Entities.MessageElement;
 
 namespace AntiRain.ChatModule.PCRGuildBattle
 {
@@ -83,16 +83,16 @@ namespace AntiRain.ChatModule.PCRGuildBattle
         {
             lock (treeList)
             {
-                Dictionary<Group, List<CQCode>> messageList = new();
+                Dictionary<Group, MessageBody> messageList = new();
                 //生成上树提示信息
                 foreach (var info in treeList.Where(info => !((DateTime.Now - info.updateTime).TotalSeconds < 10)))
                 {
                     if (messageList.All(group => @group.Key != info.treeGroup))
-                        messageList.Add(info.treeGroup, new List<CQCode>());
-                    messageList[info.treeGroup].Add(CQCode.CQAt(info.uid));
+                        messageList.Add(info.treeGroup, new MessageBody());
+                    messageList[info.treeGroup].Add(CQCodes.CQAt(info.uid));
                     messageList[info.treeGroup]
-                        .Add(CQCode.CQText($"已经上树{(DateTime.Now - info.updateTime).TotalMinutes:F0}min了!"));
-                    messageList[info.treeGroup].Add(CQCode.CQText("\r\n"));
+                        .Add(CQCodes.CQText($"已经上树{(DateTime.Now - info.updateTime).TotalMinutes:F0}min了!"));
+                    messageList[info.treeGroup].Add(CQCodes.CQText("\r\n"));
                 }
 
                 //发送上树提示信息

@@ -1,7 +1,7 @@
 using AntiRain.DatabaseUtils;
 using AntiRain.DatabaseUtils.Helpers.PCRDataDB;
 
-namespace AntiRain.Resource.PCRResource
+namespace AntiRain.Tool.PCRResource
 {
     /// <summary>
     /// 角色别名处理

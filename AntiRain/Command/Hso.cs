@@ -13,8 +13,10 @@ using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
 using Sora.Attributes.Command;
-using Sora.Entities.CQCodes;
+using Sora.Entities;
+using Sora.Entities.MessageElement;
 using Sora.Enumeration.ApiType;
+using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
 using static AntiRain.Tool.CheckInCD;
@@ -50,39 +52,111 @@ namespace AntiRain.Command
             if (CheckGroupBlock(userConfig, eventArgs)) return;
             if (Users.IsInCD(eventArgs.SourceGroup, eventArgs.Sender))
             {
-                await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender), "你是不是只会要色图(请等待CD冷却)");
+                await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender), "你是不是只会要色图(逊欸，冲的真快)");
                 return;
-            }
-
-            //检查色图文件夹大小
-            if (IOUtils.GetHsoSize() >= userConfig.HsoConfig.SizeLimit * 1024 * 1024)
-            {
-                Log.Warning("Hso", "色图文件夹超出大小限制，将清空文件夹");
-                Directory.Delete(IOUtils.GetHsoPath(), true);
             }
 
             await GiveMeSetu(userConfig.HsoConfig, eventArgs);
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] {"^让我康康 [0-9]+$"}, MatchType = MatchType.Regex)]
+        [GroupCommand(CommandExpressions = new[] {"^让我康康[0-9]+$"}, MatchType = MatchType.Regex)]
         public async void HsoPicIndexSearch(GroupMessageEventArgs eventArgs)
         {
             eventArgs.IsContinueEventChain = false;
-            string msgStr = eventArgs.Message.ToString()[5..];
+            string msgStr = eventArgs.Message.ToString()[4..];
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig userConfig))
             {
                 Log.Error("Config", "无法获取用户配置文件");
                 return;
             }
-
+            
             //TODO 支持非代理连接图片
             if (!string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
             {
-                await eventArgs.Reply(CQCode.CQImage($"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{msgStr}"));
+                await eventArgs.Reply("什么，有好康的");
+                var ret =
+                    await eventArgs.Reply(CQCodes.CQImage($"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{msgStr}"));
+                if (ret.apiStatus.RetCode == ApiStatusType.Failed)
+                {
+                    await eventArgs.Reply("逊欸，图都被删了");
+                }
+            }
+            else
+            {
+                await eventArgs.Reply("逊欸连服务器都没有(只支持代理服务器)");
             }
         }
 
+        [UsedImplicitly]
+        [GroupCommand(CommandExpressions = new []{@"^AD[0-9]+\s[0-9]+$"})]
+        public async void HsoAddPic(GroupMessageEventArgs eventArgs)
+        {
+            eventArgs.IsContinueEventChain = false;
+            //判断权限
+            if (eventArgs.SenderInfo.Role != MemberRoleType.SuperUser)
+            {
+                await eventArgs.Reply("权限不足拒绝执行");
+                return;
+            }
+
+            string[] picInfos = eventArgs.Message.RawText.Split(' ');
+            string   picId    = picInfos[0][2..];
+            string   picIndex = picInfos[1];
+            await eventArgs.Reply($"Adding[{picId}]...");
+            //读取用户配置
+            if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig userConfig))
+            {
+                Log.Error("Config", "无法获取用户配置文件");
+                await eventArgs.Reply($"Try load user config error");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(userConfig.HsoConfig.YukariApiKey))
+            {
+                Log.Error("apikey", "apikey is null");
+                await eventArgs.Reply("apikey is null");
+                return;
+            }
+
+            ReqResponse res = await Requests.GetAsync("https://api.yukari.one/setu/add_pic", new ReqParams
+            {
+                Params = new Dictionary<string, string>
+                {
+                    {"apikey", userConfig.HsoConfig.YukariApiKey},
+                    {"pid", picId},
+                    {"index", picIndex}
+                },
+                Timeout                   = 10000,
+                IsThrowErrorForStatusCode = false,
+                IsThrowErrorForTimeout    = false
+            });
+
+            if (res.StatusCode != HttpStatusCode.OK)
+            {
+                Log.Error("net", "net error");
+                await eventArgs.Reply("net error");
+                return;
+            }
+
+            var resData = res.Json();
+            if (resData == null)
+            {
+                Log.Error("api error", "api error (null response)]");
+                await eventArgs.Reply("api error (null response)]");
+                return;
+            }
+
+            if (Convert.ToInt32(resData["code"]) != 0)
+            {
+                Log.Error("api error", $"api error (code:{resData["code"]})]");
+                await eventArgs.Reply($"api error (code:{resData["code"]})]\r\n{resData["message"]}");
+                return;
+            }
+            
+            Log.Info("pic upload", "pic upload success");
+            await eventArgs.Reply($"success [{picId}]");
+        }
         #endregion
 
         #region 私有方法
@@ -211,13 +285,15 @@ namespace AntiRain.Command
                                                    ? string.Empty
                                                    : $"/{fileNameArgs[1].Split('.')[0]}");
                         Log.Debug("Get Proxy Url", proxyUrlBuilder);
-                        DownloadPicFromURL(proxyUrlBuilder.ToString(), response["data"]?[0], localPicPath, hso.UseCache,
-                                           hso.CardImage, eventArgs);
+                        await eventArgs.SourceGroup.SendGroupMessage(HsoMessageBuilder(response["data"]?[0],
+                                                                         hso.CardImage,
+                                                                         proxyUrlBuilder.ToString()));
                     }
                     else
                     {
-                        DownloadPicFromURL(picUrl, response["data"]?[0], localPicPath, hso.UseCache, hso.CardImage,
-                                           eventArgs);
+                        await eventArgs.SourceGroup.SendGroupMessage(HsoMessageBuilder(response["data"]?[0],
+                                                                         hso.CardImage,
+                                                                         picUrl));
                     }
                 }
             }
@@ -240,123 +316,8 @@ namespace AntiRain.Command
             string localPicPath = $"{picNames[randFile.Next(0, picNames.Length - 1)]}";
             Log.Debug("发送图片", localPicPath);
             await eventArgs.SourceGroup.SendGroupMessage(hso.CardImage
-                                                             ? CQCode.CQCardImage(localPicPath)
-                                                             : CQCode.CQImage(localPicPath));
-        }
-
-        /// <summary>
-        /// 下载图片保存到本地
-        /// </summary>
-        /// <param name="url">目标URL</param>
-        /// <param name="picInfo">图片信息</param>
-        /// <param name="receivePath">接收文件的地址</param>
-        /// <param name="useCache">是否启用本地缓存</param>
-        /// <param name="cardImg">使用装逼大图</param>
-        /// <param name="eventArgs">事件参数</param>
-        private void DownloadPicFromURL(string url, JToken picInfo, string receivePath, bool useCache, bool cardImg,
-                                        GroupMessageEventArgs eventArgs)
-        {
-            try
-            {
-                int      progressPercentage = 0;
-                long     bytesReceived      = 0;
-                DateTime flashTime          = DateTime.Now;
-                Console.WriteLine(@"开始从网络下载文件");
-                WebClient client = new WebClient();
-                //文件下载
-                client.DownloadProgressChanged += (sender, args) =>
-                                                  {
-                                                      if (progressPercentage == args.ProgressPercentage) return;
-                                                      progressPercentage = args.ProgressPercentage;
-                                                      Log
-                                                          .Debug("Download Pic",
-                                                                 $"Downloading {args.ProgressPercentage}% " +
-                                                                 $"({(args.BytesReceived - bytesReceived) / 1024.0 / ((DateTime.Now - flashTime).TotalMilliseconds / 1000)}KB/s) ");
-                                                      flashTime     = DateTime.Now;
-                                                      bytesReceived = args.BytesReceived;
-                                                  };
-                //文件下载完成
-                client.DownloadFileCompleted += async (sender, args) =>
-                                                {
-                                                    //检查是否出现空文件
-                                                    if (!File.Exists(receivePath)) return;
-                                                    FileInfo file = new FileInfo(receivePath);
-                                                    Log.Debug("File Size Check", file.Length);
-                                                    if (file.Length != 0)
-                                                    {
-                                                        Log.Info("Hso", "下载数据成功,发送图片");
-                                                        //发送消息
-                                                        var (code, _) =
-                                                            await eventArgs.SourceGroup
-                                                                           .SendGroupMessage(HsoMessageBuilder(picInfo,
-                                                                               cardImg, receivePath));
-                                                        Log.Debug("file", Path.GetFileName(receivePath));
-                                                        if (code == APIStatusType.OK)
-                                                        {
-                                                            Log.Info("Hso", "色图发送成功");
-                                                        }
-                                                        else
-                                                        {
-                                                            Log.Error("Hso", $"色图发送失败 code={(int) code}");
-                                                            if (code != APIStatusType.TimeOut)
-                                                                await eventArgs.SourceGroup
-                                                                               .SendGroupMessage($"哇奧色图不见了\r\n色图发送失败了\r\nAPI ERROR [{code}]");
-                                                        }
-
-                                                        return;
-                                                    }
-
-                                                    await eventArgs.SourceGroup
-                                                                   .SendGroupMessage($"哇奧色图不见了\r\nAPI ERROR [可能是画师把图删了.jpg]");
-                                                    Log.Error("Hso", "色图下载失败");
-                                                    //删除下载失败的文件
-                                                    try
-                                                    {
-                                                        file.Delete();
-                                                    }
-                                                    catch (Exception e)
-                                                    {
-                                                        Log.Error("IO", Log.ErrorLogBuilder(e));
-                                                    }
-                                                };
-                client.DownloadDataCompleted += async (sender, args) =>
-                                                {
-                                                    Log.Info("Hso", "下载数据成功,发送图片");
-                                                    try
-                                                    {
-                                                        StringBuilder ImgBase64Str = new StringBuilder();
-                                                        ImgBase64Str.Append("base64://");
-                                                        ImgBase64Str.Append(Convert.ToBase64String(args.Result));
-                                                        var (code, _) =
-                                                            await eventArgs.SourceGroup
-                                                                           .SendGroupMessage(HsoMessageBuilder(picInfo,
-                                                                               cardImg,
-                                                                               ImgBase64Str.ToString()));
-                                                        if (code == APIStatusType.OK) Log.Info("Hso", "色图发送成功");
-                                                        else
-                                                        {
-                                                            Log.Error("Hso", $"色图发送失败 code={(int) code}");
-                                                            if (code != APIStatusType.TimeOut)
-                                                                await eventArgs.SourceGroup
-                                                                               .SendGroupMessage($"哇奧色图不见了\r\n色图发送失败了\r\nAPI ERROR [{code}]");
-                                                        }
-
-                                                        Log.Debug("base64 length", ImgBase64Str.Length);
-                                                    }
-                                                    catch (Exception e)
-                                                    {
-                                                        Log.Error("pic send error", Log.ErrorLogBuilder(e));
-                                                    }
-                                                };
-                if (useCache)
-                    client.DownloadFileAsync(new Uri(url), receivePath);
-                else
-                    client.DownloadDataAsync(new Uri(url));
-            }
-            catch (Exception e)
-            {
-                Log.Error("色图下载失败", $"网络下载数据错误\n{Log.ErrorLogBuilder(e)}");
-            }
+                                                             ? CQCodes.CQCardImage(localPicPath)
+                                                             : CQCodes.CQImage(localPicPath));
         }
 
         /// <summary>
@@ -365,9 +326,9 @@ namespace AntiRain.Command
         /// <param name="picInfo">图片信息Json</param>
         /// <param name="cardImg">是否为装逼大图</param>
         /// <param name="picStr">图片路径/b64字符串</param>
-        private List<CQCode> HsoMessageBuilder(JToken picInfo, bool cardImg, string picStr)
+        private MessageBody HsoMessageBuilder(JToken picInfo, bool cardImg, string picStr)
         {
-            StringBuilder textBuilder = new StringBuilder();
+            StringBuilder textBuilder = new();
             textBuilder.Append(picInfo["title"]);
             textBuilder.Append("\r\nid:");
             textBuilder.Append(picInfo["pid"]);
@@ -380,11 +341,11 @@ namespace AntiRain.Command
             textBuilder.Append("\r\n作者:");
             textBuilder.Append(picInfo["author"]);
             //构建消息
-            List<CQCode> msg = new();
+            MessageBody msg = new();
             msg.Add(cardImg
-                        ? CQCode.CQCardImage(picStr)
-                        : CQCode.CQImage(picStr));
-            msg.Add(CQCode.CQText(textBuilder.ToString()));
+                        ? CQCodes.CQCardImage(picStr)
+                        : CQCodes.CQImage(picStr));
+            msg.Add(CQCodes.CQText(textBuilder.ToString()));
             return msg;
         }
 

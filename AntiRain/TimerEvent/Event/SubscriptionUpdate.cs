@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using AntiRain.DatabaseUtils.Helpers;
 using AntiRain.IO;
@@ -15,9 +14,9 @@ using BilibiliApi.Live.Enums;
 using BilibiliApi.Live.Models;
 using BilibiliApi.User;
 using BilibiliApi.User.Models;
-using Sora;
+using Sora.Entities;
 using Sora.Entities.Base;
-using Sora.Entities.CQCodes;
+using Sora.Entities.MessageElement;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
 using YukariToolBox.Time;
@@ -93,21 +92,13 @@ namespace AntiRain.TimerEvent.Event
                                         .ToList();
             if (targetGroup.Count == 0) return;
             //构建提示消息
-            List<CQCode>  msgList = new();
-            StringBuilder message = new();
-            message.Append(biliUserInfo.Name);
-            message.Append(" 正在直播！\r\n");
-            message.Append(biliUserInfo.LiveRoomInfo.Title);
-            msgList.AddText(message.ToString());
-            msgList.Add(CQCode.CQImage(biliUserInfo.LiveRoomInfo.CoverUrl));
-            message.Clear();
-            message.Append("直播间地址:");
-            message.Append(biliUserInfo.LiveRoomInfo.LiveUrl);
-            msgList.AddText(message.ToString());
+            MessageBody message = $"{biliUserInfo.Name} 正在直播！\r\n{biliUserInfo.LiveRoomInfo.Title}" +
+                                  CQCodes.CQImage(biliUserInfo.LiveRoomInfo.CoverUrl)               +
+                                  $"直播间地址:{biliUserInfo.LiveRoomInfo.LiveUrl}";
             foreach (var gid in targetGroup)
             {
                 Log.Info("直播订阅", $"获取到{biliUserInfo.Name}正在直播，向群[{gid}]发送动态信息");
-                await soraApi.SendGroupMessage(gid, msgList);
+                await soraApi.SendGroupMessage(gid, message);
             }
         }
 
@@ -182,24 +173,19 @@ namespace AntiRain.TimerEvent.Event
             }
 
             //构建消息
-            List<CQCode>  msgList    = new();
-            StringBuilder msgBuilder = new();
-            msgBuilder.Append("获取到了来自 ");
-            msgBuilder.Append(sender.UserName);
-            msgBuilder.Append(" 的动态：\r\n");
-            msgBuilder.Append(textMessage);
-            msgList.AddText(msgBuilder.ToString());
+            MessageBody message = new();
+            message.Add($"获取到了来自 {sender.UserName} 的动态：\r\n{textMessage}");
             //添加图片
-            imgList.ForEach(imgUrl => msgList.Add(CQCode.CQImage(imgUrl)));
-            msgBuilder.Clear();
-            msgBuilder.Append("\r\n更新时间：");
-            msgBuilder.Append(biliDynamic.UpdateTime.ToString("MM-dd HH:mm:ss"));
-            msgList.AddText(msgBuilder.ToString());
+            foreach (var img in imgList)
+            {
+                message.Add(CQCodes.CQImage(img));
+            }
+            message += CQCodes.CQText($"\r\n更新时间：{biliDynamic.UpdateTime:MM-dd HH:mm:ss}");
             //向未发送消息的群发送消息
             foreach (var targetGroup in targetGroups)
             {
                 Log.Info("动态获取", $"获取到{sender.UserName}的最新动态，向群{targetGroup}发送动态信息");
-                await soraApi.SendGroupMessage(targetGroup, msgList);
+                await soraApi.SendGroupMessage(targetGroup, message);
                 if (!dbHelper.UpdateDynamic(targetGroup, sender.Uid, biliDynamic.UpdateTime))
                     Log.Error("数据库", "更新动态记录时发生了数据库错误");
             }

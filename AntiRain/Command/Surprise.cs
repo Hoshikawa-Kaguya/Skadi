@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Sora.Attributes.Command;
-using Sora.Entities.CQCodes;
+using Sora.Entities.MessageElement;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
@@ -19,7 +19,7 @@ namespace AntiRain.Command
         public async ValueTask RandomNumber(GroupMessageEventArgs eventArgs)
         {
             Random rd = new();
-            await eventArgs.SourceGroup.SendGroupMessage(CQCode.CQAt(eventArgs.Sender.Id), "丢出了\r\n",
+            await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender.Id), "丢出了\r\n",
                                                          rd.Next(1, 6));
         }
 
@@ -36,7 +36,7 @@ namespace AntiRain.Command
         public async ValueTask RollWife(GroupMessageEventArgs eventArgs)
         {
             var (apiStatus, memberList) = await eventArgs.SourceGroup.GetGroupMemberList();
-            if (apiStatus != APIStatusType.OK)
+            if (apiStatus.RetCode != ApiStatusType.OK)
             {
                 Log.Error("api错误", $"api return {apiStatus}");
                 return;
@@ -51,9 +51,9 @@ namespace AntiRain.Command
             await eventArgs.Reply("10秒后我将at一位幸运群友成为你的老婆\r\n究竟是谁会这么幸运呢");
             await Task.Delay(10000);
             var rd = new Random();
-            await eventArgs.Reply(CQCode.CQAt(memberList[rd.Next(0, memberList.Count - 1)].UserId),
+            await eventArgs.Reply(CQCodes.CQAt(memberList[rd.Next(0, memberList.Count - 1)].UserId),
                                   "\r\n恭喜成为",
-                                  CQCode.CQAt(eventArgs.Sender),
+                                  CQCodes.CQAt(eventArgs.Sender),
                                   "的老婆 ~");
         }
 

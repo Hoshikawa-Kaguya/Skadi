@@ -1,14 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BilibiliApi.Video;
 using BilibiliApi.Video.Models;
 using JetBrains.Annotations;
-using Sora;
 using Sora.Attributes.Command;
-using Sora.Entities.CQCodes;
+using Sora.Entities;
+using Sora.Entities.MessageElement;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
@@ -77,21 +76,20 @@ namespace AntiRain.Command
             await eventArgs.Reply(GenReplyMessage(videoInfo));
         }
 
-        private static List<CQCode> GenReplyMessage(VideoInfo info)
+        private static MessageBody GenReplyMessage(VideoInfo info)
         {
-            List<CQCode>  sendMessage    = new();
+            
             StringBuilder messageBuilder = new();
-            messageBuilder.Append("Bilibili视频解析\r\n");
-            messageBuilder.Append($"[{info.Bid}(av{info.Aid})]\r\n");
-            sendMessage.AddText(messageBuilder.ToString());
-            messageBuilder.Clear();
-            sendMessage.Add(CQCode.CQImage(info.CoverUrl));
             messageBuilder.Append($"Link:https://b23.tv/{info.Bid}\r\n");
             messageBuilder.Append($"标题:{info.Title}\r\n");
             messageBuilder.Append($"简介:{info.Desc}\r\n");
             messageBuilder.Append($"UP:{info.AuthName}\r\nhttps://space.bilbili.com/{info.AuthUid}\r\n");
             messageBuilder.Append($"投稿时间:{info.PublishTime:yyyy-MM-dd HH:mm:ss}");
-            sendMessage.AddText(messageBuilder.ToString());
+
+            MessageBody sendMessage = $"Bilibili视频解析\r\n[{info.Bid}(av{info.Aid})]\r\n" +
+                                      CQCodes.CQImage(info.CoverUrl)                    +
+                                      messageBuilder.ToString();
+            
             return sendMessage;
         }
     }

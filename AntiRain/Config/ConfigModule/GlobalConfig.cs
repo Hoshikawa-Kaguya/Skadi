@@ -65,5 +65,10 @@ namespace AntiRain.Config.ConfigModule
         /// <para>API管理接口监听端口</para>
         /// </summary>
         public int AntiRainAPIPort { get; set; }
+        
+        /// <summary>
+        /// <para>机器人管理员用户组</para>
+        /// </summary>
+        public long[] SuperUsers { get; set; }
     }
 }

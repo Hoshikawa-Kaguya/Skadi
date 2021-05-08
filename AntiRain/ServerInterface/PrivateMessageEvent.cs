@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Sora.Entities.CQCodes;
+using Sora.Entities.MessageElement;
 using Sora.EventArgs.SoraEvent;
 
 namespace AntiRain.ServerInterface
@@ -18,7 +18,7 @@ namespace AntiRain.ServerInterface
             if (privateMessage.Message.RawText.Equals("在"))
             {
                 await privateMessage.Sender
-                                    .SendPrivateMessage(CQCode
+                                    .SendPrivateMessage(CQCodes
                                                             .CQImage("https://i.loli.net/2020/11/02/2OgZ1M6YNV5kntS.gif"));
             }
         }
