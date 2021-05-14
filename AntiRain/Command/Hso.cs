@@ -60,11 +60,13 @@ namespace AntiRain.Command
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] {"^让我康康[0-9]+$"}, MatchType = MatchType.Regex)]
+        [GroupCommand(CommandExpressions = new[] {@"^让我康康[0-9]+\s[0-9]+$"}, MatchType = MatchType.Regex)]
         public async void HsoPicIndexSearch(GroupMessageEventArgs eventArgs)
         {
             eventArgs.IsContinueEventChain = false;
-            string msgStr = eventArgs.Message.ToString()[4..];
+            string[] picInfos = eventArgs.Message.RawText.Split(' ');
+            string   picId    = picInfos[0][4..];
+            string   picIndex = picInfos[1];
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig userConfig))
             {
                 Log.Error("Config", "无法获取用户配置文件");
@@ -76,7 +78,7 @@ namespace AntiRain.Command
             {
                 await eventArgs.Reply("什么，有好康的");
                 var ret =
-                    await eventArgs.Reply(CQCodes.CQImage($"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{msgStr}"));
+                    await eventArgs.Reply(CQCodes.CQImage($"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{picId}/{picIndex}"));
                 if (ret.apiStatus.RetCode == ApiStatusType.Failed)
                 {
                     await eventArgs.Reply("逊欸，图都被删了");
@@ -108,7 +110,7 @@ namespace AntiRain.Command
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig userConfig))
             {
                 Log.Error("Config", "无法获取用户配置文件");
-                await eventArgs.Reply($"Try load user config error");
+                await eventArgs.Reply("Try load user config error");
                 return;
             }
 
@@ -119,7 +121,7 @@ namespace AntiRain.Command
                 return;
             }
 
-            ReqResponse res = await Requests.GetAsync("https://api.yukari.one/setu/add_pic", new ReqParams
+            ReqResponse res = await Requests.PostAsync("https://api.yukari.one/setu/add_pic", new ReqParams
             {
                 Params = new Dictionary<string, string>
                 {
