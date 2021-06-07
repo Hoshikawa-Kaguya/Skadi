@@ -8,8 +8,6 @@ ModuleSwitch:
   HaveFun: true
   # 随机色图
   Hso: false
-  # 公会战管理
-  PCR_GuildManager: false
   # 公会排名查询
   PCR_GuildRank: false
 
@@ -42,6 +40,5 @@ SubscriptionConfig:
   # 群组订阅设置
   GroupsConfig:
     - GroupId: [] # 群号，可以一次设置多个群
-      PCR_Subscription: false # PCR国服动态订阅
       SubscriptionId: [] # 订阅的B站用户ID
       LiveSubscriptionId: [] # 直播订阅的B站用户ID

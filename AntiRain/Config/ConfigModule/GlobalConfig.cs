@@ -52,11 +52,6 @@ namespace AntiRain.Config.ConfigModule
         public uint OnebotApiTimeOut { get; set; }
 
         /// <summary>
-        /// 资源数据库配置
-        /// </summary>
-        public ResourceConfig ResourceConfig { set; get; }
-
-        /// <summary>
         /// <para>API管理接口监听地址</para>
         /// </summary>
         public string AntiRainAPILocation { get; set; }

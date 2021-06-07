@@ -30,11 +30,6 @@ HeartBeatTimeOut: 10
 # 默认为2000无需修改
 OnebotApiTimeOut: 2000
 
-# 资源选项
-ResourceConfig:
-  # 使用角色名数据库
-  UseCharaDatabase: true
-
 # API管理接口监听地址
 AntiRainAPILocation: "0.0.0.0"
 

@@ -1,7 +1,6 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using AntiRain.DatabaseUtils;
 using AntiRain.IO;
 using AntiRain.TimerEvent;
 using AntiRain.Tool;
@@ -41,16 +40,6 @@ namespace AntiRain.ServerInterface
 
             //初始化资源数据库
             Log.Info("AntiRain初始化", "初始化资源...");
-            DatabaseInit.GlobalDataInit();
-
-            //检查是否开启角色数据下载
-            //TODO 咕一段时间
-            // if (globalConfig.ResourceConfig.UseCharaDatabase)
-            // {
-            //     //更新PCR角色数据库
-            //     CharaParser charaParser = new CharaParser();
-            //     if(!await charaParser.UpdateCharaNameByCloud()) Log.Error("AntiRain初始化","更新角色数据库失败");
-            // }
 
             //初始化字符编码
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -79,8 +68,6 @@ namespace AntiRain.ServerInterface
             //服务器回调
             //初始化
             server.Event.OnClientConnect += InitalizationEvent.Initalization;
-            //群聊事件
-            server.Event.OnGroupMessage += GroupMessageEvent.GroupMessageParse;
             //私聊事件
             server.Event.OnPrivateMessage += PrivateMessageEvent.PrivateMessageParse;
             //群聊戳一戳

@@ -39,7 +39,7 @@ namespace AntiRain.Command
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] {@"\[CQ:json,data=.+\]"},
+        [GroupCommand(CommandExpressions = new[] {@"https://b23\.tv/[a-zA-Z0-9]+"},
                       MatchType          = MatchType.Regex,
                       Priority           = 0)]
         public static async ValueTask VideoInfoByMiniApp(GroupMessageEventArgs eventArgs)
@@ -49,8 +49,7 @@ namespace AntiRain.Command
             var   videoUrlStr = urlRegex.Match(eventArgs.Message.RawText).Value;
             if (string.IsNullOrEmpty(videoUrlStr)) return;
             //网络请求获取跳转地址
-            var handler = new HttpClientHandler();
-            handler.AllowAutoRedirect = false;
+            var handler  = new HttpClientHandler {AllowAutoRedirect = false};
             var client   = new HttpClient(handler);
             var response = await client.GetAsync(videoUrlStr);
             //解析id
@@ -58,7 +57,6 @@ namespace AntiRain.Command
             var   videoIdStr = idRegex.Match(response.Headers.Location?.ToString() ?? string.Empty).Value;
             if (string.IsNullOrEmpty(videoIdStr))
             {
-                await eventArgs.Reply("小程序解析发生错误");
                 Log.Error("Mini App", "解析ID为空");
                 return;
             }

@@ -32,7 +32,6 @@ namespace AntiRain.DatabaseUtils.Helpers
         /// <param name="groupId">群号</param>
         /// <param name="biliUserId">B站用户ID</param>
         /// <param name="updateTime">当前获取的记录</param>
-        /// <returns></returns>
         public bool IsLatestDynamic(long groupId, long biliUserId, DateTime updateTime)
         {
             try

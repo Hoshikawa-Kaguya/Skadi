@@ -62,37 +62,5 @@ namespace AntiRain.DatabaseUtils
                 Environment.Exit(-1);
             }
         }
-
-        public static void GlobalDataInit()
-        {
-            //获取数据库路径
-            string DBPath = SugarUtils.GetDataDBPath(SugarUtils.GlobalResDBName);
-            Log.Debug("IO", $"获取数据路径{DBPath}");
-            //检擦文件是否存在
-            IOUtils.CheckFileExists(DBPath);
-            //创建数据库链接
-            SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
-
-            try
-            {
-                if (!SugarUtils.TableExists<RediveDBVersion>(dbClient))
-                {
-                    Log.Warning("数据库初始化", "未找到版本记录表 - 创建一个新表");
-                    SugarUtils.CreateTable<RediveDBVersion>(dbClient);
-                }
-
-                if (!SugarUtils.TableExists<PCRChara>(dbClient))
-                {
-                    Log.Warning("数据库初始化", "未找到角色资源表 - 创建一个新表");
-                    SugarUtils.CreateTable<PCRChara>(dbClient);
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Fatal("数据库初始化错误", Log.ErrorLogBuilder(e));
-                Thread.Sleep(5000);
-                Environment.Exit(-1);
-            }
-        }
     }
 }

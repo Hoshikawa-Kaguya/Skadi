@@ -35,11 +35,6 @@ namespace AntiRain.Config.ConfigModule
         public bool HaveFun { set; get; }
 
         /// <summary>
-        /// 会战管理器模块
-        /// </summary>
-        public bool PCR_GuildManager { set; get; }
-
-        /// <summary>
         /// 公会排名查询
         /// </summary>
         public bool PCR_GuildRank { set; get; }
