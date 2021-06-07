@@ -44,9 +44,6 @@ namespace AntiRain.ServerInterface
             //初始化字符编码
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            //指令匹配初始化
-            Command.CommandAdapter.PCRGuildBattlecmdResourseInit();
-
             //启动机器人WebAPI服务器
             Log.Info("AntiRain初始化", "启动机器人WebAPI服务器...");
             ConsoleInterface = new ConsoleInterface(globalConfig.AntiRainAPILocation, globalConfig.AntiRainAPIPort);
