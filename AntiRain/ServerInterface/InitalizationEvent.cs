@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
+using AntiRain.Config;
 using AntiRain.DatabaseUtils;
-using AntiRain.IO;
 using AntiRain.TimerEvent;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;

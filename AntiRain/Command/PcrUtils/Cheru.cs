@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using AntiRain.IO;
+using AntiRain.Config;
 using JetBrains.Annotations;
 using Sora.Attributes.Command;
 using Sora.Enumeration;

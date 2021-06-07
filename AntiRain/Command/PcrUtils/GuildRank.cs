@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using AntiRain.Config;
 using AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
@@ -28,6 +29,7 @@ namespace AntiRain.Command.PcrUtils
                       MatchType          = MatchType.Regex)]
         public static async ValueTask KyoukaRank(GroupMessageEventArgs eventArgs)
         {
+            if(!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config) && !config.ModuleSwitch.PCR_GuildRank) return;
             //网络响应
             JToken response;
             //获取公会名

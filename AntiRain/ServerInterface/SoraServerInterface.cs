@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using AntiRain.IO;
+using AntiRain.Config;
 using AntiRain.TimerEvent;
 using AntiRain.Tool;
 using AntiRain.WebConsole;

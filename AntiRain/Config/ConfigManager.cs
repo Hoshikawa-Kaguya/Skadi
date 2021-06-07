@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading;
 using AntiRain.Config.ConfigModule;
 using AntiRain.Config.Res;
+using AntiRain.IO;
 using SharpYaml.Serialization;
 using YukariToolBox.FormatLog;
 
-namespace AntiRain.IO
+namespace AntiRain.Config
 {
     internal static class ConfigManager
     {
