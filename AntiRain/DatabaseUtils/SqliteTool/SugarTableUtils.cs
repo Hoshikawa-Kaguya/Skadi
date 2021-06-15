@@ -1,22 +1,22 @@
+using System;
 using System.Reflection;
 using SqlSugar;
 
 namespace AntiRain.DatabaseUtils.SqliteTool
 {
-    internal class SugarTableUtils
+    internal static class SugarTableUtils
     {
         #region SugarTable辅助方法
 
         /// <summary>
         /// 获取表名
         /// </summary>
-        /// <typeparam name="TableClass">表格实体</typeparam>
+        /// <param name="tableType">表格类</param>
         /// <returns>表名</returns>
-        public static string GetTableName<TableClass>()
+        public static string GetTableName(this Type tableType)
         {
-            return (typeof(TableClass).GetCustomAttribute<SugarTable>() ??
-                    new SugarTable(typeof(TableClass).Name))
-                .TableName;
+            return (tableType.GetCustomAttribute<SugarTable>() ??
+                    new SugarTable(tableType.Name)).TableName;
         }
 
         #endregion

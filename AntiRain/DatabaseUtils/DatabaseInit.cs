@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using AntiRain.DatabaseUtils.SqliteTool;
 using AntiRain.IO;
@@ -25,34 +26,16 @@ namespace AntiRain.DatabaseUtils
 
             try
             {
-                if (!SugarUtils.TableExists<MemberInfo>(dbClient)) //成员状态表的初始化
-                {
-                    Log.Warning("数据库初始化", "未找到成员状态表 - 创建一个新表");
-                    SugarUtils.CreateTable<MemberInfo>(dbClient);
-                }
+                //获取所有表格类
+                var tables = typeof(Tables).GetNestedTypes().Where(t => t.IsClass).ToList();
 
-                if (!SugarUtils.TableExists<BiliDynamicSubscription>(dbClient)) //动态记录表的初始化
+                //检查数据库表格
+                foreach (var table in tables)
                 {
-                    Log.Warning("数据库初始化", "未找到动态订阅表 - 创建一个新表");
-                    SugarUtils.CreateTable<BiliDynamicSubscription>(dbClient);
-                }
-
-                if (!SugarUtils.TableExists<GuildBattleBoss>(dbClient)) //会战数据表的初始化
-                {
-                    Log.Warning("数据库初始化", "未找到会战数据表 - 创建一个新表");
-                    SugarUtils.CreateTable<GuildBattleBoss>(dbClient);
-                }
-
-                if (!SugarUtils.TableExists<BiliLiveSubscription>(dbClient))
-                {
-                    Log.Warning("数据库初始化", "未找到直播订阅表 - 创建一个新表");
-                    SugarUtils.CreateTable<BiliLiveSubscription>(dbClient);
-                }
-
-                if (!SugarUtils.TableExists<GuildInfo>(dbClient)) //会战状态表的初始化
-                {
-                    Log.Warning("数据库初始化", "未找到会战状态表 - 创建一个新表");
-                    SugarUtils.CreateTable<GuildInfo>(dbClient);
+                    Log.Debug("数据库初始化", $"检查表[{table.Name}]");
+                    if (table.TableExists(dbClient)) continue;
+                    Log.Warning("数据库初始化", $"未找表[{table.Name}],创建新表");
+                    table.CreateTable(dbClient);
                 }
             }
             catch (Exception exception)

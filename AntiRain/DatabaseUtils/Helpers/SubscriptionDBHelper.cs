@@ -4,6 +4,7 @@ using BilibiliApi.Live.Enums;
 using SqlSugar;
 using YukariToolBox.FormatLog;
 using YukariToolBox.Time;
+using static AntiRain.DatabaseUtils.Tables;
 
 namespace AntiRain.DatabaseUtils.Helpers
 {

@@ -68,16 +68,16 @@ namespace AntiRain.DatabaseUtils.SqliteTool
         /// <summary>
         /// 删除表
         /// </summary>
-        /// <typeparam name="TableClass">自定义表格类</typeparam>
+        /// <param name="tableType">自定义表格类</param>
         /// <param name="sugarClient">SqlSugarClient</param>
         /// <param name="tableName">表名，为空值则为默认值</param>
         /// <returns>影响的记录数</returns>
-        public static int DeletTable<TableClass>(SqlSugarClient sugarClient, string tableName = null)
+        public static int DeletTable(this Type tableType, SqlSugarClient sugarClient, string tableName = null)
         {
             if (sugarClient == null) throw new NullReferenceException("null SqlSugarClient");
             using IDbCommand cmd = sugarClient.Ado.Connection.CreateCommand();
             //检查表名
-            if (string.IsNullOrEmpty(tableName)) tableName = SugarTableUtils.GetTableName<TableClass>();
+            if (string.IsNullOrEmpty(tableName)) tableName = tableType.GetTableName();
             cmd.CommandText = $"DROP TABLE {tableName}";
             //检查数据库链接
             sugarClient.Ado.CheckConnection();
@@ -90,19 +90,19 @@ namespace AntiRain.DatabaseUtils.SqliteTool
         /// 创建新表，返回影响的记录数
         /// 本方法只用于创建包含联合主键的表
         /// </summary>
-        /// <typeparam name="TableClass">自定义表格类</typeparam>
+        /// <param name="tableType">自定义表格类</param>
         /// <param name="sugarClient">SqlSugarClient</param>
         /// <param name="tableName">表名，为空值则为默认值</param>
         /// <returns>影响的记录数</returns>
-        public static int CreateTable<TableClass>(SqlSugarClient sugarClient, string tableName = null)
+        public static int CreateTable(this Type tableType, SqlSugarClient sugarClient, string tableName = null)
         {
             if (sugarClient == null) throw new NullReferenceException("null SqlSugarClient");
             using IDbCommand cmd = sugarClient.Ado.Connection.CreateCommand();
             //检查表名
-            if (string.IsNullOrEmpty(tableName)) tableName = SugarTableUtils.GetTableName<TableClass>();
+            if (string.IsNullOrEmpty(tableName)) tableName = tableType.GetTableName();
             //写入创建新表指令
             cmd.CommandText = $"CREATE TABLE {tableName} (";
-            PropertyInfo[] properties   = typeof(TableClass).GetProperties();
+            PropertyInfo[] properties   = tableType.GetProperties();
             int            i            = 0;
             List<string>   primaryKeys  = new();
             bool           haveIdentity = false;
@@ -138,15 +138,15 @@ namespace AntiRain.DatabaseUtils.SqliteTool
         /// <summary>
         /// 查找是否存在同名表
         /// </summary>
-        /// <typeparam name="TableClass">自定义表格类</typeparam>
+        /// <param name="tableType">自定义表格类</param>
         /// <param name="sugarClient">SqlSugarClient</param>
         /// <param name="tableName">表名可为空</param>
         /// <returns>返回True/False代表是否存在</returns>
-        public static bool TableExists<TableClass>(SqlSugarClient sugarClient, string tableName = null)
+        public static bool TableExists(this Type tableType, SqlSugarClient sugarClient, string tableName = null)
         {
             if (sugarClient == null) throw new NullReferenceException("null SqlSugarClient");
             //检查表名
-            if (string.IsNullOrEmpty(tableName)) tableName = SugarTableUtils.GetTableName<TableClass>();
+            if (string.IsNullOrEmpty(tableName)) tableName = tableType.GetTableName();
             //获取所有表的信息
 
             //ORM的返回值会返回不存在的表，暂时弃用

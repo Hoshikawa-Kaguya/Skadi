@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using AntiRain.Config;
-using AntiRain.DatabaseUtils.Helpers.PCRGuildBattleDB;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
@@ -33,7 +32,9 @@ namespace AntiRain.Command.PcrUtils
             //网络响应
             JToken response;
             //获取公会名
-            var guildName = GetGuildName(eventArgs, 4);
+            string guildName = eventArgs.Message.RawText[4..];
+
+            Log.Debug("guild rank", $"get guild name[{guildName}]");
             if (string.IsNullOrEmpty(guildName))
             {
                 await eventArgs.Reply("此群未被记录为公会\r\n请建会后再查询或输入公会名进行查询");
@@ -132,30 +133,6 @@ namespace AntiRain.Command.PcrUtils
                 await eventArgs.Reply($"在处理数据时发生了错误，请请向开发者反馈问题\n{e.Message}");
                 Log.Error("JSON数据读取错误", e);
             }
-        }
-
-        #endregion
-
-        #region 私有方法
-
-        /// <summary>
-        /// 获取所在公会名
-        /// </summary>
-        private static string GetGuildName(GroupMessageEventArgs eventArgs, int commandLen)
-        {
-            string guildName;
-            if (eventArgs.Message.RawText.Length <= commandLen)
-            {
-                var guildDb = new GuildManagerDBHelper(eventArgs.LoginUid);
-                guildName = guildDb.GetGuildName(eventArgs.SourceGroup);
-            }
-            else
-            {
-                guildName = eventArgs.Message.RawText[commandLen..];
-            }
-
-            Log.Debug("guild rank", $"get guild name[{guildName}]");
-            return guildName;
         }
 
         #endregion
