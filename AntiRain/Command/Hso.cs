@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AntiRain.Config;
 using AntiRain.Config.ConfigModule;
+using AntiRain.DatabaseUtils.Helpers;
 using AntiRain.IO;
 using AntiRain.Tool;
 using JetBrains.Annotations;
@@ -53,10 +54,16 @@ namespace AntiRain.Command
             if (CheckGroupBlock(userConfig, eventArgs)) return;
             if (Users.IsInCD(eventArgs.SourceGroup, eventArgs.Sender))
             {
-                await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender), "你是不是只会要色图(逊欸，冲的真快)");
+                await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender),
+                                                             "你是不是只会要色图(逊欸，冲的真快)");
                 return;
             }
 
+            //刷新数据库计数
+            var hsoDbHelper = new HsoDBHelper(eventArgs.LoginUid);
+            if (!hsoDbHelper.AddOrUpdate(eventArgs.Sender, eventArgs.SourceGroup)) 
+                await eventArgs.Reply("数据库错误(count)");
+            
             await GiveMeSetu(userConfig.HsoConfig, eventArgs);
         }
 
@@ -65,9 +72,9 @@ namespace AntiRain.Command
         public async void HsoPicIndexSearch(GroupMessageEventArgs eventArgs)
         {
             eventArgs.IsContinueEventChain = false;
-            string[] picInfos = eventArgs.Message.RawText.Split(' ');
-            string   picId    = picInfos[0][4..];
-            string   picIndex = picInfos[1];
+            var picInfos = eventArgs.Message.RawText.Split(' ');
+            var picId    = picInfos[0][4..];
+            var picIndex = picInfos[1];
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig userConfig))
             {
                 Log.Error("Config", "无法获取用户配置文件");
@@ -92,6 +99,35 @@ namespace AntiRain.Command
         }
 
         [UsedImplicitly]
+        [GroupCommand(CommandExpressions = new []{"hso"}, MatchType = MatchType.Full)]
+        public async void HsoRank(GroupMessageEventArgs eventArgs)
+        {
+            eventArgs.IsContinueEventChain = false;
+            var hsoDbHelper = new HsoDBHelper(eventArgs.LoginUid);
+            if (!hsoDbHelper.GetGroupRank(eventArgs.SourceGroup, out var rankList))
+            {
+                await eventArgs.Reply("数据库错误(count)");
+                return;
+            }
+
+            if (rankList == null || rankList.Count == 0)
+            {
+                await eventArgs.Reply("你群连个色批都没有");
+            }
+            else
+            {
+                var message = new MessageBody {"让我康康到底谁最能冲\r\n"};
+                foreach (var count in rankList)
+                {
+                    message.AddRange(count.Uid.ToAt() + $"冲了{count.Count}次" + "\r\n");
+                }
+                //删去多余的换行
+                message.RemoveAt(message.Count - 1);
+                await eventArgs.Reply(message);
+            }
+        }
+        
+        [UsedImplicitly]
         [GroupCommand(CommandExpressions = new []{@"^AD[0-9]+\s[0-9]+$"})]
         public async void HsoAddPic(GroupMessageEventArgs eventArgs)
         {
@@ -103,9 +139,9 @@ namespace AntiRain.Command
                 return;
             }
 
-            string[] picInfos = eventArgs.Message.RawText.Split(' ');
-            string   picId    = picInfos[0][2..];
-            string   picIndex = picInfos[1];
+            var picInfos = eventArgs.Message.RawText.Split(' ');
+            var picId    = picInfos[0][2..];
+            var picIndex = picInfos[1];
             await eventArgs.Reply($"Adding[{picId}]...");
             //读取用户配置
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig userConfig))
