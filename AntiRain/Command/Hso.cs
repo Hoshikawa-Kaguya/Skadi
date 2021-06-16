@@ -99,7 +99,7 @@ namespace AntiRain.Command
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new []{"hso"}, MatchType = MatchType.Full)]
+        [GroupCommand(CommandExpressions = new []{"来点色批"}, MatchType = MatchType.Full)]
         public async void HsoRank(GroupMessageEventArgs eventArgs)
         {
             eventArgs.IsContinueEventChain = false;
