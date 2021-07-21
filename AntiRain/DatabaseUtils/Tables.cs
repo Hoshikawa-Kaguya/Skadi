@@ -38,7 +38,7 @@ namespace AntiRain.DatabaseUtils
         }
 
         #endregion
-        
+
         /// <summary>
         /// 老色批数据库
         /// 看看谁天天看色图
@@ -48,10 +48,10 @@ namespace AntiRain.DatabaseUtils
         {
             [SugarColumn(ColumnName = "gid", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
             public long Gid { set; get; }
-            
+
             [SugarColumn(ColumnName = "uid", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
             public long Uid { get; set; }
-            
+
             [SugarColumn(ColumnName = "count", ColumnDataType = "INTEGER")]
             public int Count { get; set; }
         }

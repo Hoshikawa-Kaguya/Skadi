@@ -54,16 +54,16 @@ namespace AntiRain.Command
             if (CheckGroupBlock(userConfig, eventArgs)) return;
             if (Users.IsInCD(eventArgs.SourceGroup, eventArgs.Sender))
             {
-                await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender),
+                await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender) +
                                                              "你是不是只会要色图(逊欸，冲的真快)");
                 return;
             }
 
             //刷新数据库计数
             var hsoDbHelper = new HsoDBHelper(eventArgs.LoginUid);
-            if (!hsoDbHelper.AddOrUpdate(eventArgs.Sender, eventArgs.SourceGroup)) 
+            if (!hsoDbHelper.AddOrUpdate(eventArgs.Sender, eventArgs.SourceGroup))
                 await eventArgs.Reply("数据库错误(count)");
-            
+
             await GiveMeSetu(userConfig.HsoConfig, eventArgs);
         }
 
@@ -80,16 +80,23 @@ namespace AntiRain.Command
                 Log.Error("Config", "无法获取用户配置文件");
                 return;
             }
-            
+
             //TODO 支持非代理连接图片
             if (!string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
             {
                 await eventArgs.Reply("什么，有好康的");
                 var ret =
-                    await eventArgs.Reply(CQCodes.CQImage($"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{picId}/{picIndex}"));
-                if (ret.apiStatus.RetCode == ApiStatusType.Failed)
+                    await
+                        eventArgs.Reply(CQCodes
+                                            .CQImage($"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{picId}/{picIndex}"),
+                                        TimeSpan.FromSeconds(10));
+                if (ret.apiStatus.RetCode != ApiStatusType.OK)
                 {
                     await eventArgs.Reply("逊欸，图都被删了");
+                }
+                else
+                {
+                    await eventArgs.SoraApi.RecallMessage(ret.messageId);
                 }
             }
             else
@@ -99,7 +106,7 @@ namespace AntiRain.Command
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new []{"来点色批"}, MatchType = MatchType.Full)]
+        [GroupCommand(CommandExpressions = new[] {"来点色批"}, MatchType = MatchType.Full)]
         public async void HsoRank(GroupMessageEventArgs eventArgs)
         {
             eventArgs.IsContinueEventChain = false;
@@ -121,14 +128,15 @@ namespace AntiRain.Command
                 {
                     message.AddRange(count.Uid.ToAt() + $"冲了{count.Count}次" + "\r\n");
                 }
+
                 //删去多余的换行
                 message.RemoveAt(message.Count - 1);
                 await eventArgs.Reply(message);
             }
         }
-        
+
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new []{@"^AD[0-9]+\s[0-9]+$"})]
+        [GroupCommand(CommandExpressions = new[] {@"^AD[0-9]+\s[0-9]+$"})]
         public async void HsoAddPic(GroupMessageEventArgs eventArgs)
         {
             eventArgs.IsContinueEventChain = false;
@@ -192,10 +200,11 @@ namespace AntiRain.Command
                 await eventArgs.Reply($"api error (code:{resData["code"]})]\r\n{resData["message"]}");
                 return;
             }
-            
+
             Log.Info("pic upload", "pic upload success");
             await eventArgs.Reply($"success [{picId}]");
         }
+
         #endregion
 
         #region 私有方法

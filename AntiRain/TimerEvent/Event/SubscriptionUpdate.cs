@@ -180,6 +180,7 @@ namespace AntiRain.TimerEvent.Event
             {
                 message.Add(CQCodes.CQImage(img));
             }
+
             message += CQCodes.CQText($"\r\n更新时间：{biliDynamic.UpdateTime:MM-dd HH:mm:ss}");
             //向未发送消息的群发送消息
             foreach (var targetGroup in targetGroups)

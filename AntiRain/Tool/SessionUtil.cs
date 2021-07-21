@@ -31,13 +31,13 @@ namespace AntiRain.Tool
             switch (BotUtils.CheckForLength(eventArgs.ToCommandArgs(), 0))
             {
                 case LenType.Extra:
-                    await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender.Id),
+                    await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender.Id) +
                                                                  "\r\n听不见！重来！（有多余参数）");
                     return false;
                 case LenType.Legitimate:
                     return true;
                 default:
-                    await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender.Id),
+                    await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender.Id) +
                                                                  "发生未知错误，请联系机器人管理员");
                     Log.Error("Unknown error", "LenType");
                     return false;
@@ -64,7 +64,7 @@ namespace AntiRain.Tool
             if (eventArgs.IsAdminSession()) return true;
             else
             {
-                await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender.Id),
+                await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender.Id) +
                                                              " 你没有执行此指令的权限");
                 Log.Warning($"会战[群:{eventArgs.SourceGroup.Id}]", $"群成员{eventArgs.SenderInfo.Nick}正在尝试执行指令{cmdTypeStr}");
                 return false;

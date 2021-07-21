@@ -76,7 +76,6 @@ namespace AntiRain.Command
 
         private static MessageBody GenReplyMessage(VideoInfo info)
         {
-            
             StringBuilder messageBuilder = new();
             messageBuilder.Append($"Link:https://b23.tv/{info.Bid}\r\n");
             messageBuilder.Append($"标题:{info.Title}\r\n");
@@ -87,7 +86,7 @@ namespace AntiRain.Command
             MessageBody sendMessage = $"Bilibili视频解析\r\n[{info.Bid}(av{info.Aid})]\r\n" +
                                       CQCodes.CQImage(info.CoverUrl)                    +
                                       messageBuilder.ToString();
-            
+
             return sendMessage;
         }
     }

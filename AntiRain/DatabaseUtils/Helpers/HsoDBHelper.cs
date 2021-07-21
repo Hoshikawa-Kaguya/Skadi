@@ -47,6 +47,7 @@ namespace AntiRain.DatabaseUtils.Helpers
                                                     member.Uid == userId)
                                    .ExecuteCommandHasChange();
                 }
+
                 //没有记录则插入新纪录
                 return
                     dbClient.Insertable(new HsoCount()
@@ -86,7 +87,7 @@ namespace AntiRain.DatabaseUtils.Helpers
                 return false;
             }
         }
-        
+
         #endregion
     }
 }

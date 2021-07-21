@@ -20,8 +20,8 @@ namespace AntiRain.ServerInterface
             if (groupPokeEventArgs.TargetUser == groupPokeEventArgs.LoginUid)
             {
                 if (!Users.IsInCD(groupPokeEventArgs.SourceGroup, groupPokeEventArgs.SendUser))
-                    await groupPokeEventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(groupPokeEventArgs.SendUser),
-                                                                          "\r\n你今晚必被爽哥杀害\r\n",
+                    await groupPokeEventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(groupPokeEventArgs.SendUser) +
+                                                                          "\r\n你今晚必被爽哥杀害\r\n"                       +
                                                                           CQCodes
                                                                               .CQImage("https://i.loli.net/2020/10/20/zWPyocxFEVp2tDT.jpg"));
                 else

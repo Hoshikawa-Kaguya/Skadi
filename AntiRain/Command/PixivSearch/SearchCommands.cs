@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using Sora.Attributes.Command;
 using Sora.Entities;
 using Sora.Enumeration;
+using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
 using static AntiRain.Tool.CheckInCD;
@@ -56,9 +57,15 @@ namespace AntiRain.Command.PixivSearch
             Log.Debug("pic", $"get pic {eventArgs.Message.RawText} searching...");
             requestList.RemoveAll(user => user == eventArgs.Sender);
 
-            await eventArgs.Reply(await SaucenaoUtils.SearchByUrl("92a805aff18cbc56c4723d7e2d5100c6892fe256",
-                                                                  eventArgs.Message.GetAllImage()[0].Url,
-                                                                  eventArgs));
+            var messageInfo =
+                await eventArgs.Reply(await SaucenaoUtils.SearchByUrl("92a805aff18cbc56c4723d7e2d5100c6892fe256",
+                                                                      eventArgs.Message.GetAllImage()[0].Url,
+                                                                      eventArgs), TimeSpan.FromSeconds(10));
+            if (messageInfo.apiStatus.RetCode == ApiStatusType.OK)
+            {
+                await Task.Delay(5000);
+                await eventArgs.SoraApi.RecallMessage(messageInfo.messageId);
+            }
         }
     }
 }

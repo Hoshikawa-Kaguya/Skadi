@@ -17,7 +17,7 @@ namespace AntiRain.Command.PixivSearch
     public static class SaucenaoUtils
     {
         public static async ValueTask<MessageBody> SearchByUrl(string apiKey, string url,
-                                                                GroupMessageEventArgs eventArgs)
+                                                               GroupMessageEventArgs eventArgs)
         {
             Log.Debug("pic", "send api request");
             var req =
@@ -58,18 +58,18 @@ namespace AntiRain.Command.PixivSearch
             if (string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
             {
                 var (success, msg, urls) = await GetPixivCatInfo(parsedPic.PixivData.PixivId);
-                
+
                 //代理连接处理失败
                 if (!success)
                     return eventArgs.Sender.CQCodeAt() + $"处理代理连接发生错误\r\nApi Message:{msg}";
-                
+
                 picUrl = urls[0];
             }
             else
             {
                 picUrl = $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{parsedPic.PixivData.PixivId}";
             }
-            
+
             return eventArgs.Sender.CQCodeAt()                +
                    $"\r\n图片名:{parsedPic.PixivData.Title}\r\n" +
                    CQCodes.CQImage(picUrl)                    +
