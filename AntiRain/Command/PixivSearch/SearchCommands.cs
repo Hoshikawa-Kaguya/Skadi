@@ -21,7 +21,7 @@ namespace AntiRain.Command.PixivSearch
         /// <summary>
         /// 调用CD记录
         /// </summary>
-        private static Dictionary<CheckUser, DateTime> users { get; set; } = new();
+        private static Dictionary<CheckUser, DateTime> users { get; } = new();
 
         /// <summary>
         /// 请求表
@@ -63,7 +63,7 @@ namespace AntiRain.Command.PixivSearch
                                                                       eventArgs), TimeSpan.FromSeconds(10));
             if (messageInfo.apiStatus.RetCode == ApiStatusType.OK)
             {
-                await Task.Delay(5000);
+                await Task.Delay(TimeSpan.FromMinutes(1));
                 await eventArgs.SoraApi.RecallMessage(messageInfo.messageId);
             }
         }

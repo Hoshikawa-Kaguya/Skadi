@@ -81,28 +81,30 @@ namespace AntiRain.Command
                 return;
             }
 
-            //TODO 支持非代理连接图片
+            await eventArgs.Reply("什么，有好康的");
+            //处理图片代理连接
+            string imageUrl;
             if (!string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
             {
-                await eventArgs.Reply("什么，有好康的");
-                var ret =
-                    await
-                        eventArgs.Reply(CQCodes
-                                            .CQImage($"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{picId}/{picIndex}"),
-                                        TimeSpan.FromSeconds(10));
-                if (ret.apiStatus.RetCode != ApiStatusType.OK)
-                {
-                    await eventArgs.Reply("逊欸，图都被删了");
-                }
-                else
-                {
-                    await eventArgs.SoraApi.RecallMessage(ret.messageId);
-                }
+                imageUrl = $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{picId}/{picIndex}";
+                Log.Debug("Hso",$"Get proxy url {imageUrl}");
             }
             else
             {
-                await eventArgs.Reply("逊欸连服务器都没有(只支持代理服务器)");
+                imageUrl = $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{picId}/{picIndex}";
+                Log.Warning("Hso","未找到代理服务器已使用默认代理:https://pixiv.lancercmd.cc/");
             }
+            //发送图片并在一分钟后自动撤回
+            var (apiStatus, messageId) = await eventArgs.Reply(CQCodes.CQImage(imageUrl),
+                TimeSpan.FromSeconds(10));
+            if (apiStatus.RetCode == ApiStatusType.OK)
+            {
+                //延迟一分钟后自动撤回
+                await Task.Delay(TimeSpan.FromMinutes(1));
+                await eventArgs.SoraApi.RecallMessage(messageId);
+                
+            }
+            else await eventArgs.Reply("逊欸，图都被删了");
         }
 
         [UsedImplicitly]
