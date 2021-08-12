@@ -146,7 +146,7 @@ namespace AntiRain.IO
             {
                 StreamReader   jsonFile   = File.OpenText(jsonPath);
                 JsonTextReader reader     = new JsonTextReader(jsonFile);
-                JObject        jsonObject = (JObject) JToken.ReadFrom(reader);
+                JObject        jsonObject = (JObject)JToken.ReadFrom(reader);
                 return jsonObject;
             }
             catch (Exception e)

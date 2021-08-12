@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Sora.Attributes.Command;
@@ -29,7 +30,7 @@ namespace AntiRain.Command.PixivSearch
         private List<User> requestList { get; } = new();
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] {"pixiv搜图"})]
+        [GroupCommand(CommandExpressions = new[] { "pixiv搜图" })]
         public async ValueTask SearchRequest(GroupMessageEventArgs eventArgs)
         {
             if (users.IsInCD(eventArgs.SourceGroup, eventArgs.Sender))
@@ -49,8 +50,8 @@ namespace AntiRain.Command.PixivSearch
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] {@"^\[CQ:image,file=[a-z0-9]+\.image\]$"},
-                      MatchType          = MatchType.Regex)]
+        [GroupCommand(CommandExpressions = new[] { @"^\[CQ:image,file=[a-z0-9]+\.image\]$" },
+                      MatchType = MatchType.Regex)]
         public async ValueTask PicParse(GroupMessageEventArgs eventArgs)
         {
             if (!requestList.Exists(member => member == eventArgs.Sender)) return;
@@ -59,7 +60,7 @@ namespace AntiRain.Command.PixivSearch
 
             var messageInfo =
                 await eventArgs.Reply(await SaucenaoUtils.SearchByUrl("92a805aff18cbc56c4723d7e2d5100c6892fe256",
-                                                                      eventArgs.Message.GetAllImage()[0].Url,
+                                                                      eventArgs.Message.GetAllImage().ToList()[0].Url,
                                                                       eventArgs), TimeSpan.FromSeconds(10));
             if (messageInfo.apiStatus.RetCode == ApiStatusType.OK)
             {

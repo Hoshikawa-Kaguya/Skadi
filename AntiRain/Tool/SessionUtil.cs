@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AntiRain.TypeEnum;
 using Sora.Entities.MessageElement;
@@ -46,15 +44,6 @@ namespace AntiRain.Tool
 
         internal static string[] ToCommandArgs(this GroupMessageEventArgs eventArgs) =>
             eventArgs.Message.RawText.Trim().Split(' ');
-
-        /// <summary>
-        /// 从消息的CQ码中获取用户ID（单CQ码）
-        /// </summary>
-        internal static long GetFirstUidInAt(this GroupMessageEventArgs eventArgs)
-        {
-            List<long> AtUserList = eventArgs.Message.GetAllAtList();
-            return AtUserList.Any() ? AtUserList.First() : -1;
-        }
 
         /// <summary>
         /// 权限检查/越权警告

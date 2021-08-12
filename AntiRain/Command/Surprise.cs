@@ -17,7 +17,7 @@ namespace AntiRain.Command
         #region 私有方法
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] {"dice"})]
+        [GroupCommand(CommandExpressions = new[] { "dice" })]
         public async ValueTask RandomNumber(GroupMessageEventArgs eventArgs)
         {
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config) &&
@@ -28,7 +28,7 @@ namespace AntiRain.Command
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] {"优质睡眠", "昏睡红茶", "昏睡套餐", "健康睡眠"})]
+        [GroupCommand(CommandExpressions = new[] { "优质睡眠", "昏睡红茶", "昏睡套餐", "健康睡眠" })]
         public async ValueTask RedTea(GroupMessageEventArgs eventArgs)
         {
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config) &&
@@ -38,7 +38,7 @@ namespace AntiRain.Command
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] {"抽老婆"})]
+        [GroupCommand(CommandExpressions = new[] { "抽老婆" })]
         public async ValueTask RollWife(GroupMessageEventArgs eventArgs)
         {
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config) &&

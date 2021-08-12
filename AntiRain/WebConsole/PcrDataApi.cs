@@ -16,7 +16,7 @@ namespace AntiRain.WebConsole
                 return Task.FromResult(WebUtil.GenResult(null, 403, "illegal request"));
             if (string.IsNullOrEmpty(path))
                 return Task.FromResult(WebUtil.GenResult(null, 400, "illegal request"));
-            return Task.FromResult(WebUtil.GenResult(new {path}));
+            return Task.FromResult(WebUtil.GenResult(new { path }));
         }
     }
 }

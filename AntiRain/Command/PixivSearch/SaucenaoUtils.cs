@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using AntiRain.Config;
 using AntiRain.Config.ConfigModule;
+using AntiRain.Tool;
 using PyLibSharp.Requests;
 using Sora.Entities;
 using Sora.Entities.MessageElement;
@@ -23,7 +23,7 @@ namespace AntiRain.Command.PixivSearch
             var req =
                 await
                     Requests.PostAsync($"http://saucenao.com/search.php?output_type=2&numres=16&db=5&api_key={apiKey}&url={url}",
-                                       new ReqParams {Timeout = 20000});
+                                       new ReqParams { Timeout = 20000 });
 
             var res     = req.Json();
             var resCode = Convert.ToInt32(res?["header"]?["status"] ?? -1);
@@ -54,64 +54,15 @@ namespace AntiRain.Command.PixivSearch
                 return eventArgs.Sender.CQCodeAt() + "处理用户配置发生错误\r\nMessage:无法读取用户配置";
             }
 
-            string picUrl;
-            if (string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
-            {
-                var (success, msg, urls) = await GetPixivCatInfo(parsedPic.PixivData.PixivId);
-
-                //代理连接处理失败
-                if (!success)
-                    return eventArgs.Sender.CQCodeAt() + $"处理代理连接发生错误\r\nApi Message:{msg}";
-
-                picUrl = urls[0];
-            }
-            else
-            {
-                picUrl = $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{parsedPic.PixivData.PixivId}";
-            }
+            var imageUrl = string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy)
+                ? $"https://pixiv.lancercmd.cc/{parsedPic.PixivData.PixivId}"
+                : $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{parsedPic.PixivData.PixivId}";
+            var imgCqCode = BotUtils.GetPixivImg(parsedPic.PixivData.PixivId, imageUrl);
 
             return eventArgs.Sender.CQCodeAt()                +
                    $"\r\n图片名:{parsedPic.PixivData.Title}\r\n" +
-                   CQCodes.CQImage(picUrl)                    +
+                   imgCqCode                                  +
                    $"id:{parsedPic.PixivData.PixivId}\r\n相似度:{parsedPic.Header.Similarity}%";
-        }
-
-        /// <summary>
-        /// PixivCat代理连接生成
-        /// </summary>
-        /// <param name="pid">pid</param>
-        private static async ValueTask<(bool success, string message, List<string> urls)>
-            GetPixivCatInfo(long pid)
-        {
-            try
-            {
-                var res = await Requests.PostAsync("https://api.pixiv.cat/v1/generate", new ReqParams
-                {
-                    Header = new Dictionary<HttpRequestHeader, string>
-                    {
-                        {HttpRequestHeader.ContentType, "application/x-www-form-urlencoded; charset=UTF-8"}
-                    },
-                    PostContent =
-                        new FormUrlEncodedContent(new[] {new KeyValuePair<string, string>("p", pid.ToString())}),
-                    Timeout = 5000
-                });
-                if (res.StatusCode != HttpStatusCode.OK) return (false, $"pixivcat respose ({res.StatusCode})", null);
-                //检查返回数据
-                var proxyJson = res.Json();
-                if (proxyJson == null) return (false, "get null respose from pixivcat", null);
-                if (!Convert.ToBoolean(proxyJson["success"] ?? false))
-                    return (false, $"pixivcat failed({proxyJson["error"]})", null);
-                //是否为多张图片
-                var urls = Convert.ToBoolean(proxyJson["multiple"] ?? false)
-                    ? proxyJson["original_urls_proxy"]?.ToObject<List<string>>()
-                    : new List<string> {proxyJson["original_url_proxy"]?.ToString() ?? string.Empty};
-                return (true, "OK", urls);
-            }
-            catch (Exception e)
-            {
-                Log.Error("pixiv api error", Log.ErrorLogBuilder(e));
-                return (false, $"pixiv api error ({e})", null);
-            }
         }
     }
 }

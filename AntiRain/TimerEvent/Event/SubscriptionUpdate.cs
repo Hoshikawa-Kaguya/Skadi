@@ -116,23 +116,23 @@ namespace AntiRain.TimerEvent.Event
                 {
                     //检查动态类型
                     case CardType.PlainText:
-                        PlainTextCard plainTextCard = (PlainTextCard) cardObj;
+                        PlainTextCard plainTextCard = (PlainTextCard)cardObj;
                         textMessage = plainTextCard.ToString();
                         biliDynamic = plainTextCard;
                         break;
                     case CardType.TextAndPic:
-                        TextAndPicCard textAndPicCard = (TextAndPicCard) cardObj;
+                        TextAndPicCard textAndPicCard = (TextAndPicCard)cardObj;
                         imgList.AddRange(textAndPicCard.ImgList);
                         textMessage = textAndPicCard.ToString();
                         biliDynamic = textAndPicCard;
                         break;
                     case CardType.Forward:
-                        ForwardCard forwardCard = (ForwardCard) cardObj;
+                        ForwardCard forwardCard = (ForwardCard)cardObj;
                         textMessage = forwardCard.ToString();
                         biliDynamic = forwardCard;
                         break;
                     case CardType.Video:
-                        VideoCard videoCard = (VideoCard) cardObj;
+                        VideoCard videoCard = (VideoCard)cardObj;
                         imgList.Add(videoCard.CoverUrl);
                         textMessage = videoCard.ToString();
                         biliDynamic = videoCard;

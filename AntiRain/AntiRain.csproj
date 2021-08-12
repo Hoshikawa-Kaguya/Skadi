@@ -1,57 +1,58 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
-    <Authors>Yukari316</Authors>
-    <Copyright>Yukari316</Copyright>
-    <Platforms>AnyCPU;x64;x86</Platforms>
-    <Version>0.4.2</Version>
-    <FileVersion>0.4.2.0</FileVersion>
-    <Nullable>warnings</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <Authors>Yukari316</Authors>
+        <Copyright>Yukari316</Copyright>
+        <Platforms>AnyCPU;x64;x86</Platforms>
+        <Version>0.4.2</Version>
+        <FileVersion>0.4.2.0</FileVersion>
+        <Nullable>warnings</Nullable>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile></DocumentationFile>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <DocumentationFile></DocumentationFile>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <DocumentationFile />
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+        <DocumentationFile/>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <DocumentationFile />
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+        <DocumentationFile/>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Config\Res\InitGlobalConfig.yaml" />
-    <EmbeddedResource Include="Config\Res\InitUserConfig.yaml" />
-  </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Config\Res\InitGlobalConfig.yaml"/>
+        <EmbeddedResource Include="Config\Res\InitUserConfig.yaml"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="BeetleX.FastHttpApi" Version="1.9.5" />
-    <PackageReference Include="BilibiliApi" Version="0.3.10" />
-    <PackageReference Include="JetBrains.Annotations" Version="2021.2.0" />
-    <PackageReference Include="PyLibSharp.Requests" Version="1.2.10" />
-    <PackageReference Include="SharpYaml" Version="1.6.6" />
-    <PackageReference Include="Sora" Version="1.0.0-rc.13" />
-    <PackageReference Include="sqlSugarCore" Version="5.0.2.8" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="BeetleX.FastHttpApi" Version="1.9.5"/>
+        <PackageReference Include="BilibiliApi" Version="0.3.10"/>
+        <PackageReference Include="JetBrains.Annotations" Version="2021.2.0"/>
+        <PackageReference Include="PyLibSharp.Requests" Version="1.2.10"/>
+        <PackageReference Include="SharpYaml" Version="1.6.6"/>
+        <PackageReference Include="Sora" Version="1.0.0-rc.15"/>
+        <PackageReference Include="sqlSugarCore" Version="5.0.2.8"/>
+        <PackageReference Include="System.Drawing.Common" Version="5.0.2"/>
+        <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Config\Res\InitRes.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>InitRes.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Update="Config\Res\InitRes.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>InitRes.resx</DependentUpon>
+        </Compile>
+    </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Update="Config\Res\InitRes.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>InitRes.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Update="Config\Res\InitRes.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>InitRes.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+    </ItemGroup>
 
 </Project>

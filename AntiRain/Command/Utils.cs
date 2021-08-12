@@ -11,14 +11,14 @@ namespace AntiRain.Command
     /// Bot实用工具
     /// </summary>
     [CommandGroup]
-    public static class BotUtils
+    public static class Utils
     {
         /// <summary>
         /// Echo
         /// </summary>
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] {@"^echo\s[\s\S]+$"},
-                      MatchType          = MatchType.Regex)]
+        [GroupCommand(CommandExpressions = new[] { @"^echo\s[\s\S]+$" },
+                      MatchType = MatchType.Regex)]
         public static async ValueTask Echo(GroupMessageEventArgs eventArgs)
         {
             //处理开头字符串

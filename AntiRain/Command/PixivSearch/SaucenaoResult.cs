@@ -28,7 +28,7 @@ namespace AntiRain.Command.PixivSearch
         [JsonProperty(PropertyName = "title")] public string Title { get; set; }
 
         [JsonProperty(PropertyName = "pixiv_id")]
-        public int PixivId { get; set; }
+        public long PixivId { get; set; }
 
         [JsonProperty(PropertyName = "member_name")]
         public string MemberName { get; set; }

@@ -21,8 +21,8 @@ namespace AntiRain.Command
     public static class BlibiliVideo
     {
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] {@"(?:BV|bv|AV|av)[a-zA-Z0-9]+"},
-                      MatchType          = MatchType.Regex)]
+        [GroupCommand(CommandExpressions = new[] { @"(?:BV|bv|AV|av)[a-zA-Z0-9]+" },
+                      MatchType = MatchType.Regex)]
         public static async ValueTask VideoInfoById(GroupMessageEventArgs eventArgs)
         {
             Regex idRegex    = new(@"(?:BV|bv|AV|av)[a-zA-Z0-9]+");
@@ -39,9 +39,9 @@ namespace AntiRain.Command
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] {@"https://b23\.tv/[a-zA-Z0-9]+"},
-                      MatchType          = MatchType.Regex,
-                      Priority           = 0)]
+        [GroupCommand(CommandExpressions = new[] { @"https://b23\.tv/[a-zA-Z0-9]+" },
+                      MatchType = MatchType.Regex,
+                      Priority = 0)]
         public static async ValueTask VideoInfoByMiniApp(GroupMessageEventArgs eventArgs)
         {
             //获取短链
@@ -49,7 +49,7 @@ namespace AntiRain.Command
             var   videoUrlStr = urlRegex.Match(eventArgs.Message.RawText).Value;
             if (string.IsNullOrEmpty(videoUrlStr)) return;
             //网络请求获取跳转地址
-            var handler  = new HttpClientHandler {AllowAutoRedirect = false};
+            var handler  = new HttpClientHandler { AllowAutoRedirect = false };
             var client   = new HttpClient(handler);
             var response = await client.GetAsync(videoUrlStr);
             //解析id

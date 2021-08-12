@@ -2,7 +2,7 @@
 LogLevel: Info
 
 # 机器人管理员用户
-SuperUsers: []
+SuperUsers: [ ]
 
 # 服务器监听地址
 Location: "0.0.0.0"

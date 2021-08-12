@@ -41,7 +41,7 @@ namespace AntiRain.Command
         /// 用于处理传入指令
         /// </summary>
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] {"来点色图", "来点涩图", "我要看色图"})]
+        [GroupCommand(CommandExpressions = new[] { "来点色图", "来点涩图", "我要看色图" })]
         public async void HsoPic(GroupMessageEventArgs eventArgs)
         {
             eventArgs.IsContinueEventChain = false;
@@ -68,7 +68,7 @@ namespace AntiRain.Command
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] {@"^让我康康[0-9]+\s[0-9]+$"}, MatchType = MatchType.Regex)]
+        [GroupCommand(CommandExpressions = new[] { @"^让我康康[0-9]+\s[0-9]+$" }, MatchType = MatchType.Regex)]
         public async void HsoPicIndexSearch(GroupMessageEventArgs eventArgs)
         {
             eventArgs.IsContinueEventChain = false;
@@ -87,28 +87,25 @@ namespace AntiRain.Command
             if (!string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
             {
                 imageUrl = $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{picId}/{picIndex}";
-                Log.Debug("Hso",$"Get proxy url {imageUrl}");
+                Log.Debug("Hso", $"Get proxy url {imageUrl}");
             }
             else
             {
-                imageUrl = $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{picId}/{picIndex}";
-                Log.Warning("Hso","未找到代理服务器已使用默认代理:https://pixiv.lancercmd.cc/");
+                imageUrl = $"https://pixiv.lancercmd.cc/{picId}/{picIndex}";
+                Log.Warning("Hso", "未找到代理服务器已使用默认代理:https://pixiv.lancercmd.cc/");
             }
+
+            var imgCqCode = BotUtils.GetPixivImg(Convert.ToInt64(picId), imageUrl);
+
             //发送图片并在一分钟后自动撤回
-            var (apiStatus, messageId) = await eventArgs.Reply(CQCodes.CQImage(imageUrl),
-                TimeSpan.FromSeconds(10));
-            if (apiStatus.RetCode == ApiStatusType.OK)
-            {
-                //延迟一分钟后自动撤回
-                await Task.Delay(TimeSpan.FromMinutes(1));
-                await eventArgs.SoraApi.RecallMessage(messageId);
-                
-            }
-            else await eventArgs.Reply("逊欸，图都被删了");
+            var (apiStatus, _) = await eventArgs.Reply(imgCqCode,
+                                                       TimeSpan.FromSeconds(10));
+            if (apiStatus.RetCode != ApiStatusType.OK)
+                await eventArgs.Reply("逊欸，图都被删了");
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] {"来点色批"}, MatchType = MatchType.Full)]
+        [GroupCommand(CommandExpressions = new[] { "来点色批" }, MatchType = MatchType.Full)]
         public async void HsoRank(GroupMessageEventArgs eventArgs)
         {
             eventArgs.IsContinueEventChain = false;
@@ -125,7 +122,7 @@ namespace AntiRain.Command
             }
             else
             {
-                var message = new MessageBody {"让我康康到底谁最能冲\r\n"};
+                var message = new MessageBody { "让我康康到底谁最能冲\r\n" };
                 foreach (var count in rankList)
                 {
                     message.AddRange(count.Uid.ToAt() + $"冲了{count.Count}次" + "\r\n");
@@ -138,7 +135,7 @@ namespace AntiRain.Command
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] {@"^AD[0-9]+\s[0-9]+$"})]
+        [GroupCommand(CommandExpressions = new[] { @"^AD[0-9]+\s[0-9]+$" })]
         public async void HsoAddPic(GroupMessageEventArgs eventArgs)
         {
             eventArgs.IsContinueEventChain = false;
@@ -172,9 +169,9 @@ namespace AntiRain.Command
             {
                 Params = new Dictionary<string, string>
                 {
-                    {"apikey", userConfig.HsoConfig.YukariApiKey},
-                    {"pid", picId},
-                    {"index", picIndex}
+                    { "apikey", userConfig.HsoConfig.YukariApiKey },
+                    { "pid", picId },
+                    { "index", picIndex }
                 },
                 Timeout                   = 10000,
                 IsThrowErrorForStatusCode = false,
@@ -273,13 +270,13 @@ namespace AntiRain.Command
                     Timeout = 3000,
                     Params = new Dictionary<string, string>
                     {
-                        {"apikey", apiKey}
+                        { "apikey", apiKey }
                     },
                     isCheckSSLCert = hso.CheckSSLCert
                 });
                 if (reqResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    Log.Error("Net", $"{serverUrl} return code {(int) reqResponse.StatusCode}");
+                    Log.Error("Net", $"{serverUrl} return code {(int)reqResponse.StatusCode}");
                     await eventArgs.SourceGroup
                                    .SendGroupMessage($"哇哦~发生了网络错误[{reqResponse.StatusCode}]，请联系机器人所在服务器管理员");
                     return;
@@ -291,7 +288,8 @@ namespace AntiRain.Command
             {
                 //网络错误
                 await eventArgs.SourceGroup.SendGroupMessage("哇哦~发生了网络错误，请联系机器人所在服务器管理员");
-                Log.Error("网络发生错误", $"{Log.ErrorLogBuilder(e)}\r\n\r\n{Utils.GetInnerExceptionMessages(e)}");
+                Log.Error("网络发生错误",
+                          $"{Log.ErrorLogBuilder(e)}\r\n\r\n{PyLibSharp.Requests.Utils.GetInnerExceptionMessages(e)}");
                 return;
             }
 
@@ -353,7 +351,7 @@ namespace AntiRain.Command
             }
         }
 
-        private async void SendLocalPic(Hso hso, GroupMessageEventArgs eventArgs)
+        private static async void SendLocalPic(Hso hso, GroupMessageEventArgs eventArgs)
         {
             string[] picNames = Directory.GetFiles(IOUtils.GetHsoPath());
             if (picNames.Length == 0)

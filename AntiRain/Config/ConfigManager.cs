@@ -172,9 +172,9 @@ namespace AntiRain.Config
                 using TextReader reader     = File.OpenText(path);
                 globalConfig = serializer.Deserialize<GlobalConfig>(reader);
                 //参数合法性检查
-                if ((int) globalConfig.LogLevel is < 0 or > 3 ||
-                    globalConfig.HeartBeatTimeOut == 0        ||
-                    globalConfig.OnebotApiTimeOut == 0        ||
+                if ((int)globalConfig.LogLevel is < 0 or > 3 ||
+                    globalConfig.HeartBeatTimeOut == 0       ||
+                    globalConfig.OnebotApiTimeOut == 0       ||
                     globalConfig.Port is 0 or > 65535)
                 {
                     Log.Error("读取全局配置", "参数值超出合法范围，重新生成配置文件");

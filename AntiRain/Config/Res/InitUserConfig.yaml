@@ -33,12 +33,12 @@ HsoConfig:
   YukariApiKey: null
   # 群组屏蔽设置
   # 数组中的群号不会触发色图功能
-  GroupBlock: []
+  GroupBlock: [ ]
 
 # 动态订阅设置
 SubscriptionConfig:
   # 群组订阅设置
   GroupsConfig:
-    - GroupId: [] # 群号，可以一次设置多个群
-      SubscriptionId: [] # 订阅的B站用户ID
-      LiveSubscriptionId: [] # 直播订阅的B站用户ID
+    - GroupId: [ ] # 群号，可以一次设置多个群
+      SubscriptionId: [ ] # 订阅的B站用户ID
+      LiveSubscriptionId: [ ] # 直播订阅的B站用户ID

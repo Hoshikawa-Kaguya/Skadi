@@ -1,8 +1,14 @@
 using System;
+using System.Net;
+// using System.Drawing;
+// using System.Drawing.Drawing2D;
+// using System.Linq;
+// using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 using AntiRain.IO;
 using AntiRain.TypeEnum;
+using PyLibSharp.Requests;
 using Sora.Entities;
 using Sora.Entities.MessageElement;
 using Sora.EventArgs.SoraEvent;
@@ -22,13 +28,13 @@ namespace AntiRain.Tool
         {
             if (DateTime.Now > DateTime.Today.Add(new TimeSpan(5, 0, 0)))
             {
-                return (long) (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Add(new TimeSpan(5, 0, 0))
+                return (long)(DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Add(new TimeSpan(5, 0, 0))
                     .TotalSeconds;
             }
             else
             {
-                return (long) (DateTime.Today.AddDays(-1) - new DateTime(1970, 1, 1, 8, 0, 0, 0))
-                              .Add(new TimeSpan(5, 0, 0)).TotalSeconds;
+                return (long)(DateTime.Today.AddDays(-1) - new DateTime(1970, 1, 1, 8, 0, 0, 0))
+                             .Add(new TimeSpan(5, 0, 0)).TotalSeconds;
             }
         }
 
@@ -78,7 +84,7 @@ namespace AntiRain.Tool
         {
             StringBuilder sb = new StringBuilder();
 
-            int toPadNum = (int) Math.Floor(padNums - GetQQStrLength(input));
+            int toPadNum = (int)Math.Floor(padNums - GetQQStrLength(input));
             if (toPadNum <= 0)
             {
                 return input;
@@ -143,6 +149,53 @@ namespace AntiRain.Tool
                                                               "\r\nERROR"                            +
                                                               "\r\n数据库错误");
             Log.Error("database", "database error");
+        }
+
+        #endregion
+
+        #region 图片处理
+
+        // public Image ow(Image[] imgs)
+        // {
+        //     if (imgs == null || imgs.Length < 9) return null;
+        //     var width = imgs.First().Width * 3;
+        //     var height = imgs.First().Height * 2 +
+        //                  Math.Max(Math.Max(imgs[6].Height, imgs[7].Height), imgs[8].Height);
+        //     var       cursor    = (x: 0, y: 0);
+        //     var       imgeIndex = 0;
+        //     using var ret       = new Bitmap(width,height);
+        //     using var canvas    = Graphics.FromImage(ret);
+        //     canvas.InterpolationMode = InterpolationMode.HighQualityBicubic;
+        //     canvas.DrawImage(imgs[imgeIndex], cursor.x, cursor.y, imgs[imgeIndex].Width, imgs[imgeIndex].Height);
+        //     
+        // } 
+
+        #endregion
+
+        #region R18图片拦截
+
+        public static CQCode GetPixivImg(long pid, string proxyUrl)
+        {
+            var pixApiReq =
+                Requests.Get($"https://pixiv.yukari.one/api/illust/{pid}",
+                             new ReqParams
+                             {
+                                 Timeout                   = 5000,
+                                 IsThrowErrorForTimeout    = false,
+                                 IsThrowErrorForStatusCode = false
+                             });
+            var imgCqCode = CQCodes.CQImage(proxyUrl);
+
+            if (pixApiReq.StatusCode == HttpStatusCode.OK)
+            {
+                var infoJson = pixApiReq.Json();
+                if (Convert.ToBoolean(infoJson["error"])) imgCqCode                   = "[ERROR:网络错误，无法获取图片详细信息]\r\n";
+                else if (Convert.ToBoolean(infoJson["body"]?["xRestrict"])) imgCqCode = "[H是不行的]\r\n";
+            }
+            else
+                imgCqCode = "[ERROR:网络错误，无法获取图片详细信息]\r\n";
+
+            return imgCqCode;
         }
 
         #endregion
