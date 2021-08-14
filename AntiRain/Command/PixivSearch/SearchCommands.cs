@@ -58,14 +58,14 @@ namespace AntiRain.Command.PixivSearch
             Log.Debug("pic", $"get pic {eventArgs.Message.RawText} searching...");
             requestList.RemoveAll(user => user == eventArgs.Sender);
 
+            //发送图片
             var messageInfo =
                 await eventArgs.Reply(await SaucenaoUtils.SearchByUrl("92a805aff18cbc56c4723d7e2d5100c6892fe256",
                                                                       eventArgs.Message.GetAllImage().ToList()[0].Url,
                                                                       eventArgs), TimeSpan.FromSeconds(10));
-            if (messageInfo.apiStatus.RetCode == ApiStatusType.OK)
+            if (messageInfo.apiStatus.RetCode != ApiStatusType.OK)
             {
-                await Task.Delay(TimeSpan.FromMinutes(1));
-                await eventArgs.SoraApi.RecallMessage(messageInfo.messageId);
+                await eventArgs.Reply("图被夹了，你找服务器要去");
             }
         }
     }

@@ -96,8 +96,8 @@ namespace AntiRain.Command
             }
 
             var imgCqCode = BotUtils.GetPixivImg(Convert.ToInt64(picId), imageUrl);
-
-            //发送图片并在一分钟后自动撤回
+            
+            //发送图片
             var (apiStatus, _) = await eventArgs.Reply(imgCqCode,
                                                        TimeSpan.FromSeconds(10));
             if (apiStatus.RetCode != ApiStatusType.OK)
