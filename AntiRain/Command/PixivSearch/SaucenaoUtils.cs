@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using AntiRain.Config;
 using AntiRain.Config.ConfigModule;
@@ -9,15 +8,13 @@ using AntiRain.Tool;
 using PyLibSharp.Requests;
 using Sora.Entities;
 using Sora.Entities.MessageElement;
-using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
 
 namespace AntiRain.Command.PixivSearch
 {
     public static class SaucenaoUtils
     {
-        public static async ValueTask<MessageBody> SearchByUrl(string apiKey, string url,
-                                                               GroupMessageEventArgs eventArgs)
+        public static async ValueTask<MessageBody> SearchByUrl(string apiKey, string url, long sender, long selfId)
         {
             Log.Debug("pic", "send api request");
             var req =
@@ -31,27 +28,27 @@ namespace AntiRain.Command.PixivSearch
 
             //API返回失败
             if (res == null || resCode != 0)
-                return eventArgs.Sender.CQCodeAt() + "图片获取失败";
+                return sender.ToAt() + "图片获取失败";
 
             var resData = res["results"]?.ToObject<List<SaucenaoResult>>();
 
             //API返回空值
             if (resData == null)
-                return eventArgs.Sender.CQCodeAt() + "处理API返回发生错误";
+                return sender.ToAt() + "处理API返回发生错误";
 
             //未找到图片
             if (resData.Count == 0)
-                return eventArgs.Sender.CQCodeAt() + "查询到的图片相似度过低，请尝试别的图片";
+                return sender.ToAt() + "查询到的图片相似度过低，请尝试别的图片";
 
             var parsedPic = resData.OrderByDescending(pic => Convert.ToDouble(pic.Header.Similarity))
                                    .First();
 
 
-            if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig userConfig))
+            if (!ConfigManager.TryGetUserConfig(selfId, out UserConfig userConfig))
             {
                 //用户配置获取失败
                 Log.Error("Config", "无法获取用户配置文件");
-                return eventArgs.Sender.CQCodeAt() + "处理用户配置发生错误\r\nMessage:无法读取用户配置";
+                return sender.ToAt() + "处理用户配置发生错误\r\nMessage:无法读取用户配置";
             }
 
             var imageUrl = string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy)
@@ -59,7 +56,7 @@ namespace AntiRain.Command.PixivSearch
                 : $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{parsedPic.PixivData.PixivId}";
             var imgCqCode = BotUtils.GetPixivImg(parsedPic.PixivData.PixivId, imageUrl);
 
-            return eventArgs.Sender.CQCodeAt()                +
+            return sender.ToAt()                +
                    $"\r\n图片名:{parsedPic.PixivData.Title}\r\n" +
                    imgCqCode                                  +
                    $"id:{parsedPic.PixivData.PixivId}\r\n相似度:{parsedPic.Header.Similarity}%";

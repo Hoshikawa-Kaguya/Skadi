@@ -17,7 +17,7 @@ namespace AntiRain.Config.ConfigModule
         /// <summary>
         /// 端口
         /// </summary>
-        public uint Port { get; set; }
+        public ushort Port { get; set; }
 
         /// <summary>
         /// 鉴权Token

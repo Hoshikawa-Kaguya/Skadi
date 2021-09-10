@@ -7,7 +7,7 @@ using AntiRain.Tool;
 using AntiRain.WebConsole;
 using Sora.Interfaces;
 using Sora.Net;
-using Sora.OnebotModel;
+using Sora.Net.Config;
 using YukariToolBox.Extensions;
 using YukariToolBox.FormatLog;
 
@@ -71,7 +71,6 @@ namespace AntiRain.ServerInterface
             server.Event.OnGroupPoke += GroupPokeEvent.GroupPokeEventParse;
             //关闭连接事件处理
             server.ConnManager.OnCloseConnectionAsync += SubscriptionTimer.DelTimerEvent;
-            server.ConnManager.OnHeartBeatTimeOut     += SubscriptionTimer.DelTimerEvent;
 
             //启动服务器
             await server.StartService().RunCatch(BotUtils.BotCrash);

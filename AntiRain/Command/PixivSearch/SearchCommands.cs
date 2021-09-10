@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Sora.Attributes.Command;
-using Sora.Entities;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
@@ -27,7 +26,7 @@ namespace AntiRain.Command.PixivSearch
         /// <summary>
         /// 请求表
         /// </summary>
-        private List<User> requestList { get; } = new();
+        private HashSet<(long uid, long gid)> requestList { get; } = new();
 
         [UsedImplicitly]
         [GroupCommand(CommandExpressions = new[] { "pixiv搜图" })]
@@ -39,30 +38,24 @@ namespace AntiRain.Command.PixivSearch
                 return;
             }
 
-            if (requestList.Exists(member => member == eventArgs.Sender))
+            await eventArgs.Reply("图呢(请在1分钟内发送图片)");
+            requestList.Add((eventArgs.Sender, eventArgs.SourceGroup));
+
+            var imgArgs = await eventArgs.WaitForNextMessageAsync(@"^\[CQ:image,file=[a-z0-9]+\.image\]$",
+                                                              MatchType.Regex, TimeSpan.FromMinutes(1));
+            if(imgArgs == null)
             {
-                await eventArgs.Reply("dnmd图呢");
+                await eventArgs.Reply("连图都没有真是太逊了");
+                requestList.Remove((eventArgs.Sender, eventArgs.SourceGroup));
                 return;
             }
-
-            await eventArgs.Reply("图呢");
-            requestList.Add(eventArgs.Sender);
-        }
-
-        [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] { @"^\[CQ:image,file=[a-z0-9]+\.image\]$" },
-                      MatchType = MatchType.Regex)]
-        public async ValueTask PicParse(GroupMessageEventArgs eventArgs)
-        {
-            if (!requestList.Exists(member => member == eventArgs.Sender)) return;
-            Log.Debug("pic", $"get pic {eventArgs.Message.RawText} searching...");
-            requestList.RemoveAll(user => user == eventArgs.Sender);
-
+            Log.Debug("pic", $"get pic {imgArgs.Message.RawText} searching...");
             //发送图片
             var messageInfo =
                 await eventArgs.Reply(await SaucenaoUtils.SearchByUrl("92a805aff18cbc56c4723d7e2d5100c6892fe256",
-                                                                      eventArgs.Message.GetAllImage().ToList()[0].Url,
-                                                                      eventArgs), TimeSpan.FromSeconds(10));
+                                                                      imgArgs.Message.GetAllImage().ToList()[0].Url,
+                                                                      imgArgs.Sender, imgArgs.LoginUid),
+                                      TimeSpan.FromSeconds(15));
             if (messageInfo.apiStatus.RetCode != ApiStatusType.OK)
             {
                 await eventArgs.Reply("图被夹了，你找服务器要去");
