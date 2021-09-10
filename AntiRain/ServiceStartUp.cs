@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using AntiRain.Config;
+using AntiRain.ServerInterface;
 using AntiRain.TimerEvent;
 using AntiRain.Tool;
 using AntiRain.WebConsole;
@@ -11,9 +12,9 @@ using Sora.Net.Config;
 using YukariToolBox.Extensions;
 using YukariToolBox.FormatLog;
 
-namespace AntiRain.ServerInterface
+namespace AntiRain
 {
-    internal static class SoraServerInterface
+    internal static class ServiceStartUp
     {
         //控制台实例
         private static ConsoleInterface ConsoleInterface { get; set; }
