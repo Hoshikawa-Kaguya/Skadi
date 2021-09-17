@@ -189,11 +189,11 @@ namespace AntiRain.Tool
             if (pixApiReq.StatusCode == HttpStatusCode.OK)
             {
                 var infoJson = pixApiReq.Json();
-                if (Convert.ToBoolean(infoJson["error"])) imgCqCode                   = "[ERROR:网络错误，无法获取图片详细信息]\r\n";
-                else if (Convert.ToBoolean(infoJson["body"]?["xRestrict"])) imgCqCode = "[H是不行的]\r\n";
+                if (Convert.ToBoolean(infoJson["error"])) imgCqCode                   = "[ERROR:网络错误，无法获取图片详细信息]";
+                else if (Convert.ToBoolean(infoJson["body"]?["xRestrict"])) imgCqCode = "[H是不行的]";
             }
             else
-                imgCqCode = "[ERROR:网络错误，无法获取图片详细信息]\r\n";
+                imgCqCode = "[ERROR:网络错误，无法获取图片详细信息]";
 
             return imgCqCode;
         }

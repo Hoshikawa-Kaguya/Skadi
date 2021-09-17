@@ -41,8 +41,9 @@ namespace AntiRain.Command.PixivSearch
             await eventArgs.Reply("图呢(请在1分钟内发送图片)");
             requestList.Add((eventArgs.Sender, eventArgs.SourceGroup));
 
-            var imgArgs = await eventArgs.WaitForNextMessageAsync(@"^\[CQ:image,file=[a-z0-9]+\.image\]$",
-                                                              MatchType.Regex, TimeSpan.FromMinutes(1));
+            var imgArgs =
+                await eventArgs.WaitForNextMessageAsync(@"^\[CQ:image,file=[a-z0-9]+\.image,subType=[0-9]+\]$",
+                                                        MatchType.Regex, TimeSpan.FromMinutes(1));
             if(imgArgs == null)
             {
                 await eventArgs.Reply("连图都没有真是太逊了");

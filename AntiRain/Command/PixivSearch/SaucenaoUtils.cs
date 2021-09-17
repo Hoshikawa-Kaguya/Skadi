@@ -59,7 +59,7 @@ namespace AntiRain.Command.PixivSearch
             return sender.ToAt()                +
                    $"\r\n图片名:{parsedPic.PixivData.Title}\r\n" +
                    imgCqCode                                  +
-                   $"id:{parsedPic.PixivData.PixivId}\r\n相似度:{parsedPic.Header.Similarity}%";
+                   $"\r\nid:{parsedPic.PixivData.PixivId}\r\n相似度:{parsedPic.Header.Similarity}%";
         }
     }
 }

@@ -236,7 +236,7 @@ namespace AntiRain.Command
                 switch (hso.Source)
                 {
                     case "Mix":
-                        Random randSource = new Random();
+                        var randSource = new Random();
                         if (randSource.Next(1, 100) > 50)
                         {
                             serverUrl = "https://api.lolicon.app/setu/";

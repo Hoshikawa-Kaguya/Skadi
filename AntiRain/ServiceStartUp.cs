@@ -21,7 +21,6 @@ namespace AntiRain
 
         public static async Task Main()
         {
-            //[Description(@"^谁是[\u4e00-\u9fa5]+$")] FindChara,//TODO 最后一个PCR功能（
             //修改控制台标题
             Console.Title = @"AntiRain";
             Log.Info("AntiRain初始化", "AntiRain初始化...");
