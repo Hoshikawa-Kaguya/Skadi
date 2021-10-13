@@ -55,5 +55,18 @@ namespace AntiRain.DatabaseUtils
             [SugarColumn(ColumnName = "count", ColumnDataType = "INTEGER")]
             public int Count { get; set; }
         }
+        
+        /// <summary>
+        /// 抽老婆数据
+        /// </summary>
+        [SugarTable("wife")]
+        public class Wife
+        {
+            [SugarColumn(ColumnName = "uid", ColumnDataType = "INTEGER", IsPrimaryKey = true)]
+            public long Uid { get; set; }
+            
+            [SugarColumn(ColumnName = "wife_uid", ColumnDataType = "INTEGER")]
+            public long WifeUid { get; set; }
+        }
     }
 }
