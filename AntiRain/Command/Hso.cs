@@ -16,7 +16,7 @@ using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
 using Sora.Attributes.Command;
 using Sora.Entities;
-using Sora.Entities.MessageElement;
+using Sora.Entities.Segment;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
@@ -54,7 +54,7 @@ namespace AntiRain.Command
             if (CheckGroupBlock(userConfig, eventArgs)) return;
             if (Users.IsInCD(eventArgs.SourceGroup, eventArgs.Sender))
             {
-                await eventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(eventArgs.Sender) +
+                await eventArgs.SourceGroup.SendGroupMessage(SegmentBuilder.At(eventArgs.Sender) +
                                                              "你是不是只会要色图(逊欸，冲的真快)");
                 return;
             }
@@ -161,7 +161,7 @@ namespace AntiRain.Command
             if (string.IsNullOrEmpty(userConfig.HsoConfig.YukariApiKey))
             {
                 Log.Error("apikey", "apikey is null");
-                await eventArgs.Reply("apikey is null");
+                await eventArgs.Reply("error:apikey is null");
                 return;
             }
 
@@ -181,15 +181,15 @@ namespace AntiRain.Command
             if (res.StatusCode != HttpStatusCode.OK)
             {
                 Log.Error("net", "net error");
-                await eventArgs.Reply("net error");
+                await eventArgs.Reply("error:net error");
                 return;
             }
 
             var resData = res.Json();
             if (resData == null)
             {
-                Log.Error("api error", "api error (null response)]");
-                await eventArgs.Reply("api error (null response)]");
+                Log.Error("api error", "api error (null response)");
+                await eventArgs.Reply("api error (null response)");
                 return;
             }
 
@@ -201,7 +201,7 @@ namespace AntiRain.Command
             }
 
             Log.Info("pic upload", "pic upload success");
-            await eventArgs.Reply($"success [{picId}]");
+            await eventArgs.Reply($"success[{picId}]");
         }
 
         #endregion
@@ -364,8 +364,8 @@ namespace AntiRain.Command
             string localPicPath = $"{picNames[randFile.Next(0, picNames.Length - 1)]}";
             Log.Debug("发送图片", localPicPath);
             await eventArgs.SourceGroup.SendGroupMessage(hso.CardImage
-                                                             ? CQCodes.CQCardImage(localPicPath)
-                                                             : CQCodes.CQImage(localPicPath));
+                                                             ? SegmentBuilder.CardImage(localPicPath)
+                                                             : SegmentBuilder.Image(localPicPath));
         }
 
         /// <summary>
@@ -389,11 +389,13 @@ namespace AntiRain.Command
             textBuilder.Append("\r\n作者:");
             textBuilder.Append(picInfo["author"]);
             //构建消息
-            MessageBody msg = new();
-            msg.Add(cardImg
-                        ? CQCodes.CQCardImage(picStr)
-                        : CQCodes.CQImage(picStr));
-            msg.Add(CQCodes.CQText(textBuilder.ToString()));
+            MessageBody msg = new()
+            {
+                cardImg
+                    ? SegmentBuilder.CardImage(picStr)
+                    : SegmentBuilder.Image(picStr),
+                textBuilder.ToString()
+            };
             return msg;
         }
 

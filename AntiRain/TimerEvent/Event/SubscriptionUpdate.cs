@@ -16,7 +16,7 @@ using BilibiliApi.User;
 using BilibiliApi.User.Models;
 using Sora.Entities;
 using Sora.Entities.Base;
-using Sora.Entities.MessageElement;
+using Sora.Entities.Segment;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
 using YukariToolBox.Time;
@@ -93,7 +93,7 @@ namespace AntiRain.TimerEvent.Event
             if (targetGroup.Count == 0) return;
             //构建提示消息
             MessageBody message = $"{biliUserInfo.Name} 正在直播！\r\n{biliUserInfo.LiveRoomInfo.Title}" +
-                                  CQCodes.CQImage(biliUserInfo.LiveRoomInfo.CoverUrl)               +
+                                  SegmentBuilder.Image(biliUserInfo.LiveRoomInfo.CoverUrl)               +
                                   $"直播间地址:{biliUserInfo.LiveRoomInfo.LiveUrl}";
             foreach (var gid in targetGroup)
             {
@@ -178,10 +178,10 @@ namespace AntiRain.TimerEvent.Event
             //添加图片
             foreach (var img in imgList)
             {
-                message.Add(CQCodes.CQImage(img));
+                message.Add(SegmentBuilder.Image(img));
             }
 
-            message += CQCodes.CQText($"\r\n更新时间：{biliDynamic.UpdateTime:MM-dd HH:mm:ss}");
+            message += SegmentBuilder.Text($"\r\n更新时间：{biliDynamic.UpdateTime:MM-dd HH:mm:ss}");
             //向未发送消息的群发送消息
             foreach (var targetGroup in targetGroups)
             {

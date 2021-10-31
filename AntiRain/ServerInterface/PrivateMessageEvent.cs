@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Sora.Entities.MessageElement;
+using Sora.Entities.Segment;
 using Sora.EventArgs.SoraEvent;
 
 namespace AntiRain.ServerInterface
@@ -18,8 +18,8 @@ namespace AntiRain.ServerInterface
             if (privateMessage.Message.RawText.Equals("在"))
             {
                 await privateMessage.Sender
-                                    .SendPrivateMessage(CQCodes
-                                                            .CQImage("https://i.loli.net/2020/11/02/2OgZ1M6YNV5kntS.gif"));
+                                    .SendPrivateMessage(SegmentBuilder
+                                                            .Image("https://i.loli.net/2020/11/02/2OgZ1M6YNV5kntS.gif"));
             }
         }
     }

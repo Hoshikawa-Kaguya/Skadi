@@ -25,7 +25,8 @@ namespace AntiRain.Command.PixivSearch
         [JsonProperty(PropertyName = "ext_urls")]
         public List<string> ExtUrls { get; set; }
 
-        [JsonProperty(PropertyName = "title")] public string Title { get; set; }
+        [JsonProperty(PropertyName = "title")] 
+        public string Title { get; set; }
 
         [JsonProperty(PropertyName = "pixiv_id")]
         public long PixivId { get; set; }
@@ -42,6 +43,7 @@ namespace AntiRain.Command.PixivSearch
         [JsonProperty(PropertyName = "header")]
         public Header Header { get; set; }
 
-        [JsonProperty(PropertyName = "data")] public PixivData PixivData { get; set; }
+        [JsonProperty(PropertyName = "data")] 
+        public PixivData PixivData { get; set; }
     }
 }

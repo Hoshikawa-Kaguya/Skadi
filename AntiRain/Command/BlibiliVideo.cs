@@ -7,7 +7,7 @@ using BilibiliApi.Video.Models;
 using JetBrains.Annotations;
 using Sora.Attributes.Command;
 using Sora.Entities;
-using Sora.Entities.MessageElement;
+using Sora.Entities.Segment;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
@@ -84,7 +84,7 @@ namespace AntiRain.Command
             messageBuilder.Append($"投稿时间:{info.PublishTime:yyyy-MM-dd HH:mm:ss}");
 
             MessageBody sendMessage = $"Bilibili视频解析\r\n[{info.Bid}(av{info.Aid})]\r\n" +
-                                      CQCodes.CQImage(info.CoverUrl)                    +
+                                      SegmentBuilder.Image(info.CoverUrl)                    +
                                       messageBuilder.ToString();
 
             return sendMessage;

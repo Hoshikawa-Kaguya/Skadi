@@ -1,4 +1,6 @@
 using System;
+using System.Drawing;
+using System.IO;
 using System.Net;
 // using System.Drawing;
 // using System.Drawing.Drawing2D;
@@ -10,7 +12,7 @@ using AntiRain.IO;
 using AntiRain.TypeEnum;
 using PyLibSharp.Requests;
 using Sora.Entities;
-using Sora.Entities.MessageElement;
+using Sora.Entities.Segment;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
 
@@ -117,7 +119,7 @@ namespace AntiRain.Tool
             }
             else
             {
-                qGroup?.SendGroupMessage(CQCodes.CQAt(fromQQid) + " 命令参数不全，请补充。");
+                qGroup?.SendGroupMessage(SegmentBuilder.At(fromQQid) + " 命令参数不全，请补充。");
                 return LenType.Illegal;
             }
         }
@@ -145,8 +147,8 @@ namespace AntiRain.Tool
         /// </summary>
         public static async ValueTask DatabaseFailedTips(GroupMessageEventArgs groupEventArgs)
         {
-            await groupEventArgs.SourceGroup.SendGroupMessage(CQCodes.CQAt(groupEventArgs.Sender.Id) +
-                                                              "\r\nERROR"                            +
+            await groupEventArgs.SourceGroup.SendGroupMessage(SegmentBuilder.At(groupEventArgs.Sender.Id) +
+                                                              "\r\nERROR"                                 +
                                                               "\r\n数据库错误");
             Log.Error("database", "database error");
         }
@@ -170,11 +172,70 @@ namespace AntiRain.Tool
         //     
         // } 
 
+        /// <summary>
+        /// 将文字转为图片
+        /// </summary>
+        public static Bitmap DrawText(String text, Font font, Color textColor, Color backColor)
+        {
+            //first, create a dummy bitmap just to get a graphics object
+            var img     = new Bitmap(1, 1);
+            var drawing = Graphics.FromImage(img);
+
+            //measure the string to see how big the image needs to be
+            var textSize = drawing.MeasureString(text, font);
+
+            //free up the dummy image and old graphics object
+            img.Dispose();
+            drawing.Dispose();
+
+            //create a new image of the right size
+            img = new Bitmap((int)textSize.Width, (int)textSize.Height);
+
+            drawing = Graphics.FromImage(img);
+
+            //paint the background
+            drawing.Clear(backColor);
+
+            //create a brush for the text
+            Brush textBrush = new SolidBrush(textColor);
+
+            drawing.DrawString(text, font, textBrush, 0, 0);
+
+            drawing.Save();
+
+            textBrush.Dispose();
+            drawing.Dispose();
+
+            return img;
+        }
+
+        /// <summary>
+        /// 转换图片为base64
+        /// </summary>
+        public static string ImgToBase64String(Bitmap bmp)
+        {
+            try
+            {
+                using var ms = new MemoryStream();
+                bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                byte[] arr = new byte[ms.Length];
+                ms.Position = 0;
+                ms.Read(arr, 0, (int)ms.Length);
+                ms.Close();
+                return Convert.ToBase64String(arr);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Image", $"Convert image to base64 error\r\n{Log.ErrorLogBuilder(e)}");
+                return string.Empty;
+            }
+        }
+
         #endregion
 
         #region R18图片拦截
 
-        public static CQCode GetPixivImg(long pid, string proxyUrl)
+        public static SoraSegment GetPixivImg(long pid, string proxyUrl)
         {
             var pixApiReq =
                 Requests.Get($"https://pixiv.yukari.one/api/illust/{pid}",
@@ -184,16 +245,16 @@ namespace AntiRain.Tool
                                  IsThrowErrorForTimeout    = false,
                                  IsThrowErrorForStatusCode = false
                              });
-            var imgCqCode = CQCodes.CQImage(proxyUrl);
+            var imgCqCode = SegmentBuilder.Image(proxyUrl);
 
             if (pixApiReq.StatusCode == HttpStatusCode.OK)
             {
                 var infoJson = pixApiReq.Json();
-                if (Convert.ToBoolean(infoJson["error"])) imgCqCode                   = "[ERROR:网络错误，无法获取图片详细信息]";
-                else if (Convert.ToBoolean(infoJson["body"]?["xRestrict"])) imgCqCode = "[H是不行的]";
+                if (Convert.ToBoolean(infoJson["error"])) imgCqCode = SegmentBuilder.Text("[ERROR:网络错误，无法获取图片详细信息]");
+                else if (Convert.ToBoolean(infoJson["body"]?["xRestrict"])) imgCqCode = SegmentBuilder.Text("[H是不行的]");
             }
             else
-                imgCqCode = "[ERROR:网络错误，无法获取图片详细信息]";
+                imgCqCode = SegmentBuilder.Text("[ERROR:网络错误，无法获取图片详细信息]");
 
             return imgCqCode;
         }

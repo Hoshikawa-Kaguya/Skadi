@@ -23,13 +23,8 @@ namespace AntiRain.Command.PixivSearch
         /// </summary>
         private static Dictionary<CheckUser, DateTime> users { get; } = new();
 
-        /// <summary>
-        /// 请求表
-        /// </summary>
-        private HashSet<(long uid, long gid)> requestList { get; } = new();
-
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] { "pixiv搜图" })]
+        [GroupCommand(CommandExpressions = new[] { "搜图" })]
         public async ValueTask SearchRequest(GroupMessageEventArgs eventArgs)
         {
             if (users.IsInCD(eventArgs.SourceGroup, eventArgs.Sender))
@@ -39,7 +34,6 @@ namespace AntiRain.Command.PixivSearch
             }
 
             await eventArgs.Reply("图呢(请在1分钟内发送图片)");
-            requestList.Add((eventArgs.Sender, eventArgs.SourceGroup));
 
             var imgArgs =
                 await eventArgs.WaitForNextMessageAsync(@"^\[CQ:image,file=[a-z0-9]+\.image,subType=[0-9]+\]$",
@@ -47,15 +41,13 @@ namespace AntiRain.Command.PixivSearch
             if(imgArgs == null)
             {
                 await eventArgs.Reply("连图都没有真是太逊了");
-                requestList.Remove((eventArgs.Sender, eventArgs.SourceGroup));
                 return;
             }
             Log.Debug("pic", $"get pic {imgArgs.Message.RawText} searching...");
             //发送图片
             var messageInfo =
-                await eventArgs.Reply(await SaucenaoUtils.SearchByUrl("92a805aff18cbc56c4723d7e2d5100c6892fe256",
-                                                                      imgArgs.Message.GetAllImage().ToList()[0].Url,
-                                                                      imgArgs.Sender, imgArgs.LoginUid),
+                await eventArgs.Reply(await SaucenaoApi.SearchByUrl("92a805aff18cbc56c4723d7e2d5100c6892fe256",
+                                                                      imgArgs.Message.GetAllImage().ToList()[0].Url, imgArgs.LoginUid),
                                       TimeSpan.FromSeconds(15));
             if (messageInfo.apiStatus.RetCode != ApiStatusType.OK)
             {

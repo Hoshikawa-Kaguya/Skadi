@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using AntiRain.Config;
 using JetBrains.Annotations;
 using Sora.Attributes.Command;
-using Sora.Entities.MessageElement;
+using Sora.Entities.Segment;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
@@ -52,9 +52,9 @@ namespace AntiRain.Command
             await Task.Delay(10000);
             waitingList.RemoveAll(user => user == eventArgs.Sender);
             var rd = new Random();
-            await eventArgs.Reply(CQCodes.CQAt(memberList[rd.Next(0, memberList.Count - 1)].UserId) +
+            await eventArgs.Reply(SegmentBuilder.At(memberList[rd.Next(0, memberList.Count - 1)].UserId) +
                                   "\r\n恭喜成为" +
-                                  CQCodes.CQAt(eventArgs.Sender) +
+                                  SegmentBuilder.At(eventArgs.Sender) +
                                   "的老婆 ~");
         }
     }
