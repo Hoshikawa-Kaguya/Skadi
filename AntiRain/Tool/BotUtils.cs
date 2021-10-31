@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AntiRain.IO;
 using AntiRain.TypeEnum;
+using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
 using Sora.Entities;
 using Sora.Entities.Segment;
@@ -235,7 +236,7 @@ namespace AntiRain.Tool
 
         #region R18图片拦截
 
-        public static SoraSegment GetPixivImg(long pid, string proxyUrl)
+        public static (JToken apiInfo, SoraSegment message) GetPixivImg(long pid, string proxyUrl)
         {
             var pixApiReq =
                 Requests.Get($"https://pixiv.yukari.one/api/illust/{pid}",
@@ -245,18 +246,20 @@ namespace AntiRain.Tool
                                  IsThrowErrorForTimeout    = false,
                                  IsThrowErrorForStatusCode = false
                              });
-            var imgCqCode = SegmentBuilder.Image(proxyUrl);
+            var imgSegment = SegmentBuilder.Image(proxyUrl);
 
             if (pixApiReq.StatusCode == HttpStatusCode.OK)
             {
                 var infoJson = pixApiReq.Json();
-                if (Convert.ToBoolean(infoJson["error"])) imgCqCode = SegmentBuilder.Text("[ERROR:网络错误，无法获取图片详细信息]");
-                else if (Convert.ToBoolean(infoJson["body"]?["xRestrict"])) imgCqCode = SegmentBuilder.Text("[H是不行的]");
+                if (Convert.ToBoolean(infoJson["error"]))
+                    return (infoJson,
+                            SegmentBuilder.Text($"[ERROR:网络错误，无法获取图片详细信息({infoJson["message"]})]"));
+                return Convert.ToBoolean(infoJson["body"]?["xRestrict"])
+                    ? (infoJson, SegmentBuilder.Text("[H是不行的]"))
+                    : (infoJson, imgSegment);
             }
-            else
-                imgCqCode = SegmentBuilder.Text("[ERROR:网络错误，无法获取图片详细信息]");
 
-            return imgCqCode;
+            return (null, SegmentBuilder.Text($"[ERROR:网络错误，无法获取图片详细信息({pixApiReq.StatusCode})]"));
         }
 
         #endregion

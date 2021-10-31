@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AntiRain.Config;
 using AntiRain.Config.ConfigModule;
+using AntiRain.Resource;
 using AntiRain.Tool;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -11,6 +13,7 @@ using PyLibSharp.Requests;
 using Sora.Entities;
 using Sora.Entities.Segment;
 using YukariToolBox.FormatLog;
+using Font = System.Drawing.Font;
 
 namespace AntiRain.Command.PixivSearch
 {
@@ -56,16 +59,14 @@ namespace AntiRain.Command.PixivSearch
                 //pixiv
                 case 5:
                 {
-                    var pid = Convert.ToInt64(parsedPic["data"]?["pixiv_id"]);
-                    var imageUrl = string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy)
-                        ? $"https://pixiv.lancercmd.cc/{pid}"
-                        : $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{pid}";
-                    var imgSegment = BotUtils.GetPixivImg(pid, imageUrl);
+                    var pid        = Convert.ToInt64(parsedPic["data"]?["pixiv_id"]);
+                    var imageUrl   = GenPixivUrl(userConfig.HsoConfig.PximyProxy, pid);
+                    var (_, imgSegment) = BotUtils.GetPixivImg(pid, imageUrl);
                     return "[Saucenao-Pixiv]"                                +
                            $"\r\n图片名:{parsedPic["data"]?["title"]}"          +
                            $"\r\n作者:{parsedPic["data"]?["member_name"]}\r\n" +
                            imgSegment                                        +
-                           $"\r\npixiv id:{pid}\r\n"                         +
+                           $"\r\nPixiv Id:{pid}\r\n"                         +
                            $"[{parsedPic["header"]?["similarity"]}%]";
                 }
                 //twitter
@@ -92,18 +93,48 @@ namespace AntiRain.Command.PixivSearch
                            $"\r\n[{parsedPic["header"]?["similarity"]}%]";
                 //unknown
                 default:
-                    var img = BotUtils.DrawText(parsedPic["data"]?.ToString(Formatting.Indented) ?? string.Empty,
-                                                new Font(FontFamily.GenericMonospace, 15),
-                                                Color.Black, Color.White);
-                    var base64Img = BotUtils.ImgToBase64String(img);
                     var msg = new MessageBody
                     {
-                        $"[Saucenao-Unknown]\r\nDatabase:{parsedPic["header"]?["index_name"]}",
-                        SegmentBuilder.Image($"base64://{base64Img}")
+                        $"[Saucenao-UnknownDatabase]\r\n{parsedPic["header"]?["index_name"]}"
                     };
+                    var source = parsedPic["data"]?["source"]?.ToString() ?? string.Empty;
+                    if (!string.IsNullOrEmpty(source))
+                    {
+                        //包含pixiv链接
+                        if (source.IndexOf("pixiv", StringComparison.Ordinal) != -1)
+                        {
+                            msg += "\r\n[Pixiv-Source]";
+                            var pid        = Convert.ToInt64(Path.GetFileName(source));
+                            var imageUrl   = GenPixivUrl(userConfig.HsoConfig.PximyProxy, pid);
+                            var (info, imgSegment) =  BotUtils.GetPixivImg(pid, imageUrl);
+                            msg += imgSegment;
+                            msg += $"\r\n{info["body"]?["illustTitle"]?.ToString() ?? string.Empty}";
+                            msg += $"\r\nPixiv Id:{info["body"]?["illustId"]?.ToString() ?? string.Empty}";
+                            msg += $"\r\n作者:{info["body"]?["userName"]?.ToString() ?? string.Empty}";
+                        }
+                        //包含twitter链接
+                        if (source.IndexOf("twitter", StringComparison.Ordinal) != -1)
+                        {
+                            msg += "\r\n[Twitter-Source]";
+                            msg += $"\r\nLink:{source}";
+                        }
+                    }
+                    else
+                    {
+                        var img = BotUtils.DrawText(parsedPic["data"]?.ToString(Formatting.Indented) ?? string.Empty,
+                                                    new Font(StaticResource.FontCollection.Families[0], 15),
+                                                    Color.Black, Color.White);
+                        var base64Img = BotUtils.ImgToBase64String(img);
+                        msg += SegmentBuilder.Image($"base64://{base64Img}");
+                    }
 
                     return msg;
             }
         }
+
+        private static string GenPixivUrl(string proxy, long pid)
+            => string.IsNullOrEmpty(proxy)
+                ? $"https://pixiv.lancercmd.cc/{pid}"
+                : $"{proxy.Trim('/')}/{pid}";
     }
 }

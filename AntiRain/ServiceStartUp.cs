@@ -1,7 +1,9 @@
 using System;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using AntiRain.Config;
+using AntiRain.Resource;
 using AntiRain.ServerInterface;
 using AntiRain.TimerEvent;
 using AntiRain.Tool;
@@ -38,8 +40,14 @@ namespace AntiRain
             //显示Log等级
             Log.Debug("Log Level", globalConfig.LogLevel);
 
-            //初始化资源数据库
+            //初始化资源
             Log.Info("AntiRain初始化", "初始化资源...");
+            //字体文件
+            Log.Debug("AntiRain初始化", "Load font...");
+            var fontObj = GCHandle.Alloc(Font.JetBrainsMono, GCHandleType.Pinned);
+            var fontPtr = fontObj.AddrOfPinnedObject();
+            StaticResource.FontCollection.AddMemoryFont(fontPtr, Font.JetBrainsMono.Length);
+            Log.Debug("AntiRain初始化", "Load font success");
 
             //初始化字符编码
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);

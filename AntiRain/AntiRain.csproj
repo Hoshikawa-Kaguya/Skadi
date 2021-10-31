@@ -26,6 +26,16 @@
     <ItemGroup>
         <EmbeddedResource Include="Config\Res\InitGlobalConfig.yaml" />
         <EmbeddedResource Include="Config\Res\InitUserConfig.yaml" />
+        <EmbeddedResource Update="Resource\Font.resx">
+          <Generator>ResXFileCodeGenerator</Generator>
+          <LastGenOutput>Font.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Resource\Fonts.resx">
+          <Generator>ResXFileCodeGenerator</Generator>
+          <LastGenOutput>Fonts.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+        <None Remove="Resource\JetBrainsMono-Regular.ttf" />
+        <EmbeddedResource Include="Resource\JetBrainsMono-Regular.ttf" />
     </ItemGroup>
 
     <ItemGroup>
@@ -45,6 +55,16 @@
             <DesignTime>True</DesignTime>
             <AutoGen>True</AutoGen>
             <DependentUpon>InitRes.resx</DependentUpon>
+        </Compile>
+        <Compile Update="Resource\Font.Designer.cs">
+          <DesignTime>True</DesignTime>
+          <AutoGen>True</AutoGen>
+          <DependentUpon>Font.resx</DependentUpon>
+        </Compile>
+        <Compile Update="Resource\Fonts.Designer.cs">
+          <DesignTime>True</DesignTime>
+          <AutoGen>True</AutoGen>
+          <DependentUpon>Fonts.resx</DependentUpon>
         </Compile>
     </ItemGroup>
 
