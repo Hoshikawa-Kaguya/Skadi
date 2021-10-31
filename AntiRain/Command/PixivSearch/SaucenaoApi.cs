@@ -127,6 +127,7 @@ namespace AntiRain.Command.PixivSearch
                         var base64Img = BotUtils.ImgToBase64String(img);
                         msg += SegmentBuilder.Image($"base64://{base64Img}");
                     }
+                    msg += $"\r\n[{parsedPic["header"]?["similarity"]}%]";
 
                     return msg;
             }
