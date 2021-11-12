@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <Authors>Yukari316</Authors>
         <Copyright>Yukari316</Copyright>
         <Platforms>AnyCPU;x64;x86</Platforms>
@@ -13,14 +13,29 @@
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <DocumentationFile></DocumentationFile>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
         <DocumentationFile />
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
         <DocumentationFile />
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+      <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -39,15 +54,16 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="BeetleX.FastHttpApi" Version="1.9.5" />
+        <PackageReference Include="BeetleX.FastHttpApi" Version="2.0.8" />
         <PackageReference Include="BilibiliApi" Version="0.3.10" />
         <PackageReference Include="JetBrains.Annotations" Version="2021.3.0" />
         <PackageReference Include="PyLibSharp.Requests" Version="1.2.10" />
         <PackageReference Include="SharpYaml" Version="1.8.0" />
-        <PackageReference Include="Sora" Version="1.0.0-rc.24" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
+        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
+        <PackageReference Include="Sora" Version="1.0.0-rc.26-pre6" />
         <PackageReference Include="sqlSugarCore" Version="5.0.4.2" />
-        <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
-        <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
+        <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
     </ItemGroup>
 
     <ItemGroup>

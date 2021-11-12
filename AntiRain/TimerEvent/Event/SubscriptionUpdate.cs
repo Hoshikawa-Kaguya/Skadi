@@ -33,10 +33,10 @@ namespace AntiRain.TimerEvent.Event
         {
             //读取配置文件
             ConfigManager.TryGetUserConfig(connectEventArgs.LoginUid, out var loadedConfig);
-            ModuleSwitch            moduleEnable  = loadedConfig.ModuleSwitch;
-            List<GroupSubscription> Subscriptions = loadedConfig.SubscriptionConfig.GroupsConfig;
+            var moduleEnable  = loadedConfig.ModuleSwitch;
+            var Subscriptions = loadedConfig.SubscriptionConfig.GroupsConfig;
             //数据库
-            SubscriptionDBHelper dbHelper = new(connectEventArgs.LoginUid);
+            var dbHelper = new SubscriptionDBHelper(connectEventArgs.LoginUid);
             //检查模块是否启用
             if (!moduleEnable.Bili_Subscription) return;
             foreach (var subscription in Subscriptions)
@@ -81,9 +81,7 @@ namespace AntiRain.TimerEvent.Event
             foreach (var status in updateDict)
             {
                 if (!dbHelper.UpdateLiveStatus(status.Key, biliUser, live.LiveStatus))
-                {
                     Log.Error("Database", "更新直播订阅数据失败");
-                }
             }
 
             //需要消息提示的群
@@ -92,9 +90,9 @@ namespace AntiRain.TimerEvent.Event
                                         .ToList();
             if (targetGroup.Count == 0) return;
             //构建提示消息
-            MessageBody message = $"{biliUserInfo.Name} 正在直播！\r\n{biliUserInfo.LiveRoomInfo.Title}" +
-                                  SegmentBuilder.Image(biliUserInfo.LiveRoomInfo.CoverUrl)               +
-                                  $"直播间地址:{biliUserInfo.LiveRoomInfo.LiveUrl}";
+            var message = $"{biliUserInfo.Name} 正在直播！\r\n{biliUserInfo.LiveRoomInfo.Title}" +
+                          SoraSegment.Image(biliUserInfo.LiveRoomInfo.CoverUrl)             +
+                          $"直播间地址:{biliUserInfo.LiveRoomInfo.LiveUrl}";
             foreach (var gid in targetGroup)
             {
                 Log.Info("直播订阅", $"获取到{biliUserInfo.Name}正在直播，向群[{gid}]发送动态信息");
@@ -105,9 +103,9 @@ namespace AntiRain.TimerEvent.Event
         private static async ValueTask GetDynamic(SoraApi soraApi, long biliUser, List<long> groupId,
                                                   SubscriptionDBHelper dbHelper)
         {
-            string       textMessage;
-            Dynamic      biliDynamic;
-            List<string> imgList = new();
+            string  textMessage;
+            Dynamic biliDynamic;
+            var     imgList = new List<string>();
             //获取动态文本
             try
             {
@@ -116,23 +114,23 @@ namespace AntiRain.TimerEvent.Event
                 {
                     //检查动态类型
                     case CardType.PlainText:
-                        PlainTextCard plainTextCard = (PlainTextCard)cardObj;
+                        var plainTextCard = (PlainTextCard) cardObj;
                         textMessage = plainTextCard.ToString();
                         biliDynamic = plainTextCard;
                         break;
                     case CardType.TextAndPic:
-                        TextAndPicCard textAndPicCard = (TextAndPicCard)cardObj;
+                        var textAndPicCard = (TextAndPicCard) cardObj;
                         imgList.AddRange(textAndPicCard.ImgList);
                         textMessage = textAndPicCard.ToString();
                         biliDynamic = textAndPicCard;
                         break;
                     case CardType.Forward:
-                        ForwardCard forwardCard = (ForwardCard)cardObj;
+                        var forwardCard = (ForwardCard) cardObj;
                         textMessage = forwardCard.ToString();
                         biliDynamic = forwardCard;
                         break;
                     case CardType.Video:
-                        VideoCard videoCard = (VideoCard)cardObj;
+                        var videoCard = (VideoCard) cardObj;
                         imgList.Add(videoCard.CoverUrl);
                         textMessage = videoCard.ToString();
                         biliDynamic = videoCard;
@@ -158,13 +156,13 @@ namespace AntiRain.TimerEvent.Event
             }
 
             //获取用户信息
-            UserInfo sender = biliDynamic.GetUserInfo();
+            var sender = biliDynamic.GetUserInfo();
             Log.Debug("动态获取", $"{sender.UserName}的动态获取成功");
             //检查是否是最新的
-            List<long> targetGroups = groupId
-                                      .Where(group => !dbHelper.IsLatestDynamic(@group, sender.Uid,
-                                                                                    biliDynamic.UpdateTime))
-                                      .ToList();
+            var targetGroups = groupId
+                               .Where(group => !dbHelper.IsLatestDynamic(@group, sender.Uid,
+                                                                         biliDynamic.UpdateTime))
+                               .ToList();
             //没有群需要发送消息
             if (targetGroups.Count == 0)
             {
@@ -173,15 +171,15 @@ namespace AntiRain.TimerEvent.Event
             }
 
             //构建消息
-            MessageBody message = new();
+            var message = new MessageBody();
             message.Add($"获取到了来自 {sender.UserName} 的动态：\r\n{textMessage}");
             //添加图片
             foreach (var img in imgList)
             {
-                message.Add(SegmentBuilder.Image(img));
+                message.Add(SoraSegment.Image(img));
             }
 
-            message += SegmentBuilder.Text($"\r\n更新时间：{biliDynamic.UpdateTime:MM-dd HH:mm:ss}");
+            message += SoraSegment.Text($"\r\n更新时间：{biliDynamic.UpdateTime:MM-dd HH:mm:ss}");
             //向未发送消息的群发送消息
             foreach (var targetGroup in targetGroups)
             {

@@ -1,11 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using AntiRain.Config;
 using AntiRain.Config.ConfigModule;
 using AntiRain.DatabaseUtils.Helpers;
@@ -20,6 +12,14 @@ using Sora.Entities.Segment;
 using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using YukariToolBox.FormatLog;
 using static AntiRain.Tool.CheckInCD;
 using MatchType = Sora.Enumeration.MatchType;
@@ -31,7 +31,7 @@ namespace AntiRain.Command
     {
         #region 属性
 
-        private Dictionary<CheckUser, DateTime> Users { get; set; } = new();
+        private Dictionary<CheckUser, DateTime> Users { get; } = new();
 
         #endregion
 
@@ -41,20 +41,20 @@ namespace AntiRain.Command
         /// 用于处理传入指令
         /// </summary>
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] { "来点色图", "来点涩图", "我要看色图" })]
+        [GroupCommand(CommandExpressions = new[] {"来点色图", "来点涩图", "我要看色图"})]
         public async void HsoPic(GroupMessageEventArgs eventArgs)
         {
             eventArgs.IsContinueEventChain = false;
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig userConfig))
             {
-                Log.Error("Config", "无法获取用户配置文件");
+                Log.Error("Config|Hso", "无法获取用户配置文件");
                 return;
             }
 
             if (CheckGroupBlock(userConfig, eventArgs)) return;
             if (Users.IsInCD(eventArgs.SourceGroup, eventArgs.Sender))
             {
-                await eventArgs.SourceGroup.SendGroupMessage(SegmentBuilder.At(eventArgs.Sender) +
+                await eventArgs.SourceGroup.SendGroupMessage(SoraSegment.At(eventArgs.Sender) +
                                                              "你是不是只会要色图(逊欸，冲的真快)");
                 return;
             }
@@ -68,7 +68,7 @@ namespace AntiRain.Command
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] { @"^让我康康[0-9]+\s[0-9]+$" }, MatchType = MatchType.Regex)]
+        [GroupCommand(CommandExpressions = new[] {@"^让我康康[0-9]+\s[0-9]+$"}, MatchType = MatchType.Regex)]
         public async void HsoPicIndexSearch(GroupMessageEventArgs eventArgs)
         {
             eventArgs.IsContinueEventChain = false;
@@ -77,7 +77,7 @@ namespace AntiRain.Command
             var picIndex = picInfos[1];
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig userConfig))
             {
-                Log.Error("Config", "无法获取用户配置文件");
+                Log.Error("Config|Hso", "无法获取用户配置文件");
                 return;
             }
 
@@ -96,7 +96,7 @@ namespace AntiRain.Command
             }
 
             var (_, imgSegment) = BotUtils.GetPixivImg(Convert.ToInt64(picId), imageUrl);
-            
+
             //发送图片
             var (apiStatus, _) = await eventArgs.Reply(imgSegment,
                                                        TimeSpan.FromSeconds(10));
@@ -105,8 +105,8 @@ namespace AntiRain.Command
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] { "来点色批" }, MatchType = MatchType.Full)]
-        public async void HsoRank(GroupMessageEventArgs eventArgs)
+        [GroupCommand(CommandExpressions = new[] {"来点色批"}, MatchType = MatchType.Full)]
+        public static async void HsoRank(GroupMessageEventArgs eventArgs)
         {
             eventArgs.IsContinueEventChain = false;
             var hsoDbHelper = new HsoDBHelper(eventArgs.LoginUid);
@@ -122,7 +122,7 @@ namespace AntiRain.Command
             }
             else
             {
-                var message = new MessageBody { "让我康康到底谁最能冲\r\n" };
+                var message = new MessageBody {"让我康康到底谁最能冲\r\n"};
                 foreach (var count in rankList)
                 {
                     message.AddRange(count.Uid.ToAt() + $"冲了{count.Count}次" + "\r\n");
@@ -135,7 +135,7 @@ namespace AntiRain.Command
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] { @"^AD[0-9]+\s[0-9]+$" })]
+        [GroupCommand(CommandExpressions = new[] {@"^AD[0-9]+\s[0-9]+$"})]
         public async void HsoAddPic(GroupMessageEventArgs eventArgs)
         {
             eventArgs.IsContinueEventChain = false;
@@ -153,7 +153,7 @@ namespace AntiRain.Command
             //读取用户配置
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig userConfig))
             {
-                Log.Error("Config", "无法获取用户配置文件");
+                Log.Error("Config|Hso", "无法获取用户配置文件");
                 await eventArgs.Reply("Try load user config error");
                 return;
             }
@@ -165,13 +165,13 @@ namespace AntiRain.Command
                 return;
             }
 
-            ReqResponse res = await Requests.PostAsync("https://api.yukari.one/setu/add_pic", new ReqParams
+            var res = await Requests.PostAsync("https://api.yukari.one/setu/add_pic", new ReqParams
             {
                 Params = new Dictionary<string, string>
                 {
-                    { "apikey", userConfig.HsoConfig.YukariApiKey },
-                    { "pid", picId },
-                    { "index", picIndex }
+                    {"apikey", userConfig.HsoConfig.YukariApiKey},
+                    {"pid", picId},
+                    {"index", picIndex}
                 },
                 Timeout                   = 10000,
                 IsThrowErrorForStatusCode = false,
@@ -214,7 +214,7 @@ namespace AntiRain.Command
         /// </summary>
         /// <param name="hso">hso配置实例</param>
         /// <param name="eventArgs">事件参数</param>
-        private async Task GiveMeSetu(Hso hso, GroupMessageEventArgs eventArgs)
+        private static async Task GiveMeSetu(Hso hso, GroupMessageEventArgs eventArgs)
         {
             JToken response;
             Log.Debug("源", hso.Source);
@@ -270,13 +270,13 @@ namespace AntiRain.Command
                     Timeout = 3000,
                     Params = new Dictionary<string, string>
                     {
-                        { "apikey", apiKey }
+                        {"apikey", apiKey}
                     },
                     isCheckSSLCert = hso.CheckSSLCert
                 });
                 if (reqResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    Log.Error("Net", $"{serverUrl} return code {(int)reqResponse.StatusCode}");
+                    Log.Error("Net", $"{serverUrl} return code {(int) reqResponse.StatusCode}");
                     await eventArgs.SourceGroup
                                    .SendGroupMessage($"哇哦~发生了网络错误[{reqResponse.StatusCode}]，请联系机器人所在服务器管理员");
                     return;
@@ -307,10 +307,10 @@ namespace AntiRain.Command
                 }
 
                 //图片链接
-                string picUrl = response["data"]?[0]?["url"]?.ToString() ?? "";
+                var picUrl = response["data"]?[0]?["url"]?.ToString() ?? "";
                 Log.Debug("获取到图片", picUrl);
                 //本地图片存储路径
-                string localPicPath = $"{IOUtils.GetHsoPath()}/{Path.GetFileName(picUrl)}".Replace('\\', '/');
+                var localPicPath = $"{IOUtils.GetHsoPath()}/{Path.GetFileName(picUrl)}".Replace('\\', '/');
                 if (File.Exists(localPicPath)) //检查是否已缓存过图片
                 {
                     await eventArgs.SourceGroup.SendGroupMessage(HsoMessageBuilder(response["data"]?[0], hso.CardImage,
@@ -321,8 +321,8 @@ namespace AntiRain.Command
                     //检查是否有设置代理
                     if (!string.IsNullOrEmpty(hso.PximyProxy))
                     {
-                        string[]      fileNameArgs    = Regex.Split(Path.GetFileName(picUrl), "_p");
-                        StringBuilder proxyUrlBuilder = new();
+                        var fileNameArgs    = Regex.Split(Path.GetFileName(picUrl), "_p");
+                        var proxyUrlBuilder = new StringBuilder();
                         proxyUrlBuilder.Append(hso.PximyProxy);
                         //图片Pid部分
                         proxyUrlBuilder.Append(hso.PximyProxy.EndsWith("/")
@@ -353,19 +353,19 @@ namespace AntiRain.Command
 
         private static async void SendLocalPic(Hso hso, GroupMessageEventArgs eventArgs)
         {
-            string[] picNames = Directory.GetFiles(IOUtils.GetHsoPath());
+            var picNames = Directory.GetFiles(IOUtils.GetHsoPath());
             if (picNames.Length == 0)
             {
                 await eventArgs.SourceGroup.SendGroupMessage("机器人管理者没有在服务器上塞色图\r\n你去找他要啦!");
                 return;
             }
 
-            Random randFile     = new();
-            string localPicPath = $"{picNames[randFile.Next(0, picNames.Length - 1)]}";
+            var randFile     = new Random();
+            var localPicPath = $"{picNames[randFile.Next(0, picNames.Length - 1)]}";
             Log.Debug("发送图片", localPicPath);
             await eventArgs.SourceGroup.SendGroupMessage(hso.CardImage
-                                                             ? SegmentBuilder.CardImage(localPicPath)
-                                                             : SegmentBuilder.Image(localPicPath));
+                                                             ? SoraSegment.CardImage(localPicPath)
+                                                             : SoraSegment.Image(localPicPath));
         }
 
         /// <summary>
@@ -374,26 +374,25 @@ namespace AntiRain.Command
         /// <param name="picInfo">图片信息Json</param>
         /// <param name="cardImg">是否为装逼大图</param>
         /// <param name="picStr">图片路径/b64字符串</param>
-        private MessageBody HsoMessageBuilder(JToken picInfo, bool cardImg, string picStr)
+        private static MessageBody HsoMessageBuilder(JToken picInfo, bool cardImg, string picStr)
         {
-            StringBuilder textBuilder = new();
-            textBuilder.Append(picInfo["title"]);
-            textBuilder.Append("\r\nid:");
-            textBuilder.Append(picInfo["pid"]);
+            var textBuilder = new StringBuilder();
+            textBuilder.AppendLine(picInfo["title"]?.ToString());
+            textBuilder.Append($"pid:{picInfo["pid"]}");
             if (picInfo["index"] != null)
             {
                 textBuilder.Append(" - ");
                 textBuilder.Append(picInfo["index"]);
             }
 
-            textBuilder.Append("\r\n作者:");
-            textBuilder.Append(picInfo["author"]);
+            textBuilder.AppendLine();
+            textBuilder.Append($"作者:{picInfo["author"]}");
             //构建消息
-            MessageBody msg = new()
+            var msg = new MessageBody
             {
                 cardImg
-                    ? SegmentBuilder.CardImage(picStr)
-                    : SegmentBuilder.Image(picStr),
+                    ? SoraSegment.CardImage(picStr)
+                    : SoraSegment.Image(picStr),
                 textBuilder.ToString()
             };
             return msg;
@@ -404,7 +403,7 @@ namespace AntiRain.Command
         /// </summary>
         /// <param name="config">配置文件</param>
         /// <param name="eventArgs">事件参数</param>
-        private bool CheckGroupBlock(UserConfig config, GroupMessageEventArgs eventArgs)
+        private static bool CheckGroupBlock(UserConfig config, GroupMessageEventArgs eventArgs)
             => config.HsoConfig.GroupBlock.Any(gid => gid == eventArgs.SourceGroup);
 
         #endregion

@@ -18,7 +18,7 @@ namespace AntiRain.ServerInterface
             if (privateMessage.Message.RawText.Equals("在"))
             {
                 await privateMessage.Sender
-                                    .SendPrivateMessage(SegmentBuilder
+                                    .SendPrivateMessage(SoraSegment
                                                             .Image("https://i.loli.net/2020/11/02/2OgZ1M6YNV5kntS.gif"));
             }
         }

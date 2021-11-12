@@ -32,22 +32,22 @@ namespace AntiRain.Command.PcrUtils
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] { "^切噜(?:~|～)" },
+        [GroupCommand(CommandExpressions = new[] {"^切噜(?:~|～)"},
                       MatchType = MatchType.Regex)]
         public static async void CheruToString(GroupMessageEventArgs eventArgs)
         {
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config))
             {
-                Log.Error("Config", "无法获取用户配置文件");
+                Log.Error("Config|Cheru", "无法获取用户配置文件");
                 return;
             }
 
             if (!config.ModuleSwitch.Cheru) return;
             if (eventArgs.Message.RawText.Length <= 3) return;
-            string        cheru       = eventArgs.Message.RawText[3..];
-            Regex         isCheru     = new(@"切[切卟叮咧哔唎啪啰啵嘭噜噼巴拉蹦铃]+");
-            StringBuilder textBuilder = new();
-            foreach (string cheruWord in Regex.Split(cheru, @"\b"))
+            var cheru       = eventArgs.Message.RawText[3..];
+            var isCheru     = new Regex(@"切[切卟叮咧哔唎啪啰啵嘭噜噼巴拉蹦铃]+");
+            var textBuilder = new StringBuilder();
+            foreach (var cheruWord in Regex.Split(cheru, @"\b"))
             {
                 textBuilder.Append(isCheru.IsMatch(cheruWord) ? CheruToWord(cheruWord) : cheruWord);
             }
@@ -60,22 +60,22 @@ namespace AntiRain.Command.PcrUtils
         /// </summary>
         /// <param name="eventArgs">事件参数</param>
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] { "^切噜一下" },
+        [GroupCommand(CommandExpressions = new[] {"^切噜一下"},
                       MatchType = MatchType.Regex)]
         public static async void StringToCheru(GroupMessageEventArgs eventArgs)
         {
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config))
             {
-                Log.Error("Config", "无法获取用户配置文件");
+                Log.Error("Config|Cheru", "无法获取用户配置文件");
                 return;
             }
 
             if (!config.ModuleSwitch.Cheru) return;
             if (eventArgs.Message.RawText.Length <= 4) return;
-            string        text         = eventArgs.Message.RawText[4..];
-            Regex         isCHN        = new(@"[\u4e00-\u9fa5]");
-            StringBuilder cheruBuilder = new();
-            foreach (string word in Regex.Split(text, @"\b"))
+            var text         = eventArgs.Message.RawText[4..];
+            var isCHN        = new Regex(@"[\u4e00-\u9fa5]");
+            var cheruBuilder = new StringBuilder();
+            foreach (var word in Regex.Split(text, @"\b"))
             {
                 cheruBuilder.Append(isCHN.IsMatch(word) ? WordToCheru(word) : word);
             }
@@ -123,15 +123,15 @@ namespace AntiRain.Command.PcrUtils
             {
                 if (i + 1 >= cheruContent.Length) continue;
                 //将index作为高低四位合并为八位
-                var wordByte = (byte)(CHERU_SET.IndexOf(cheruContent[i]) +
-                                      (CHERU_SET.IndexOf(cheruContent[i + 1]) << 4));
+                var wordByte = (byte) (CHERU_SET.IndexOf(cheruContent[i]) +
+                                       (CHERU_SET.IndexOf(cheruContent[i + 1]) << 4));
                 wordBytes.Add(wordByte);
             }
 
             //剩下的单字符
             Regex isPunctuation = new Regex(@"\b"); //跳过标点符号
             if (cheruContent.Length % 2 == 1 && !isPunctuation.IsMatch(cheruContent[^1].ToString()))
-                wordBytes.Add((byte)CHERU_SET[CHERU_SET.IndexOf(cheruContent[^1])]);
+                wordBytes.Add((byte) CHERU_SET[CHERU_SET.IndexOf(cheruContent[^1])]);
             return Encoding.GetEncoding("GB18030").GetString(wordBytes.ToArray());
         }
 

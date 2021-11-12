@@ -18,7 +18,7 @@ namespace AntiRain.Command
         /// Echo
         /// </summary>
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] { @"^echo\s[\s\S]+$" },
+        [GroupCommand(CommandExpressions = new[] {@"^echo\s[\s\S]+$"},
                       MatchType = MatchType.Regex)]
         public static async ValueTask Echo(GroupMessageEventArgs eventArgs)
         {
@@ -28,7 +28,7 @@ namespace AntiRain.Command
                 if (eventArgs.Message.MessageBody[0].Data is TextSegment str && str.Content.StartsWith("echo "))
                 {
                     if (str.Content.Equals("echo ")) eventArgs.Message.MessageBody.RemoveAt(0);
-                    else eventArgs.Message.MessageBody[0] = SegmentBuilder.Text(str.Content[5..]);
+                    else eventArgs.Message.MessageBody[0] = SoraSegment.Text(str.Content[5..]);
                 }
             }
 

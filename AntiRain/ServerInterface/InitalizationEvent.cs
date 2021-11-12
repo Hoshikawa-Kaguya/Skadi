@@ -24,7 +24,7 @@ namespace AntiRain.ServerInterface
             if (!ConfigManager.UserConfigFileInit(connectEvent.LoginUid) ||
                 !ConfigManager.TryGetUserConfig(connectEvent.LoginUid, out var userConfig))
             {
-                Log.Fatal("AntiRain初始化", "无法获取用户配置文件");
+                Log.Fatal("AntiRain初始化", "无法获取用户配置文件(Initalization)");
                 Environment.Exit(-1);
                 return ValueTask.CompletedTask;
             }

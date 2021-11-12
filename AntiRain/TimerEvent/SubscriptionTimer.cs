@@ -1,10 +1,10 @@
+using AntiRain.TimerEvent.Event;
+using Sora.EventArgs.SoraEvent;
+using Sora.EventArgs.WebsocketEvent;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using AntiRain.TimerEvent.Event;
-using Sora.EventArgs.SoraEvent;
-using Sora.EventArgs.WebsocketEvent;
 using YukariToolBox.FormatLog;
 
 namespace AntiRain.TimerEvent
@@ -16,10 +16,12 @@ namespace AntiRain.TimerEvent
         /// <summary>
         /// 计时器
         /// </summary>
-        private static readonly Timer Timer = new(SubscriptionEvent, //事件处理
-                                                  null,              //初始化数据
-                                                  new TimeSpan(0),   //即刻执行
-                                                  new TimeSpan(0, 0, 0, 60));
+#pragma warning disable IDE0052
+        private static readonly Timer SubTimer = new(SubscriptionEvent, //事件处理
+                                                     null,              //初始化数据
+                                                     new TimeSpan(0),   //即刻执行
+                                                     new TimeSpan(0, 0, 0, 60));
+#pragma warning restore IDE0052
 
         /// <summary>
         /// 订阅列表
@@ -40,18 +42,20 @@ namespace AntiRain.TimerEvent
             if (!SubDictionary.Exists(args => args.LoginUid == eventArgs.LoginUid))
             {
                 SubDictionary.Add(eventArgs);
-                return;
             }
-
-            Log.Error("SubTimer", "添加订阅账号失败");
+            else
+            {
+                SubDictionary.RemoveAll(arg => arg.LoginUid == eventArgs.LoginUid);
+                SubDictionary.Add(eventArgs);
+            }
         }
 
         /// <summary>
         /// 删除计时器
         /// </summary>
-        /// <param name="id">onebot连接标识</param>
+        /// <param name="_">没啥用</param>
         /// <param name="eventArgs">ConnectEventArgs</param>
-        internal static ValueTask DelTimerEvent(Guid id, ConnectionEventArgs eventArgs)
+        internal static ValueTask DelTimerEvent(Guid _, ConnectionEventArgs eventArgs)
         {
             //尝试移除订阅
             if (!SubDictionary.Exists(args => args.LoginUid == eventArgs.SelfId))

@@ -1,12 +1,12 @@
+using AntiRain.Config.ConfigModule;
+using AntiRain.Config.Res;
+using AntiRain.IO;
+using SharpYaml.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
-using AntiRain.Config.ConfigModule;
-using AntiRain.Config.Res;
-using AntiRain.IO;
-using SharpYaml.Serialization;
 using YukariToolBox.FormatLog;
 
 namespace AntiRain.Config
@@ -35,13 +35,20 @@ namespace AntiRain.Config
                 if (File.Exists(userConfigPath) && LoadUserConfig(out var ret, userConfigPath))
                 {
                     Log.Debug("ConfigIO", "读取配置文件");
+                    //已经存在则更新
+                    if (UserConfigs.ContainsKey(uid))
+                    {
+                        UserConfigs[uid] = ret;
+                        return true;
+                    }
+
                     return UserConfigs.TryAdd(uid, ret);
                 }
 
                 //没读取到文件时创建新的文件
                 Log.Error("ConfigIO", "未找到配置文件");
                 Log.Warning("ConfigIO", "创建新的配置文件");
-                string initConfigText = Encoding.UTF8.GetString(InitRes.InitUserConfig);
+                var initConfigText = Encoding.UTF8.GetString(InitRes.InitUserConfig);
                 using (TextWriter writer = File.CreateText(userConfigPath))
                 {
                     writer.Write(initConfigText);
@@ -123,6 +130,12 @@ namespace AntiRain.Config
             return GlobalConfig != null;
         }
 
+        /// <summary>
+        /// 移除已过期的用户配置
+        /// </summary>
+        public static bool TryRemoveUserConfig(long uid)
+            => UserConfigs.Remove(uid);
+
         #endregion
 
         #region 私有读取方法
@@ -139,7 +152,7 @@ namespace AntiRain.Config
             try
             {
                 //反序列化配置文件
-                Serializer       serializer = new();
+                var              serializer = new Serializer();
                 using TextReader reader     = File.OpenText(path);
                 userConfig = serializer.Deserialize<UserConfig>(reader);
                 //参数合法性检查
@@ -168,13 +181,13 @@ namespace AntiRain.Config
             try
             {
                 //反序列化配置文件
-                Serializer       serializer = new();
+                var              serializer = new Serializer();
                 using TextReader reader     = File.OpenText(path);
                 globalConfig = serializer.Deserialize<GlobalConfig>(reader);
                 //参数合法性检查
-                if ((int)globalConfig.LogLevel is < 0 or > 3 ||
-                    globalConfig.HeartBeatTimeOut == 0       ||
-                    globalConfig.OnebotApiTimeOut == 0       ||
+                if ((int) globalConfig.LogLevel is < 0 or > 3 ||
+                    globalConfig.HeartBeatTimeOut == 0        ||
+                    globalConfig.OnebotApiTimeOut == 0        ||
                     globalConfig.Port is 0 or > 65535)
                 {
                     Log.Error("读取全局配置", "参数值超出合法范围，重新生成配置文件");

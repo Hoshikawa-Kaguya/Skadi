@@ -1,8 +1,4 @@
-﻿using System.Net.Http;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using BilibiliApi.Video;
+﻿using BilibiliApi.Video;
 using BilibiliApi.Video.Models;
 using JetBrains.Annotations;
 using Sora.Attributes.Command;
@@ -10,6 +6,10 @@ using Sora.Entities;
 using Sora.Entities.Segment;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
+using System.Net.Http;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using YukariToolBox.FormatLog;
 
 namespace AntiRain.Command
@@ -21,7 +21,7 @@ namespace AntiRain.Command
     public static class BlibiliVideo
     {
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] { @"(?:BV|bv|AV|av)[a-zA-Z0-9]+" },
+        [GroupCommand(CommandExpressions = new[] {@"(?:BV|bv|AV|av)[a-zA-Z0-9]+"},
                       MatchType = MatchType.Regex)]
         public static async ValueTask VideoInfoById(GroupMessageEventArgs eventArgs)
         {
@@ -39,7 +39,7 @@ namespace AntiRain.Command
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] { @"https://b23\.tv/[a-zA-Z0-9]+" },
+        [GroupCommand(CommandExpressions = new[] {@"https://b23\.tv/[a-zA-Z0-9]+"},
                       MatchType = MatchType.Regex,
                       Priority = 0)]
         public static async ValueTask VideoInfoByMiniApp(GroupMessageEventArgs eventArgs)
@@ -49,7 +49,7 @@ namespace AntiRain.Command
             var   videoUrlStr = urlRegex.Match(eventArgs.Message.RawText).Value;
             if (string.IsNullOrEmpty(videoUrlStr)) return;
             //网络请求获取跳转地址
-            var handler  = new HttpClientHandler { AllowAutoRedirect = false };
+            var handler  = new HttpClientHandler {AllowAutoRedirect = false};
             var client   = new HttpClient(handler);
             var response = await client.GetAsync(videoUrlStr);
             //解析id
@@ -76,16 +76,16 @@ namespace AntiRain.Command
 
         private static MessageBody GenReplyMessage(VideoInfo info)
         {
-            StringBuilder messageBuilder = new();
-            messageBuilder.Append($"Link:https://b23.tv/{info.Bid}\r\n");
-            messageBuilder.Append($"标题:{info.Title}\r\n");
-            messageBuilder.Append($"简介:{info.Desc}\r\n");
-            messageBuilder.Append($"UP:{info.AuthName}\r\nhttps://space.bilbili.com/{info.AuthUid}\r\n");
-            messageBuilder.Append($"投稿时间:{info.PublishTime:yyyy-MM-dd HH:mm:ss}");
-
-            MessageBody sendMessage = $"Bilibili视频解析\r\n[{info.Bid}(av{info.Aid})]\r\n" +
-                                      SegmentBuilder.Image(info.CoverUrl)                    +
-                                      messageBuilder.ToString();
+            var messageBuilder = new StringBuilder();
+            messageBuilder.AppendLine($"Link:https://b23.tv/{info.Bid}");
+            messageBuilder.AppendLine($"标题:{info.Title}");
+            messageBuilder.AppendLine($"简介:{info.Desc}");
+            messageBuilder.AppendLine($"UP:{info.AuthName}");
+            messageBuilder.AppendLine($"https://space.bilbili.com/{info.AuthUid}\r\n");
+            messageBuilder.AppendLine($"投稿时间:{info.PublishTime:yyyy-MM-dd HH:mm:ss}");
+            var sendMessage = $"Bilibili视频解析\r\n[{info.Bid}(av{info.Aid})]\r\n" +
+                              SoraSegment.Image(info.CoverUrl)                  +
+                              messageBuilder.ToString();
 
             return sendMessage;
         }

@@ -15,20 +15,21 @@ namespace AntiRain.Command
     public class GroupWife
     {
         private readonly List<long> waitingList = new();
-        
+
         [UsedImplicitly]
         [GroupCommand(CommandExpressions = new[] {"抽老婆"})]
         public async ValueTask RollWife(GroupMessageEventArgs eventArgs)
         {
             eventArgs.IsContinueEventChain = false;
-            if(!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config) && !config.ModuleSwitch.HaveFun) return;
+            if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config) &&
+                !config.ModuleSwitch.HaveFun) return;
             //检查是否已经在抽选
-            if(waitingList.Exists(user => user == eventArgs.Sender))
+            if (waitingList.Exists(user => user == eventArgs.Sender))
             {
                 await eventArgs.Reply("你已经在抽老婆了真是屑呢");
                 return;
             }
-            
+
             var (apiStatus, memberList) = await eventArgs.SourceGroup.GetGroupMemberList();
             if (apiStatus.RetCode != ApiStatusType.OK)
             {
@@ -52,9 +53,9 @@ namespace AntiRain.Command
             await Task.Delay(10000);
             waitingList.RemoveAll(user => user == eventArgs.Sender);
             var rd = new Random();
-            await eventArgs.Reply(SegmentBuilder.At(memberList[rd.Next(0, memberList.Count - 1)].UserId) +
-                                  "\r\n恭喜成为" +
-                                  SegmentBuilder.At(eventArgs.Sender) +
+            await eventArgs.Reply(SoraSegment.At(memberList[rd.Next(0, memberList.Count - 1)].UserId) +
+                                  "\r\n恭喜成为"                                                          +
+                                  SoraSegment.At(eventArgs.Sender)                                    +
                                   "的老婆 ~");
         }
     }

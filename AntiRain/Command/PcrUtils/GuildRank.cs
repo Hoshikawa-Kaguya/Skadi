@@ -24,7 +24,7 @@ namespace AntiRain.Command.PcrUtils
         /// 镜华站查询
         /// </summary>
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] { @"^镜华排名\S*$" },
+        [GroupCommand(CommandExpressions = new[] {@"^镜华排名\S*$"},
                       MatchType = MatchType.Regex)]
         public static async ValueTask KyoukaRank(GroupMessageEventArgs eventArgs)
         {
@@ -62,12 +62,13 @@ namespace AntiRain.Command.PcrUtils
                                                  {
                                                      {
                                                          HttpRequestHeader.Referer,
-                                                         "https://kengxxiao.github.io/Kyouka/"
-                                                     }
+                                                         "https://kyouka.kengxxiao.com/"
+                                                     },
                                                  },
                                                  CustomHeader = new Dictionary<string, string>
                                                  {
-                                                     { "Custom-Source", "AntiRainBot" }
+                                                     {"Custom-Source", "AntiRainBot"},
+                                                     {"Origin", "https://kyouka.kengxxiao.com/"}
                                                  }
                                              });
                 //判断响应
@@ -75,8 +76,8 @@ namespace AntiRain.Command.PcrUtils
                 {
                     await
                         eventArgs
-                            .Reply($"哇哦~发生了网络错误，请联系机器人所在服务器管理员\r\n{reqResponse.StatusCode}({(int)reqResponse.StatusCode})");
-                    Log.Error("网络发生错误", $"Code[{reqResponse.StatusCode}({(int)reqResponse.StatusCode})]");
+                            .Reply($"哇哦~发生了网络错误，请联系机器人所在服务器管理员\r\n{reqResponse.StatusCode}({(int) reqResponse.StatusCode})");
+                    Log.Error("网络发生错误", $"Code[{reqResponse.StatusCode}({(int) reqResponse.StatusCode})]");
                     //阻止下一步处理
                     return;
                 }
