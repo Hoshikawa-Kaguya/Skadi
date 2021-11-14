@@ -10,7 +10,7 @@ using Sora.EventArgs.SoraEvent;
 using YukariToolBox.FormatLog;
 using static AntiRain.Tool.CheckInCD;
 
-namespace AntiRain.Command.PixivSearch
+namespace AntiRain.Command.ImageSearch
 {
     /// <summary>
     /// 搜图指令

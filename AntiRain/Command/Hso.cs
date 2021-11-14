@@ -95,7 +95,7 @@ namespace AntiRain.Command
                 Log.Warning("Hso", "未找到代理服务器已使用默认代理:https://pixiv.lancercmd.cc/");
             }
 
-            var (_, imgSegment) = BotUtils.GetPixivImg(Convert.ToInt64(picId), imageUrl);
+            var imgSegment = BotUtils.GetPixivImg(Convert.ToInt64(picId), imageUrl);
 
             //发送图片
             var (apiStatus, _) = await eventArgs.Reply(imgSegment,

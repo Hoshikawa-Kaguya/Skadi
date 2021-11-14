@@ -22,6 +22,11 @@ namespace AntiRain.Config.ConfigModule
         /// 色图相关设置
         /// </summary>
         public Hso HsoConfig { set; get; }
+
+        /// <summary>
+        /// 推特API Token(v2)
+        /// </summary>
+        public string TwitterApiToken { get; set; }
     }
 
     /// <summary>

@@ -177,14 +177,14 @@ internal static class BotUtils
         //转换base64
         var b64 = img.ToBase64String(PngFormat.Instance);
         img.Dispose();
-        return b64;
+        return b64.Split(',')[1];
     }
 
     #endregion
 
     #region R18图片拦截
 
-    public static (JToken apiInfo, SoraSegment message) GetPixivImg(long pid, string proxyUrl)
+    public static SoraSegment GetPixivImg(long pid, string proxyUrl)
     {
         var pixApiReq =
             Requests.Get($"https://pixiv.yukari.one/api/illust/{pid}",
@@ -200,14 +200,13 @@ internal static class BotUtils
         {
             var infoJson = pixApiReq.Json();
             if (Convert.ToBoolean(infoJson["error"]))
-                return (infoJson,
-                        SoraSegment.Text($"[ERROR:网络错误，无法获取图片详细信息({infoJson["message"]})]"));
+                return SoraSegment.Text($"[ERROR:网络错误，无法获取图片详细信息({infoJson["message"]})]");
             return Convert.ToBoolean(infoJson["body"]?["xRestrict"])
-                ? (infoJson, SoraSegment.Text("[H是不行的]"))
-                : (infoJson, imgSegment);
+                ? SoraSegment.Text("[H是不行的]")
+                :imgSegment;
         }
 
-        return (null, SoraSegment.Text($"[ERROR:网络错误，无法获取图片详细信息({pixApiReq.StatusCode})]"));
+        return SoraSegment.Text($"[ERROR:网络错误，无法获取图片详细信息({pixApiReq.StatusCode})]");
     }
 
     #endregion

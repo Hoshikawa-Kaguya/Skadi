@@ -3,6 +3,7 @@ using AntiRain.Tool;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
+using SixLabors.ImageSharp;
 using Sora.Entities;
 using Sora.Entities.Segment;
 using System;
@@ -10,9 +11,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YukariToolBox.FormatLog;
-using Color = SixLabors.ImageSharp.Color;
 
-namespace AntiRain.Command.PixivSearch;
+namespace AntiRain.Command.ImageSearch;
 
 public static class SaucenaoApi
 {
@@ -65,24 +65,15 @@ public static class SaucenaoApi
             {
                 var pid      = Convert.ToInt64(parsedPic["data"]?["pixiv_id"]);
                 var imageUrl = GenPixivUrl(userConfig.HsoConfig.PximyProxy, pid);
-                var (_, imgSegment) = BotUtils.GetPixivImg(pid, imageUrl);
-                return "[Saucenao-Pixiv]"                                +
-                       $"\r\n图片名:{parsedPic["data"]?["title"]}"          +
-                       $"\r\n作者:{parsedPic["data"]?["member_name"]}\r\n" +
-                       imgSegment                                        +
-                       $"\r\nPixiv Id:{pid}\r\n"                         +
-                       $"[{parsedPic["header"]?["similarity"]}%]";
+                return Util.GenPixivResult(imageUrl, pid, parsedPic);
             }
             //twitter
             case 41:
             {
-                //TODO 推特API获取图片
-                return "[Saucenao-Twitter]" +
-                       //$"\r\n推文:{}\r\n"      +
-                       $"\r\n用户:{parsedPic["data"]?["twitter_user_handle"]}" +
-                       //imgCqCode                                         +
-                       $"\r\nLink:{parsedPic["data"]?["ext_urls"]?[0]}" +
-                       $"\r\n[{parsedPic["header"]?["similarity"]}%]";
+                var tweetUrl = parsedPic["data"]?["ext_urls"]?[0]?.ToString();
+                return string.IsNullOrEmpty(tweetUrl)
+                    ? "服务器歇逼了（无法获取推文链接，请稍后再试）"
+                    : Util.GenTwitterResult(tweetUrl, userConfig.TwitterApiToken, parsedPic);
             }
             //eh
             case 38:
@@ -97,45 +88,32 @@ public static class SaucenaoApi
                        $"\r\n[{parsedPic["header"]?["similarity"]}%]";
             //unknown
             default:
-                var msg = new MessageBody
-                {
-                    $"[Saucenao-UnknownDatabase]\r\n{parsedPic["header"]?["index_name"]}"
-                };
+            {
+                //检查源
                 var source = parsedPic["data"]?["source"]?.ToString() ?? string.Empty;
-                if (!string.IsNullOrEmpty(source))
-                {
-                    //包含pixiv链接
-                    if (source.IndexOf("pixiv", StringComparison.Ordinal) != -1)
-                    {
-                        msg += "\r\n[Pixiv-Source]";
-                        var pid = Convert.ToInt64(Path.GetFileName(source));
-                        var imageUrl = GenPixivUrl(userConfig.HsoConfig.PximyProxy, pid);
-                        var (info, imgSegment) = BotUtils.GetPixivImg(pid, imageUrl);
-                        msg += imgSegment;
-                        msg += $"\r\n{info["body"]?["illustTitle"]?.ToString() ?? string.Empty}";
-                        msg += $"\r\nPixiv Id:{info["body"]?["illustId"]?.ToString() ?? string.Empty}";
-                        msg += $"\r\n作者:{info["body"]?["userName"]?.ToString() ?? string.Empty}";
-                    }
 
-                    //包含twitter链接
-                    if (source.IndexOf("twitter", StringComparison.Ordinal) != -1)
-                    {
-                        msg += "\r\n[Twitter-Source]";
-                        msg += $"\r\nLink:{source}";
-                    }
-                }
-                else
+                //包含pixiv链接
+                if (source.IndexOf("pixiv", StringComparison.Ordinal) != -1)
                 {
-                    var b64Pic =
-                        BotUtils.DrawTextImage(parsedPic["data"]?.ToString(Formatting.Indented) ?? string.Empty,
-                                               Color.Black, Color.White)
-                                .Split(',')[1];
-                    msg += SoraSegment.Image($"base64://{b64Pic}");
+                    var pid      = Convert.ToInt64(Path.GetFileName(source));
+                    var imageUrl = GenPixivUrl(userConfig.HsoConfig.PximyProxy, pid);
+                    return Util.GenPixivResult(imageUrl, pid, parsedPic);
                 }
 
+                //包含twitter链接
+                if (source.IndexOf("twitter", StringComparison.Ordinal) != -1)
+                    return Util.GenTwitterResult(source, userConfig.TwitterApiToken, parsedPic);
+
+                var msg = new MessageBody();
+                msg += $"[Saucenao-UnknownDatabase]\r\n{parsedPic["header"]?["index_name"]}";
+                var b64Pic =
+                    BotUtils.DrawTextImage(parsedPic["data"]?.ToString(Formatting.Indented) ?? string.Empty,
+                                           Color.Black, Color.White);
+                msg += SoraSegment.Image($"base64://{b64Pic}");
                 msg += $"\r\n[{parsedPic["header"]?["similarity"]}%]";
 
                 return msg;
+            }
         }
     }
 
