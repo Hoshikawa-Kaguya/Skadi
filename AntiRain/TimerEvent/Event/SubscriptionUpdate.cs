@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AntiRain.Config;
 using AntiRain.DatabaseUtils.Helpers;
-using AntiRain.Config.ConfigModule;
 using BilibiliApi.Dynamic;
 using BilibiliApi.Dynamic.Enums;
 using BilibiliApi.Dynamic.Models;
@@ -18,6 +13,10 @@ using Sora.Entities;
 using Sora.Entities.Base;
 using Sora.Entities.Segment;
 using Sora.EventArgs.SoraEvent;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using YukariToolBox.FormatLog;
 using YukariToolBox.Time;
 

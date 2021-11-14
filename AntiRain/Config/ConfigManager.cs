@@ -1,5 +1,4 @@
 using AntiRain.Config.ConfigModule;
-using AntiRain.Config.Res;
 using AntiRain.IO;
 using SharpYaml.Serialization;
 using System;

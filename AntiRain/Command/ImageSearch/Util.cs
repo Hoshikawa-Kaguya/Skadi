@@ -4,7 +4,6 @@ using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
 using Sora.Entities;
 using Sora.Entities.Segment;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

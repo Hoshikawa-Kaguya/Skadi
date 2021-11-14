@@ -39,8 +39,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="Config\Res\InitGlobalConfig.yaml" />
-        <EmbeddedResource Include="Config\Res\InitUserConfig.yaml" />
+        <EmbeddedResource Include="Config\InitGlobalConfig.yaml" />
+        <EmbeddedResource Include="Config\InitUserConfig.yaml" />
         <EmbeddedResource Update="Resource\Font.resx">
           <Generator>ResXFileCodeGenerator</Generator>
           <LastGenOutput>Font.Designer.cs</LastGenOutput>
@@ -67,7 +67,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Update="Config\Res\InitRes.Designer.cs">
+        <Compile Update="Config\InitRes.Designer.cs">
             <DesignTime>True</DesignTime>
             <AutoGen>True</AutoGen>
             <DependentUpon>InitRes.resx</DependentUpon>
@@ -85,7 +85,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Update="Config\Res\InitRes.resx">
+        <EmbeddedResource Update="Config\InitRes.resx">
             <Generator>ResXFileCodeGenerator</Generator>
             <LastGenOutput>InitRes.Designer.cs</LastGenOutput>
         </EmbeddedResource>

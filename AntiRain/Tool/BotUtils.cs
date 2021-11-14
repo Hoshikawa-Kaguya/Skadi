@@ -1,6 +1,5 @@
 using AntiRain.IO;
 using AntiRain.TypeEnum;
-using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
