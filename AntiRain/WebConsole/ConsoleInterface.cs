@@ -1,7 +1,7 @@
 using System.Reflection;
 using BeetleX.EventArgs;
 using BeetleX.FastHttpApi;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 
 namespace AntiRain.WebConsole
 {

@@ -41,9 +41,9 @@
     <ItemGroup>
         <EmbeddedResource Include="Config\InitGlobalConfig.yaml" />
         <EmbeddedResource Include="Config\InitUserConfig.yaml" />
-        <EmbeddedResource Update="Resource\Font.resx">
+        <EmbeddedResource Update="Resource\FontRes.resx">
           <Generator>ResXFileCodeGenerator</Generator>
-          <LastGenOutput>Font.Designer.cs</LastGenOutput>
+          <LastGenOutput>FontRes.Designer.cs</LastGenOutput>
         </EmbeddedResource>
         <EmbeddedResource Update="Resource\Fonts.resx">
           <Generator>ResXFileCodeGenerator</Generator>
@@ -54,15 +54,15 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="BeetleX.FastHttpApi" Version="2.0.8" />
-        <PackageReference Include="BilibiliApi" Version="0.3.10" />
+        <PackageReference Include="BeetleX.FastHttpApi" Version="2.1.0" />
+        <PackageReference Include="BilibiliApi" Version="0.3.11" />
         <PackageReference Include="JetBrains.Annotations" Version="2021.3.0" />
         <PackageReference Include="PyLibSharp.Requests" Version="1.2.10" />
         <PackageReference Include="SharpYaml" Version="1.8.0" />
         <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
         <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
-        <PackageReference Include="Sora" Version="1.0.0-rc.27" />
-        <PackageReference Include="sqlSugarCore" Version="5.0.4.2" />
+        <PackageReference Include="Sora" Version="1.0.0-rc.32" />
+        <PackageReference Include="sqlSugarCore" Version="5.0.4.3" />
         <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
     </ItemGroup>
 
@@ -72,10 +72,10 @@
             <AutoGen>True</AutoGen>
             <DependentUpon>InitRes.resx</DependentUpon>
         </Compile>
-        <Compile Update="Resource\Font.Designer.cs">
+        <Compile Update="Resource\FontRes.Designer.cs">
           <DesignTime>True</DesignTime>
           <AutoGen>True</AutoGen>
-          <DependentUpon>Font.resx</DependentUpon>
+          <DependentUpon>FontRes.resx</DependentUpon>
         </Compile>
         <Compile Update="Resource\Fonts.Designer.cs">
           <DesignTime>True</DesignTime>

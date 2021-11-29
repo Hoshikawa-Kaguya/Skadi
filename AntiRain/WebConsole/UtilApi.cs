@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 using BeetleX.FastHttpApi;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 
 namespace AntiRain.WebConsole
 {

@@ -1,26 +1,16 @@
+using System;
+using System.Text;
+using System.Threading.Tasks;
 using AntiRain.IO;
 using AntiRain.TypeEnum;
-using PyLibSharp.Requests;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 using Sora.Entities;
 using Sora.Entities.Segment;
 using Sora.EventArgs.SoraEvent;
-using System;
-using System.IO;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using YukariToolBox.FormatLog;
-using Font = AntiRain.Resource.Font;
+using YukariToolBox.LightLog;
 
 namespace AntiRain.Tool;
 
-internal static class BotUtils
+internal static class BotUtil
 {
     #region 时间戳处理
 
@@ -128,84 +118,6 @@ internal static class BotUtils
                                                           "\r\nERROR"                              +
                                                           "\r\n数据库错误");
         Log.Error("database", "database error");
-    }
-
-    #endregion
-
-    #region 图片处理
-
-    // public Image ow(Image[] imgs)
-    // {
-    //     if (imgs == null || imgs.Length < 9) return null;
-    //     var width = imgs.First().Width * 3;
-    //     var height = imgs.First().Height * 2 +
-    //                  Math.Max(Math.Max(imgs[6].Height, imgs[7].Height), imgs[8].Height);
-    //     var       cursor    = (x: 0, y: 0);
-    //     var       imgeIndex = 0;
-    //     using var ret       = new Bitmap(width,height);
-    //     using var canvas    = Graphics.FromImage(ret);
-    //     canvas.InterpolationMode = InterpolationMode.HighQualityBicubic;
-    //     canvas.DrawImage(imgs[imgeIndex], cursor.x, cursor.y, imgs[imgeIndex].Width, imgs[imgeIndex].Height);
-    //     
-    // } 
-
-    /// <summary>
-    /// 绘制文字图片
-    /// </summary>
-    public static string DrawTextImage(string text, Color fontColor, Color backColor)
-    {
-        //加载字体
-        using var fontMs = new MemoryStream(Font.JetBrainsMono);
-
-        var fontCollection = new FontCollection();
-        var fontFamily     = fontCollection.Install(fontMs);
-        var font           = fontFamily.CreateFont(24);
-
-        //计算图片大小
-        var strRect = TextMeasurer.Measure(text, new RendererOptions(font));
-        //边缘距离
-        var frameSize = 5;
-        //图片大小
-        var (width, height) = ((int) strRect.Width + frameSize * 2, (int) strRect.Height + frameSize * 2);
-        //创建图片
-        var img = new Image<Rgba32>(width, height);
-        //绘制
-        img.Mutate(x => x.Fill(backColor)
-                         .DrawText(text, font, fontColor,
-                                   new PointF(frameSize, frameSize / 2 - 1)));
-        //转换base64
-        var b64 = img.ToBase64String(PngFormat.Instance);
-        img.Dispose();
-        return b64.Split(',')[1];
-    }
-
-    #endregion
-
-    #region R18图片拦截
-
-    public static SoraSegment GetPixivImg(long pid, string proxyUrl)
-    {
-        var pixApiReq =
-            Requests.Get($"https://pixiv.yukari.one/api/illust/{pid}",
-                         new ReqParams
-                         {
-                             Timeout                   = 5000,
-                             IsThrowErrorForTimeout    = false,
-                             IsThrowErrorForStatusCode = false
-                         });
-        var imgSegment = SoraSegment.Image(proxyUrl);
-
-        if (pixApiReq.StatusCode == HttpStatusCode.OK)
-        {
-            var infoJson = pixApiReq.Json();
-            if (Convert.ToBoolean(infoJson["error"]))
-                return SoraSegment.Text($"[ERROR:网络错误，无法获取图片详细信息({infoJson["message"]})]");
-            return Convert.ToBoolean(infoJson["body"]?["xRestrict"])
-                ? SoraSegment.Text("[H是不行的]")
-                :imgSegment;
-        }
-
-        return SoraSegment.Text($"[ERROR:网络错误，无法获取图片详细信息({pixApiReq.StatusCode})]");
     }
 
     #endregion

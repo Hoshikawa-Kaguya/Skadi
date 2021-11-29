@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 using Sora.Attributes.Command;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 
 namespace AntiRain.Command.PcrUtils
 {

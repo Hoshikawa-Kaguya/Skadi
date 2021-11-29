@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 
 namespace AntiRain.IO
 {
@@ -17,7 +17,7 @@ namespace AntiRain.IO
         /// </summary>
         private static string GetCrashLogPath()
         {
-            StringBuilder pathBuilder = new StringBuilder();
+            var pathBuilder = new StringBuilder();
 #if DEBUG
             pathBuilder.Append(Environment.GetEnvironmentVariable("DebugDataPath"));
 #else
@@ -35,7 +35,7 @@ namespace AntiRain.IO
         public static string GetUserConfigPath(long userId)
         {
             if (userId < 10000) return null;
-            StringBuilder pathBuilder = new StringBuilder();
+            var pathBuilder = new StringBuilder();
 #if DEBUG
             pathBuilder.Append(Environment.GetEnvironmentVariable("DebugDataPath"));
 #else
@@ -52,7 +52,7 @@ namespace AntiRain.IO
 
         public static string GetGlobalConfigPath()
         {
-            StringBuilder pathBuilder = new StringBuilder();
+            var pathBuilder = new StringBuilder();
 #if DEBUG
             pathBuilder.Append(Environment.GetEnvironmentVariable("DebugDataPath"));
 #else
@@ -70,7 +70,7 @@ namespace AntiRain.IO
         /// </summary>
         public static string GetHsoPath()
         {
-            StringBuilder pathBuilder = new StringBuilder();
+            var pathBuilder = new StringBuilder();
 #if DEBUG
             pathBuilder.Append(Environment.GetEnvironmentVariable("DebugDataPath"));
 #else
@@ -126,7 +126,7 @@ namespace AntiRain.IO
             }
             catch (Exception e)
             {
-                Log.Error("File Check Error", Log.ErrorLogBuilder(e));
+                Log.Error(e, "IO", "File Check Error");
                 return false;
             }
         }

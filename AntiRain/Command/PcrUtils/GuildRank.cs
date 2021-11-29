@@ -5,13 +5,14 @@ using System.Net;
 using System.Threading.Tasks;
 using AntiRain.Config;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
 using Sora.Attributes.Command;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
-using YukariToolBox.FormatLog;
-using YukariToolBox.Time;
+using Sora.Util;
+using YukariToolBox.LightLog;
 
 namespace AntiRain.Command.PcrUtils
 {
@@ -48,7 +49,7 @@ namespace AntiRain.Command.PcrUtils
                 //获取查询结果
                 Log.Info("NET", $"尝试查询[{guildName}]会站排名");
                 await eventArgs.Reply($"正在查询公会[{guildName}]的排名...");
-                ReqResponse reqResponse =
+                var reqResponse =
                     await Requests.PostAsync("https://service-kjcbcnmw-1254119946.gz.apigw.tencentcs.com/name/0",
                                              new ReqParams
                                              {
@@ -92,12 +93,12 @@ namespace AntiRain.Command.PcrUtils
                     return;
                 }
 
-                Log.Info("获取JSON成功", response);
+                Log.Info("获取JSON成功", response.ToString(Formatting.None));
             }
             catch (Exception e)
             {
                 await eventArgs.Reply($"哇哦~发生了网络错误，请联系机器人所在服务器管理员\n{e.Message}");
-                Log.Error("网络发生错误", e);
+                Log.Error(e, "KyoukaRank", "在获取排名时发生错误");
                 //阻止下一步处理
                 return;
             }
@@ -136,7 +137,7 @@ namespace AntiRain.Command.PcrUtils
             catch (Exception e)
             {
                 await eventArgs.Reply($"在处理数据时发生了错误，请请向开发者反馈问题\n{e.Message}");
-                Log.Error("JSON数据读取错误", e);
+                Log.Error(e, "KyoukaRank", "JSON数据读取错误");
             }
         }
 

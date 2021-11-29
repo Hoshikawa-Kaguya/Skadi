@@ -1,4 +1,8 @@
-﻿using BilibiliApi.Video;
+﻿using System.Net.Http;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using BilibiliApi.Video;
 using BilibiliApi.Video.Models;
 using JetBrains.Annotations;
 using Sora.Attributes.Command;
@@ -6,11 +10,7 @@ using Sora.Entities;
 using Sora.Entities.Segment;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
-using System.Net.Http;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 
 namespace AntiRain.Command
 {

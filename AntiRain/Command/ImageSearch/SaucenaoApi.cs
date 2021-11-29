@@ -1,4 +1,8 @@
-﻿using AntiRain.Config;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using AntiRain.Config;
 using AntiRain.Tool;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -6,11 +10,7 @@ using PyLibSharp.Requests;
 using SixLabors.ImageSharp;
 using Sora.Entities;
 using Sora.Entities.Segment;
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 
 namespace AntiRain.Command.ImageSearch;
 
@@ -18,17 +18,18 @@ public static class SaucenaoApi
 {
     public static async ValueTask<MessageBody> SearchByUrl(string apiKey, string url, long selfId)
     {
-        Log.Debug("pic", "send api request");
-        ReqResponse serverResponse;
+        Log.Debug("pic", "send api request"); 
+        JToken res;
         try
         {
-            serverResponse = await
+            var serverResponse = await
                 Requests.PostAsync($"http://saucenao.com/search.php?output_type=2&numres=16&db=999&api_key={apiKey}&url={url}",
                                    new ReqParams
                                    {
                                        Timeout                = 20000,
                                        IsThrowErrorForTimeout = false
                                    });
+            res = serverResponse.Json();
         }
         catch (Exception e)
         {
@@ -36,12 +37,11 @@ public static class SaucenaoApi
             return $"服务器网络错误{e.Message}";
         }
 
-        var res     = serverResponse?.Json();
         var resCode = Convert.ToInt32(res?["header"]?["status"] ?? -1);
         Log.Debug("pic", $"get api result code [{resCode}]");
 
         //API返回失败
-        if (serverResponse is null || res is null || resCode != 0) return "图片获取失败";
+        if (res is null || resCode != 0) return "图片获取失败";
 
         //API返回空值
         if (res["results"] is not JArray resData) return "处理API返回发生错误";
@@ -64,8 +64,8 @@ public static class SaucenaoApi
             case 5:
             {
                 var pid      = Convert.ToInt64(parsedPic["data"]?["pixiv_id"]);
-                var imageUrl = GenPixivUrl(userConfig.HsoConfig.PximyProxy, pid);
-                return Util.GenPixivResult(imageUrl, pid, parsedPic);
+                var imageUrl = MediaUtil.GenPixivUrl(userConfig.HsoConfig.PximyProxy, pid);
+                return GenPixivResult(imageUrl, pid, parsedPic);
             }
             //twitter
             case 41:
@@ -73,7 +73,7 @@ public static class SaucenaoApi
                 var tweetUrl = parsedPic["data"]?["ext_urls"]?[0]?.ToString();
                 return string.IsNullOrEmpty(tweetUrl)
                     ? "服务器歇逼了（无法获取推文链接，请稍后再试）"
-                    : Util.GenTwitterResult(tweetUrl, userConfig.TwitterApiToken, parsedPic);
+                    : GenTwitterResult(tweetUrl, userConfig.TwitterApiToken, parsedPic);
             }
             //eh
             case 38:
@@ -96,31 +96,53 @@ public static class SaucenaoApi
                 if (source.IndexOf("pixiv", StringComparison.Ordinal) != -1)
                 {
                     var pid      = Convert.ToInt64(Path.GetFileName(source));
-                    var imageUrl = GenPixivUrl(userConfig.HsoConfig.PximyProxy, pid);
-                    return Util.GenPixivResult(imageUrl, pid, parsedPic);
+                    var imageUrl = MediaUtil.GenPixivUrl(userConfig.HsoConfig.PximyProxy, pid);
+                    return GenPixivResult(imageUrl, pid, parsedPic);
                 }
 
                 //包含twitter链接
                 if (source.IndexOf("twitter", StringComparison.Ordinal) != -1)
-                    return Util.GenTwitterResult(source, userConfig.TwitterApiToken, parsedPic);
+                    return GenTwitterResult(source, userConfig.TwitterApiToken, parsedPic);
 
-                var msg = new MessageBody();
-                msg += $"[Saucenao-UnknownDatabase]\r\n{parsedPic["header"]?["index_name"]}";
                 var b64Pic =
-                    BotUtils.DrawTextImage(parsedPic["data"]?.ToString(Formatting.Indented) ?? string.Empty,
-                                           Color.Black, Color.White);
-                msg += SoraSegment.Image($"base64://{b64Pic}");
-                msg += $"\r\n[{parsedPic["header"]?["similarity"]}%]";
+                    MediaUtil.DrawTextImage(parsedPic["data"]?.ToString(Formatting.Indented) ?? string.Empty,
+                                            Color.Black, Color.White);
+
+                var msg = new MessageBody
+                {
+                    $"[Saucenao-UnknownDatabase]\r\n{parsedPic["header"]?["index_name"]}",
+                    SoraSegment.Image($"base64://{b64Pic}"),
+                    $"\r\n[{parsedPic["header"]?["similarity"]}%]"
+                };
 
                 return msg;
             }
         }
     }
 
-    private static string GenPixivUrl(string proxy, long pid)
+    private static MessageBody GenTwitterResult(string tweetUrl, string token, JToken apiRet)
     {
-        return string.IsNullOrEmpty(proxy)
-            ? $"https://pixiv.lancercmd.cc/{pid}"
-            : $"{proxy.Trim('/')}/{pid}";
+        var tId = Path.GetFileName(tweetUrl);
+        var (success, sender, text, media) = MediaUtil.GetTweet(tId, token);
+
+        if (!success) return $"推特API错误\r\nMessage:{text}";
+
+        var msg = new MessageBody
+        {
+            $"[Saucenao-Twitter]\r\n推文:{text}\r\n用户:{sender}\r\n"
+        };
+        foreach (var pic in media) msg.Add(SoraSegment.Image(pic));
+
+        msg.Add($"\r\nLink:{tweetUrl}");
+        msg.Add($"\r\n[{apiRet["header"]?["similarity"]}%]");
+        return msg;
     }
+
+    private static MessageBody GenPixivResult(string url, long pid, JToken apiRet)
+        => "[Saucenao-Pixiv]"                             +
+           $"\r\n图片名:{apiRet["data"]?["title"]}"          +
+           $"\r\n作者:{apiRet["data"]?["member_name"]}\r\n" +
+           MediaUtil.GetPixivImg(pid, url)                +
+           $"\r\nPixiv Id:{pid}\r\n"                      +
+           $"[{apiRet["header"]?["similarity"]}%]";
 }

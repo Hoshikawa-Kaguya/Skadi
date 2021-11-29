@@ -5,7 +5,7 @@ using AntiRain.DatabaseUtils.SqliteTool;
 using AntiRain.IO;
 using Sora.EventArgs.SoraEvent;
 using SqlSugar;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 
 namespace AntiRain.DatabaseUtils
 {
@@ -17,7 +17,7 @@ namespace AntiRain.DatabaseUtils
         /// <param name="eventArgs">CQAppEnableEventArgs</param>
         public static void UserDataInit(ConnectEventArgs eventArgs)
         {
-            string DBPath = SugarUtils.GetDBPath(eventArgs.LoginUid.ToString());
+            var DBPath = SugarUtils.GetDBPath(eventArgs.LoginUid.ToString());
             Log.Debug("IO", $"获取用户数据路径{DBPath}");
             //检查文件是否存在
             IOUtils.CheckFileExists(DBPath);
@@ -40,7 +40,7 @@ namespace AntiRain.DatabaseUtils
             }
             catch (Exception exception)
             {
-                Log.Fatal("数据库初始化错误", Log.ErrorLogBuilder(exception));
+                Log.Fatal(exception, "Database", "无法初始化数据库");
                 Thread.Sleep(5000);
                 Environment.Exit(-1);
             }

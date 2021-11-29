@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using AntiRain.Config;
 using AntiRain.DatabaseUtils.Helpers;
 using BilibiliApi.Dynamic;
@@ -13,12 +17,8 @@ using Sora.Entities;
 using Sora.Entities.Base;
 using Sora.Entities.Segment;
 using Sora.EventArgs.SoraEvent;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using YukariToolBox.FormatLog;
-using YukariToolBox.Time;
+using Sora.Util;
+using YukariToolBox.LightLog;
 
 namespace AntiRain.TimerEvent.Event
 {
@@ -67,7 +67,7 @@ namespace AntiRain.TimerEvent.Event
             }
             catch (Exception e)
             {
-                Log.Error("获取直播状态时发生错误", Log.ErrorLogBuilder(e));
+                Log.Error(e, "SubscriptionUpdate", "获取直播状态时发生错误");
                 return;
             }
 
@@ -159,7 +159,7 @@ namespace AntiRain.TimerEvent.Event
             Log.Debug("动态获取", $"{sender.UserName}的动态获取成功");
             //检查是否是最新的
             var targetGroups = groupId
-                               .Where(group => !dbHelper.IsLatestDynamic(@group, sender.Uid,
+                               .Where(group => !dbHelper.IsLatestDynamic(group, sender.Uid,
                                                                          biliDynamic.UpdateTime))
                                .ToList();
             //没有群需要发送消息

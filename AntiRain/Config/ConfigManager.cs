@@ -1,12 +1,12 @@
-using AntiRain.Config.ConfigModule;
-using AntiRain.IO;
-using SharpYaml.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
-using YukariToolBox.FormatLog;
+using AntiRain.Config.ConfigModule;
+using AntiRain.IO;
+using SharpYaml.Serialization;
+using YukariToolBox.LightLog;
 
 namespace AntiRain.Config
 {
@@ -60,7 +60,7 @@ namespace AntiRain.Config
             }
             catch (Exception e)
             {
-                Log.Fatal("ConfigIO ERROR", Log.ErrorLogBuilder(e));
+                Log.Fatal(e, "ConfigIO", "初始化配置文件时发生错误");
                 Thread.Sleep(5000);
                 Environment.Exit(-1);
             }
@@ -88,7 +88,7 @@ namespace AntiRain.Config
                 //没读取到文件时创建新的文件
                 Log.Error("ConfigIO", "未找到配置文件");
                 Log.Warning("ConfigIO", "创建新的配置文件");
-                string initConfigText = Encoding.UTF8.GetString(InitRes.InitGlobalConfig);
+                var initConfigText = Encoding.UTF8.GetString(InitRes.InitGlobalConfig);
                 using (TextWriter writer = File.CreateText(globalConfigPath))
                 {
                     writer.Write(initConfigText);
@@ -102,7 +102,7 @@ namespace AntiRain.Config
             }
             catch (Exception e)
             {
-                Log.Fatal("ConfigIO ERROR", Log.ErrorLogBuilder(e));
+                Log.Fatal(e, "ConfigIO", "无法读取全局配置文件，程序将停止");
                 Thread.Sleep(5000);
                 Environment.Exit(-1);
             }

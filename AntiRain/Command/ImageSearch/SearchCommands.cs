@@ -1,14 +1,14 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AntiRain.Tool;
 using JetBrains.Annotations;
 using Sora.Attributes.Command;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
-using YukariToolBox.FormatLog;
-using static AntiRain.Tool.CheckInCD;
+using YukariToolBox.LightLog;
+using static AntiRain.Tool.CommandCdUtil;
 
 namespace AntiRain.Command.ImageSearch
 {
@@ -18,16 +18,11 @@ namespace AntiRain.Command.ImageSearch
     [CommandGroup]
     public class SearchCommands
     {
-        /// <summary>
-        /// 调用CD记录
-        /// </summary>
-        private static Dictionary<CheckUser, DateTime> users { get; } = new();
-
         [UsedImplicitly]
         [GroupCommand(CommandExpressions = new[] { "搜图" })]
-        public async ValueTask SearchRequest(GroupMessageEventArgs eventArgs)
+        public static async ValueTask SearchRequest(GroupMessageEventArgs eventArgs)
         {
-            if (users.IsInCD(eventArgs.SourceGroup, eventArgs.Sender))
+            if (CommandCdUtil.IsInCD(eventArgs.SourceGroup, eventArgs.Sender, CommandFlag.PicSearch))
             {
                 await eventArgs.Reply("你冲的太快了，要坏掉了(请等待CD冷却)");
                 return;
@@ -45,11 +40,12 @@ namespace AntiRain.Command.ImageSearch
             }
             Log.Debug("pic", $"get pic {imgArgs.Message.RawText} searching...");
             //发送图片
-            var messageInfo =
+            var (apiStatus, _) =
                 await eventArgs.Reply(await SaucenaoApi.SearchByUrl("92a805aff18cbc56c4723d7e2d5100c6892fe256",
-                                                                      imgArgs.Message.GetAllImage().ToList()[0].Url, imgArgs.LoginUid),
+                                                                    imgArgs.Message.GetAllImage().ToList()[0].Url,
+                                                                    imgArgs.LoginUid),
                                       TimeSpan.FromSeconds(15));
-            if (messageInfo.apiStatus.RetCode != ApiStatusType.OK)
+            if (apiStatus.RetCode != ApiStatusType.OK)
             {
                 await eventArgs.Reply("图被夹了，你找服务器要去");
             }

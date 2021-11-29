@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using AntiRain.DatabaseUtils.SqliteTool;
 using SqlSugar;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 using static AntiRain.DatabaseUtils.Tables;
 
 namespace AntiRain.DatabaseUtils.Helpers
@@ -59,7 +59,7 @@ namespace AntiRain.DatabaseUtils.Helpers
             }
             catch (Exception e)
             {
-                Log.Error("Database Error", $"update lsp record error\r\n{Log.ErrorLogBuilder(e)}");
+                Log.Error(e, "HsoDatabase", "update lsp record error");
                 return false;
             }
         }

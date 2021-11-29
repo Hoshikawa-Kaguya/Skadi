@@ -1,4 +1,4 @@
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 
 namespace AntiRain.Config.ConfigModule
 {

@@ -3,7 +3,7 @@ using AntiRain.TypeEnum;
 using Sora.Entities.Segment;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
-using YukariToolBox.FormatLog;
+using YukariToolBox.LightLog;
 
 namespace AntiRain.Tool
 {
@@ -12,8 +12,7 @@ namespace AntiRain.Tool
         #region 基础方法
 
         internal static bool IsAdminSession(this GroupMessageEventArgs eventArgs) =>
-            eventArgs.SenderInfo.Role == MemberRoleType.Admin ||
-            eventArgs.SenderInfo.Role == MemberRoleType.Owner;
+            eventArgs.SenderInfo.Role is MemberRoleType.Admin or MemberRoleType.Owner;
 
         /// <summary>
         /// 零参数指令的参数检查
@@ -26,7 +25,7 @@ namespace AntiRain.Tool
         internal static async ValueTask<bool> ZeroArgsCheck(this GroupMessageEventArgs eventArgs)
         {
             //检查参数
-            switch (await BotUtils.CheckForLength(eventArgs.ToCommandArgs(), 0))
+            switch (await BotUtil.CheckForLength(eventArgs.ToCommandArgs(), 0))
             {
                 case LenType.Extra:
                     await eventArgs.SourceGroup.SendGroupMessage(SoraSegment.At(eventArgs.Sender.Id) +
