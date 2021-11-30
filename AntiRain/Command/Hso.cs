@@ -61,38 +61,27 @@ public class HsoCommand
     }
 
     [UsedImplicitly]
+    [GroupCommand(CommandExpressions = new[] {@"^让我康康[0-9]+$"}, MatchType = MatchType.Regex)]
+    public async void HsoPicIndexSearchFirst(GroupMessageEventArgs eventArgs)
+    {
+        eventArgs.IsContinueEventChain = false;
+        var picInfos = eventArgs.Message.RawText.Split(' ');
+        await eventArgs.Reply("什么，有好康的");
+        var imgSegment = GetPixivImageMessage(eventArgs.LoginUid, picInfos[0][4..], "0");
+        var (apiStatus, _) = await eventArgs.Reply(imgSegment, TimeSpan.FromSeconds(10));
+        if (apiStatus.RetCode != ApiStatusType.OK)
+            await eventArgs.Reply("逊欸，图都被删了");
+    }
+
+    [UsedImplicitly]
     [GroupCommand(CommandExpressions = new[] {@"^让我康康[0-9]+\s[0-9]+$"}, MatchType = MatchType.Regex)]
     public async void HsoPicIndexSearch(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         var picInfos = eventArgs.Message.RawText.Split(' ');
-        var picId    = picInfos[0][4..];
-        var picIndex = picInfos[1];
-        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var userConfig))
-        {
-            Log.Error("Config|Hso", "无法获取用户配置文件");
-            return;
-        }
-
         await eventArgs.Reply("什么，有好康的");
-        //处理图片代理连接
-        string imageUrl;
-        if (!string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
-        {
-            imageUrl = $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{picId}/{picIndex}";
-            Log.Debug("Hso", $"Get proxy url {imageUrl}");
-        }
-        else
-        {
-            imageUrl = $"https://pixiv.lancercmd.cc/{picId}/{picIndex}";
-            Log.Warning("Hso", "未找到代理服务器已使用默认代理:https://pixiv.lancercmd.cc/");
-        }
-
-        var imgSegment = MediaUtil.GetPixivImg(Convert.ToInt64(picId), imageUrl);
-
-        //发送图片
-        var (apiStatus, _) = await eventArgs.Reply(imgSegment,
-                                                   TimeSpan.FromSeconds(10));
+        var imgSegment = GetPixivImageMessage(eventArgs.LoginUid, picInfos[0][4..], picInfos[1]);
+        var (apiStatus, _) = await eventArgs.Reply(imgSegment, TimeSpan.FromSeconds(10));
         if (apiStatus.RetCode != ApiStatusType.OK)
             await eventArgs.Reply("逊欸，图都被删了");
     }
@@ -208,6 +197,31 @@ public class HsoCommand
 
     #region 私有方法
 
+    private static MessageBody GetPixivImageMessage(long loginUid, string pid, string index)
+    {
+        if (!ConfigManager.TryGetUserConfig(loginUid, out var userConfig))
+        {
+            Log.Error("Config|Hso", "无法获取用户配置文件");
+            return "ERR:无法获取用户配置文件";
+        }
+
+
+        //处理图片代理连接
+        string imageUrl;
+        if (!string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
+        {
+            imageUrl = $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{pid}/{index}";
+            Log.Debug("Hso", $"Get proxy url {imageUrl}");
+        }
+        else
+        {
+            imageUrl = $"https://pixiv.lancercmd.cc/{pid}/{index}";
+            Log.Warning("Hso", "未找到代理服务器已使用默认代理:https://pixiv.lancercmd.cc/");
+        }
+
+        return MediaUtil.GetPixivImg(Convert.ToInt64(pid), imageUrl);
+    }
+
     /// <summary>
     /// <para>从色图源获取色图</para>
     /// <para>不会支持R18的哦</para>
@@ -306,8 +320,8 @@ public class HsoCommand
                 return;
             }
 
-            if(!long.TryParse(response["data"]?[0]?["pid"]?.ToString(), out var pid) ||
-               !int.TryParse(response["data"]?[0]?["index"]?.ToString(), out var index))
+            if (!long.TryParse(response["data"]?[0]?["pid"]?.ToString(), out var pid) ||
+                !int.TryParse(response["data"]?[0]?["index"]?.ToString(), out var index))
             {
                 await eventArgs.SourceGroup.SendGroupMessage("无法获取到色图信息");
                 return;
