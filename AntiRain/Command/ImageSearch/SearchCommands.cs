@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AntiRain.Tool;
 using JetBrains.Annotations;
 using Sora.Attributes.Command;
+using Sora.Entities;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
@@ -16,10 +17,12 @@ namespace AntiRain.Command.ImageSearch
     /// 搜图指令
     /// </summary>
     [CommandGroup]
-    public class SearchCommands
+    public static class SearchCommands
     {
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] { "搜图" })]
+        [SoraCommand(
+            SourceType = SourceFlag.Group, 
+            CommandExpressions = new[] { "搜图" })]
         public static async ValueTask SearchRequest(GroupMessageEventArgs eventArgs)
         {
             if (CommandCdUtil.IsInCD(eventArgs.SourceGroup, eventArgs.Sender, CommandFlag.PicSearch))
@@ -40,12 +43,12 @@ namespace AntiRain.Command.ImageSearch
             }
             Log.Debug("pic", $"get pic {imgArgs.Message.RawText} searching...");
             //发送图片
-            var (apiStatus, _) =
+            (ApiStatus apiStatus, _) =
                 await eventArgs.Reply(await SaucenaoApi.SearchByUrl("92a805aff18cbc56c4723d7e2d5100c6892fe256",
                                                                     imgArgs.Message.GetAllImage().ToList()[0].Url,
                                                                     imgArgs.LoginUid),
                                       TimeSpan.FromSeconds(15));
-            if (apiStatus.RetCode != ApiStatusType.OK)
+            if (apiStatus.RetCode != ApiStatusType.Ok)
             {
                 await eventArgs.Reply("图被夹了，你找服务器要去");
             }

@@ -58,7 +58,8 @@ internal static class ServiceStartUp
             HeartBeatTimeOut         = TimeSpan.FromSeconds(globalConfig.HeartBeatTimeOut),
             ApiTimeOut               = TimeSpan.FromMilliseconds(globalConfig.OnebotApiTimeOut),
             SuperUsers               = globalConfig.SuperUsers,
-            EnableSoraCommandManager = true
+            EnableSoraCommandManager = true,
+            ThrowCommandException = false
         });
 
         //服务器回调

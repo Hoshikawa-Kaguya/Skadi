@@ -4,6 +4,7 @@ using AntiRain.Config;
 using JetBrains.Annotations;
 using Sora.Attributes.Command;
 using Sora.Entities.Segment;
+using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
 
 namespace AntiRain.Command
@@ -14,7 +15,9 @@ namespace AntiRain.Command
         #region 私有方法
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] {"dice"})]
+        [SoraCommand(
+            SourceType = SourceFlag.Group, 
+            CommandExpressions = new[] {"dice"})]
         public async ValueTask RandomNumber(GroupMessageEventArgs eventArgs)
         {
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config) &&
@@ -25,7 +28,9 @@ namespace AntiRain.Command
         }
 
         [UsedImplicitly]
-        [GroupCommand(CommandExpressions = new[] {"优质睡眠", "昏睡红茶", "昏睡套餐", "健康睡眠"})]
+        [SoraCommand(
+            SourceType = SourceFlag.Group, 
+            CommandExpressions = new[] {"优质睡眠", "昏睡红茶", "昏睡套餐", "健康睡眠"})]
         public async ValueTask RedTea(GroupMessageEventArgs eventArgs)
         {
             if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config) &&

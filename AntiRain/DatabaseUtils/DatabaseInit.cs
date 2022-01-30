@@ -17,12 +17,12 @@ namespace AntiRain.DatabaseUtils
         /// <param name="eventArgs">CQAppEnableEventArgs</param>
         public static void UserDataInit(ConnectEventArgs eventArgs)
         {
-            var DBPath = SugarUtils.GetDBPath(eventArgs.LoginUid.ToString());
-            Log.Debug("IO", $"获取用户数据路径{DBPath}");
+            var dbPath = SugarUtils.GetDbPath(eventArgs.LoginUid.ToString());
+            Log.Debug("IO", $"获取用户数据路径{dbPath}");
             //检查文件是否存在
-            IOUtils.CheckFileExists(DBPath);
+            IoUtils.CheckFileExists(dbPath);
             //创建数据库链接
-            SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(dbPath);
 
             try
             {

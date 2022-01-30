@@ -17,7 +17,7 @@ namespace AntiRain.DatabaseUtils.SqliteTool
         #region 数据库常量
 
         //资源数据库名
-        public const string GlobalResDBName = "res";
+        public const string GLOBAL_RES_DB_NAME = "res";
 
         #endregion
 
@@ -26,7 +26,7 @@ namespace AntiRain.DatabaseUtils.SqliteTool
         /// <summary>
         /// 获取应用数据库的绝对路径
         /// </summary>
-        public static string GetDBPath(string dirName = null)
+        public static string GetDbPath(string dirName = null)
         {
             StringBuilder dbPath = new();
 #if DEBUG
@@ -46,7 +46,7 @@ namespace AntiRain.DatabaseUtils.SqliteTool
         /// <summary>
         /// 获取目标数据库的绝对路径
         /// </summary>
-        public static string GetDataDBPath(string dbFileName)
+        public static string GetDataDbPath(string dbFileName)
         {
             StringBuilder dbPath = new();
 #if DEBUG
@@ -190,13 +190,13 @@ namespace AntiRain.DatabaseUtils.SqliteTool
         /// <summary>
         /// 创建一个SQLiteClient
         /// </summary>
-        /// <param name="DBPath">数据库路径</param>
+        /// <param name="dbPath">数据库路径</param>
         /// <returns>默认开启的SqlSugarClient</returns>
-        internal static SqlSugarClient CreateSqlSugarClient(string DBPath)
+        internal static SqlSugarClient CreateSqlSugarClient(string dbPath)
         {
             return new(new ConnectionConfig
             {
-                ConnectionString      = $"DATA SOURCE={DBPath}",
+                ConnectionString      = $"DATA SOURCE={dbPath}",
                 DbType                = SqlSugar.DbType.Sqlite,
                 IsAutoCloseConnection = true,
                 InitKeyType           = InitKeyType.Attribute

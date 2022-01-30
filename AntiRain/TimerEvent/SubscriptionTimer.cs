@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AntiRain.TimerEvent.Event;
+using JetBrains.Annotations;
 using Sora.EventArgs.SoraEvent;
 using Sora.EventArgs.WebsocketEvent;
 using YukariToolBox.LightLog;
@@ -16,17 +17,17 @@ namespace AntiRain.TimerEvent
         /// <summary>
         /// 计时器
         /// </summary>
-#pragma warning disable IDE0052
-        private static readonly Timer SubTimer = new(SubscriptionEvent, //事件处理
-                                                     null,              //初始化数据
-                                                     new TimeSpan(0),   //即刻执行
-                                                     new TimeSpan(0, 0, 0, 60));
-#pragma warning restore IDE0052
+        [UsedImplicitly]
+        private static readonly Timer _subTimer = new(
+            SubscriptionEvent, //事件处理
+            null,              //初始化数据
+            new TimeSpan(0),   //即刻执行
+            new TimeSpan(0, 0, 0, 60));
 
         /// <summary>
         /// 订阅列表
         /// </summary>
-        private static readonly List<ConnectEventArgs> SubDictionary = new();
+        private static readonly List<ConnectEventArgs> _subDictionary = new();
 
         #endregion
 
@@ -39,14 +40,14 @@ namespace AntiRain.TimerEvent
         internal static void TimerEventAdd(ConnectEventArgs eventArgs)
         {
             //尝试添加订阅
-            if (!SubDictionary.Exists(args => args.LoginUid == eventArgs.LoginUid))
+            if (!_subDictionary.Exists(args => args.LoginUid == eventArgs.LoginUid))
             {
-                SubDictionary.Add(eventArgs);
+                _subDictionary.Add(eventArgs);
             }
             else
             {
-                SubDictionary.RemoveAll(arg => arg.LoginUid == eventArgs.LoginUid);
-                SubDictionary.Add(eventArgs);
+                _subDictionary.RemoveAll(arg => arg.LoginUid == eventArgs.LoginUid);
+                _subDictionary.Add(eventArgs);
             }
         }
 
@@ -58,7 +59,7 @@ namespace AntiRain.TimerEvent
         internal static ValueTask DelTimerEvent(Guid _, ConnectionEventArgs eventArgs)
         {
             //尝试移除订阅
-            if (!SubDictionary.Exists(args => args.LoginUid == eventArgs.SelfId))
+            if (!_subDictionary.Exists(args => args.LoginUid == eventArgs.SelfId))
             {
                 Log.Error("SubTimer", "未找到该账号的订阅信息");
                 return ValueTask.CompletedTask;
@@ -66,7 +67,7 @@ namespace AntiRain.TimerEvent
 
             try
             {
-                SubDictionary.RemoveAll(args => args.LoginUid == eventArgs.SelfId);
+                _subDictionary.RemoveAll(args => args.LoginUid == eventArgs.SelfId);
             }
             catch (Exception e)
             {
@@ -87,7 +88,7 @@ namespace AntiRain.TimerEvent
         private static void SubscriptionEvent(object obj)
         {
             Log.Info("Sub", "订阅事件刷新");
-            foreach (var eventArg in SubDictionary)
+            foreach (var eventArg in _subDictionary)
             {
                 Log.Info("Sub", $"更新[{eventArg.LoginUid}]的订阅");
                 SubscriptionUpdate.BiliUpdateCheck(eventArg);

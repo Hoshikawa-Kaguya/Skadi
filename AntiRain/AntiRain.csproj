@@ -54,6 +54,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Include="..\.editorconfig" Link=".editorconfig" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="BeetleX.FastHttpApi" Version="2.1.0" />
         <PackageReference Include="BilibiliApi" Version="0.3.11" />
         <PackageReference Include="JetBrains.Annotations" Version="2021.3.0" />
@@ -61,8 +65,8 @@
         <PackageReference Include="SharpYaml" Version="1.8.0" />
         <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
         <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
-        <PackageReference Include="Sora" Version="1.0.0-rc.32" />
-        <PackageReference Include="sqlSugarCore" Version="5.0.4.3" />
+        <PackageReference Include="Sora" Version="1.0.0-rc.40" />
+        <PackageReference Include="sqlSugarCore" Version="5.0.5.3" />
         <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
     </ItemGroup>
 

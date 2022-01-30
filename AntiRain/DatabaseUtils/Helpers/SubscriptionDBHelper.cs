@@ -8,19 +8,19 @@ using static AntiRain.DatabaseUtils.Tables;
 
 namespace AntiRain.DatabaseUtils.Helpers
 {
-    internal class SubscriptionDBHelper
+    internal class SubscriptionDbHelper
     {
         #region 属性
 
-        private readonly string DBPath; //数据库路径
+        private readonly string _dbPath; //数据库路径
 
         #endregion
 
         #region 构造函数
 
-        public SubscriptionDBHelper(long uid)
+        public SubscriptionDbHelper(long uid)
         {
-            DBPath = SugarUtils.GetDBPath(uid.ToString());
+            _dbPath = SugarUtils.GetDbPath(uid.ToString());
         }
 
         #endregion
@@ -37,7 +37,7 @@ namespace AntiRain.DatabaseUtils.Helpers
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(_dbPath);
                 var                  ts       = updateTime.ToTimeStamp();
                 //查询是否存在相同或时间大于记录subscriptionId
                 return dbClient.Queryable<BiliDynamicSubscription>()
@@ -65,7 +65,7 @@ namespace AntiRain.DatabaseUtils.Helpers
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(_dbPath);
                 //查找是否有历史记录
                 if (!dbClient.Queryable<BiliDynamicSubscription>()
                              .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId &&
@@ -112,7 +112,7 @@ namespace AntiRain.DatabaseUtils.Helpers
         {
             try
             {
-                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(_dbPath);
                 //查找是否有历史记录
                 if (!dbClient.Queryable<BiliDynamicSubscription>()
                              .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId &&
@@ -158,7 +158,7 @@ namespace AntiRain.DatabaseUtils.Helpers
         /// <returns>直播间状态</returns>
         public LiveStatusType GetLastLiveStatus(long groupId, long biliUserId)
         {
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(_dbPath);
             //查找是否有历史记录
             if (dbClient.Queryable<BiliLiveSubscription>()
                         .Where(biliLive => biliLive.SubscriptionId == biliUserId &&
@@ -184,7 +184,7 @@ namespace AntiRain.DatabaseUtils.Helpers
         /// <param name="newStatus">新状态</param>
         public bool UpdateLiveStatus(long groupId, long biliUserId, LiveStatusType newStatus)
         {
-            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+            using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(_dbPath);
             //查找是否有历史记录
             if (!dbClient.Queryable<BiliLiveSubscription>()
                          .Where(biliLive => biliLive.SubscriptionId == biliUserId &&

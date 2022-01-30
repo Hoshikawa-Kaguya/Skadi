@@ -1,7 +1,7 @@
 # 各模块的开关
 ModuleSwitch:
   # B站动态订阅
-  Bili_Subscription: false
+  BiliSubscription: false
   # 切噜语翻译
   Cheru: false
   # 奇怪的娱乐功能 (随机禁言啥的)
@@ -9,7 +9,7 @@ ModuleSwitch:
   # 随机色图
   Hso: false
   # 公会排名查询
-  PCR_GuildRank: false
+  PcrGuildRank: false
 
 # 推特API Token(v2)
 TwitterApiToken: null

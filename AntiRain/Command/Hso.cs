@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using AntiRain.Config;
 using AntiRain.Config.ConfigModule;
 using AntiRain.DatabaseUtils.Helpers;
@@ -16,9 +9,16 @@ using PyLibSharp.Requests;
 using Sora.Attributes.Command;
 using Sora.Entities;
 using Sora.Entities.Segment;
+using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
-using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 using YukariToolBox.LightLog;
 using static AntiRain.Tool.CommandCdUtil;
 using MatchType = Sora.Enumeration.MatchType;
@@ -34,7 +34,9 @@ public class HsoCommand
     /// 用于处理传入指令
     /// </summary>
     [UsedImplicitly]
-    [GroupCommand(CommandExpressions = new[] {"来点色图", "来点涩图", "我要看色图"})]
+    [SoraCommand(
+        SourceType = SourceFlag.Group,
+        CommandExpressions = new[] {"来点色图", "来点涩图", "我要看色图"})]
     public async void HsoPic(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -53,15 +55,69 @@ public class HsoCommand
         }
 
         //刷新数据库计数
-        var hsoDbHelper = new HsoDBHelper(eventArgs.LoginUid);
+        var hsoDbHelper = new HsoDbHelper(eventArgs.LoginUid);
         if (!hsoDbHelper.AddOrUpdate(eventArgs.Sender, eventArgs.SourceGroup))
             await eventArgs.Reply("数据库错误(count)");
 
-        await GiveMeSetu(userConfig.HsoConfig, eventArgs);
+        Hso    hso = userConfig.HsoConfig;
+        Log.Debug("源", hso.Source);
+        //本地模式
+        if (hso.Source.Equals("Local"))
+        {
+            SendLocalPic(hso, eventArgs);
+            return;
+        }
+
+        Log.Info("NET", "尝试获取色图");
+        await eventArgs.SourceGroup.SendGroupMessage("正在获取色图中...");
+
+        (int code, JToken data) = await GetRandomSetuJson(hso);
+        if (code != 200)
+        {
+            await eventArgs.SourceGroup
+                           .SendGroupMessage($"哇哦~发生了网络错误[{code}]，请联系机器人所在服务器管理员");
+            return;
+        }
+
+        //json处理
+        try
+        {
+            if (!int.TryParse(data["code"]?.ToString() ?? "-100", out var retCode) && retCode != 0)
+            {
+                Log.Error("Hso",
+                          retCode == -100
+                              ? "Server response null message"
+                              : $"Server response code {retCode}");
+                await eventArgs.SourceGroup.SendGroupMessage("哇奧色图不见了\n请联系机器人服务器管理员");
+                return;
+            }
+
+            if (!long.TryParse(data["data"]?[0]?["pid"]?.ToString(), out var pid) ||
+                !int.TryParse(data["data"]?[0]?["index"]?.ToString(), out var index))
+            {
+                await eventArgs.SourceGroup.SendGroupMessage("无法获取到色图信息");
+                return;
+            }
+
+            //图片链接
+            Log.Debug("获取到图片", $"pid:{pid}|index:{index}");
+            var url = MediaUtil.GenPixivUrl(hso.PximyProxy, pid, index);
+            //检查是否有设置代理
+            await eventArgs.SourceGroup.SendGroupMessage(
+                HsoMessageBuilder(data["data"]?[0], hso.CardImage, url),
+                TimeSpan.FromSeconds(10));
+        }
+        catch (Exception e)
+        {
+            Log.Error("色图下载失败", $"网络下载数据错误\n{Log.ErrorLogBuilder(e)}");
+        }
     }
 
     [UsedImplicitly]
-    [GroupCommand(CommandExpressions = new[] {@"^让我康康[0-9]+$"}, MatchType = MatchType.Regex)]
+    [SoraCommand(
+        SourceType = SourceFlag.Group, 
+        CommandExpressions = new[] {@"^让我康康[0-9]+$"}, 
+        MatchType = MatchType.Regex)]
     public async void HsoPicIndexSearchFirst(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -69,12 +125,15 @@ public class HsoCommand
         await eventArgs.Reply("什么，有好康的");
         var imgSegment = GetPixivImageMessage(eventArgs.LoginUid, picInfos[0][4..], "0");
         var (apiStatus, _) = await eventArgs.Reply(imgSegment, TimeSpan.FromSeconds(10));
-        if (apiStatus.RetCode != ApiStatusType.OK)
+        if (apiStatus.RetCode != ApiStatusType.Ok)
             await eventArgs.Reply("逊欸，图都被删了");
     }
 
     [UsedImplicitly]
-    [GroupCommand(CommandExpressions = new[] {@"^让我康康[0-9]+\s[0-9]+$"}, MatchType = MatchType.Regex)]
+    [SoraCommand(
+        SourceType = SourceFlag.Group, 
+        CommandExpressions = new[] {@"^让我康康[0-9]+\s[0-9]+$"},
+        MatchType = MatchType.Regex)]
     public async void HsoPicIndexSearch(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -82,16 +141,19 @@ public class HsoCommand
         await eventArgs.Reply("什么，有好康的");
         var imgSegment = GetPixivImageMessage(eventArgs.LoginUid, picInfos[0][4..], picInfos[1]);
         var (apiStatus, _) = await eventArgs.Reply(imgSegment, TimeSpan.FromSeconds(10));
-        if (apiStatus.RetCode != ApiStatusType.OK)
+        if (apiStatus.RetCode != ApiStatusType.Ok)
             await eventArgs.Reply("逊欸，图都被删了");
     }
 
     [UsedImplicitly]
-    [GroupCommand(CommandExpressions = new[] {"来点色批"}, MatchType = MatchType.Full)]
+    [SoraCommand(
+        SourceType = SourceFlag.Group,
+        CommandExpressions = new[] {"来点色批"},
+        MatchType = MatchType.Full)]
     public static async void HsoRank(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        var hsoDbHelper = new HsoDBHelper(eventArgs.LoginUid);
+        var hsoDbHelper = new HsoDbHelper(eventArgs.LoginUid);
         if (!hsoDbHelper.GetGroupRank(eventArgs.SourceGroup, out var rankList))
         {
             await eventArgs.Reply("数据库错误(count)");
@@ -114,12 +176,14 @@ public class HsoCommand
     }
 
     [UsedImplicitly]
-    [GroupCommand(CommandExpressions = new[] {@"^AD[0-9]+\s[0-9]+$"})]
+    [SoraCommand(
+        SourceType = SourceFlag.Group,
+        CommandExpressions = new[] {@"^AD[0-9]+\s[0-9]+$"})]
     public async void HsoAddPic(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         //判断权限
-        if (eventArgs.SenderInfo.Role != MemberRoleType.SuperUser)
+        if (!eventArgs.IsSuperUser)
         {
             await eventArgs.Reply("权限不足拒绝执行");
             return;
@@ -223,27 +287,12 @@ public class HsoCommand
     }
 
     /// <summary>
-    /// <para>从色图源获取色图</para>
-    /// <para>不会支持R18的哦</para>
+    /// 获取随机图片信息
     /// </summary>
-    /// <param name="hso">hso配置实例</param>
-    /// <param name="eventArgs">事件参数</param>
-    private static async Task GiveMeSetu(Hso hso, GroupMessageEventArgs eventArgs)
+    private static async ValueTask<(int code, JToken json)> GetRandomSetuJson(Hso hso)
     {
-        JToken response;
-        Log.Debug("源", hso.Source);
-        //本地模式
-        if (hso.Source.Equals("Local"))
-        {
-            SendLocalPic(hso, eventArgs);
-            return;
-        }
-
-        //网络部分
         try
         {
-            Log.Info("NET", "尝试获取色图");
-            await eventArgs.SourceGroup.SendGroupMessage("正在获取色图中...");
             string apiKey;
             string serverUrl;
             //源切换
@@ -254,26 +303,26 @@ public class HsoCommand
                     if (randSource.Next(1, 100) > 50)
                     {
                         serverUrl = "https://api.lolicon.app/setu/";
-                        apiKey    = hso.LoliconApiKey ?? string.Empty;
+                        apiKey = hso.LoliconApiKey ?? string.Empty;
                     }
                     else
                     {
                         serverUrl = "https://api.yukari.one/setu/";
-                        apiKey    = hso.YukariApiKey ?? string.Empty;
+                        apiKey = hso.YukariApiKey ?? string.Empty;
                     }
 
                     break;
                 case "Yukari":
                     serverUrl = "https://api.yukari.one/setu/";
-                    apiKey    = hso.YukariApiKey ?? string.Empty;
+                    apiKey = hso.YukariApiKey ?? string.Empty;
                     break;
                 case "Lolicon":
                     serverUrl = "https://api.yukari.one/setu/";
-                    apiKey    = hso.YukariApiKey ?? string.Empty;
+                    apiKey = hso.YukariApiKey ?? string.Empty;
                     break;
                 default:
                     serverUrl = hso.Source;
-                    apiKey    = string.Empty;
+                    apiKey = string.Empty;
                     break;
             }
 
@@ -290,60 +339,23 @@ public class HsoCommand
             });
             if (reqResponse.StatusCode != HttpStatusCode.OK)
             {
-                Log.Error("Net", $"{serverUrl} return code {(int) reqResponse.StatusCode}");
-                await eventArgs.SourceGroup
-                               .SendGroupMessage($"哇哦~发生了网络错误[{reqResponse.StatusCode}]，请联系机器人所在服务器管理员");
-                return;
+                Log.Error("Net", $"{serverUrl} return code {(int)reqResponse.StatusCode}");
+                return ((int) reqResponse.StatusCode, null);
             }
 
-            response = reqResponse.Json();
+            return (200, reqResponse.Json());
         }
         catch (Exception e)
         {
-            //网络错误
-            await eventArgs.SourceGroup.SendGroupMessage("哇哦~发生了网络错误，请联系机器人所在服务器管理员");
             Log.Error("网络发生错误",
                       $"{Log.ErrorLogBuilder(e)}\r\n\r\n{PyLibSharp.Requests.Utils.GetInnerExceptionMessages(e)}");
-            return;
-        }
-
-        //json处理
-        try
-        {
-            if (!int.TryParse(response["code"]?.ToString() ?? "-100", out var retCode) && retCode != 0)
-            {
-                Log.Error("Hso",
-                          retCode == -100
-                              ? "Server response null message"
-                              : $"Server response code {retCode}");
-                await eventArgs.SourceGroup.SendGroupMessage("哇奧色图不见了\n请联系机器人服务器管理员");
-                return;
-            }
-
-            if (!long.TryParse(response["data"]?[0]?["pid"]?.ToString(), out var pid) ||
-                !int.TryParse(response["data"]?[0]?["index"]?.ToString(), out var index))
-            {
-                await eventArgs.SourceGroup.SendGroupMessage("无法获取到色图信息");
-                return;
-            }
-
-            //图片链接
-            Log.Debug("获取到图片", $"pid:{pid}|index:{index}");
-            var url = MediaUtil.GenPixivUrl(hso.PximyProxy, pid, index);
-            //检查是否有设置代理
-            await eventArgs.SourceGroup.SendGroupMessage(HsoMessageBuilder(response["data"]?[0],
-                                                                           hso.CardImage,
-                                                                           url));
-        }
-        catch (Exception e)
-        {
-            Log.Error("色图下载失败", $"网络下载数据错误\n{Log.ErrorLogBuilder(e)}");
+            return (-1, null);
         }
     }
 
     private static async void SendLocalPic(Hso hso, GroupMessageEventArgs eventArgs)
     {
-        var picNames = Directory.GetFiles(IOUtils.GetHsoPath());
+        var picNames = Directory.GetFiles(IoUtils.GetHsoPath());
         if (picNames.Length == 0)
         {
             await eventArgs.SourceGroup.SendGroupMessage("机器人管理者没有在服务器上塞色图\r\n你去找他要啦!");
@@ -367,6 +379,7 @@ public class HsoCommand
     private static MessageBody HsoMessageBuilder(JToken picInfo, bool cardImg, string picStr)
     {
         var textBuilder = new StringBuilder();
+        textBuilder.AppendLine();
         textBuilder.AppendLine(picInfo["title"]?.ToString());
         textBuilder.Append($"pid:{picInfo["pid"]}");
         if (picInfo["index"] != null)

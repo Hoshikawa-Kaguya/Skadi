@@ -93,9 +93,9 @@ public static class SaucenaoApi
                 var source = parsedPic["data"]?["source"]?.ToString() ?? string.Empty;
 
                 //包含pixiv链接
-                if (source.IndexOf("pixiv", StringComparison.Ordinal) != -1)
+                if (source.IndexOf("pixiv", StringComparison.Ordinal) != -1 &&
+                    long.TryParse(Path.GetFileName(source), out long pid))
                 {
-                    var pid      = Convert.ToInt64(Path.GetFileName(source));
                     var imageUrl = MediaUtil.GenPixivUrl(userConfig.HsoConfig.PximyProxy, pid);
                     return GenPixivResult(imageUrl, pid, parsedPic);
                 }

@@ -33,12 +33,12 @@ namespace AntiRain.TimerEvent.Event
             //读取配置文件
             ConfigManager.TryGetUserConfig(connectEventArgs.LoginUid, out var loadedConfig);
             var moduleEnable  = loadedConfig.ModuleSwitch;
-            var Subscriptions = loadedConfig.SubscriptionConfig.GroupsConfig;
+            var subscriptions = loadedConfig.SubscriptionConfig.GroupsConfig;
             //数据库
-            var dbHelper = new SubscriptionDBHelper(connectEventArgs.LoginUid);
+            var dbHelper = new SubscriptionDbHelper(connectEventArgs.LoginUid);
             //检查模块是否启用
-            if (!moduleEnable.Bili_Subscription) return;
-            foreach (var subscription in Subscriptions)
+            if (!moduleEnable.BiliSubscription) return;
+            foreach (var subscription in subscriptions)
             {
                 //臭DD的订阅
                 foreach (var biliUser in subscription.SubscriptionId)
@@ -55,7 +55,7 @@ namespace AntiRain.TimerEvent.Event
         }
 
         private static async ValueTask GetLiveStatus(SoraApi soraApi, long biliUser, List<long> groupId,
-                                                     SubscriptionDBHelper dbHelper)
+                                                     SubscriptionDbHelper dbHelper)
         {
             LiveInfo      live;
             UserSpaceInfo biliUserInfo;
@@ -100,7 +100,7 @@ namespace AntiRain.TimerEvent.Event
         }
 
         private static async ValueTask GetDynamic(SoraApi soraApi, long biliUser, List<long> groupId,
-                                                  SubscriptionDBHelper dbHelper)
+                                                  SubscriptionDbHelper dbHelper)
         {
             string  textMessage;
             Dynamic biliDynamic;

@@ -8,7 +8,7 @@ using YukariToolBox.LightLog;
 
 namespace AntiRain.IO
 {
-    internal static class IOUtils
+    internal static class IoUtils
     {
         #region IO工具
 
@@ -88,7 +88,7 @@ namespace AntiRain.IO
         /// <param name="errorMessage">错误信息</param>
         public static void CrashLogGen(string errorMessage)
         {
-            StringBuilder pathBuilder = new StringBuilder();
+            var pathBuilder = new StringBuilder();
             pathBuilder.Append(GetCrashLogPath());
             pathBuilder.Append("crash-");
             pathBuilder.Append(DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss"));

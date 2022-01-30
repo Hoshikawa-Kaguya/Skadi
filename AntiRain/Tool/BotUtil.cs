@@ -102,7 +102,7 @@ internal static class BotUtil
     public static void BotCrash(Exception e)
     {
         //生成错误报告
-        IOUtils.CrashLogGen(Log.ErrorLogBuilder(e));
+        IoUtils.CrashLogGen(Log.ErrorLogBuilder(e));
     }
 
     #endregion

@@ -14,8 +14,8 @@ namespace AntiRain.Config
     {
         #region 配置存储区
 
-        private static readonly Dictionary<long, UserConfig> UserConfigs  = new();
-        private static          GlobalConfig                 GlobalConfig = new();
+        private static readonly Dictionary<long, UserConfig> _userConfigs  = new();
+        private static          GlobalConfig                 _globalConfig = new();
 
         #endregion
 
@@ -29,19 +29,19 @@ namespace AntiRain.Config
         {
             try
             {
-                var userConfigPath = IOUtils.GetUserConfigPath(uid);
+                var userConfigPath = IoUtils.GetUserConfigPath(uid);
                 //当读取到文件时直接返回
                 if (File.Exists(userConfigPath) && LoadUserConfig(out var ret, userConfigPath))
                 {
                     Log.Debug("ConfigIO", "读取配置文件");
                     //已经存在则更新
-                    if (UserConfigs.ContainsKey(uid))
+                    if (_userConfigs.ContainsKey(uid))
                     {
-                        UserConfigs[uid] = ret;
+                        _userConfigs[uid] = ret;
                         return true;
                     }
 
-                    return UserConfigs.TryAdd(uid, ret);
+                    return _userConfigs.TryAdd(uid, ret);
                 }
 
                 //没读取到文件时创建新的文件
@@ -56,7 +56,7 @@ namespace AntiRain.Config
 
                 //读取生成的配置文件
                 if (!LoadUserConfig(out var retNew, userConfigPath)) throw new IOException("无法读取生成的配置文件");
-                return UserConfigs.TryAdd(uid, retNew);
+                return _userConfigs.TryAdd(uid, retNew);
             }
             catch (Exception e)
             {
@@ -76,12 +76,12 @@ namespace AntiRain.Config
         {
             try
             {
-                var globalConfigPath = IOUtils.GetGlobalConfigPath();
+                var globalConfigPath = IoUtils.GetGlobalConfigPath();
                 //当读取到文件时直接返回
                 if (File.Exists(globalConfigPath) && LoadGlobalConfig(out var ret, globalConfigPath))
                 {
                     Log.Debug("ConfigIO", "读取配置文件");
-                    GlobalConfig = ret;
+                    _globalConfig = ret;
                     return true;
                 }
 
@@ -97,7 +97,7 @@ namespace AntiRain.Config
 
                 //读取生成的配置文件
                 if (!LoadGlobalConfig(out var retNew, globalConfigPath)) throw new IOException("无法读取生成的配置文件");
-                GlobalConfig = retNew;
+                _globalConfig = retNew;
                 return true;
             }
             catch (Exception e)
@@ -107,7 +107,7 @@ namespace AntiRain.Config
                 Environment.Exit(-1);
             }
 
-            GlobalConfig = null;
+            _globalConfig = null;
             return false;
         }
 
@@ -117,7 +117,7 @@ namespace AntiRain.Config
         /// <param name="uid">uid</param>
         /// <param name="userConfig">配置</param>
         public static bool TryGetUserConfig(long uid, out UserConfig userConfig)
-            => UserConfigs.TryGetValue(uid, out userConfig);
+            => _userConfigs.TryGetValue(uid, out userConfig);
 
         /// <summary>
         /// 尝试获取全局配置
@@ -125,15 +125,15 @@ namespace AntiRain.Config
         /// <param name="globalConfig">配置</param>
         public static bool TryGetGlobalConfig(out GlobalConfig globalConfig)
         {
-            globalConfig = GlobalConfig;
-            return GlobalConfig != null;
+            globalConfig = _globalConfig;
+            return _globalConfig != null;
         }
 
         /// <summary>
         /// 移除已过期的用户配置
         /// </summary>
         public static bool TryRemoveUserConfig(long uid)
-            => UserConfigs.Remove(uid);
+            => _userConfigs.Remove(uid);
 
         #endregion
 

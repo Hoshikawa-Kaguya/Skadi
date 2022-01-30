@@ -41,7 +41,7 @@ internal static class InitalizationEvent
         DatabaseInit.UserDataInit(connectEvent);
 
         //初始化定时器线程
-        if (userConfig.ModuleSwitch.Bili_Subscription) SubscriptionTimer.TimerEventAdd(connectEvent);
+        if (userConfig.ModuleSwitch.BiliSubscription) SubscriptionTimer.TimerEventAdd(connectEvent);
 
         return ValueTask.CompletedTask;
     }

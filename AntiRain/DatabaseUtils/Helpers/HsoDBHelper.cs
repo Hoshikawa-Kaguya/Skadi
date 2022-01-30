@@ -7,19 +7,19 @@ using static AntiRain.DatabaseUtils.Tables;
 
 namespace AntiRain.DatabaseUtils.Helpers
 {
-    internal class HsoDBHelper
+    internal class HsoDbHelper
     {
         #region 属性
 
-        private readonly string DBPath; //数据库路径
+        private readonly string _dbPath; //数据库路径
 
         #endregion
 
         #region 构造函数
 
-        public HsoDBHelper(long uid)
+        public HsoDbHelper(long uid)
         {
-            DBPath = SugarUtils.GetDBPath(uid.ToString());
+            _dbPath = SugarUtils.GetDbPath(uid.ToString());
         }
 
         #endregion
@@ -35,7 +35,7 @@ namespace AntiRain.DatabaseUtils.Helpers
         {
             try
             {
-                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(_dbPath);
                 var countData = dbClient.Queryable<HsoCount>()
                                         .First(member => member.Gid == groupId &&
                                                          member.Uid == userId);
@@ -73,7 +73,7 @@ namespace AntiRain.DatabaseUtils.Helpers
         {
             try
             {
-                using var dbClient = SugarUtils.CreateSqlSugarClient(DBPath);
+                using var dbClient = SugarUtils.CreateSqlSugarClient(_dbPath);
                 rankList = dbClient.Queryable<HsoCount>()
                                    .Where(group => group.Gid == groupId)
                                    .OrderBy(c => c.Count, OrderByType.Desc)

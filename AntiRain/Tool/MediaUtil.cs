@@ -22,7 +22,7 @@ internal static class MediaUtil
 {
     #region 静态资源
 
-    private static Font font { get; }
+    private static Font Font { get; }
 
     static MediaUtil()
     {
@@ -31,7 +31,7 @@ internal static class MediaUtil
         using var fontMs         = new MemoryStream(FontRes.JetBrainsMono);
         var       fontCollection = new FontCollection();
         var       fontFamily     = fontCollection.Install(fontMs);
-        font = fontFamily.CreateFont(24);
+        Font = fontFamily.CreateFont(24);
     }
 
     #endregion
@@ -156,14 +156,14 @@ internal static class MediaUtil
     public static string DrawTextImage(string text, Color fontColor, Color backColor, int frameSize = 5)
     {
         //计算图片大小
-        var strRect = TextMeasurer.Measure(text, new RendererOptions(font));
+        var strRect = TextMeasurer.Measure(text, new RendererOptions(Font));
         //图片大小
         var (width, height) = ((int) strRect.Width + frameSize * 2, (int) strRect.Height + frameSize * 2);
         //创建图片
         var img = new Image<Rgba32>(width, height);
         //绘制
         img.Mutate(x => x.Fill(backColor)
-                         .DrawText(text, font, fontColor,
+                         .DrawText(text, Font, fontColor,
                                    new PointF(frameSize, frameSize / 2 - 1)));
         //转换base64
         using var byteStream = new MemoryStream();

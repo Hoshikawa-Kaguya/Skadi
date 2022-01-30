@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace AntiRain.Config.ConfigModule
 {
+    [UsedImplicitly]
     internal class Hso
     {
         /// <summary>
@@ -12,6 +14,7 @@ namespace AntiRain.Config.ConfigModule
         /// <summary>
         /// 检查源证书
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         public bool CheckSSLCert { set; get; }
 
         /// <summary>
@@ -47,6 +50,7 @@ namespace AntiRain.Config.ConfigModule
         /// <summary>
         /// 群组屏蔽
         /// </summary>
+        // ReSharper disable once CollectionNeverUpdated.Global
         public List<long> GroupBlock { get; set; }
     }
 }

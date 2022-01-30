@@ -42,12 +42,12 @@ namespace AntiRain.Config.ConfigModule
         /// <summary>
         /// 公会排名查询
         /// </summary>
-        public bool PCR_GuildRank { set; get; }
+        public bool PcrGuildRank { set; get; }
 
         /// <summary>
         /// B站UP主动态订阅
         /// </summary>
-        public bool Bili_Subscription { set; get; }
+        public bool BiliSubscription { set; get; }
 
         /// <summary>
         /// 来点色图
