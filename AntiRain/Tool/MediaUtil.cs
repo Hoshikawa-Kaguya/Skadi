@@ -22,16 +22,23 @@ internal static class MediaUtil
 {
     #region 静态资源
 
-    private static Font Font { get; }
+    private static Font Mono { get; }
+
+    private static Font YaHei { get; }
 
     static MediaUtil()
     {
         //加载字体
-        Log.Debug("Font","Init font");
-        using var fontMs         = new MemoryStream(FontRes.JetBrainsMono);
-        var       fontCollection = new FontCollection();
-        var       fontFamily     = fontCollection.Install(fontMs);
-        Font = fontFamily.CreateFont(24);
+        Log.Debug("Mono", "Init font");
+        using var monoFontMs         = new MemoryStream(FontRes.JetBrainsMono);
+        var       monoFontCollection = new FontCollection();
+        var       monoFontFamily     = monoFontCollection.Add(monoFontMs);
+        Mono = monoFontFamily.CreateFont(24);
+
+        using var yhFontMs         = new MemoryStream(FontRes.YaHei);
+        var       yhFontCollection = new FontCollection();
+        var       yhFontFamily     = yhFontCollection.Add(yhFontMs);
+        YaHei = yhFontFamily.CreateFont(35);
     }
 
     #endregion
@@ -39,21 +46,23 @@ internal static class MediaUtil
     #region Pixiv图片消息段生成
 
     public static string GenPixivUrl(string proxy, long pid, int index = 0)
-        => string.IsNullOrEmpty(proxy)
+    {
+        return string.IsNullOrEmpty(proxy)
             ? $"https://pixiv.lancercmd.cc/{pid}"
             : $"{proxy.Trim('/')}/{pid}/{index}";
+    }
 
     public static SoraSegment GetPixivImg(long pid, string proxyUrl)
     {
         try
         {
             var pixApiReq = Requests.Get($"https://pixiv.yukari.one/api/illust/{pid}",
-                                         new ReqParams
-                                         {
-                                             Timeout                   = 5000,
-                                             IsThrowErrorForTimeout    = false,
-                                             IsThrowErrorForStatusCode = false
-                                         });
+                new ReqParams
+                {
+                    Timeout                   = 5000,
+                    IsThrowErrorForTimeout    = false,
+                    IsThrowErrorForStatusCode = false
+                });
             var imgSegment = SoraSegment.Image(proxyUrl);
 
             if (pixApiReq.StatusCode == HttpStatusCode.OK)
@@ -93,20 +102,20 @@ internal static class MediaUtil
         try
         {
             var res = Requests.Get($"https://api.twitter.com/2/tweets/{tweetId}",
-                                   new ReqParams
-                                   {
-                                       Params = new Dictionary<string, string>
-                                       {
-                                           {"expansions", "attachments.media_keys,author_id"},
-                                           {"media.fields", "url"}
-                                       },
-                                       Header = new Dictionary<HttpRequestHeader, string>
-                                       {
-                                           {HttpRequestHeader.Authorization, $"Bearer {token}"}
-                                       },
-                                       IsThrowErrorForStatusCode = false,
-                                       IsThrowErrorForTimeout    = false
-                                   });
+                new ReqParams
+                {
+                    Params = new Dictionary<string, string>
+                    {
+                        {"expansions", "attachments.media_keys,author_id"},
+                        {"media.fields", "url"}
+                    },
+                    Header = new Dictionary<HttpRequestHeader, string>
+                    {
+                        {HttpRequestHeader.Authorization, $"Bearer {token}"}
+                    },
+                    IsThrowErrorForStatusCode = false,
+                    IsThrowErrorForTimeout    = false
+                });
 
             Log.Info("Twitter", $"Twitter api http code:{res.StatusCode}");
             if (res is not {StatusCode: HttpStatusCode.OK})
@@ -126,9 +135,9 @@ internal static class MediaUtil
 
         Log.Debug("Twitter", $"Get twitter api data:{data.ToString(Formatting.None)}");
         var urls = data["includes"]?["media"]?
-                   .Where(m => m["type"]?.ToString() == "photo")
-                   .Select(t => t["url"]?.ToString() ?? string.Empty)
-                   .ToList() ?? new List<string>();
+                  .Where(m => m["type"]?.ToString() == "photo")
+                  .Select(t => t["url"]?.ToString() ?? string.Empty)
+                  .ToList() ?? new List<string>();
         urls.RemoveAll(string.IsNullOrEmpty);
         if (urls.Count == 0)
         {
@@ -137,13 +146,13 @@ internal static class MediaUtil
         }
 
         var authorName = data["includes"]?["users"]
-                         ?.First(t => t["id"]?.ToString() == data["data"]?["author_id"]?.ToString())
+                       ?.First(t => t["id"]?.ToString() == data["data"]?["author_id"]?.ToString())
                          ["name"]?.ToString() ?? string.Empty;
         Log.Info("Twitter", $"Get twitter image [count:{urls.Count}]");
         return (true,
-                authorName,
-                data["data"]?["text"]?.ToString() ?? string.Empty,
-                urls);
+            authorName,
+            data["data"]?["text"]?.ToString() ?? string.Empty,
+            urls);
     }
 
     #endregion
@@ -153,25 +162,26 @@ internal static class MediaUtil
     /// <summary>
     /// 绘制文字图片
     /// </summary>
-    public static string DrawTextImage(string text, Color fontColor, Color backColor, int frameSize = 5)
+    public static string DrawTextImage(string text, Color fontColor, Color backColor, bool chsFont = false,
+                                       int    frameSize = 5)
     {
         //计算图片大小
-        var strRect = TextMeasurer.Measure(text, new RendererOptions(Font));
+        FontRectangle strRect = TextMeasurer.Measure(text, new TextOptions(chsFont ? YaHei : Mono));
         //图片大小
-        var (width, height) = ((int) strRect.Width + frameSize * 2, (int) strRect.Height + frameSize * 2);
+        (int width, int height) = ((int) strRect.Width + frameSize * 2, (int) strRect.Height + frameSize * 2);
         //创建图片
-        var img = new Image<Rgba32>(width, height);
+        using Image<Rgba32> img = new Image<Rgba32>(width, height);
         //绘制
-        img.Mutate(x => x.Fill(backColor)
-                         .DrawText(text, Font, fontColor,
-                                   new PointF(frameSize, frameSize / 2 - 1)));
+        img.Mutate(x =>
+            x.Fill(backColor)
+             .DrawText(text, chsFont ? YaHei : Mono, fontColor, new PointF(frameSize, frameSize / 2 - 1)));
         //转换base64
         using var byteStream = new MemoryStream();
         img.Save(byteStream, PngFormat.Instance);
         img.Dispose();
 
-        return byteStream.Length != 0 
-            ? Convert.ToBase64String(byteStream.GetBuffer(), 0, (int) byteStream.Length) 
+        return byteStream.Length != 0
+            ? Convert.ToBase64String(byteStream.GetBuffer(), 0, (int) byteStream.Length)
             : string.Empty;
     }
 

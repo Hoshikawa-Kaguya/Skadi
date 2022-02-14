@@ -2,15 +2,18 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AntiRain.Tool;
 using BilibiliApi.Video;
 using BilibiliApi.Video.Models;
 using JetBrains.Annotations;
+using SixLabors.ImageSharp;
 using Sora.Attributes.Command;
 using Sora.Entities;
 using Sora.Entities.Segment;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.LightLog;
+using MatchType = Sora.Enumeration.MatchType;
 
 namespace AntiRain.Command;
 
@@ -23,25 +26,11 @@ public static class BlibiliVideo
     [UsedImplicitly]
     [SoraCommand(
         SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"^BV1[1-9A-NP-Za-km-z]{9}$"},
+        CommandExpressions = new[] {@"^BV1[1-9A-NP-Za-km-z]{9}$", @"^AV[1-9][0-9]*$" },
         MatchType = MatchType.Regex)]
-    public static async ValueTask BvIdGet(GroupMessageEventArgs eventArgs)
+    public static async ValueTask BiliVideoGet(GroupMessageEventArgs eventArgs)
     {
-        var    idRegex    = new Regex(@"^BV1[1-9A-NP-Za-km-z]{9}$");
-        string videoIdStr = idRegex.Match(eventArgs.Message.RawText).Value;
-        await VideoInfoById(videoIdStr, eventArgs);
-    }
-
-    [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"^av[1-9][0-9]*$"}, 
-        MatchType = MatchType.Regex)]
-    public static async ValueTask AvIdGet(GroupMessageEventArgs eventArgs)
-    {
-        var    idRegex    = new Regex(@"^av[1-9][0-9]*$");
-        string videoIdStr = idRegex.Match(eventArgs.Message.RawText).Value;
-        await VideoInfoById(videoIdStr, eventArgs);
+        await VideoInfoId(eventArgs);
     }
 
     [UsedImplicitly]
@@ -84,9 +73,9 @@ public static class BlibiliVideo
         await eventArgs.Reply(GenReplyMessage(videoInfo));
     }
 
-    private static async ValueTask VideoInfoById(string videoIdStr, GroupMessageEventArgs eventArgs)
+    private static async ValueTask VideoInfoId(GroupMessageEventArgs eventArgs)
     {
-        VideoInfo videoInfo = VideoApis.GetVideoInfo(videoIdStr);
+        VideoInfo videoInfo = VideoApis.GetVideoInfo(eventArgs.Message.RawText);
         if (videoInfo.Code != 0)
         {
             await eventArgs.Reply($"API发生错误({videoInfo.Code})\r\nmessage:{videoInfo.Message}");
@@ -100,15 +89,22 @@ public static class BlibiliVideo
     private static MessageBody GenReplyMessage(VideoInfo info)
     {
         var messageBuilder = new StringBuilder();
-        messageBuilder.AppendLine($"Link:https://b23.tv/{info.Bid}");
-        messageBuilder.AppendLine($"标题:{info.Title}");
         messageBuilder.AppendLine($"简介:{info.Desc}");
         messageBuilder.AppendLine($"UP:{info.AuthName}");
         messageBuilder.AppendLine($"https://space.bilbili.com/{info.AuthUid}\r\n");
         messageBuilder.AppendLine($"投稿时间:{info.PublishTime:yyyy-MM-dd HH:mm:ss}");
-        MessageBody sendMessage = $"Bilibili视频解析\r\n[{info.Bid}(av{info.Aid})]\r\n" +
-            SoraSegment.Image(info.CoverUrl)                                        +
-            messageBuilder.ToString();
+
+        string b64Pic =
+            MediaUtil.DrawTextImage(messageBuilder.ToString(), Color.Black, Color.White, true);
+
+        var sendMessage = new MessageBody
+        {
+            $"Bilibili视频解析\r\n[{info.Bid}(av{info.Aid})]\r\n",
+            $"标题:{info.Title}",
+            SoraSegment.Image($"{info.CoverUrl}"),
+            SoraSegment.Image($"base64://{b64Pic}"),
+            $"Link:https://b23.tv/{info.Bid}"
+        };
 
         return sendMessage;
     }
