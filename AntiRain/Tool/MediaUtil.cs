@@ -22,23 +22,16 @@ internal static class MediaUtil
 {
     #region 静态资源
 
-    private static Font Mono { get; }
-
-    private static Font YaHei { get; }
+    private static Font Arial { get; }
 
     static MediaUtil()
     {
         //加载字体
         Log.Debug("Mono", "Init font");
-        using var monoFontMs         = new MemoryStream(FontRes.JetBrainsMono);
-        var       monoFontCollection = new FontCollection();
-        var       monoFontFamily     = monoFontCollection.Add(monoFontMs);
-        Mono = monoFontFamily.CreateFont(24);
-
-        using var yhFontMs         = new MemoryStream(FontRes.YaHei);
-        var       yhFontCollection = new FontCollection();
-        var       yhFontFamily     = yhFontCollection.Add(yhFontMs);
-        YaHei = yhFontFamily.CreateFont(35);
+        using var arialFontMs         = new MemoryStream(FontRes.Deng);
+        var       arialFontCollection = new FontCollection();
+        var       arialFontFamily     = arialFontCollection.Add(arialFontMs);
+        Arial = arialFontFamily.CreateFont(35);
     }
 
     #endregion
@@ -162,11 +155,10 @@ internal static class MediaUtil
     /// <summary>
     /// 绘制文字图片
     /// </summary>
-    public static string DrawTextImage(string text, Color fontColor, Color backColor, bool chsFont = false,
-                                       int    frameSize = 5)
+    public static string DrawTextImage(string text, Color fontColor, Color backColor,int frameSize = 5)
     {
         //计算图片大小
-        FontRectangle strRect = TextMeasurer.Measure(text, new TextOptions(chsFont ? YaHei : Mono));
+        FontRectangle strRect = TextMeasurer.Measure(text, new TextOptions(Arial));
         //图片大小
         (int width, int height) = ((int) strRect.Width + frameSize * 2, (int) strRect.Height + frameSize * 2);
         //创建图片
@@ -174,7 +166,7 @@ internal static class MediaUtil
         //绘制
         img.Mutate(x =>
             x.Fill(backColor)
-             .DrawText(text, chsFont ? YaHei : Mono, fontColor, new PointF(frameSize, frameSize / 2 - 1)));
+             .DrawText(text, Arial, fontColor, new PointF(frameSize, frameSize / 2 - 1)));
         //转换base64
         using var byteStream = new MemoryStream();
         img.Save(byteStream, PngFormat.Instance);

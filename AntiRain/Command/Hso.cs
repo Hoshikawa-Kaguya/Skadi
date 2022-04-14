@@ -50,7 +50,7 @@ public class HsoCommand
         if (IsInCD(eventArgs.SourceGroup, eventArgs.Sender, CommandFlag.Setu))
         {
             await eventArgs.SourceGroup.SendGroupMessage(SoraSegment.At(eventArgs.Sender) +
-                                                         "你是不是只会要色图(逊欸，冲的真快)");
+                "你是不是只会要色图(逊欸，冲的真快)");
             return;
         }
 
@@ -59,7 +59,7 @@ public class HsoCommand
         if (!hsoDbHelper.AddOrUpdate(eventArgs.Sender, eventArgs.SourceGroup))
             await eventArgs.Reply("数据库错误(count)");
 
-        Hso    hso = userConfig.HsoConfig;
+        Hso hso = userConfig.HsoConfig;
         Log.Debug("源", hso.Source);
         //本地模式
         if (hso.Source.Equals("Local"))
@@ -85,9 +85,9 @@ public class HsoCommand
             if (!int.TryParse(data["code"]?.ToString() ?? "-100", out var retCode) && retCode != 0)
             {
                 Log.Error("Hso",
-                          retCode == -100
-                              ? "Server response null message"
-                              : $"Server response code {retCode}");
+                    retCode == -100
+                        ? "Server response null message"
+                        : $"Server response code {retCode}");
                 await eventArgs.SourceGroup.SendGroupMessage("哇奧色图不见了\n请联系机器人服务器管理员");
                 return;
             }
@@ -115,8 +115,8 @@ public class HsoCommand
 
     [UsedImplicitly]
     [SoraCommand(
-        SourceType = SourceFlag.Group, 
-        CommandExpressions = new[] {@"^让我康康[0-9]+$"}, 
+        SourceType = SourceFlag.Group,
+        CommandExpressions = new[] {@"^让我康康[0-9]+$"},
         MatchType = MatchType.Regex)]
     public async void HsoPicIndexSearchFirst(GroupMessageEventArgs eventArgs)
     {
@@ -131,7 +131,7 @@ public class HsoCommand
 
     [UsedImplicitly]
     [SoraCommand(
-        SourceType = SourceFlag.Group, 
+        SourceType = SourceFlag.Group,
         CommandExpressions = new[] {@"^让我康康[0-9]+\s[0-9]+$"},
         MatchType = MatchType.Regex)]
     public async void HsoPicIndexSearch(GroupMessageEventArgs eventArgs)
@@ -213,18 +213,26 @@ public class HsoCommand
         {
             var res = await Requests.PostAsync("https://api.yukari.one/setu/add_pic", new ReqParams
             {
-                Params = new Dictionary<string, string>
+                PostJson = new
                 {
-                    {"apikey", userConfig.HsoConfig.YukariApiKey},
-                    {"pid", picId},
-                    {"index", picIndex}
+                    apikey = userConfig.HsoConfig.YukariApiKey,
+                    pid    = picId,
+                    index  = picIndex
                 },
                 Timeout                   = 10000,
                 IsThrowErrorForStatusCode = false,
                 IsThrowErrorForTimeout    = false
             });
 
-            if (res is null || res.StatusCode != HttpStatusCode.OK)
+            if (res.StatusCode != HttpStatusCode.OK)
+            {
+                string message = res.Json()?["message"]?.ToString() ?? "unknown";
+                Log.Error("api error", $"{res.StatusCode}|{message}");
+                await eventArgs.Reply($"error:api err\r\n{message}");
+                return;
+            }
+
+            if (res is null)
             {
                 Log.Error("net", "net error");
                 await eventArgs.Reply("error:net error");
@@ -236,6 +244,7 @@ public class HsoCommand
         catch (Exception e)
         {
             Log.Error(e, "HsoAddPic", "cannot add pic");
+            await eventArgs.Reply("出错了，寄");
             return;
         }
 
@@ -303,26 +312,26 @@ public class HsoCommand
                     if (randSource.Next(1, 100) > 50)
                     {
                         serverUrl = "https://api.lolicon.app/setu/";
-                        apiKey = hso.LoliconApiKey ?? string.Empty;
+                        apiKey    = hso.LoliconApiKey ?? string.Empty;
                     }
                     else
                     {
                         serverUrl = "https://api.yukari.one/setu/";
-                        apiKey = hso.YukariApiKey ?? string.Empty;
+                        apiKey    = hso.YukariApiKey ?? string.Empty;
                     }
 
                     break;
                 case "Yukari":
                     serverUrl = "https://api.yukari.one/setu/";
-                    apiKey = hso.YukariApiKey ?? string.Empty;
+                    apiKey    = hso.YukariApiKey ?? string.Empty;
                     break;
                 case "Lolicon":
                     serverUrl = "https://api.yukari.one/setu/";
-                    apiKey = hso.YukariApiKey ?? string.Empty;
+                    apiKey    = hso.YukariApiKey ?? string.Empty;
                     break;
                 default:
                     serverUrl = hso.Source;
-                    apiKey = string.Empty;
+                    apiKey    = string.Empty;
                     break;
             }
 
@@ -339,7 +348,7 @@ public class HsoCommand
             });
             if (reqResponse.StatusCode != HttpStatusCode.OK)
             {
-                Log.Error("Net", $"{serverUrl} return code {(int)reqResponse.StatusCode}");
+                Log.Error("Net", $"{serverUrl} return code {(int) reqResponse.StatusCode}");
                 return ((int) reqResponse.StatusCode, null);
             }
 
@@ -348,7 +357,7 @@ public class HsoCommand
         catch (Exception e)
         {
             Log.Error("网络发生错误",
-                      $"{Log.ErrorLogBuilder(e)}\r\n\r\n{PyLibSharp.Requests.Utils.GetInnerExceptionMessages(e)}");
+                $"{Log.ErrorLogBuilder(e)}\r\n\r\n{PyLibSharp.Requests.Utils.GetInnerExceptionMessages(e)}");
             return (-1, null);
         }
     }
@@ -366,8 +375,8 @@ public class HsoCommand
         var localPicPath = $"{picNames[randFile.Next(0, picNames.Length - 1)]}";
         Log.Debug("发送图片", localPicPath);
         await eventArgs.SourceGroup.SendGroupMessage(hso.CardImage
-                                                         ? SoraSegment.CardImage(localPicPath)
-                                                         : SoraSegment.Image(localPicPath));
+            ? SoraSegment.CardImage(localPicPath)
+            : SoraSegment.Image(localPicPath));
     }
 
     /// <summary>

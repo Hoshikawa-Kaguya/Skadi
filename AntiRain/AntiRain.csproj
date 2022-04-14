@@ -39,9 +39,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <None Remove="Resource\Deng.ttf" />
+    </ItemGroup>
+
+    <ItemGroup>
         <EmbeddedResource Include="Config\InitGlobalConfig.yaml" />
         <EmbeddedResource Include="Config\InitUserConfig.yaml" />
-        <EmbeddedResource Include="Resource\YaHei.ttf" />
+        <EmbeddedResource Include="Resource\Deng.ttf" />
         <EmbeddedResource Update="Resource\FontRes.resx">
           <Generator>ResXFileCodeGenerator</Generator>
           <LastGenOutput>FontRes.Designer.cs</LastGenOutput>
@@ -50,9 +54,6 @@
           <Generator>ResXFileCodeGenerator</Generator>
           <LastGenOutput>Fonts.Designer.cs</LastGenOutput>
         </EmbeddedResource>
-        <None Remove="Resource\JetBrainsMono-Regular.ttf" />
-        <None Remove="Resource\YaHei.ttf" />
-        <EmbeddedResource Include="Resource\JetBrainsMono-Regular.ttf" />
     </ItemGroup>
 
     <ItemGroup>
@@ -60,15 +61,15 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="BeetleX.FastHttpApi" Version="2.1.0" />
+        <PackageReference Include="BeetleX.FastHttpApi" Version="2.2.10.1802" />
         <PackageReference Include="BilibiliApi" Version="0.3.11" />
         <PackageReference Include="JetBrains.Annotations" Version="2021.3.0" />
         <PackageReference Include="PyLibSharp.Requests" Version="1.2.10" />
-        <PackageReference Include="SharpYaml" Version="1.8.0" />
-        <PackageReference Include="SixLabors.ImageSharp" Version="2.0.0" />
+        <PackageReference Include="SharpYaml" Version="1.9.0" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.0" />
         <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14" />
-        <PackageReference Include="Sora" Version="1.0.0-rc.46" />
-        <PackageReference Include="sqlSugarCore" Version="5.0.5.4" />
+        <PackageReference Include="Sora" Version="1.0.0-rc.49" />
+        <PackageReference Include="sqlSugarCore" Version="5.0.7" />
         <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
     </ItemGroup>
 

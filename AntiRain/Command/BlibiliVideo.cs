@@ -95,7 +95,7 @@ public static class BlibiliVideo
         messageBuilder.AppendLine($"投稿时间:{info.PublishTime:yyyy-MM-dd HH:mm:ss}");
 
         string b64Pic =
-            MediaUtil.DrawTextImage(messageBuilder.ToString(), Color.Black, Color.White, true);
+            MediaUtil.DrawTextImage(messageBuilder.ToString(), Color.Black, Color.White);
 
         var sendMessage = new MessageBody
         {

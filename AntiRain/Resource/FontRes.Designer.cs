@@ -63,19 +63,9 @@ namespace AntiRain.Resource {
         /// <summary>
         ///   查找 System.Byte[] 类型的本地化资源。
         /// </summary>
-        internal static byte[] JetBrainsMono {
+        internal static byte[] Deng {
             get {
-                object obj = ResourceManager.GetObject("JetBrainsMono", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   查找 System.Byte[] 类型的本地化资源。
-        /// </summary>
-        internal static byte[] YaHei {
-            get {
-                object obj = ResourceManager.GetObject("YaHei", resourceCulture);
+                object obj = ResourceManager.GetObject("Deng", resourceCulture);
                 return ((byte[])(obj));
             }
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -90,7 +91,7 @@ public static class SaucenaoApi
             default:
             {
                 //检查源
-                var source = parsedPic["data"]?["source"]?.ToString() ?? string.Empty;
+                string source = parsedPic["data"]?["source"]?.ToString() ?? string.Empty;
 
                 //包含pixiv链接
                 if (source.IndexOf("pixiv", StringComparison.Ordinal) != -1 &&
@@ -104,7 +105,7 @@ public static class SaucenaoApi
                 if (source.IndexOf("twitter", StringComparison.Ordinal) != -1)
                     return GenTwitterResult(source, userConfig.TwitterApiToken, parsedPic);
 
-                var b64Pic =
+                string b64Pic =
                     MediaUtil.DrawTextImage(parsedPic["data"]?.ToString(Formatting.Indented) ?? string.Empty,
                                             Color.Black, Color.White);
 
@@ -122,8 +123,8 @@ public static class SaucenaoApi
 
     private static MessageBody GenTwitterResult(string tweetUrl, string token, JToken apiRet)
     {
-        var tId = Path.GetFileName(tweetUrl);
-        var (success, sender, text, media) = MediaUtil.GetTweet(tId, token);
+        string tId = Path.GetFileName(tweetUrl);
+        (bool success, string sender, string text, List<string> media) = MediaUtil.GetTweet(tId, token);
 
         if (!success) return $"推特API错误\r\nMessage:{text}";
 
