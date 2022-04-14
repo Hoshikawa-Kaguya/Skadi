@@ -1,3 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 using AntiRain.Config;
 using AntiRain.Config.ConfigModule;
 using AntiRain.DatabaseUtils.Helpers;
@@ -9,16 +16,9 @@ using PyLibSharp.Requests;
 using Sora.Attributes.Command;
 using Sora.Entities;
 using Sora.Entities.Segment;
+using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
-using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using YukariToolBox.LightLog;
 using static AntiRain.Tool.CommandCdUtil;
 using MatchType = Sora.Enumeration.MatchType;
@@ -121,12 +121,7 @@ public class HsoCommand
     public async void HsoPicIndexSearchFirst(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        var picInfos = eventArgs.Message.RawText.Split(' ');
-        await eventArgs.Reply("什么，有好康的");
-        var imgSegment = GetPixivImageMessage(eventArgs.LoginUid, picInfos[0][4..], "0");
-        var (apiStatus, _) = await eventArgs.Reply(imgSegment, TimeSpan.FromSeconds(10));
-        if (apiStatus.RetCode != ApiStatusType.Ok)
-            await eventArgs.Reply("逊欸，图都被删了");
+        await SendPixivImageMessage(eventArgs);
     }
 
     [UsedImplicitly]
@@ -137,12 +132,7 @@ public class HsoCommand
     public async void HsoPicIndexSearch(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        var picInfos = eventArgs.Message.RawText.Split(' ');
-        await eventArgs.Reply("什么，有好康的");
-        var imgSegment = GetPixivImageMessage(eventArgs.LoginUid, picInfos[0][4..], picInfos[1]);
-        var (apiStatus, _) = await eventArgs.Reply(imgSegment, TimeSpan.FromSeconds(10));
-        if (apiStatus.RetCode != ApiStatusType.Ok)
-            await eventArgs.Reply("逊欸，图都被删了");
+        await SendPixivImageMessage(eventArgs);
     }
 
     [UsedImplicitly]
@@ -270,29 +260,65 @@ public class HsoCommand
 
     #region 私有方法
 
-    private static MessageBody GetPixivImageMessage(long loginUid, string pid, string index)
+    private static async Task SendPixivImageMessage(GroupMessageEventArgs eventArgs)
     {
-        if (!ConfigManager.TryGetUserConfig(loginUid, out var userConfig))
+        var picInfos = eventArgs.Message.RawText.Split(' ');
+        await eventArgs.Reply("什么，有好康的");
+        string pid        = picInfos[0][4..];
+        string index      = picInfos.Length > 1 ? picInfos[1] : string.Empty;
+
+        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var userConfig))
         {
             Log.Error("Config|Hso", "无法获取用户配置文件");
-            return "ERR:无法获取用户配置文件";
+            await eventArgs.Reply("ERR:无法获取用户配置文件");
         }
-
 
         //处理图片代理连接
         string imageUrl;
         if (!string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
         {
-            imageUrl = $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{pid}/{index}";
+            imageUrl = $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{pid}";
             Log.Debug("Hso", $"Get proxy url {imageUrl}");
         }
         else
         {
-            imageUrl = $"https://pixiv.lancercmd.cc/{pid}/{index}";
+            imageUrl = $"https://pixiv.lancercmd.cc/{pid}";
             Log.Warning("Hso", "未找到代理服务器已使用默认代理:https://pixiv.lancercmd.cc/");
         }
 
-        return MediaUtil.GetPixivImg(Convert.ToInt64(pid), imageUrl);
+        (int statusCode, bool r18, int count) = MediaUtil.GetPixivImgInfo(Convert.ToInt64(pid));
+
+        if (statusCode != 200)
+        {
+            await eventArgs.Reply($"哇哦，发生了网络错误[{statusCode}]");
+        }
+
+        if (r18)
+        {
+            await eventArgs.Reply("H是不行的！冲了这么多，休息一下吧");
+        }
+
+        // ApiStatus apiStatus;
+
+        if (string.IsNullOrEmpty(index) && count > 1)
+        { 
+            var customNodes = new List<CustomNode>();
+            for (int i = 0; i < count; i++)
+            {
+                customNodes.Add(new CustomNode("色色", 114514, SoraSegment.Image($"{imageUrl}/{i}")));
+            }
+
+            // apiStatus = 
+            await eventArgs.SourceGroup.SendGroupForwardMsg(customNodes);
+        }
+        else
+        {
+            // (apiStatus, _) = 
+            await eventArgs.Reply(SoraSegment.Image(imageUrl), TimeSpan.FromMinutes(2));
+        }
+
+        // if (apiStatus.RetCode != ApiStatusType.Ok)
+        //     await eventArgs.Reply("逊欸，图都被删了");
     }
 
     /// <summary>

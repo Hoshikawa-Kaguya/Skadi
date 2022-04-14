@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using AntiRain.Config;
 using AntiRain.Tool;
@@ -140,10 +141,24 @@ public static class SaucenaoApi
     }
 
     private static MessageBody GenPixivResult(string url, long pid, JToken apiRet)
-        => "[Saucenao-Pixiv]"                             +
-           $"\r\n图片名:{apiRet["data"]?["title"]}"          +
-           $"\r\n作者:{apiRet["data"]?["member_name"]}\r\n" +
-           MediaUtil.GetPixivImg(pid, url)                +
-           $"\r\nPixiv Id:{pid}\r\n"                      +
-           $"[{apiRet["header"]?["similarity"]}%]";
+    {
+        MessageBody msg = new MessageBody();
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("[Saucenao-Pixiv]");
+        sb.AppendLine($"图片名:{apiRet["data"]?["title"]}");
+        sb.AppendLine($"作者:{apiRet["data"]?["member_name"]}");
+        msg.Add(sb.ToString());
+
+        (int statusCode, bool r18, _) = MediaUtil.GetPixivImgInfo(pid);
+        if (statusCode != 0) msg.Add($"[网络错误{statusCode}]");
+        else if(r18) msg.Add("[H是不行的]");
+        else msg.Add(SoraSegment.Image(url));
+
+        sb.Clear();
+        sb.AppendLine($"Pixiv Id:{pid}");
+        sb.AppendLine($"[{apiRet["header"]?["similarity"]}%]");
+        msg.Add(sb.ToString());
+
+        return msg;
+    }
 }

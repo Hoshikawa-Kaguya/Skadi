@@ -13,7 +13,6 @@ using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using Sora.Entities.Segment;
 using YukariToolBox.LightLog;
 
 namespace AntiRain.Tool;
@@ -45,7 +44,7 @@ internal static class MediaUtil
             : $"{proxy.Trim('/')}/{pid}/{index}";
     }
 
-    public static SoraSegment GetPixivImg(long pid, string proxyUrl)
+    public static (int statusCode, bool r18, int count) GetPixivImgInfo(long pid)
     {
         try
         {
@@ -56,24 +55,23 @@ internal static class MediaUtil
                     IsThrowErrorForTimeout    = false,
                     IsThrowErrorForStatusCode = false
                 });
-            var imgSegment = SoraSegment.Image(proxyUrl);
 
             if (pixApiReq.StatusCode == HttpStatusCode.OK)
             {
                 var infoJson = pixApiReq.Json();
                 if (Convert.ToBoolean(infoJson["error"]))
-                    return SoraSegment.Text($"[ERROR:网络错误，无法获取图片详细信息({infoJson["message"]})]");
-                return Convert.ToBoolean(infoJson["body"]?["xRestrict"])
-                    ? SoraSegment.Text("[H是不行的]")
-                    : imgSegment;
+                    return (200, false, 0);
+                return (200,
+                    Convert.ToBoolean(infoJson["body"]?["xRestrict"]),
+                    Convert.ToInt32(infoJson["body"]?["pageCount"]));
             }
 
-            return SoraSegment.Text($"[ERROR:网络错误，无法获取图片详细信息({pixApiReq.StatusCode})]");
+            return ((int)pixApiReq.StatusCode, false, 0);
         }
         catch (Exception e)
         {
             Log.Error(e, "GetPixivImg", "can not get illust info");
-            return SoraSegment.Text($"[ERROR:网络错误，无法获取图片详细信息({e.Message})]");
+            return (-1, false, 0);
         }
     }
 
