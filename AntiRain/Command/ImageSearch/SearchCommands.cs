@@ -36,7 +36,8 @@ namespace AntiRain.Command.ImageSearch
             var imgArgs =
                 await eventArgs.WaitForNextMessageAsync(@"^\[CQ:image,file=[a-z0-9]+\.image,subType=[0-9]+\]$",
                                                         MatchType.Regex, TimeSpan.FromMinutes(1));
-            if(imgArgs == null)
+            Log.Info("pic search", $"[{eventArgs.Sender.Id}]搜索色图");
+            if (imgArgs == null)
             {
                 await eventArgs.Reply("连图都没有真是太逊了");
                 return;

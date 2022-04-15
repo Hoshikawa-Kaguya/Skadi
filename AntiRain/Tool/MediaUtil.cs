@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
+using AntiRain.Config;
 using AntiRain.Resource;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -13,6 +15,9 @@ using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using Sora.Entities.Segment;
+using Sora.Entities.Segment.DataModel;
+using Sora.EventArgs.SoraEvent;
 using YukariToolBox.LightLog;
 
 namespace AntiRain.Tool;
@@ -26,7 +31,7 @@ internal static class MediaUtil
     static MediaUtil()
     {
         //加载字体
-        Log.Debug("Mono", "Init font");
+        Log.Debug("Arial Font", "Init font");
         using var arialFontMs         = new MemoryStream(FontRes.Deng);
         var       arialFontCollection = new FontCollection();
         var       arialFontFamily     = arialFontCollection.Add(arialFontMs);
@@ -37,6 +42,67 @@ internal static class MediaUtil
 
     #region Pixiv图片消息段生成
 
+    public static async Task SendPixivImageMessage(this GroupMessageEventArgs eventArgs, long pid, int index)
+    {
+        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var userConfig))
+        {
+            Log.Error("Config|Hso", "无法获取用户配置文件");
+            await eventArgs.Reply("ERR:无法获取用户配置文件");
+        }
+
+        //处理图片代理连接
+        string imageUrl;
+        if (!string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
+        {
+            imageUrl = $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{pid}";
+            Log.Debug("Hso", $"Get proxy url {imageUrl}");
+        }
+        else
+        {
+            imageUrl = $"https://pixiv.lancercmd.cc/{pid}";
+            Log.Warning("Hso", "未找到代理服务器已使用默认代理:https://pixiv.lancercmd.cc/");
+        }
+
+        (int statusCode, bool r18, int count) = MediaUtil.GetPixivImgInfo(Convert.ToInt64(pid), out _);
+
+        if (statusCode != 200)
+        {
+            await eventArgs.Reply($"哇哦，发生了网络错误[{statusCode}]");
+        }
+
+        if (r18)
+        {
+            await eventArgs.Reply("H是不行的！冲了这么多，休息一下吧");
+        }
+
+        // ApiStatus apiStatus;
+
+        if (index > -1 && count > 1)
+        {
+            var customNodes = new List<CustomNode>();
+            for (int i = 0; i < count; i++)
+            {
+                customNodes.Add(new CustomNode("色色", 114514, SoraSegment.Image($"{imageUrl}/{i}")));
+            }
+
+            // apiStatus = 
+            await eventArgs.SourceGroup.SendGroupForwardMsg(customNodes);
+        }
+        else
+        {
+            if (index != 0 && count <= 1 || index > count - 1)
+            {
+                await eventArgs.Reply("没有这张色图欸(404)");
+                return;
+            }
+            // (apiStatus, _) = 
+            await eventArgs.Reply(SoraSegment.Image(imageUrl), TimeSpan.FromMinutes(2));
+        }
+
+        // if (apiStatus.RetCode != ApiStatusType.Ok)
+        //     await eventArgs.Reply("逊欸，图都被删了");
+    }
+
     public static string GenPixivUrl(string proxy, long pid, int index = 0)
     {
         return string.IsNullOrEmpty(proxy)
@@ -44,10 +110,13 @@ internal static class MediaUtil
             : $"{proxy.Trim('/')}/{pid}/{index}";
     }
 
-    public static (int statusCode, bool r18, int count) GetPixivImgInfo(long pid)
+    public static (int statusCode, bool r18, int count) GetPixivImgInfo(long pid, out JToken json)
     {
+        Log.Debug("pixiv api", "sending illust info request");
+        json = null;
         try
         {
+            
             var pixApiReq = Requests.Get($"https://pixiv.yukari.one/api/illust/{pid}",
                 new ReqParams
                 {
@@ -56,16 +125,17 @@ internal static class MediaUtil
                     IsThrowErrorForStatusCode = false
                 });
 
+            Log.Debug("pixiv api", $"get illust info response({pixApiReq.StatusCode})");
             if (pixApiReq.StatusCode == HttpStatusCode.OK)
             {
-                var infoJson = pixApiReq.Json();
+                JToken infoJson = pixApiReq.Json();
+                json = infoJson;
                 if (Convert.ToBoolean(infoJson["error"]))
                     return (200, false, 0);
                 return (200,
                     Convert.ToBoolean(infoJson["body"]?["xRestrict"]),
                     Convert.ToInt32(infoJson["body"]?["pageCount"]));
             }
-
             return ((int)pixApiReq.StatusCode, false, 0);
         }
         catch (Exception e)

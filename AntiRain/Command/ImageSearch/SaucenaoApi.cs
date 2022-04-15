@@ -20,7 +20,7 @@ public static class SaucenaoApi
 {
     public static async ValueTask<MessageBody> SearchByUrl(string apiKey, string url, long selfId)
     {
-        Log.Debug("pic", "send api request"); 
+        Log.Debug("pic search", "send api request"); 
         JToken res;
         try
         {
@@ -60,7 +60,9 @@ public static class SaucenaoApi
             return "处理用户配置发生错误\r\nMessage:无法读取用户配置";
         }
 
-        switch (Convert.ToInt32(parsedPic["header"]?["index_id"]))
+        int databaseId = Convert.ToInt32(parsedPic["header"]?["index_id"]);
+        Log.Debug("pic search", $"get pic type:{databaseId}");
+        switch (databaseId)
         {
             //pixiv
             case 5:
@@ -106,6 +108,7 @@ public static class SaucenaoApi
                 if (source.IndexOf("twitter", StringComparison.Ordinal) != -1)
                     return GenTwitterResult(source, userConfig.TwitterApiToken, parsedPic);
 
+                Log.Debug("pic search", $"get unknown source:{source}");
                 string b64Pic =
                     MediaUtil.DrawTextImage(parsedPic["data"]?.ToString(Formatting.Indented) ?? string.Empty,
                                             Color.Black, Color.White);
@@ -142,21 +145,29 @@ public static class SaucenaoApi
 
     private static MessageBody GenPixivResult(string url, long pid, JToken apiRet)
     {
-        MessageBody msg = new MessageBody();
-        StringBuilder sb = new StringBuilder();
-        sb.AppendLine("[Saucenao-Pixiv]");
-        sb.AppendLine($"图片名:{apiRet["data"]?["title"]}");
-        sb.AppendLine($"作者:{apiRet["data"]?["member_name"]}");
-        msg.Add(sb.ToString());
+        (int statusCode, bool r18, int count) = MediaUtil.GetPixivImgInfo(pid, out JToken json);
+        if (statusCode != 200) return $"[网络错误{statusCode}]";
+        MessageBody   msg = new();
+        StringBuilder sb  = new();
 
-        (int statusCode, bool r18, _) = MediaUtil.GetPixivImgInfo(pid);
-        if (statusCode != 0) msg.Add($"[网络错误{statusCode}]");
-        else if(r18) msg.Add("[H是不行的]");
+        sb.AppendLine("[Saucenao-Pixiv]");
+        sb.AppendLine($"图片名:{json["body"]?["title"]}");
+        sb.Append($"作者:{json["body"]?["userName"]}");
+        msg.Add(sb.ToString());
+        sb.Clear();
+
+        if (r18) msg.Add($"[H是不行的]{Environment.NewLine}");
         else msg.Add(SoraSegment.Image(url));
 
-        sb.Clear();
         sb.AppendLine($"Pixiv Id:{pid}");
-        sb.AppendLine($"[{apiRet["header"]?["similarity"]}%]");
+        sb.Append($"[{apiRet["header"]?["similarity"]}%]");
+        if (count != 1)
+        {
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine("有多张图片，使用下面的指令查看合集图片");
+            sb.Append($"[让我康康{pid}]");
+        }
         msg.Add(sb.ToString());
 
         return msg;

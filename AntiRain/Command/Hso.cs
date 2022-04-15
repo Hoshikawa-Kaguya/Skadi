@@ -16,7 +16,6 @@ using PyLibSharp.Requests;
 using Sora.Attributes.Command;
 using Sora.Entities;
 using Sora.Entities.Segment;
-using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.LightLog;
@@ -54,6 +53,7 @@ public class HsoCommand
             return;
         }
 
+        Log.Info("HSO", $"[{eventArgs.Sender.Id}]加载色图");
         //刷新数据库计数
         var hsoDbHelper = new HsoDbHelper(eventArgs.LoginUid);
         if (!hsoDbHelper.AddOrUpdate(eventArgs.Sender, eventArgs.SourceGroup))
@@ -121,7 +121,9 @@ public class HsoCommand
     public async void HsoPicIndexSearchFirst(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        await SendPixivImageMessage(eventArgs);
+        long pid = Convert.ToInt64(eventArgs.Message.RawText[4..]);
+        Log.Info("让我康康", $"[{eventArgs.Sender.Id}]加载图片:{pid}");
+        await eventArgs.SendPixivImageMessage(pid, -1);
     }
 
     [UsedImplicitly]
@@ -132,7 +134,12 @@ public class HsoCommand
     public async void HsoPicIndexSearch(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        await SendPixivImageMessage(eventArgs);
+        var picInfos = eventArgs.Message.RawText.Split(' ');
+        await eventArgs.Reply("什么，有好康的");
+        long pid   = Convert.ToInt64(picInfos[0][4..]);
+        int  index = Convert.ToInt32(picInfos[1]);
+        Log.Info("让我康康", $"加载图片:{pid}-{index}");
+        await eventArgs.SendPixivImageMessage(pid, index);
     }
 
     [UsedImplicitly]
@@ -182,6 +189,7 @@ public class HsoCommand
         var picInfos = eventArgs.Message.RawText.Split(' ');
         var picId    = picInfos[0][2..];
         var picIndex = picInfos[1];
+        Log.Info("cloud database", $"[{eventArgs.Sender.Id}]正在添加图片:{picId}-{picIndex}");
         await eventArgs.Reply($"Adding[{picId}]...");
         //读取用户配置
         if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var userConfig))
@@ -259,67 +267,6 @@ public class HsoCommand
     #endregion
 
     #region 私有方法
-
-    private static async Task SendPixivImageMessage(GroupMessageEventArgs eventArgs)
-    {
-        var picInfos = eventArgs.Message.RawText.Split(' ');
-        await eventArgs.Reply("什么，有好康的");
-        string pid        = picInfos[0][4..];
-        string index      = picInfos.Length > 1 ? picInfos[1] : string.Empty;
-
-        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var userConfig))
-        {
-            Log.Error("Config|Hso", "无法获取用户配置文件");
-            await eventArgs.Reply("ERR:无法获取用户配置文件");
-        }
-
-        //处理图片代理连接
-        string imageUrl;
-        if (!string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
-        {
-            imageUrl = $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{pid}";
-            Log.Debug("Hso", $"Get proxy url {imageUrl}");
-        }
-        else
-        {
-            imageUrl = $"https://pixiv.lancercmd.cc/{pid}";
-            Log.Warning("Hso", "未找到代理服务器已使用默认代理:https://pixiv.lancercmd.cc/");
-        }
-
-        (int statusCode, bool r18, int count) = MediaUtil.GetPixivImgInfo(Convert.ToInt64(pid));
-
-        if (statusCode != 200)
-        {
-            await eventArgs.Reply($"哇哦，发生了网络错误[{statusCode}]");
-        }
-
-        if (r18)
-        {
-            await eventArgs.Reply("H是不行的！冲了这么多，休息一下吧");
-        }
-
-        // ApiStatus apiStatus;
-
-        if (string.IsNullOrEmpty(index) && count > 1)
-        { 
-            var customNodes = new List<CustomNode>();
-            for (int i = 0; i < count; i++)
-            {
-                customNodes.Add(new CustomNode("色色", 114514, SoraSegment.Image($"{imageUrl}/{i}")));
-            }
-
-            // apiStatus = 
-            await eventArgs.SourceGroup.SendGroupForwardMsg(customNodes);
-        }
-        else
-        {
-            // (apiStatus, _) = 
-            await eventArgs.Reply(SoraSegment.Image(imageUrl), TimeSpan.FromMinutes(2));
-        }
-
-        // if (apiStatus.RetCode != ApiStatusType.Ok)
-        //     await eventArgs.Reply("逊欸，图都被删了");
-    }
 
     /// <summary>
     /// 获取随机图片信息
