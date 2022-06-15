@@ -5,7 +5,6 @@ using AntiRain.Config;
 using JetBrains.Annotations;
 using Sora.Attributes.Command;
 using Sora.Entities.Segment;
-using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.LightLog;
@@ -18,9 +17,9 @@ public class GroupWife
     private readonly List<long> _waitingList = new();
 
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {"抽老婆"})]
+    // [SoraCommand(
+    //     SourceType = SourceFlag.Group,
+    //     CommandExpressions = new[] {"抽老婆"})]
     public async ValueTask RollWife(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;

@@ -38,6 +38,7 @@ public static class Cheru
         MatchType = MatchType.Regex)]
     public static async void CheruToString(GroupMessageEventArgs eventArgs)
     {
+        eventArgs.IsContinueEventChain = false;
         if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config))
         {
             Log.Error("Config|Cheru", "无法获取用户配置文件");
@@ -66,6 +67,7 @@ public static class Cheru
         MatchType = MatchType.Regex)]
     public static async void StringToCheru(GroupMessageEventArgs eventArgs)
     {
+        eventArgs.IsContinueEventChain = false;
         if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config))
         {
             Log.Error("Config|Cheru", "无法获取用户配置文件");

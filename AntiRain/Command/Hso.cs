@@ -24,7 +24,7 @@ using MatchType = Sora.Enumeration.MatchType;
 
 namespace AntiRain.Command;
 
-[CommandGroup]
+[CommandGroup(GroupName = "hso")]
 public class HsoCommand
 {
     #region 指令响应
@@ -118,11 +118,12 @@ public class HsoCommand
         SourceType = SourceFlag.Group,
         CommandExpressions = new[] {@"^让我康康[0-9]+$"},
         MatchType = MatchType.Regex)]
-    public async void HsoPicIndexSearchFirst(GroupMessageEventArgs eventArgs)
+    public async void HsoPicIndexSearchAll(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         long pid = Convert.ToInt64(eventArgs.Message.RawText[4..]);
         Log.Info("让我康康", $"[{eventArgs.Sender.Id}]加载图片:{pid}");
+        await eventArgs.Reply("什么，有好康的");
         await eventArgs.SendPixivImageMessage(pid, -1);
     }
 
@@ -134,11 +135,11 @@ public class HsoCommand
     public async void HsoPicIndexSearch(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        var picInfos = eventArgs.Message.RawText.Split(' ');
-        await eventArgs.Reply("什么，有好康的");
-        long pid   = Convert.ToInt64(picInfos[0][4..]);
-        int  index = Convert.ToInt32(picInfos[1]);
+        var  picInfos = eventArgs.Message.RawText.Split(' ');
+        long pid      = Convert.ToInt64(picInfos[0][4..]);
+        int  index    = Convert.ToInt32(picInfos[1]);
         Log.Info("让我康康", $"加载图片:{pid}-{index}");
+        await eventArgs.Reply("什么，有好康的");
         await eventArgs.SendPixivImageMessage(pid, index);
     }
 
@@ -377,7 +378,7 @@ public class HsoCommand
         {
             cardImg
                 ? SoraSegment.CardImage(picStr)
-                : SoraSegment.Image(picStr),
+                : SoraSegment.Image(picStr, true, 4),
             textBuilder.ToString()
         };
         return msg;

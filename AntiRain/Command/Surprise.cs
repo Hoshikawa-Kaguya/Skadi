@@ -25,6 +25,7 @@ public class Surprise
         CommandExpressions = new[] {"dice"})]
     public async ValueTask RandomNumber(GroupMessageEventArgs eventArgs)
     {
+        eventArgs.IsContinueEventChain = false;
         if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig config) &&
             !config.ModuleSwitch.HaveFun) return;
         await eventArgs.SourceGroup.SendGroupMessage(
@@ -39,6 +40,7 @@ public class Surprise
         CommandExpressions = new[] {"优质睡眠", "昏睡红茶", "昏睡套餐", "健康睡眠"})]
     public async ValueTask RedTea(GroupMessageEventArgs eventArgs)
     {
+        eventArgs.IsContinueEventChain = false;
         if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig config) &&
             !config.ModuleSwitch.HaveFun) return;
         await eventArgs.SourceGroup.EnableGroupMemberMute(eventArgs.Sender.Id,
@@ -51,6 +53,7 @@ public class Surprise
         CommandExpressions = new[] {@"^选择.+还是.+$"})]
     public async ValueTask Choice(GroupMessageEventArgs eventArgs)
     {
+        eventArgs.IsContinueEventChain = false;
         Guid id = eventArgs.Message.MessageBody
                            .Where(m => m.Data is TextSegment t &&
                                 t.Content.IndexOf("还是", StringComparison.Ordinal) != -1)

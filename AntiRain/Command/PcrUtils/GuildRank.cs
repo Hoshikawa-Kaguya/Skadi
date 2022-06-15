@@ -31,6 +31,7 @@ public static class GuildRank
         MatchType = MatchType.Regex)]
     public static async ValueTask KyoukaRank(GroupMessageEventArgs eventArgs)
     {
+        eventArgs.IsContinueEventChain = false;
         if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config) &&
             !config.ModuleSwitch.PcrGuildRank) return;
         //网络响应

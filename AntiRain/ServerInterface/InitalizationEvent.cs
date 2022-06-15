@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using AntiRain.Config;
 using AntiRain.DatabaseUtils;
+using AntiRain.IO;
 using AntiRain.TimerEvent;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.LightLog;
@@ -39,6 +40,10 @@ internal static class InitalizationEvent
 
         //初始化数据库
         DatabaseInit.UserDataInit(connectEvent);
+
+        //初始化QA
+        StaticVar.QaConfigFile = new QAConfigFile(connectEvent.LoginUid);
+        StaticVar.ServiceReady.Set();
 
         //初始化定时器线程
         if (userConfig.ModuleSwitch.BiliSubscription) SubscriptionTimer.TimerEventAdd(connectEvent);

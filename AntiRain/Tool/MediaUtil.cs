@@ -48,6 +48,7 @@ internal static class MediaUtil
         {
             Log.Error("Config|Hso", "无法获取用户配置文件");
             await eventArgs.Reply("ERR:无法获取用户配置文件");
+            return;
         }
 
         //处理图片代理连接
@@ -63,26 +64,30 @@ internal static class MediaUtil
             Log.Warning("Hso", "未找到代理服务器已使用默认代理:https://pixiv.lancercmd.cc/");
         }
 
-        (int statusCode, bool r18, int count) = MediaUtil.GetPixivImgInfo(Convert.ToInt64(pid), out _);
+        (int statusCode, bool r18, int count) = GetPixivImgInfo(Convert.ToInt64(pid), out _);
 
         if (statusCode != 200)
         {
             await eventArgs.Reply($"哇哦，发生了网络错误[{statusCode}]");
+            return;
         }
 
         if (r18)
         {
             await eventArgs.Reply("H是不行的！冲了这么多，休息一下吧");
+            return;
         }
 
         // ApiStatus apiStatus;
 
-        if (index > -1 && count > 1)
+        if (index == -1 && count > 1)
         {
             var customNodes = new List<CustomNode>();
             for (int i = 0; i < count; i++)
             {
-                customNodes.Add(new CustomNode("色色", 114514, SoraSegment.Image($"{imageUrl}/{i}")));
+                customNodes.Add(new CustomNode("色色",
+                    114514,
+                    SoraSegment.Image($"{imageUrl}/{i}", true, 4)));
             }
 
             // apiStatus = 
@@ -90,13 +95,13 @@ internal static class MediaUtil
         }
         else
         {
-            if (index != 0 && count <= 1 || index > count - 1)
+            if (index > 0 && count <= 1 || index > count - 1)
             {
                 await eventArgs.Reply("没有这张色图欸(404)");
                 return;
             }
             // (apiStatus, _) = 
-            await eventArgs.Reply(SoraSegment.Image(imageUrl), TimeSpan.FromMinutes(2));
+            await eventArgs.Reply(SoraSegment.Image(imageUrl, true, 4), TimeSpan.FromMinutes(2));
         }
 
         // if (apiStatus.RetCode != ApiStatusType.Ok)

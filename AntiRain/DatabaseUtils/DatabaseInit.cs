@@ -20,7 +20,7 @@ namespace AntiRain.DatabaseUtils
             var dbPath = SugarUtils.GetDbPath(eventArgs.LoginUid.ToString());
             Log.Debug("IO", $"获取用户数据路径{dbPath}");
             //检查文件是否存在
-            IoUtils.CheckFileExists(dbPath);
+            IoUtils.CheckDbFileExists(dbPath);
             //创建数据库链接
             SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(dbPath);
 

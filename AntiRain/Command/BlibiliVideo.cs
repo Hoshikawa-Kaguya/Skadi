@@ -1,6 +1,9 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using AntiRain.Tool;
 using BilibiliApi.Video;
@@ -23,6 +26,20 @@ namespace AntiRain.Command;
 [CommandGroup]
 public static class BlibiliVideo
 {
+    public static HashSet<string> cmdRecord = new();
+
+    /// <summary>
+    /// 计时器
+    /// </summary>
+    [UsedImplicitly]
+    private static readonly Timer _subTimer = new(
+        CleanUpEvent,               //事件处理
+        null,                       //初始化数据
+        new TimeSpan(0, 0, 0, 120),
+        new TimeSpan(0, 0, 0, 120));
+
+    #region 指令
+
     [UsedImplicitly]
     [SoraCommand(
         SourceType = SourceFlag.Group,
@@ -30,7 +47,20 @@ public static class BlibiliVideo
         MatchType = MatchType.Regex)]
     public static async ValueTask BiliVideoGet(GroupMessageEventArgs eventArgs)
     {
-        await VideoInfoId(eventArgs);
+        eventArgs.IsContinueEventChain = false;
+        //检查近期匹配
+        if (cmdRecord.Contains(eventArgs.Message.RawText)) return;
+        cmdRecord.Add(eventArgs.Message.RawText);
+
+        VideoInfo videoInfo = VideoApis.GetVideoInfo(eventArgs.Message.RawText);
+        if (videoInfo.Code != 0)
+        {
+            await eventArgs.Reply($"API发生错误({videoInfo.Code})\r\nmessage:{videoInfo.Message}");
+            return;
+        }
+
+        //发送视频信息
+        await eventArgs.Reply(GenReplyMessage(videoInfo));
     }
 
     [UsedImplicitly]
@@ -41,16 +71,19 @@ public static class BlibiliVideo
         Priority = 0)]
     public static async ValueTask VideoInfoByShortUrl(GroupMessageEventArgs eventArgs)
     {
+        eventArgs.IsContinueEventChain = false;
         //获取短链
-        var    urlRegex    = new Regex(@"https://b23\.tv/[a-zA-Z0-9]+");
+        Regex  urlRegex    = new Regex(@"https://b23\.tv/[a-zA-Z0-9]+");
         string videoUrlStr = urlRegex.Match(eventArgs.Message.RawText).Value;
-        if (string.IsNullOrEmpty(videoUrlStr)) return;
+        //检查空字符或近期匹配过
+        if (string.IsNullOrEmpty(videoUrlStr) || cmdRecord.Contains(videoUrlStr)) return;
+        cmdRecord.Add(videoUrlStr);
         //网络请求获取跳转地址
-        var                 handler  = new HttpClientHandler {AllowAutoRedirect = false};
-        var                 client   = new HttpClient(handler);
+        HttpClientHandler   handler  = new HttpClientHandler {AllowAutoRedirect = false};
+        HttpClient          client   = new HttpClient(handler);
         HttpResponseMessage response = await client.GetAsync(videoUrlStr);
         //解析id
-        var    idRegex    = new Regex(@"(?:BV|bv|AV|av)[a-zA-Z0-9]+");
+        Regex  idRegex    = new Regex(@"(?:BV|bv|AV|av)[a-zA-Z0-9]+");
         string videoIdStr = idRegex.Match(response.Headers.Location?.ToString() ?? string.Empty).Value;
         if (string.IsNullOrEmpty(videoIdStr))
         {
@@ -73,18 +106,7 @@ public static class BlibiliVideo
         await eventArgs.Reply(GenReplyMessage(videoInfo));
     }
 
-    private static async ValueTask VideoInfoId(GroupMessageEventArgs eventArgs)
-    {
-        VideoInfo videoInfo = VideoApis.GetVideoInfo(eventArgs.Message.RawText);
-        if (videoInfo.Code != 0)
-        {
-            await eventArgs.Reply($"API发生错误({videoInfo.Code})\r\nmessage:{videoInfo.Message}");
-            return;
-        }
-
-        //发送视频信息
-        await eventArgs.Reply(GenReplyMessage(videoInfo));
-    }
+    #endregion
 
     private static MessageBody GenReplyMessage(VideoInfo info)
     {
@@ -107,5 +129,10 @@ public static class BlibiliVideo
         };
 
         return sendMessage;
+    }
+
+    private static void CleanUpEvent(object obj)
+    {
+        cmdRecord.Clear();
     }
 }

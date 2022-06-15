@@ -61,15 +61,15 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="BeetleX.FastHttpApi" Version="2.2.10.1802" />
+        <PackageReference Include="BeetleX.FastHttpApi" Version="2.2.18.1803" />
         <PackageReference Include="BilibiliApi" Version="0.3.11" />
-        <PackageReference Include="JetBrains.Annotations" Version="2021.3.0" />
+        <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
         <PackageReference Include="PyLibSharp.Requests" Version="1.2.10" />
-        <PackageReference Include="SharpYaml" Version="1.9.0" />
-        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.0" />
+        <PackageReference Include="SharpYaml" Version="1.9.1" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.2" />
         <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14" />
-        <PackageReference Include="Sora" Version="1.0.0-rc.49" />
-        <PackageReference Include="sqlSugarCore" Version="5.0.7" />
+        <PackageReference Include="Sora" Version="1.0.0-rc.62" />
+        <PackageReference Include="sqlSugarCore" Version="5.0.9" />
         <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
     </ItemGroup>
 

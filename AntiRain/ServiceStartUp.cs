@@ -62,6 +62,8 @@ internal static class ServiceStartUp
             ThrowCommandException = false
         });
 
+        StaticVar.SoraCommandManager = server.Event.CommandManager;
+
         //服务器回调
         //初始化
         server.Event.OnClientConnect += InitalizationEvent.Initalization;
@@ -75,6 +77,7 @@ internal static class ServiceStartUp
 
         //启动服务器
         await server.StartService().RunCatch(BotUtil.BotCrash);
+        StaticVar.StartTime = DateTime.Now;
         await Task.Delay(-1);
     }
 }

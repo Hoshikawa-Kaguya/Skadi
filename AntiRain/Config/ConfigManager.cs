@@ -17,6 +17,8 @@ namespace AntiRain.Config
         private static readonly Dictionary<long, UserConfig> _userConfigs  = new();
         private static          GlobalConfig                 _globalConfig = new();
 
+        private const string CONFIG_FILE = "config.yaml";
+
         #endregion
 
         #region 公有方法
@@ -29,7 +31,7 @@ namespace AntiRain.Config
         {
             try
             {
-                var userConfigPath = IoUtils.GetUserConfigPath(uid);
+                var userConfigPath = IoUtils.GetUserConfigPath(uid, CONFIG_FILE);
                 //当读取到文件时直接返回
                 if (File.Exists(userConfigPath) && LoadUserConfig(out var ret, userConfigPath))
                 {
