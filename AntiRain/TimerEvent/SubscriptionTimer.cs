@@ -87,10 +87,8 @@ namespace AntiRain.TimerEvent
         /// </summary>
         private static void SubscriptionEvent(object obj)
         {
-            Log.Info("Sub", "订阅事件刷新");
             foreach (var eventArg in _subDictionary)
             {
-                Log.Info("Sub", $"更新[{eventArg.LoginUid}]的订阅");
                 SubscriptionUpdate.BiliUpdateCheck(eventArg);
             }
         }

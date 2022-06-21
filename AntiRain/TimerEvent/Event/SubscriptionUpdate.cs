@@ -76,6 +76,7 @@ namespace AntiRain.TimerEvent.Event
                                                           .Where(gid => dbHelper.GetLastLiveStatus(gid, biliUser) !=
                                                                         live.LiveStatus)
                                                           .ToDictionary(gid => gid, _ => live.LiveStatus);
+
             //更新数据库
             foreach (var status in updateDict)
             {
@@ -88,6 +89,8 @@ namespace AntiRain.TimerEvent.Event
                                         .Select(group => group.Key)
                                         .ToList();
             if (targetGroup.Count == 0) return;
+
+            Log.Info("Sub", $"更新[{soraApi.GetLoginUserId()}]的Live订阅");
             //构建提示消息
             var message = $"{biliUserInfo.Name} 正在直播！\r\n{biliUserInfo.LiveRoomInfo.Title}" +
                           SoraSegment.Image(biliUserInfo.LiveRoomInfo.CoverUrl)             +
@@ -168,6 +171,8 @@ namespace AntiRain.TimerEvent.Event
                 Log.Debug("动态获取", $"{sender.UserName}的动态已是最新");
                 return;
             }
+
+            Log.Info("Sub", $"更新[{soraApi.GetLoginUserId()}]的动态订阅");
 
             //构建消息
             var message = new MessageBody();
