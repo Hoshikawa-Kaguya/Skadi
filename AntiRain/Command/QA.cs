@@ -182,7 +182,7 @@ public class QA
     public void RegisterNewQaCommand(MessageBody qMsg, MessageBody aMsg, long group)
     {
         Guid cmdId = StaticVar.SoraCommandManager.RegisterGroupDynamicCommand(
-            args => MessageMatch(args.Message.MessageBody, qMsg),
+            args => MessageMatch(qMsg, args.Message.MessageBody),
             async e => await e.Reply(aMsg),
             "qa_global", null, MemberRoleType.Member, false, 0, new[] { group });
 
@@ -191,6 +191,7 @@ public class QA
 
     public static bool MessageCheck(MessageBody message)
     {
+        if (message is null) return false;
         bool check = true;
         foreach (SoraSegment segment in message)
         {
@@ -205,14 +206,16 @@ public class QA
 
     public static bool MessageMatch(MessageBody srcMsg, MessageBody rxMsg)
     {
-        if (!MessageCheck(srcMsg) || srcMsg.Count != rxMsg.Count) return false;
+        if (rxMsg is null) return false;
+        if (!MessageCheck(rxMsg) || srcMsg.Count != rxMsg.Count) return false;
 
         for (int i = 0; i < srcMsg.Count; i++)
         {
             switch (srcMsg[i].MessageType)
             {
                 case SegmentType.Text:
-                    if ((srcMsg[i].Data as TextSegment)!.Content != (rxMsg[i].Data as TextSegment)?.Content) return false;
+                    if ((srcMsg[i].Data as TextSegment)!.Content !=
+                        ((rxMsg[i].Data as TextSegment)?.Content ?? string.Empty)) return false;
                     break;
                 case SegmentType.Image:
                     if ((srcMsg[i].Data as ImageSegment)!.ImgFile != (rxMsg[i].Data as ImageSegment)?.ImgFile) return false;
@@ -221,7 +224,7 @@ public class QA
                     if ((srcMsg[i].Data as AtSegment)!.Target != (rxMsg[i].Data as AtSegment)?.Target) return false;
                     break;
                 case SegmentType.Face:
-                    if ((srcMsg[i].Data as FaceSegment)!.Id != (rxMsg[i].Data as FaceSegment)!.Id) return false;
+                    if ((srcMsg[i].Data as FaceSegment)!.Id != (rxMsg[i].Data as FaceSegment)?.Id) return false;
                     break;
             }
         }
