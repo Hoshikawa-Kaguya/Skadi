@@ -44,7 +44,7 @@ internal class QAConfigFile
     public void DeleteQA(MessageBody qMsg)
     {
         var qaData = ReadFile();
-        qaData.RemoveAll(qa => QA.MessageMatch(qMsg, qa.qMsg));
+        qaData.RemoveAll(qa => QA.MessageEqual(qMsg, qa.qMsg));
         UpdateFile(qaData);
     }
 
@@ -79,9 +79,7 @@ internal class QAConfigFile
         List<(string qMsg, string aMsg, long groupId)> temp = new();
 
         foreach (QaData qaData in data)
-        {
             temp.Add((qaData.qMsg.SerializeMessage(), qaData.aMsg.SerializeMessage(), qaData.GroupId));
-        }
 
         JToken json = JToken.FromObject(temp);
         File.WriteAllText(QAConfigPath, json.ToString(Formatting.None));
