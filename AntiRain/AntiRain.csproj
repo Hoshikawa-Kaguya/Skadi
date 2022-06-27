@@ -68,7 +68,7 @@
         <PackageReference Include="SharpYaml" Version="1.9.1" />
         <PackageReference Include="SixLabors.ImageSharp" Version="2.1.2" />
         <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14" />
-        <PackageReference Include="Sora" Version="1.0.0-rc.62" />
+        <PackageReference Include="Sora" Version="1.0.0-rc.63" />
         <PackageReference Include="sqlSugarCore" Version="5.0.9" />
         <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
     </ItemGroup>

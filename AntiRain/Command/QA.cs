@@ -91,7 +91,7 @@ public class QA
             fMessage.Add(srcBSegment.Content[..^2]);
         }
 
-        if (_commandGuids.Any(s => MessageMatch(s.msg, fMessage)))
+        if (_commandGuids.Any(s => MessageEqual(s.msg, fMessage)))
         {
             await eventArgs.Reply("已经有相同的问题了！");
             return;
@@ -118,6 +118,11 @@ public class QA
             }
         }
 
+        if (MessageEqual(fMessage, bMessage))
+        {
+            await eventArgs.Reply("不可以复读,爪巴");
+            return;
+        }
         //处理问题
         RegisterNewQaCommand(fMessage, bMessage, eventArgs.SourceGroup);
         StaticVar.QaConfigFile.AddNewQA(new QAConfigFile.QaData
@@ -132,7 +137,7 @@ public class QA
     [UsedImplicitly]
     [SoraCommand(
         SourceType = SourceFlag.Group,
-        CommandExpressions = new[] { @"^删除有人问[\s\S]+$" },
+        CommandExpressions = new[] { @"^不再回答[\s\S]+$" },
         MatchType = MatchType.Regex,
         PermissionLevel = MemberRoleType.Admin)]
     public async ValueTask DeleteGlobalQuestion(GroupMessageEventArgs eventArgs)
@@ -147,7 +152,7 @@ public class QA
         else
             question[0] = qFrontStr;
 
-        (MessageBody qMsg, Guid cmdId) = _commandGuids.SingleOrDefault(s => MessageMatch(s.msg, question));
+        (MessageBody qMsg, Guid cmdId) = _commandGuids.SingleOrDefault(s => MessageEqual(s.msg, question));
         if (qMsg is null || cmdId == Guid.Empty)
         {
             await eventArgs.Reply("没有这样的问题");
@@ -156,7 +161,7 @@ public class QA
         {
             StaticVar.SoraCommandManager.DeleteDynamicCommand(cmdId);
             StaticVar.QaConfigFile.DeleteQA(qMsg);
-            _commandGuids.RemoveAll(s => MessageMatch(s.msg, question));
+            _commandGuids.RemoveAll(s => MessageEqual(s.msg, question));
             await eventArgs.Reply("我不再回答" + qMsg + "了");
         }
     }
@@ -182,7 +187,7 @@ public class QA
     public void RegisterNewQaCommand(MessageBody qMsg, MessageBody aMsg, long group)
     {
         Guid cmdId = StaticVar.SoraCommandManager.RegisterGroupDynamicCommand(
-            args => MessageMatch(args.Message.MessageBody, qMsg),
+            args => MessageEqual(args.Message.MessageBody, qMsg),
             async e => await e.Reply(aMsg),
             "qa_global", null, MemberRoleType.Member, false, 0, new[] { group });
 
@@ -203,7 +208,7 @@ public class QA
         return check;
     }
 
-    public static bool MessageMatch(MessageBody srcMsg, MessageBody rxMsg)
+    public static bool MessageEqual(MessageBody srcMsg, MessageBody rxMsg)
     {
         if (!MessageCheck(srcMsg) || srcMsg.Count != rxMsg.Count) return false;
 
