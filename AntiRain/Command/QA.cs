@@ -29,15 +29,12 @@ public class QA
             Log.Info("QA", "QA初始化");
             List<QAConfigFile.QaData> qaMsg =
                 StaticVar.QaConfigFile.GetAllQA();
-            foreach (QAConfigFile.QaData data in qaMsg)
-            {
-                RegisterNewQaCommand(data.qMsg, data.aMsg, data.GroupId);
-            }
+            foreach (QAConfigFile.QaData data in qaMsg) RegisterNewQaCommand(data.qMsg, data.aMsg, data.GroupId);
             Log.Info("QA", $"加载了{qaMsg.Count}条QA");
         });
     }
 
-    private readonly List<(MessageBody msg, Guid id)> _commandGuids = new();
+    private readonly List<(MessageBody msg, Guid id, long gid)> _commandGuids = new();
 
     [UsedImplicitly]
     [SoraCommand(
@@ -47,11 +44,11 @@ public class QA
         PermissionLevel = MemberRoleType.Admin)]
     public async ValueTask GetGlobalQuestion(GroupMessageEventArgs eventArgs)
     {
-        if(!MessageCheck(eventArgs.Message.MessageBody)) return;
+        if (!MessageCheck(eventArgs.Message.MessageBody)) return;
         //查找分割点
         Guid backSegmentId = eventArgs.Message.MessageBody
                                       .Where(s => s.Data is TextSegment t &&
-                                           t.Content.IndexOf("你答", StringComparison.Ordinal) != -1)
+                                                  t.Content.IndexOf("你答", StringComparison.Ordinal) != -1)
                                       .Select(s => s.Id)
                                       .FirstOrDefault();
         if (backSegmentId == Guid.Empty) return;
@@ -73,8 +70,8 @@ public class QA
         {
             int qEndIndex = srcFSegment.Content.IndexOf("你答", StringComparison.Ordinal);
             string msg = qEndIndex != -1
-                ? srcFSegment.Content.Substring(3, qEndIndex - 3).Trim()
-                : srcFSegment.Content[3..].Trim();
+                             ? srcFSegment.Content.Substring(3, qEndIndex - 3).Trim()
+                             : srcFSegment.Content[3..].Trim();
 
             if (!string.IsNullOrEmpty(msg))
             {
@@ -86,10 +83,9 @@ public class QA
                 fMessage.RemoveAt(0);
             }
         }
+
         if (!srcBSegment.Content.Equals("你答") && srcBSegment.Content.EndsWith("你答") && nextMsgIndex != 0)
-        {
             fMessage.Add(srcBSegment.Content[..^2]);
-        }
 
         if (_commandGuids.Any(s => MessageEqual(s.msg, fMessage)))
         {
@@ -123,12 +119,13 @@ public class QA
             await eventArgs.Reply("不可以复读,爪巴");
             return;
         }
+
         //处理问题
         RegisterNewQaCommand(fMessage, bMessage, eventArgs.SourceGroup);
         StaticVar.QaConfigFile.AddNewQA(new QAConfigFile.QaData
         {
-            qMsg = fMessage,
-            aMsg = bMessage,
+            qMsg    = fMessage,
+            aMsg    = bMessage,
             GroupId = eventArgs.SourceGroup
         });
         await eventArgs.Reply("我记住了！");
@@ -137,22 +134,23 @@ public class QA
     [UsedImplicitly]
     [SoraCommand(
         SourceType = SourceFlag.Group,
-        CommandExpressions = new[] { @"^不再回答[\s\S]+$" },
+        CommandExpressions = new[] {@"^不要回答[\s\S]+$"},
         MatchType = MatchType.Regex,
         PermissionLevel = MemberRoleType.Admin)]
     public async ValueTask DeleteGlobalQuestion(GroupMessageEventArgs eventArgs)
     {
         if (!MessageCheck(eventArgs.Message.MessageBody)) return;
         eventArgs.IsContinueEventChain = false;
-        
+
         MessageBody question  = eventArgs.Message.MessageBody;
-        string      qFrontStr = (question[0].Data as TextSegment)!.Content[5..].Trim();
+        string      qFrontStr = (question[0].Data as TextSegment)!.Content[4..].Trim();
         if (string.IsNullOrEmpty(qFrontStr))
             question.RemoveAt(0);
         else
             question[0] = qFrontStr;
 
-        (MessageBody qMsg, Guid cmdId) = _commandGuids.SingleOrDefault(s => MessageEqual(s.msg, question));
+        (MessageBody qMsg, Guid cmdId, _) =
+            _commandGuids.SingleOrDefault(s => MessageEqual(s.msg, question) && eventArgs.SourceGroup == s.gid);
         if (qMsg is null || cmdId == Guid.Empty)
         {
             await eventArgs.Reply("没有这样的问题");
@@ -169,17 +167,39 @@ public class QA
     [UsedImplicitly]
     [SoraCommand(
         SourceType = SourceFlag.Group,
-        CommandExpressions = new[] { @"^看看有人问$" },
+        CommandExpressions = new[] { @"^DEQA[\s\S]+$" },
+        MatchType = MatchType.Regex,
+        SuperUserCommand = true)]
+    public async ValueTask DeleteGlobalQuestionSu(GroupMessageEventArgs eventArgs)
+    {
+        await DeleteGlobalQuestion(eventArgs);
+    }
+
+    [UsedImplicitly]
+    [SoraCommand(
+        SourceType = SourceFlag.Group,
+        CommandExpressions = new[] {@"^看看有人问$"},
         MatchType = MatchType.Regex,
         PermissionLevel = MemberRoleType.Admin)]
     public async ValueTask GetAllQuestion(GroupMessageEventArgs eventArgs)
     {
         MessageBody questions = new MessageBody();
-        foreach ((MessageBody msg, _) in _commandGuids)
+        List<MessageBody> groupQuestion = _commandGuids.Where(c => c.gid == eventArgs.SourceGroup)
+                                                       .Select(c => c.msg)
+                                                       .ToList();
+
+        if (groupQuestion.Count == 0)
+        {
+            await eventArgs.Reply("别急，还没有任何问题");
+            return;
+        }
+
+        foreach (MessageBody msg in groupQuestion)
         {
             questions.AddRange(msg);
             questions.Add("|");
         }
+
         questions.RemoveAt(questions.Count - 1);
         await eventArgs.Reply(questions);
     }
@@ -189,9 +209,9 @@ public class QA
         Guid cmdId = StaticVar.SoraCommandManager.RegisterGroupDynamicCommand(
             args => MessageEqual(args.Message.MessageBody, qMsg),
             async e => await e.Reply(aMsg),
-            "qa_global", null, MemberRoleType.Member, false, 0, new[] { group });
+            "qa_global", null, MemberRoleType.Member, false, 0, new[] {group});
 
-        _commandGuids.Add((qMsg, cmdId));
+        _commandGuids.Add((qMsg, cmdId, group));
     }
 
     public static bool MessageCheck(MessageBody message)
@@ -199,13 +219,11 @@ public class QA
         if (message is null) return false;
         bool check = true;
         foreach (SoraSegment segment in message)
-        {
             check &=
                 segment.MessageType == SegmentType.Text ||
                 segment.MessageType == SegmentType.At   ||
                 segment.MessageType == SegmentType.Face ||
                 segment.MessageType == SegmentType.Image;
-        }
         return check;
     }
 
@@ -215,7 +233,6 @@ public class QA
         if (!MessageCheck(rxMsg) || srcMsg.Count != rxMsg.Count) return false;
 
         for (int i = 0; i < srcMsg.Count; i++)
-        {
             switch (srcMsg[i].MessageType)
             {
                 case SegmentType.Text:
@@ -223,7 +240,8 @@ public class QA
                         ((rxMsg[i].Data as TextSegment)?.Content ?? string.Empty)) return false;
                     break;
                 case SegmentType.Image:
-                    if ((srcMsg[i].Data as ImageSegment)!.ImgFile != (rxMsg[i].Data as ImageSegment)?.ImgFile) return false;
+                    if ((srcMsg[i].Data as ImageSegment)!.ImgFile != (rxMsg[i].Data as ImageSegment)?.ImgFile)
+                        return false;
                     break;
                 case SegmentType.At:
                     if ((srcMsg[i].Data as AtSegment)!.Target != (rxMsg[i].Data as AtSegment)?.Target) return false;
@@ -231,8 +249,9 @@ public class QA
                 case SegmentType.Face:
                     if ((srcMsg[i].Data as FaceSegment)!.Id != (rxMsg[i].Data as FaceSegment)?.Id) return false;
                     break;
+                default:
+                    return false;
             }
-        }
 
         return true;
     }

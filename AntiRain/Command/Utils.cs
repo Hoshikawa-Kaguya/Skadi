@@ -59,7 +59,7 @@ public static class Utils
             await eventArgs.Reply("diannaobaozhale");
             return;
         }
-        ulong msgCount = Convert.ToUInt64(data["MessageReceived"] ?? 0) + Convert.ToUInt64(data["MessageSent"] ?? 0);
+        ulong msgCount = Convert.ToUInt64(data["message_received"] ?? 0) + Convert.ToUInt64(data["message_sent"] ?? 0);
         StringBuilder msg = new StringBuilder();
         msg.AppendLine("Ciallo～(∠・ω< )⌒☆");
         msg.AppendLine($"m:{msgCount}");

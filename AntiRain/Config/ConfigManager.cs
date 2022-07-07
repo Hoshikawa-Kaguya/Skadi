@@ -156,6 +156,7 @@ namespace AntiRain.Config
                 var              serializer = new Serializer();
                 using TextReader reader     = File.OpenText(path);
                 userConfig = serializer.Deserialize<UserConfig>(reader);
+                if (userConfig is null) return false;
                 //参数合法性检查
                 if (userConfig.HsoConfig.SizeLimit >= 1) return true;
                 Log.Error("读取用户配置", "参数值超出合法范围，重新生成配置文件");
@@ -185,6 +186,7 @@ namespace AntiRain.Config
                 var              serializer = new Serializer();
                 using TextReader reader     = File.OpenText(path);
                 globalConfig = serializer.Deserialize<GlobalConfig>(reader);
+                if(globalConfig is null) return false;
                 //参数合法性检查
                 if ((int) globalConfig.LogLevel is < 0 or > 3 ||
                     globalConfig.HeartBeatTimeOut == 0        ||

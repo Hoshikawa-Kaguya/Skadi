@@ -66,7 +66,7 @@ internal static class ServiceStartUp
 
         //服务器回调
         //初始化
-        server.Event.OnClientConnect += InitalizationEvent.Initalization;
+        server.Event.OnClientConnect += InitializationEvent.Initialization;
         //私聊事件
         server.Event.OnPrivateMessage += PrivateMessageEvent.PrivateMessageParse;
         //群聊戳一戳

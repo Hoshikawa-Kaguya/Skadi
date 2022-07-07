@@ -15,8 +15,10 @@ using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using Sora.Entities;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
+using Sora.Enumeration.ApiType;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.LightLog;
 
@@ -78,7 +80,7 @@ internal static class MediaUtil
             return;
         }
 
-        // ApiStatus apiStatus;
+        ApiStatus apiStatus;
 
         if (index == -1 && count > 1)
         {
@@ -90,8 +92,8 @@ internal static class MediaUtil
                     SoraSegment.Image($"{imageUrl}/{i}", true, 4)));
             }
 
-            // apiStatus = 
-            await eventArgs.SourceGroup.SendGroupForwardMsg(customNodes);
+            (apiStatus, _) =
+                await eventArgs.SourceGroup.SendGroupForwardMsg(customNodes, TimeSpan.FromMinutes(2));
         }
         else
         {
@@ -100,12 +102,12 @@ internal static class MediaUtil
                 await eventArgs.Reply("没有这张色图欸(404)");
                 return;
             }
-            // (apiStatus, _) = 
+            (apiStatus, _) = 
             await eventArgs.Reply(SoraSegment.Image(imageUrl, true, 4), TimeSpan.FromMinutes(2));
         }
 
-        // if (apiStatus.RetCode != ApiStatusType.Ok)
-        //     await eventArgs.Reply("逊欸，图都被删了");
+        if (apiStatus.RetCode != ApiStatusType.Ok)
+            await eventArgs.Reply("图被夹了啊啊啊啊啊啊啊啊啊啊啊");
     }
 
     public static string GenPixivUrl(string proxy, long pid, int index = 0)

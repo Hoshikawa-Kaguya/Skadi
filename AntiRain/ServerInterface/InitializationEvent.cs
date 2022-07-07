@@ -13,12 +13,12 @@ namespace AntiRain.ServerInterface;
 /// <summary>
 /// 初始化事件
 /// </summary>
-internal static class InitalizationEvent
+internal static class InitializationEvent
 {
     /// <summary>
     /// 初始化处理
     /// </summary>
-    internal static ValueTask Initalization(string _, ConnectEventArgs connectEvent)
+    internal static ValueTask Initialization(string _, ConnectEventArgs connectEvent)
     {
         Log.Info("AntiRain初始化", "与onebot客户端连接成功，初始化资源...");
         //初始化配置文件
@@ -26,7 +26,7 @@ internal static class InitalizationEvent
         if (!ConfigManager.UserConfigFileInit(connectEvent.LoginUid) ||
             !ConfigManager.TryGetUserConfig(connectEvent.LoginUid, out var userConfig))
         {
-            Log.Fatal(new IOException("无法获取用户配置文件(Initalization)"), "AntiRain初始化", "用户配置文件初始化失败");
+            Log.Fatal(new IOException("无法获取用户配置文件(Initialization)"), "AntiRain初始化", "用户配置文件初始化失败");
             Environment.Exit(-1);
             return ValueTask.CompletedTask;
         }

@@ -46,7 +46,7 @@ public static class SaucenaoApi
         catch (Exception e)
         {
             Log.Error("NetError", Log.ErrorLogBuilder(e));
-            return $"服务器网络错误{e.Message}";
+            return $"服务器网络错误[{e.Message}]";
         }
 
         var resCode = Convert.ToInt32(res?["header"]?["status"] ?? -1);
@@ -74,7 +74,7 @@ public static class SaucenaoApi
         {
             //用户配置获取失败
             Log.Error("Config|SaucenaoApi", "无法获取用户配置文件");
-            return "处理用户配置发生错误{Environment.NewLine}Message:无法读取用户配置";
+            return $"处理用户配置发生错误{Environment.NewLine}Message:无法读取用户配置";
         }
 
         //优先pixiv
@@ -189,7 +189,7 @@ public static class SaucenaoApi
     private static MessageBody GenPixivResult(string image, long pid, JToken apiRet)
     {
         (int statusCode, bool r18, int count) = MediaUtil.GetPixivImgInfo(pid, out JToken json);
-        if (statusCode != 200) return $"[网络错误{statusCode}]";
+        if (statusCode is not 200 and not 404) return $"[网络错误{statusCode}]";
         MessageBody   msg = new();
         StringBuilder sb  = new();
 
@@ -200,7 +200,8 @@ public static class SaucenaoApi
         sb.Clear();
 
         if (r18) msg.Add($"{Environment.NewLine}[H是不行的]{Environment.NewLine}");
-        else msg.Add(SoraSegment.Image(image, true, 4));
+        else if (statusCode != 404) msg.Add(SoraSegment.Image(image, true, 4));
+        else msg.Add("哈哈，图被删了");
 
         sb.AppendLine($"Pixiv Id:{pid}");
         sb.Append($"[{apiRet["header"]?["similarity"]}%]");

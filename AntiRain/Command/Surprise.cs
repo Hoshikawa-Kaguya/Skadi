@@ -7,12 +7,10 @@ using AntiRain.Config;
 using AntiRain.Config.ConfigModule;
 using JetBrains.Annotations;
 using Sora.Attributes.Command;
-using Sora.Entities;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
-using YukariToolBox.LightLog;
 
 namespace AntiRain.Command;
 
@@ -53,7 +51,8 @@ public class Surprise
     [UsedImplicitly]
     [SoraCommand(
         SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"^选择.+(还是.+)+$"})]
+        CommandExpressions = new[] {@"^选择.+(还是.+)+$"},
+        MatchType = MatchType.Regex)]
     public async ValueTask Choice(GroupMessageEventArgs eventArgs)
     {
         if (eventArgs.Message.MessageBody.Count          != 1 &&
