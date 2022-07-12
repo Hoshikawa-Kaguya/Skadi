@@ -194,14 +194,14 @@ public static class SaucenaoApi
         StringBuilder sb  = new();
 
         sb.AppendLine("[Saucenao-Pixiv]");
-        sb.AppendLine($"图片名:{json["body"]?["title"]}");
-        sb.Append($"作者:{json["body"]?["userName"]}");
+        sb.AppendLine($"图片名:{json?["body"]?["title"] ?? string.Empty}");
+        sb.Append($"作者:{json?["body"]?["userName"] ?? string.Empty}");
         msg.Add(sb.ToString());
         sb.Clear();
 
         if (r18) msg.Add($"{Environment.NewLine}[H是不行的]{Environment.NewLine}");
         else if (statusCode != 404) msg.Add(SoraSegment.Image(image, true, 4));
-        else msg.Add("哈哈，图被删了");
+        else return "哈哈，图被删了(404 NOT FOUND)";
 
         sb.AppendLine($"Pixiv Id:{pid}");
         sb.Append($"[{apiRet["header"]?["similarity"]}%]");

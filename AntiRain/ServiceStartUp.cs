@@ -6,7 +6,10 @@ using AntiRain.Config;
 using AntiRain.ServerInterface;
 using AntiRain.TimerEvent;
 using AntiRain.Tool;
+using SixLabors.ImageSharp;
 using Sora;
+using Sora.Entities.Segment;
+using Sora.EventArgs.SoraEvent;
 using Sora.Net.Config;
 using Sora.Util;
 using YukariToolBox.LightLog;
@@ -59,7 +62,9 @@ internal static class ServiceStartUp
             ApiTimeOut               = TimeSpan.FromMilliseconds(globalConfig.OnebotApiTimeOut),
             SuperUsers               = globalConfig.SuperUsers,
             EnableSoraCommandManager = true,
-            ThrowCommandException = false
+            ThrowCommandException    = false,
+            SendCommandErrMsg        = false,
+            CommandExceptionHandle   = CommandError
         });
 
         StaticVar.SoraCommandManager = server.Event.CommandManager;
@@ -79,5 +84,20 @@ internal static class ServiceStartUp
         await server.StartService().RunCatch(BotUtil.BotCrash);
         StaticVar.StartTime = DateTime.Now;
         await Task.Delay(-1);
+    }
+
+    private static async void CommandError(Exception e, BaseMessageEventArgs eventArgs, string log)
+    {
+        string b64Pic =
+            MediaUtil.DrawTextImage(log, Color.Red, Color.Black);
+        switch (eventArgs)
+        {
+            case GroupMessageEventArgs g:
+                await g.Reply(SoraSegment.Image($"base64://{b64Pic}"));
+                break;
+            case PrivateMessageEventArgs p:
+                await p.Reply(SoraSegment.Image($"base64://{b64Pic}"));
+                break;
+        }
     }
 }
