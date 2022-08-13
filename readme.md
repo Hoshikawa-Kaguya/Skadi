@@ -1,40 +1,32 @@
-# Anti-Rain Bot
-> ### 下雨了，在平原之上
+# Skadi
+> ### 为斯卡蒂献上心脏！
 <div align="center">
-   	<img width="400" src="https://i.loli.net/2020/10/20/L9aH6eiA4EsgXDx.png" alt="DOG">
+   	<img width="400" src="https://user-images.githubusercontent.com/7535224/184509028-c6ef14aa-95dc-412f-989d-a2ac524bf277.jpg" alt="Skadi">
     </br>
     <font size="-6" color="#707070">
-        图片作者:Yime(图片版权归图片作者所有)
+        图片作者:[z喵](图片版权归图片作者所有)
 	</font></br>
-因为作者是个狗厨所以就用狗图了（叉腰</br>
+因为本repo的作者是个蒂厨所以就用蒂蒂图啦（叉腰</br>
 </div>
 
 
 -----
 
-本项目的名字来源于 [少女前线](https://gf-cn.sunborngame.com/) 的AR(Anti-Rain)小队名
+本项目的名字来源于 [明日方舟](https://ak.hypergryph.com/) 的角色 [斯卡蒂](https://zh.moegirl.org.cn/%E6%98%8E%E6%97%A5%E6%96%B9%E8%88%9F:%E6%96%AF%E5%8D%A1%E8%92%82)~~老婆！老婆！~~
 
-~~但是这个机器人的功能其实和[少女前线](https://gf-cn.sunborngame.com/)没啥关系~~
+~~但是这个机器人的功能其实和[明日方舟](https://ak.hypergryph.com/)没啥关系~~
 
-本项目仍处于开发阶段，文档还完全没写（
+但是 ~~这个人要开始发癫了~~ 蒂蒂！老婆！
 
 ## 简介
 
-Anti-Rain Bot是一个主要为辅助游玩公主连结/~~少女前线~~的群聊机器人   ~~当然还有一堆乱七八糟的功能~~
+没有什么好说的，蒂蒂就是我的老婆！
 
 ## 功能概览
 
-- 公会战管理
-- 公会战排名查询
-- B站动态订阅（包括PCR国服官方）
-- 来点色图！
-- 切噜语翻译
+这个bot写的很随意，什么功能都有（比如色色）
 
-## 进度
-
->  目前机器人只设计为国服服务，动态更新的功能一部分与日程表更新的功能重复，将不会支持日程表更新，除非之后会添加对外服的支持（摸了）
-
-在[看板](https://github.com/Yukari316/AntiRainBot/projects)中查看开发进度
+~~色色就是人类的第一生产力！~~
 
 ## 关于Issue
 
@@ -46,39 +38,13 @@ Anti-Rain Bot是一个主要为辅助游玩公主连结/~~少女前线~~的群�
 
 如需反馈bug请使用**Issue模版**进行反馈
 
-## 平台兼容性
-
->**注意**
->
->仅支持反向WebSocket通讯方式
->
->仅支持Array事件上报格式
-
-可以运行在支持[onebot](https://github.com/howmanybots/onebot)协议的平台下
-
-不需要任何运行环境
-
-使用单文件模式进行编译（其实还有些运行时库没法打包就是了）
-
-对Windows/Liunx/OSX平台都进行了支持（包括ARM架构）
-
-~~如果其他平台上有什么运行问题一定要提issue啊~~
-
-## 其他平台的考虑
-
-[Discord](https://discord.com/)和[Tomon](https://beta.tomon.co/)都有可能进行支持
-
-## 关于插件版本号
-
-`主版本号`.`副版本号`.`修改版本号`[-`dev`]
-
 ## 开源协议
 
 ![AGPL](https://img.shields.io/github/license/CBGan/SuiseiBot?style=for-the-badge)
 
 ## 声明
 
-- Anti-Rain Bot是完全免费且开放源代码的软件，仅供学习和娱乐用途使用，不会进行一切形式的收费
+- Skadi是完全免费且开放源代码的软件，仅供学习和娱乐用途使用，不会进行一切形式的收费
 - 如果对源代码进行的引用或修改并发布的版本请使用`AGPLv3`开源协议
 - 本插件不支持且不鼓励一切的商业用途
 
