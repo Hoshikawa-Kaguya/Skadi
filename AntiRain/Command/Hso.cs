@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using AntiRain.Command.ImageSearch;
 using AntiRain.Config;
 using AntiRain.Config.ConfigModule;
 using AntiRain.DatabaseUtils.Helpers;
@@ -125,6 +126,22 @@ public class HsoCommand
         Log.Info("让我康康", $"[{eventArgs.Sender.Id}]加载图片:{pid}");
         await eventArgs.Reply("什么，有好康的");
         await eventArgs.SendPixivImageMessage(pid, -1);
+    }
+
+    [UsedImplicitly]
+    [SoraCommand(
+        SourceType = SourceFlag.Group,
+        CommandExpressions = new[] { @"^看看推特[0-9]+$" },
+        MatchType = MatchType.Regex)]
+    public async void TweetPic(GroupMessageEventArgs eventArgs)
+    {
+        eventArgs.IsContinueEventChain = false;
+
+        await eventArgs.Reply("我超，色色");
+        string      tid = eventArgs.Message.RawText[4..];
+        MessageBody msg = SaucenaoApi.GenTwitterResult(tid);
+
+        await eventArgs.Reply(msg);
     }
 
     [UsedImplicitly]

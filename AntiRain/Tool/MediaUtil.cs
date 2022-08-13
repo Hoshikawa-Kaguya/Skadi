@@ -160,29 +160,20 @@ internal static class MediaUtil
     /// 获取推特推文信息
     /// </summary>
     /// <param name="tweetId">推文ID</param>
-    /// <param name="token">api key v2</param>
     internal static (bool success, string sender, string text, List<string> media)
-        GetTweet(string tweetId, string token)
+        GetTweet(string tweetId)
     {
         Log.Info("Twitter", $"Get tweet by id[{tweetId}]");
 
         JToken data;
         try
         {
-            var res = Requests.Get($"https://api.twitter.com/2/tweets/{tweetId}",
+            var res = Requests.Get($"https://pixiv.yukari.one/api/tweet/{tweetId}",
                 new ReqParams
                 {
-                    Params = new Dictionary<string, string>
-                    {
-                        {"expansions", "attachments.media_keys,author_id"},
-                        {"media.fields", "url"}
-                    },
-                    Header = new Dictionary<HttpRequestHeader, string>
-                    {
-                        {HttpRequestHeader.Authorization, $"Bearer {token}"}
-                    },
                     IsThrowErrorForStatusCode = false,
-                    IsThrowErrorForTimeout    = false
+                    IsThrowErrorForTimeout    = false,
+                    Timeout = 10000
                 });
 
             Log.Info("Twitter", $"Twitter api http code:{res.StatusCode}");

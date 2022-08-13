@@ -65,11 +65,11 @@
         <PackageReference Include="BilibiliApi" Version="0.3.11" />
         <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
         <PackageReference Include="PyLibSharp.Requests" Version="1.2.10" />
-        <PackageReference Include="SharpYaml" Version="2.0.0" />
+        <PackageReference Include="SharpYaml" Version="2.1.0" />
         <PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
-        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14" />
-        <PackageReference Include="Sora" Version="1.0.0-rc.69" />
-        <PackageReference Include="sqlSugarCore" Version="5.0.9.4" />
+        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta15" />
+        <PackageReference Include="Sora" Version="1.0.0-rc.74" />
+        <PackageReference Include="sqlSugarCore" Version="5.1.1" />
         <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
     </ItemGroup>
 

@@ -27,8 +27,7 @@ public class QA
         {
             StaticVar.ServiceReady.WaitOne();
             Log.Info("QA", "QA初始化");
-            List<QAConfigFile.QaData> qaMsg =
-                StaticVar.QaConfigFile.GetAllQA();
+            List<QAConfigFile.QaData> qaMsg = StaticVar.QaConfigFile.GetAllQA();
             foreach (QAConfigFile.QaData data in qaMsg) RegisterNewQaCommand(data.qMsg, data.aMsg, data.GroupId);
             Log.Info("QA", $"加载了{qaMsg.Count}条QA");
         });
@@ -184,9 +183,10 @@ public class QA
     public async ValueTask GetAllQuestion(GroupMessageEventArgs eventArgs)
     {
         MessageBody questions = new MessageBody();
-        List<MessageBody> groupQuestion = _commandGuids.Where(c => c.gid == eventArgs.SourceGroup)
-                                                       .Select(c => c.msg)
-                                                       .ToList();
+        List<MessageBody> groupQuestion =
+            _commandGuids.Where(c => c.gid == eventArgs.SourceGroup)
+                         .Select(c => c.msg)
+                         .ToList();
 
         if (groupQuestion.Count == 0)
         {
@@ -209,7 +209,7 @@ public class QA
         Guid cmdId = StaticVar.SoraCommandManager.RegisterGroupDynamicCommand(
             args => MessageEqual(args.Message.MessageBody, qMsg),
             async e => await e.Reply(aMsg),
-            "qa_global", null, MemberRoleType.Member, false, 0, new[] {group});
+            "qa_global", MemberRoleType.Member, false, 0, new[] {group});
 
         _commandGuids.Add((qMsg, cmdId, group));
     }
@@ -219,11 +219,8 @@ public class QA
         if (message is null) return false;
         bool check = true;
         foreach (SoraSegment segment in message)
-            check &=
-                segment.MessageType == SegmentType.Text ||
-                segment.MessageType == SegmentType.At   ||
-                segment.MessageType == SegmentType.Face ||
-                segment.MessageType == SegmentType.Image;
+            check &= segment.MessageType is 
+                         SegmentType.Text or SegmentType.At or SegmentType.Face or SegmentType.Image;
         return check;
     }
 

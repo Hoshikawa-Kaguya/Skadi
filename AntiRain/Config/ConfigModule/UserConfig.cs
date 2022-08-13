@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Reflection;
+using JetBrains.Annotations;
 
 namespace AntiRain.Config.ConfigModule
 {
@@ -26,6 +27,7 @@ namespace AntiRain.Config.ConfigModule
         /// <summary>
         /// 推特API Token(v2)
         /// </summary>
+        [UsedImplicitly]//TODO 推特API扩展
         public string TwitterApiToken { get; set; }
     }
 

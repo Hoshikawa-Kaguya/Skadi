@@ -34,13 +34,13 @@ public static class SaucenaoApi
         try
         {
             var serverResponse = await
-                Requests.PostAsync(
-                    $"http://saucenao.com/search.php?output_type=2&numres=16&db=999&api_key={apiKey}&url={HttpUtility.UrlEncode(url)}",
-                    new ReqParams
-                    {
-                        Timeout                = 20000,
-                        IsThrowErrorForTimeout = false
-                    });
+                                     Requests.PostAsync(
+                                         $"http://saucenao.com/search.php?output_type=2&numres=16&db=999&api_key={apiKey}&url={HttpUtility.UrlEncode(url)}",
+                                         new ReqParams
+                                         {
+                                             Timeout                = 20000,
+                                             IsThrowErrorForTimeout = false
+                                         });
             res = serverResponse.Json();
         }
         catch (Exception e)
@@ -53,13 +53,16 @@ public static class SaucenaoApi
         Log.Debug("pic", $"get api result code [{resCode}]");
 
         //API返回失败
-        if (res is null || resCode != 0) return "图片获取失败";
+        if (res is null || resCode != 0)
+            return "图片获取失败";
 
         //API返回空值
-        if (res["results"] is not JArray resData) return "处理API返回发生错误";
+        if (res["results"] is not JArray resData)
+            return "处理API返回发生错误";
 
         //未找到图片
-        if (resData.Count == 0) return "查找结果为空";
+        if (resData.Count == 0)
+            return "查找结果为空";
 
         JToken parsedPic = resData.OrderByDescending(t => Convert.ToSingle(t["header"]?["similarity"])).First();
 
@@ -80,9 +83,9 @@ public static class SaucenaoApi
         //优先pixiv
         if (pixivPic is not null &&
             Math.Abs(Convert.ToSingle(pixivPic["header"]?["similarity"]) -
-                Convert.ToSingle(parsedPic["header"]?["similarity"])) <= 5)
+                     Convert.ToSingle(parsedPic["header"]?["similarity"])) <= 5)
         {
-            var pid      = Convert.ToInt64(pixivPic["data"]?["pixiv_id"]);
+            var pid = Convert.ToInt64(pixivPic["data"]?["pixiv_id"]);
             Log.Info("SaucenaoApi", $"获取到pixiv图片[{pid}]");
             var imageUrl = MediaUtil.GenPixivUrl(userConfig.HsoConfig.PximyProxy, pid);
             return GenPixivResult(imageUrl, pid, parsedPic);
@@ -91,13 +94,13 @@ public static class SaucenaoApi
         //优先推特
         if (twitterPic is not null &&
             Math.Abs(Convert.ToSingle(twitterPic["header"]?["similarity"]) -
-                Convert.ToSingle(parsedPic["header"]?["similarity"])) <= 5)
+                     Convert.ToSingle(parsedPic["header"]?["similarity"])) <= 5)
         {
             var tweetUrl = twitterPic["data"]?["ext_urls"]?[0]?.ToString();
             Log.Info("SaucenaoApi", $"获取到tweet[{tweetUrl}]");
             return string.IsNullOrEmpty(tweetUrl)
-                ? "服务器歇逼了（无法获取推文链接，请稍后再试）"
-                : GenTwitterResult(tweetUrl, userConfig.TwitterApiToken, parsedPic);
+                       ? "服务器歇逼了（无法获取推文链接，请稍后再试）"
+                       : GenTwitterResult(tweetUrl, parsedPic);
         }
 
         int databaseId = Convert.ToInt32(parsedPic["header"]?["index_id"]);
@@ -107,15 +110,15 @@ public static class SaucenaoApi
         {
             //eh
             case DbIndex.E_HENTAI:
-                return "[Saucenao-EHentai]"                      +
-                    $"{Environment.NewLine}Source:{parsedPic["data"]?["source"]}" +
-                    $"{Environment.NewLine}Name:{parsedPic["data"]?["jp_name"]}"  +
-                    $"{Environment.NewLine}[{parsedPic["header"]?["similarity"]}%]";
+                return "[Saucenao-EHentai]"                                          +
+                       $"{Environment.NewLine}Source:{parsedPic["data"]?["source"]}" +
+                       $"{Environment.NewLine}Name:{parsedPic["data"]?["jp_name"]}"  +
+                       $"{Environment.NewLine}[{parsedPic["header"]?["similarity"]}%]";
             case DbIndex.N_HENTAI:
-                return "[Saucenao-NHentai]"                      +
-                    $"{Environment.NewLine}Source:{parsedPic["data"]?["source"]}" +
-                    $"{Environment.NewLine}Name:{parsedPic["data"]?["jp_name"]}"  +
-                    $"{Environment.NewLine}[{parsedPic["header"]?["similarity"]}%]";
+                return "[Saucenao-NHentai]"                                          +
+                       $"{Environment.NewLine}Source:{parsedPic["data"]?["source"]}" +
+                       $"{Environment.NewLine}Name:{parsedPic["data"]?["jp_name"]}"  +
+                       $"{Environment.NewLine}[{parsedPic["header"]?["similarity"]}%]";
             //unknown
             default:
             {
@@ -124,7 +127,8 @@ public static class SaucenaoApi
                 string source = parsedPic["data"]?["source"]?.ToString() ?? string.Empty;
 
                 //包含pixiv链接
-                if ((source.IndexOf("pixiv", StringComparison.Ordinal) != -1 || source.IndexOf("pximg", StringComparison.Ordinal) != -1) &&
+                if ((source.IndexOf("pixiv", StringComparison.Ordinal) != -1 ||
+                     source.IndexOf("pximg", StringComparison.Ordinal) != -1) &&
                     long.TryParse(Path.GetFileName(source), out long pid))
                 {
                     var imageUrl = MediaUtil.GenPixivUrl(userConfig.HsoConfig.PximyProxy, pid);
@@ -133,12 +137,13 @@ public static class SaucenaoApi
 
                 //包含twitter链接
                 if (source.IndexOf("twitter", StringComparison.Ordinal) != -1)
-                    return GenTwitterResult(source, userConfig.TwitterApiToken, parsedPic);
+                    return GenTwitterResult(source, parsedPic);
 
                 //ext url
                 //pixiv
                 string purl = parsedPic["data"]?["ext_urls"]?.Select(t => t.ToString()).ToArray()
-                                                             .FirstOrDefault(pu => pu.IndexOf("pximg", StringComparison.Ordinal) != -1);
+                                                             .FirstOrDefault(pu =>
+                                                                  pu.IndexOf("pximg", StringComparison.Ordinal) != -1);
                 if (!string.IsNullOrEmpty(purl))
                 {
                     long.TryParse(Path.GetFileName(purl), out long pxPid);
@@ -148,8 +153,11 @@ public static class SaucenaoApi
 
                 //danbooru
                 string durl = parsedPic["data"]?["ext_urls"]?.Select(t => t.ToString()).ToArray()
-                                                             .FirstOrDefault(du => du.IndexOf("danbooru", StringComparison.Ordinal) != -1);
-                if (!string.IsNullOrEmpty(durl)) return $"[Danbooru]{Environment.NewLine}{durl}";
+                                                             .FirstOrDefault(du =>
+                                                                  du.IndexOf("danbooru",
+                                                                      StringComparison.Ordinal) != -1);
+                if (!string.IsNullOrEmpty(durl))
+                    return $"[Danbooru]{Environment.NewLine}{durl}";
 
                 Log.Debug("pic search", $"get unknown source:{source}");
                 string b64Pic =
@@ -168,40 +176,47 @@ public static class SaucenaoApi
         }
     }
 
-    private static MessageBody GenTwitterResult(string tweetUrl, string token, JToken apiRet)
+    public static MessageBody GenTwitterResult(string tweetUrl, JToken apiRet = null)
     {
         string tId = Path.GetFileName(tweetUrl);
-        (bool success, string sender, string text, List<string> media) = MediaUtil.GetTweet(tId, token);
+        (bool success, string sender, string text, List<string> media) = MediaUtil.GetTweet(tId);
 
-        if (!success) return $"推特API错误{Environment.NewLine}Message:{text}";
+        if (!success)
+            return $"推特API错误{Environment.NewLine}Message:{text}";
 
         var msg = new MessageBody
         {
-            $"[Saucenao-Twitter]{Environment.NewLine}推文:{text}{Environment.NewLine}用户:{sender}{Environment.NewLine}"
+            $"[Twitter]{Environment.NewLine}推文:{text}{Environment.NewLine}用户:{sender}{Environment.NewLine}"
         };
-        foreach (var pic in media) msg.Add(SoraSegment.Image(pic));
+        foreach (var pic in media)
+            msg.Add(SoraSegment.Image($"https://pixiv.yukari.one/api/tweet/image?url={pic}"));
 
         msg.Add($"{Environment.NewLine}Link:{tweetUrl}");
-        msg.Add($"{Environment.NewLine}[{apiRet["header"]?["similarity"]}%]");
+        if (apiRet is not null)
+            msg.Add($"{Environment.NewLine}[{apiRet["header"]?["similarity"]}%]");
         return msg;
     }
 
     private static MessageBody GenPixivResult(string image, long pid, JToken apiRet)
     {
         (int statusCode, bool r18, int count) = MediaUtil.GetPixivImgInfo(pid, out JToken json);
-        if (statusCode is not 200 and not 404) return $"[网络错误{statusCode}]";
+        if (statusCode is not 200 and not 404)
+            return $"[网络错误{statusCode}]";
         MessageBody   msg = new();
         StringBuilder sb  = new();
 
         sb.AppendLine("[Saucenao-Pixiv]");
         sb.AppendLine($"图片名:{json?["body"]?["title"] ?? string.Empty}");
-        sb.Append($"作者:{json?["body"]?["userName"] ?? string.Empty}");
+        sb.Append($"作者:{json?["body"]?["userName"]   ?? string.Empty}");
         msg.Add(sb.ToString());
         sb.Clear();
 
-        if (r18) msg.Add($"{Environment.NewLine}[H是不行的]{Environment.NewLine}");
-        else if (statusCode != 404) msg.Add(SoraSegment.Image(image, true, 4));
-        else return "哈哈，图被删了(404 NOT FOUND)";
+        if (r18)
+            msg.Add($"{Environment.NewLine}[H是不行的]{Environment.NewLine}");
+        else if (statusCode != 404)
+            msg.Add(SoraSegment.Image(image, true, 4));
+        else
+            return "哈哈，图被删了(404 NOT FOUND)";
 
         sb.AppendLine($"Pixiv Id:{pid}");
         sb.Append($"[{apiRet["header"]?["similarity"]}%]");
