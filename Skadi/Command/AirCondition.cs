@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using Sora.Attributes.Command;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
+
 #pragma warning disable CS8509
 #pragma warning disable CS8524
 
@@ -37,7 +38,7 @@ public class AirCondition
     [UsedImplicitly]
     [SoraCommand(
         SourceType = SourceFlag.Group,
-        CommandExpressions = new[] { "开空调" })]
+        CommandExpressions = new[] {"开空调"})]
     public async ValueTask OpenCondition(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -49,9 +50,7 @@ public class AirCondition
         }
 
         if (!_conditions.ContainsKey(gid))
-        {
             _conditions.TryAdd(gid, new AirConditionCof());
-        }
         _conditions[gid].Enable = true;
 
         await eventArgs.Reply("哔~");
@@ -60,7 +59,7 @@ public class AirCondition
     [UsedImplicitly]
     [SoraCommand(
         SourceType = SourceFlag.Group,
-        CommandExpressions = new[] { "关空调" })]
+        CommandExpressions = new[] {"关空调"})]
     public async ValueTask CloseCondition(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -70,6 +69,7 @@ public class AirCondition
             await eventArgs.Reply("空调根本就没开！");
             return;
         }
+
         _conditions[gid].Enable = false;
 
         await eventArgs.Reply("💤哔~");
@@ -78,7 +78,7 @@ public class AirCondition
     [UsedImplicitly]
     [SoraCommand(
         SourceType = SourceFlag.Group,
-        CommandExpressions = new[] { "^风速[低中高]$" },
+        CommandExpressions = new[] {"^风速[低中高]$"},
         MatchType = MatchType.Regex)]
     public async ValueTask SetSpeed(GroupMessageEventArgs eventArgs)
     {
@@ -89,13 +89,12 @@ public class AirCondition
             await eventArgs.Reply("空调根本就没开！");
             return;
         }
-        
     }
 
     [UsedImplicitly]
     [SoraCommand(
         SourceType = SourceFlag.Group,
-        CommandExpressions = new[] { "看看空调", "空调状态" })]
+        CommandExpressions = new[] {"看看空调", "空调状态"})]
     public async ValueTask ConStatus(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -113,13 +112,13 @@ public class AirCondition
         {
             Mode.HEAT => "☀制热",
             Mode.COOL => "❄制冷",
-            Mode.AUTO => "🌡自动",
+            Mode.AUTO => "🌡自动"
         });
         re.AppendLine(con.Speed switch
         {
             1 => "💨",
             2 => "💨💨",
-            3 => "💨💨💨",
+            3 => "💨💨💨"
         });
         re.AppendLine($"当前温度 {con.Current}");
         re.Append($"目标温度 {con.Target}");

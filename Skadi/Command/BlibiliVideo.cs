@@ -33,8 +33,8 @@ public static class BlibiliVideo
     /// </summary>
     [UsedImplicitly]
     private static readonly Timer _subTimer = new(
-        CleanUpEvent,               //事件处理
-        null,                       //初始化数据
+        CleanUpEvent, //事件处理
+        null,         //初始化数据
         new TimeSpan(0, 0, 0, 120),
         new TimeSpan(0, 0, 0, 120));
 
@@ -43,13 +43,14 @@ public static class BlibiliVideo
     [UsedImplicitly]
     [SoraCommand(
         SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"^BV1[1-9A-NP-Za-km-z]{9}$", @"^AV[1-9][0-9]*$" },
+        CommandExpressions = new[] {@"^BV1[1-9A-NP-Za-km-z]{9}$", @"^AV[1-9][0-9]*$"},
         MatchType = MatchType.Regex)]
     public static async ValueTask BiliVideoGet(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         //检查近期匹配
-        if (cmdRecord.Contains(eventArgs.Message.RawText)) return;
+        if (cmdRecord.Contains(eventArgs.Message.RawText))
+            return;
         cmdRecord.Add(eventArgs.Message.RawText);
 
         VideoInfo videoInfo = VideoApis.GetVideoInfo(eventArgs.Message.RawText);
@@ -76,7 +77,8 @@ public static class BlibiliVideo
         Regex  urlRegex    = new Regex(@"https://b23\.tv/[a-zA-Z0-9]+");
         string videoUrlStr = urlRegex.Match(eventArgs.Message.RawText).Value;
         //检查空字符或近期匹配过
-        if (string.IsNullOrEmpty(videoUrlStr) || cmdRecord.Contains(videoUrlStr)) return;
+        if (string.IsNullOrEmpty(videoUrlStr) || cmdRecord.Contains(videoUrlStr))
+            return;
         cmdRecord.Add(videoUrlStr);
         //网络请求获取跳转地址
         HttpClientHandler   handler  = new HttpClientHandler {AllowAutoRedirect = false};

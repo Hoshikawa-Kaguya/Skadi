@@ -27,7 +27,8 @@ public class Surprise
     {
         eventArgs.IsContinueEventChain = false;
         if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig config) &&
-            !config.ModuleSwitch.HaveFun) return;
+            !config.ModuleSwitch.HaveFun)
+            return;
         await eventArgs.SourceGroup.SendGroupMessage(
             SoraSegment.At(eventArgs.Sender.Id) +
             "丢出了\r\n"                           +
@@ -42,7 +43,8 @@ public class Surprise
     {
         eventArgs.IsContinueEventChain = false;
         if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig config) &&
-            !config.ModuleSwitch.HaveFun) return;
+            !config.ModuleSwitch.HaveFun)
+            return;
         await eventArgs.SourceGroup.EnableGroupMemberMute(eventArgs.Sender.Id,
             28800);
     }
@@ -56,7 +58,8 @@ public class Surprise
     public async ValueTask Choice(GroupMessageEventArgs eventArgs)
     {
         if (eventArgs.Message.MessageBody.Count          != 1 &&
-            eventArgs.Message.MessageBody[0].MessageType != SegmentType.Text) return;
+            eventArgs.Message.MessageBody[0].MessageType != SegmentType.Text)
+            return;
         eventArgs.IsContinueEventChain = false;
         string       text    = (eventArgs.Message.MessageBody[0].Data as TextSegment)!.Content[2..].Trim();
         List<string> options = text.Split("还是").ToList();

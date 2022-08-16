@@ -33,7 +33,8 @@ public static class GuildRank
     {
         eventArgs.IsContinueEventChain = false;
         if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config) &&
-            !config.ModuleSwitch.PcrGuildRank) return;
+            !config.ModuleSwitch.PcrGuildRank)
+            return;
         //网络响应
         JToken response;
         //获取公会名
@@ -123,13 +124,13 @@ public static class GuildRank
                     await eventArgs.Reply("查询到多个公会，可能存在重名或关键词错误");
                 Log.Info("JSON处理成功", "向用户发送数据");
                 long.TryParse(response["ts"]?.ToString() ?? "0", out long updateTimeStamp);
-                await eventArgs.Reply("查询成功！\n"                               +
-                    $"公会:{guildName}\n"                                       +
-                    $"排名:{response["data"]?[0]?["rank"]}\n"                   +
-                    $"总分数:{response["data"]?[0]?["damage"]}\n"                +
-                    $"会长:{response["data"]?[0]?["leader_name"]}\n"            +
-                    $"数据更新时间:{updateTimeStamp.ToDateTime():MM-dd HH:mm:ss}\n" +
-                    "如果查询到的信息有误，有可能关键词错误或公会排名在20060之后");
+                await eventArgs.Reply("查询成功！\n"                                                 +
+                                      $"公会:{guildName}\n"                                       +
+                                      $"排名:{response["data"]?[0]?["rank"]}\n"                   +
+                                      $"总分数:{response["data"]?[0]?["damage"]}\n"                +
+                                      $"会长:{response["data"]?[0]?["leader_name"]}\n"            +
+                                      $"数据更新时间:{updateTimeStamp.ToDateTime():MM-dd HH:mm:ss}\n" +
+                                      "如果查询到的信息有误，有可能关键词错误或公会排名在20060之后");
             }
             else
             {

@@ -86,24 +86,23 @@ internal static class MediaUtil
         {
             var customNodes = new List<CustomNode>();
             for (int i = 0; i < count; i++)
-            {
                 customNodes.Add(new CustomNode("色色",
                     114514,
                     SoraSegment.Image($"{imageUrl}/{i}", true, 4)));
-            }
 
             (apiStatus, _) =
                 await eventArgs.SourceGroup.SendGroupForwardMsg(customNodes, TimeSpan.FromMinutes(2));
         }
         else
         {
-            if (index > 0 && count <= 1 || index > count - 1)
+            if ((index > 0 && count <= 1) || index > count - 1)
             {
                 await eventArgs.Reply("没有这张色图欸(404)");
                 return;
             }
-            (apiStatus, _) = 
-            await eventArgs.Reply(SoraSegment.Image(imageUrl, true, 4), TimeSpan.FromMinutes(2));
+
+            (apiStatus, _) =
+                await eventArgs.Reply(SoraSegment.Image(imageUrl, true, 4), TimeSpan.FromMinutes(2));
         }
 
         if (apiStatus.RetCode != ApiStatusType.Ok)
@@ -113,8 +112,8 @@ internal static class MediaUtil
     public static string GenPixivUrl(string proxy, long pid, int index = 0)
     {
         return string.IsNullOrEmpty(proxy)
-            ? $"https://pixiv.lancercmd.cc/{pid}"
-            : $"{proxy.Trim('/')}/{pid}/{index}";
+                   ? $"https://pixiv.lancercmd.cc/{pid}"
+                   : $"{proxy.Trim('/')}/{pid}/{index}";
     }
 
     public static (int statusCode, bool r18, int count) GetPixivImgInfo(long pid, out JToken json)
@@ -123,7 +122,6 @@ internal static class MediaUtil
         json = null;
         try
         {
-            
             var pixApiReq = Requests.Get($"https://pixiv.yukari.one/api/illust/{pid}",
                 new ReqParams
                 {
@@ -140,10 +138,11 @@ internal static class MediaUtil
                 if (Convert.ToBoolean(infoJson["error"]))
                     return (200, false, 0);
                 return (200,
-                    Convert.ToBoolean(infoJson["body"]?["xRestrict"]),
-                    Convert.ToInt32(infoJson["body"]?["pageCount"]));
+                           Convert.ToBoolean(infoJson["body"]?["xRestrict"]),
+                           Convert.ToInt32(infoJson["body"]?["pageCount"]));
             }
-            return ((int)pixApiReq.StatusCode, false, 0);
+
+            return ((int) pixApiReq.StatusCode, false, 0);
         }
         catch (Exception e)
         {
@@ -173,7 +172,7 @@ internal static class MediaUtil
                 {
                     IsThrowErrorForStatusCode = false,
                     IsThrowErrorForTimeout    = false,
-                    Timeout = 10000
+                    Timeout                   = 10000
                 });
 
             Log.Info("Twitter", $"Twitter api http code:{res.StatusCode}");
@@ -209,9 +208,9 @@ internal static class MediaUtil
                          ["name"]?.ToString() ?? string.Empty;
         Log.Info("Twitter", $"Get twitter image [count:{urls.Count}]");
         return (true,
-            authorName,
-            data["data"]?["text"]?.ToString() ?? string.Empty,
-            urls);
+                   authorName,
+                   data["data"]?["text"]?.ToString() ?? string.Empty,
+                   urls);
     }
 
     #endregion
@@ -221,7 +220,7 @@ internal static class MediaUtil
     /// <summary>
     /// 绘制文字图片
     /// </summary>
-    public static string DrawTextImage(string text, Color fontColor, Color backColor,int frameSize = 5)
+    public static string DrawTextImage(string text, Color fontColor, Color backColor, int frameSize = 5)
     {
         //计算图片大小
         FontRectangle strRect = TextMeasurer.Measure(text, new TextOptions(Arial));
@@ -239,8 +238,8 @@ internal static class MediaUtil
         img.Dispose();
 
         return byteStream.Length != 0
-            ? Convert.ToBase64String(byteStream.GetBuffer(), 0, (int) byteStream.Length)
-            : string.Empty;
+                   ? Convert.ToBase64String(byteStream.GetBuffer(), 0, (int) byteStream.Length)
+                   : string.Empty;
     }
 
     #endregion

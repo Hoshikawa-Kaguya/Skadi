@@ -33,7 +33,7 @@ internal static class InitializationEvent
 
         //在控制台显示启用模块
         Log.Info("已启用的模块",
-                 $"\n{userConfig.ModuleSwitch}");
+            $"\n{userConfig.ModuleSwitch}");
         //显示代理信息
         if (userConfig.ModuleSwitch.Hso && !string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
             Log.Debug("Hso Proxy", userConfig.HsoConfig.PximyProxy);
@@ -46,7 +46,8 @@ internal static class InitializationEvent
         StaticVar.ServiceReady.Set();
 
         //初始化定时器线程
-        if (userConfig.ModuleSwitch.BiliSubscription) SubscriptionTimer.TimerEventAdd(connectEvent);
+        if (userConfig.ModuleSwitch.BiliSubscription)
+            SubscriptionTimer.TimerEventAdd(connectEvent);
 
         return ValueTask.CompletedTask;
     }

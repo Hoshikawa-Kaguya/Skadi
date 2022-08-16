@@ -47,10 +47,11 @@ public static class SearchCommands
         //发送图片
         (ApiStatus apiStatus, _) =
             await eventArgs.Reply(await SaucenaoApi.SearchByUrl(
-                    "92a805aff18cbc56c4723d7e2d5100c6892fe256",
-                    (imgArgs.Message[0].Data as ImageSegment)!.Url,
-                    imgArgs.LoginUid),
+                                      "92a805aff18cbc56c4723d7e2d5100c6892fe256",
+                                      (imgArgs.Message[0].Data as ImageSegment)!.Url,
+                                      imgArgs.LoginUid),
                 TimeSpan.FromSeconds(15));
-        if (apiStatus.RetCode != ApiStatusType.Ok) await eventArgs.Reply("图被夹了，你找服务器要去");
+        if (apiStatus.RetCode != ApiStatusType.Ok)
+            await eventArgs.Reply("图被夹了，你找服务器要去");
     }
 }

@@ -28,7 +28,8 @@ public class QA
             StaticVar.ServiceReady.WaitOne();
             Log.Info("QA", "QA初始化");
             List<QAConfigFile.QaData> qaMsg = StaticVar.QaConfigFile.GetAllQA();
-            foreach (QAConfigFile.QaData data in qaMsg) RegisterNewQaCommand(data.qMsg, data.aMsg, data.GroupId);
+            foreach (QAConfigFile.QaData data in qaMsg)
+                RegisterNewQaCommand(data.qMsg, data.aMsg, data.GroupId);
             Log.Info("QA", $"加载了{qaMsg.Count}条QA");
         });
     }
@@ -43,22 +44,26 @@ public class QA
         PermissionLevel = MemberRoleType.Admin)]
     public async ValueTask GetGlobalQuestion(GroupMessageEventArgs eventArgs)
     {
-        if (!MessageCheck(eventArgs.Message.MessageBody)) return;
+        if (!MessageCheck(eventArgs.Message.MessageBody))
+            return;
         //查找分割点
         Guid backSegmentId = eventArgs.Message.MessageBody
                                       .Where(s => s.Data is TextSegment t &&
                                                   t.Content.IndexOf("你答", StringComparison.Ordinal) != -1)
                                       .Select(s => s.Id)
                                       .FirstOrDefault();
-        if (backSegmentId == Guid.Empty) return;
+        if (backSegmentId == Guid.Empty)
+            return;
         eventArgs.IsContinueEventChain = false;
         int nextMsgIndex = eventArgs.Message.MessageBody.IndexOfById(backSegmentId);
 
         //切片预处理
         MessageBody fMessage = new(eventArgs.Message.MessageBody.Take(nextMsgIndex == 0 ? 1 : nextMsgIndex).ToList());
-        if (fMessage[0].Data is not TextSegment srcFSegment) return;
+        if (fMessage[0].Data is not TextSegment srcFSegment)
+            return;
         MessageBody bMessage = new(eventArgs.Message.MessageBody.Skip(nextMsgIndex).ToList());
-        if (bMessage[0].Data is not TextSegment srcBSegment) return;
+        if (bMessage[0].Data is not TextSegment srcBSegment)
+            return;
 
         //问题消息切片
         if (srcFSegment.Content.Equals("有人问"))
@@ -138,7 +143,8 @@ public class QA
         PermissionLevel = MemberRoleType.Admin)]
     public async ValueTask DeleteGlobalQuestion(GroupMessageEventArgs eventArgs)
     {
-        if (!MessageCheck(eventArgs.Message.MessageBody)) return;
+        if (!MessageCheck(eventArgs.Message.MessageBody))
+            return;
         eventArgs.IsContinueEventChain = false;
 
         MessageBody question  = eventArgs.Message.MessageBody;
@@ -166,7 +172,7 @@ public class QA
     [UsedImplicitly]
     [SoraCommand(
         SourceType = SourceFlag.Group,
-        CommandExpressions = new[] { @"^DEQA[\s\S]+$" },
+        CommandExpressions = new[] {@"^DEQA[\s\S]+$"},
         MatchType = MatchType.Regex,
         SuperUserCommand = true)]
     public async ValueTask DeleteGlobalQuestionSu(GroupMessageEventArgs eventArgs)
@@ -216,35 +222,41 @@ public class QA
 
     public static bool MessageCheck(MessageBody message)
     {
-        if (message is null) return false;
+        if (message is null)
+            return false;
         bool check = true;
         foreach (SoraSegment segment in message)
-            check &= segment.MessageType is 
+            check &= segment.MessageType is
                          SegmentType.Text or SegmentType.At or SegmentType.Face or SegmentType.Image;
         return check;
     }
 
     public static bool MessageEqual(MessageBody srcMsg, MessageBody rxMsg)
     {
-        if (rxMsg is null) return false;
-        if (!MessageCheck(rxMsg) || srcMsg.Count != rxMsg.Count) return false;
+        if (rxMsg is null)
+            return false;
+        if (!MessageCheck(rxMsg) || srcMsg.Count != rxMsg.Count)
+            return false;
 
         for (int i = 0; i < srcMsg.Count; i++)
             switch (srcMsg[i].MessageType)
             {
                 case SegmentType.Text:
                     if ((srcMsg[i].Data as TextSegment)!.Content !=
-                        ((rxMsg[i].Data as TextSegment)?.Content ?? string.Empty)) return false;
+                        ((rxMsg[i].Data as TextSegment)?.Content ?? string.Empty))
+                        return false;
                     break;
                 case SegmentType.Image:
                     if ((srcMsg[i].Data as ImageSegment)!.ImgFile != (rxMsg[i].Data as ImageSegment)?.ImgFile)
                         return false;
                     break;
                 case SegmentType.At:
-                    if ((srcMsg[i].Data as AtSegment)!.Target != (rxMsg[i].Data as AtSegment)?.Target) return false;
+                    if ((srcMsg[i].Data as AtSegment)!.Target != (rxMsg[i].Data as AtSegment)?.Target)
+                        return false;
                     break;
                 case SegmentType.Face:
-                    if ((srcMsg[i].Data as FaceSegment)!.Id != (rxMsg[i].Data as FaceSegment)?.Id) return false;
+                    if ((srcMsg[i].Data as FaceSegment)!.Id != (rxMsg[i].Data as FaceSegment)?.Id)
+                        return false;
                     break;
                 default:
                     return false;

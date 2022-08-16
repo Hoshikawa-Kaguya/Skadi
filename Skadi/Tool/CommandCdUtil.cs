@@ -1,4 +1,5 @@
 // ReSharper disable RedundantUsingDirective
+
 #if RELEASE
 using System;
 using System.Collections.Concurrent;
@@ -9,7 +10,7 @@ namespace Skadi.Tool;
 internal static class CommandCdUtil
 {
     #region 调用记录
-    
+
     public enum CommandFlag
     {
         PicSearch,
@@ -49,8 +50,8 @@ internal static class CommandCdUtil
         var time = DateTime.Now; //获取当前时间
         var user = new UserRecord
         {
-            GroupId     = groupId,
-            UserId      = userId,
+            GroupId = groupId,
+            UserId = userId,
             CommandName = cmdFlag
         };
         //尝试从字典中取出上一次调用的时间

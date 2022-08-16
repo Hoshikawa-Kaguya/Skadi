@@ -62,7 +62,8 @@ internal class QAConfigFile
         List<(string qMsg, string aMsg, long groupId)> temp =
             qaJson.ToObject<List<(string qMsg, string aMsg, long groupId)>>();
 
-        if (temp == null) return null;
+        if (temp == null)
+            return null;
         foreach ((string qMsgStr, string aMsgStr, long groupId) in temp)
             commands.Add(new QaData
             {

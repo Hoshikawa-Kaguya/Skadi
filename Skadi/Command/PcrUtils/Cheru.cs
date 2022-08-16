@@ -45,8 +45,10 @@ public static class Cheru
             return;
         }
 
-        if (!config.ModuleSwitch.Cheru) return;
-        if (eventArgs.Message.RawText.Length <= 3) return;
+        if (!config.ModuleSwitch.Cheru)
+            return;
+        if (eventArgs.Message.RawText.Length <= 3)
+            return;
         var cheru       = eventArgs.Message.RawText[3..];
         var isCheru     = new Regex(@"切[切卟叮咧哔唎啪啰啵嘭噜噼巴拉蹦铃]+");
         var textBuilder = new StringBuilder();
@@ -74,8 +76,10 @@ public static class Cheru
             return;
         }
 
-        if (!config.ModuleSwitch.Cheru) return;
-        if (eventArgs.Message.RawText.Length <= 4) return;
+        if (!config.ModuleSwitch.Cheru)
+            return;
+        if (eventArgs.Message.RawText.Length <= 4)
+            return;
         var text         = eventArgs.Message.RawText[4..];
         var isCHN        = new Regex(@"[\u4e00-\u9fa5]");
         var cheruBuilder = new StringBuilder();
@@ -116,17 +120,19 @@ public static class Cheru
     /// <param name="cheru">切噜词</param>
     private static string CheruToWord(string cheru)
     {
-        if (cheru.Length < 2 && !cheru.StartsWith("切")) return cheru;
+        if (cheru.Length < 2 && !cheru.StartsWith("切"))
+            return cheru;
         string cheruContent = cheru[1..];
 
         //转换为正常语句
         List<byte> wordBytes = new List<byte>();
         for (var i = 0; i < cheruContent.Length; i += 2)
         {
-            if (i + 1 >= cheruContent.Length) continue;
+            if (i + 1 >= cheruContent.Length)
+                continue;
             //将index作为高低四位合并为八位
             var wordByte = (byte) (CHERU_SET.IndexOf(cheruContent[i]) +
-                (CHERU_SET.IndexOf(cheruContent[i + 1]) << 4));
+                                   (CHERU_SET.IndexOf(cheruContent[i + 1]) << 4));
             wordBytes.Add(wordByte);
         }
 

@@ -86,7 +86,8 @@ internal class SubscriptionDbHelper
                 var ts = updateTime.ToTimeStamp();
                 //有记录更新时间
                 return
-                    dbClient.Updateable<Tables.BiliDynamicSubscription>(newBiliDynamic => newBiliDynamic.UpdateTime == ts)
+                    dbClient.Updateable<Tables.BiliDynamicSubscription>(newBiliDynamic =>
+                                 newBiliDynamic.UpdateTime == ts)
                             .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId &&
                                                   biliDynamic.Gid            == groupId)
                             .ExecuteCommandHasChange();

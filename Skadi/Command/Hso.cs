@@ -46,11 +46,12 @@ public class HsoCommand
             return;
         }
 
-        if (CheckGroupBlock(userConfig, eventArgs)) return;
+        if (CheckGroupBlock(userConfig, eventArgs))
+            return;
         if (IsInCD(eventArgs.SourceGroup, eventArgs.Sender, CommandFlag.Setu))
         {
             await eventArgs.SourceGroup.SendGroupMessage(SoraSegment.At(eventArgs.Sender) +
-                "你是不是只会要色图(逊欸，冲的真快)");
+                                                         "你是不是只会要色图(逊欸，冲的真快)");
             return;
         }
 
@@ -131,7 +132,7 @@ public class HsoCommand
     [UsedImplicitly]
     [SoraCommand(
         SourceType = SourceFlag.Group,
-        CommandExpressions = new[] { @"^看看推特[0-9]+$" },
+        CommandExpressions = new[] {@"^看看推特[0-9]+$"},
         MatchType = MatchType.Regex)]
     public async void TweetPic(GroupMessageEventArgs eventArgs)
     {
@@ -182,7 +183,8 @@ public class HsoCommand
         else
         {
             var message = new MessageBody {"让我康康到底谁最能冲\r\n"};
-            foreach (var count in rankList) message.AddRange(count.Uid.ToAt() + $"冲了{count.Count}次" + "\r\n");
+            foreach (var count in rankList)
+                message.AddRange(count.Uid.ToAt() + $"冲了{count.Count}次" + "\r\n");
 
             //删去多余的换行
             message.RemoveAt(message.Count - 1);
@@ -366,8 +368,8 @@ public class HsoCommand
         var localPicPath = $"{picNames[randFile.Next(0, picNames.Length - 1)]}";
         Log.Debug("发送图片", localPicPath);
         await eventArgs.SourceGroup.SendGroupMessage(hso.CardImage
-            ? SoraSegment.CardImage(localPicPath)
-            : SoraSegment.Image(localPicPath));
+                                                         ? SoraSegment.CardImage(localPicPath)
+                                                         : SoraSegment.Image(localPicPath));
     }
 
     /// <summary>
