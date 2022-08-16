@@ -22,10 +22,10 @@ internal static class BotUtil
     {
         if (DateTime.Now > DateTime.Today.Add(new TimeSpan(5, 0, 0)))
             return (long) (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Add(new TimeSpan(5, 0, 0))
-                .TotalSeconds;
+               .TotalSeconds;
         else
             return (long) (DateTime.Today.AddDays(-1) - new DateTime(1970, 1, 1, 8, 0, 0, 0))
-                          .Add(new TimeSpan(5, 0, 0)).TotalSeconds;
+                         .Add(new TimeSpan(5, 0, 0)).TotalSeconds;
     }
 
     #endregion
@@ -65,10 +65,12 @@ internal static class BotUtil
         var sb = new StringBuilder();
 
         var toPadNum = (int) Math.Floor(padNums - GetQQStrLength(input));
-        if (toPadNum <= 0) return input;
+        if (toPadNum <= 0)
+            return input;
 
         sb.Append(input);
-        for (var i = 0; i < toPadNum; i++) sb.Append(paddingChar);
+        for (var i = 0; i < toPadNum; i++)
+            sb.Append(paddingChar);
 
         return sb.ToString();
     }
@@ -81,10 +83,12 @@ internal static class BotUtil
     /// <param name="qGroup">（可选，不给的话就不发送错误信息）\n报错信息要发送到的QQ群对象</param>
     /// <param name="fromQQid">（可选，但QQgroup给了的话本参数必填）\n要通知的人的QQ Id</param>
     /// <returns>Illegal不符合 Legitimate符合 Extra超出</returns>
-    public static async ValueTask<LenType> CheckForLength(string[] args, int len, Group qGroup = null,
-                                                          long fromQQid = 0)
+    public static async ValueTask<LenType> CheckForLength(
+        string[] args, int len, Group qGroup = null,
+        long     fromQQid = 0)
     {
-        if (args.Length >= len + 1) return args.Length == len + 1 ? LenType.Legitimate : LenType.Extra;
+        if (args.Length >= len + 1)
+            return args.Length == len + 1 ? LenType.Legitimate : LenType.Extra;
 
         if (qGroup is not null)
             await qGroup.SendGroupMessage(SoraSegment.At(fromQQid) + " 命令参数不全，请补充。");
@@ -103,6 +107,9 @@ internal static class BotUtil
     {
         //生成错误报告
         IoUtils.CrashLogGen(Log.ErrorLogBuilder(e));
+        //关闭浏览器
+        Task c = StaticVar.Chrome.CloseAsync();
+        c.Wait();
     }
 
     #endregion

@@ -1,7 +1,9 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using PuppeteerSharp;
 using SixLabors.ImageSharp;
 using Skadi.Config;
 using Skadi.ServerInterface;
@@ -26,13 +28,13 @@ internal static class ServiceStartUp
         Log.LogConfiguration.EnableConsoleOutput();
         //修改控制台标题
         Console.Title = @"Skadi";
-        Log.Info("Skadi初始化", "Skadi初始化...");
+        Log.Info("初始化", "Skadi初始化...");
         //初始化配置文件
-        Log.Info("Skadi初始化", "初始化服务器全局配置...");
+        Log.Info("初始化", "初始化服务器全局配置...");
 
         if (!ConfigManager.GlobalConfigFileInit() || !ConfigManager.TryGetGlobalConfig(out var globalConfig))
         {
-            Log.Fatal(new IOException("无法获取用户配置文件(StartUp)"), "Skadi初始化", "用户配置文件初始化失败");
+            Log.Fatal(new IOException("无法获取用户配置文件(StartUp)"), "初始化", "用户配置文件初始化失败");
             Environment.Exit(-1);
             return;
         }
@@ -45,12 +47,21 @@ internal static class ServiceStartUp
         //初始化字符编码
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
+        //初始化浏览器
+        Log.Info("初始化", "初始化浏览器...");
+        await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
+        StaticVar.Chrome = await Puppeteer.LaunchAsync(new LaunchOptions
+        {
+            Headless          = true,
+            IgnoreHTTPSErrors = true
+        });
+
         //TODO 可能很久之后才会写了
         // //启动机器人WebAPI服务器
-        // Log.Info("Skadi初始化", "启动机器人WebAPI服务器...");
+        // Log.Info("初始化", "启动机器人WebAPI服务器...");
         // ConsoleInterface = new ConsoleInterface(globalConfig.SkadiAPILocation, globalConfig.SkadiAPIPort);
 
-        Log.Info("Skadi初始化", "启动反向WS服务器...");
+        Log.Info("初始化", "启动反向WS服务器...");
         //初始化服务器
         var server = SoraServiceFactory.CreateService(new ServerConfig
         {
@@ -66,6 +77,18 @@ internal static class ServiceStartUp
             SendCommandErrMsg        = false,
             CommandExceptionHandle   = CommandError
         });
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+        {
+            BotUtil.BotCrash(args.ExceptionObject as Exception);
+        };
+        Console.CancelKeyPress += (_, args) =>
+        {
+            Log.Info("Ctr-C", "Skadi正在停止...");
+            StaticVar.Chrome.CloseAsync();
+            Thread.Sleep(1000);
+            args.Cancel = true;
+            Environment.Exit(0);
+        };
 
         StaticVar.SoraCommandManager = server.Event.CommandManager;
 
