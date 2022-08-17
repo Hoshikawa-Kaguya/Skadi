@@ -54,7 +54,8 @@ internal static class ServiceStartUp
         {
             Headless          = true,
             IgnoreHTTPSErrors = true,
-            Timeout           = 60000
+            Timeout           = 60000,
+            Args              = new[] {"--no-sandbox"}
         });
 
         //TODO 可能很久之后才会写了

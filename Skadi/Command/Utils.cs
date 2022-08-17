@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using PuppeteerSharp;
-using SixLabors.ImageSharp;
 using Skadi.Tool;
 using Sora.Attributes.Command;
 using Sora.Entities;
@@ -143,6 +142,9 @@ public static class Utils
             });
             message.Add(SoraSegment.Image($"base64://{picB64}"));
         }
+        //关闭页面
+        await page.CloseAsync();
+        await page.DisposeAsync();
 
         (ApiStatus status, int msgId) ret;
         if (fakeMessage)
