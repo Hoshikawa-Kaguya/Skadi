@@ -21,6 +21,13 @@ namespace Skadi.Command;
 [CommandGroup(SeriesName = "QA")]
 public class QA
 {
+    private struct QABuf
+    {
+        internal MessageBody msg;
+        internal Guid        cmdId;
+        internal long        gid;
+    }
+
     public QA()
     {
         Task.Run(() =>
@@ -34,7 +41,7 @@ public class QA
         });
     }
 
-    private readonly List<(MessageBody msg, Guid id, long gid)> _commandGuids = new();
+    private readonly List<QABuf> _commandGuids = new();
 
     [UsedImplicitly]
     [SoraCommand(
@@ -48,8 +55,9 @@ public class QA
             return;
         //查找分割点
         Guid backSegmentId = eventArgs.Message.MessageBody
-                                      .Where(s => s.Data is TextSegment t &&
-                                                  t.Content.IndexOf("你答", StringComparison.Ordinal) != -1)
+                                      .Where(s =>
+                                           s.Data is TextSegment t
+                                        && t.Content.IndexOf("你答", StringComparison.Ordinal) != -1)
                                       .Select(s => s.Id)
                                       .FirstOrDefault();
         if (backSegmentId == Guid.Empty)
@@ -90,12 +98,6 @@ public class QA
 
         if (!srcBSegment.Content.Equals("你答") && srcBSegment.Content.EndsWith("你答") && nextMsgIndex != 0)
             fMessage.Add(srcBSegment.Content[..^2]);
-
-        if (_commandGuids.Any(s => MessageEqual(s.msg, fMessage)))
-        {
-            await eventArgs.Reply("已经有相同的问题了！");
-            return;
-        }
 
         //回答消息切片
         if (srcBSegment.Content.EndsWith("你答"))
@@ -154,18 +156,27 @@ public class QA
         else
             question[0] = qFrontStr;
 
-        (MessageBody qMsg, Guid cmdId, _) =
-            _commandGuids.SingleOrDefault(s => MessageEqual(s.msg, question) && eventArgs.SourceGroup == s.gid);
-        if (qMsg is null || cmdId == Guid.Empty)
+        //查找相同问题的指令
+        List<QABuf> qaBufs = _commandGuids
+                            .Where(s => MessageEqual(s.msg, question) && eventArgs.SourceGroup == s.gid)
+                            .ToList();
+        if (qaBufs.Count == 0)
         {
             await eventArgs.Reply("没有这样的问题");
         }
         else
         {
-            StaticVar.SoraCommandManager.DeleteDynamicCommand(cmdId);
-            StaticVar.QaConfigFile.DeleteQA(qMsg);
-            _commandGuids.RemoveAll(s => MessageEqual(s.msg, question));
-            await eventArgs.Reply("我不再回答" + qMsg + "了");
+            foreach (QABuf buf in qaBufs)
+            {
+                //取消注册指令
+                StaticVar.SoraCommandManager.DeleteDynamicCommand(buf.cmdId);
+                //删除数据文件中的qa数据
+                StaticVar.QaConfigFile.DeleteQA(buf.msg);
+                //删除缓存中的qa
+                _commandGuids.RemoveAll(s => MessageEqual(s.msg, question));
+            }
+
+            await eventArgs.Reply("我不再回答" + question + "了");
         }
     }
 
@@ -193,6 +204,7 @@ public class QA
             _commandGuids.Where(c => c.gid == eventArgs.SourceGroup)
                          .Select(c => c.msg)
                          .ToList();
+        List<MessageBody> temp = new List<MessageBody>();
 
         if (groupQuestion.Count == 0)
         {
@@ -202,8 +214,11 @@ public class QA
 
         foreach (MessageBody msg in groupQuestion)
         {
+            if (temp.Any(i => MessageEqual(i, msg)))
+                continue;
             questions.AddRange(msg);
             questions.Add("|");
+            temp.Add(msg);
         }
 
         questions.RemoveAt(questions.Count - 1);
@@ -214,10 +229,19 @@ public class QA
     {
         Guid cmdId = StaticVar.SoraCommandManager.RegisterGroupDynamicCommand(
             args => MessageEqual(args.Message.MessageBody, qMsg),
-            async e => await e.Reply(aMsg),
+            async e =>
+            {
+                e.IsContinueEventChain = false;
+                await e.Reply(aMsg);
+            },
             "qa_global", MemberRoleType.Member, false, 0, new[] {group});
 
-        _commandGuids.Add((qMsg, cmdId, group));
+        _commandGuids.Add(new QABuf
+        {
+            msg   = qMsg,
+            cmdId = cmdId,
+            gid   = group
+        });
     }
 
     public static bool MessageCheck(MessageBody message)
