@@ -1,11 +1,14 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using PuppeteerSharp;
+using SixLabors.ImageSharp;
 using Skadi.Tool;
 using Sora.Attributes.Command;
 using Sora.Entities;
@@ -55,7 +58,7 @@ public static class Utils
     [UsedImplicitly]
     [SoraCommand(
         SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"fs"},
+        CommandExpressions = new[] {@"#sk"},
         MatchType = MatchType.Full,
         SuperUserCommand = true)]
     public static async ValueTask Status(GroupMessageEventArgs eventArgs)
@@ -71,9 +74,18 @@ public static class Utils
 
         ulong msgCount = Convert.ToUInt64(data["message_received"] ?? 0) + Convert.ToUInt64(data["message_sent"] ?? 0);
         StringBuilder msg = new StringBuilder();
+        float tMem = GC.GetTotalAllocatedBytes(true) / (1024 * 1024f);
+        float mem = Environment.WorkingSet / (1024 * 1024f);
+        double cpu = await GetCpuUsageForProcess();
+
+        msg.AppendLine("Skadi-Status");
         msg.AppendLine("Ciallo～(∠・ω< )⌒☆");
-        msg.AppendLine($"m:{msgCount}");
-        msg.Append($"u:{DateTime.Now - StaticVar.StartTime:g}");
+        msg.AppendLine($"消息数量:{msgCount}");
+        msg.AppendLine($"运行时间:{DateTime.Now - StaticVar.StartTime:g}");
+        msg.AppendLine($"GC Allocated:{tMem.ToString("F2")}MB");
+        msg.AppendLine($"RAM:{mem.ToString("F2")}MB");
+        msg.AppendLine($"CPU:{cpu.ToString("F2")}%");
+        msg.Append($"P_THC:{ThreadPool.ThreadCount}");
         await eventArgs.Reply(msg.ToString());
     }
 
@@ -134,7 +146,8 @@ public static class Utils
 
         (ApiStatus status, int msgId) ret;
         if (fakeMessage)
-            ret = await eventArgs.SourceGroup.SendGroupForwardMsg(new[] {new CustomNode("色色", 114514, message)}, timeout);
+            ret = await eventArgs.SourceGroup.SendGroupForwardMsg(new[] {new CustomNode("色色", 114514, message)},
+                      timeout);
         else
             ret = await eventArgs.Reply(message, timeout);
 
@@ -143,5 +156,19 @@ public static class Utils
             Log.Info("Curl", $"自动撤回消息[{ret.msgId}]");
             BotUtil.AutoRemoveMessage(ret.msgId, eventArgs.LoginUid);
         }
+    }
+
+    private static async Task<double> GetCpuUsageForProcess()
+    {
+        var startTime     = DateTime.UtcNow;
+        var startCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
+        await Task.Delay(500);
+
+        var endTime       = DateTime.UtcNow;
+        var endCpuUsage   = Process.GetCurrentProcess().TotalProcessorTime;
+        var cpuUsedMs     = (endCpuUsage - startCpuUsage).TotalMilliseconds;
+        var totalMsPassed = (endTime     - startTime).TotalMilliseconds;
+        var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
+        return cpuUsageTotal * 100;
     }
 }
