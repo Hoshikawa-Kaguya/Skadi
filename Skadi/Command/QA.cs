@@ -18,7 +18,7 @@ namespace Skadi.Command;
 /// <summary>
 /// 问答
 /// </summary>
-[CommandGroup(GroupName = "QA")]
+[CommandGroup(SeriesName = "QA")]
 public class QA
 {
     public QA()

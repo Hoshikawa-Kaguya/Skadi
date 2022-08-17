@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Skadi.IO;
 using Skadi.TypeEnum;
+using Sora;
 using Sora.Entities;
 using Sora.Entities.Segment;
 using Sora.EventArgs.SoraEvent;
@@ -125,6 +126,21 @@ internal static class BotUtil
                                                           "\r\nERROR"                              +
                                                           "\r\n数据库错误");
         Log.Error("database", "database error");
+    }
+
+    #endregion
+
+    #region 消息工具
+
+    internal static void AutoRemoveMessage(int msgId, long selfId, TimeSpan? timeOffset = null)
+    {
+        TimeSpan t = timeOffset ?? TimeSpan.FromSeconds(5);
+        Task.Run(async () =>
+        {
+            await Task.Delay(t);
+            if (SoraServiceFactory.TryGetApi(selfId, out var api))
+                await api.RecallMessage(msgId);
+        });
     }
 
     #endregion

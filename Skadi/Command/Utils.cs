@@ -1,16 +1,21 @@
 using System;
+using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using PuppeteerSharp;
+using Skadi.Tool;
 using Sora.Attributes.Command;
 using Sora.Entities;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 using Sora.Enumeration.ApiType;
+using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
+using YukariToolBox.LightLog;
 
 namespace Skadi.Command;
 
@@ -76,11 +81,16 @@ public static class Utils
     [SoraCommand(
         SourceType = SourceFlag.Group,
         CommandExpressions = new[] {@"^看看\s.+$"},
-        MatchType = MatchType.Regex)]
+        MatchType = MatchType.Regex,
+        PermissionLevel = MemberRoleType.Admin)]
     public static async ValueTask Curl(GroupMessageEventArgs eventArgs)
     {
-        string[] args = eventArgs.Message.RawText.Split(' ');
-        string   url  = args[1];
+        string[] args        = eventArgs.Message.RawText.Split(' ');
+        string   url         = args[1];
+        bool     all         = args.Contains("-a");
+        bool     autoRemove  = args.Contains("-ar");
+        bool     fakeMessage = args.Contains("-f");
+
         if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
         {
             await eventArgs.Reply("这不是url啊kora");
@@ -90,6 +100,7 @@ public static class Utils
         eventArgs.IsContinueEventChain = false;
 
         await eventArgs.Reply("running...");
+        Log.Info("Curl", $"获取到url [{url}]");
 
         Page page = await StaticVar.Chrome.NewPageAsync();
         await page.SetViewportAsync(new ViewPortOptions
@@ -98,23 +109,39 @@ public static class Utils
             Height = 1080
         });
 
-        await page.GoToAsync(url);
-        ElementHandle img = await page.QuerySelectorAsync("body > img");
+        Response    resp    = await page.GoToAsync(url);
+        MessageBody message = new MessageBody();
+        TimeSpan    timeout = TimeSpan.FromMinutes(1);
+
         //单图网页
-        if (img is not null)
+        if (resp.Status == HttpStatusCode.OK
+         && resp.Headers.ContainsKey("content-type")
+         && resp.Headers["content-type"].Contains("image/"))
         {
-            string imgUrl = (await img.GetPropertyAsync("src")).RemoteObject.Value.ToString();
-            await eventArgs.Reply(SoraSegment.Image(imgUrl));
-            return;
+            Log.Info("Curl", "获取到图片");
+            message.Add(SoraSegment.Image(url));
+        }
+        else
+        {
+            Log.Info("Curl", "生成截图...");
+            string picB64 = await page.ScreenshotBase64Async(new ScreenshotOptions
+            {
+                FullPage = all,
+                Type     = ScreenshotType.Png
+            });
+            message.Add(SoraSegment.Image($"base64://{picB64}"));
         }
 
-        string picB64 = await page.ScreenshotBase64Async(new ScreenshotOptions
-        {
-            FullPage       = false,
-            OmitBackground = true,
-            Type           = ScreenshotType.Png
-        });
+        (ApiStatus status, int msgId) ret;
+        if (fakeMessage)
+            ret = await eventArgs.SourceGroup.SendGroupForwardMsg(new[] {new CustomNode("色色", 114514, message)}, timeout);
+        else
+            ret = await eventArgs.Reply(message, timeout);
 
-        await eventArgs.Reply(SoraSegment.Image($"base64://{picB64}"));
+        if (ret.status.RetCode == ApiStatusType.Ok && autoRemove)
+        {
+            Log.Info("Curl", $"自动撤回消息[{ret.msgId}]");
+            BotUtil.AutoRemoveMessage(ret.msgId, eventArgs.LoginUid);
+        }
     }
 }

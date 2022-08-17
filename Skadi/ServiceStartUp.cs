@@ -53,7 +53,8 @@ internal static class ServiceStartUp
         StaticVar.Chrome = await Puppeteer.LaunchAsync(new LaunchOptions
         {
             Headless          = true,
-            IgnoreHTTPSErrors = true
+            IgnoreHTTPSErrors = true,
+            Timeout           = 60000
         });
 
         //TODO 可能很久之后才会写了
