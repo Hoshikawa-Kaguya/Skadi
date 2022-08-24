@@ -24,7 +24,7 @@ namespace Skadi.Command;
 /// <summary>
 /// Bot实用工具
 /// </summary>
-[CommandGroup]
+[CommandSeries]
 public static class Utils
 {
     /// <summary>

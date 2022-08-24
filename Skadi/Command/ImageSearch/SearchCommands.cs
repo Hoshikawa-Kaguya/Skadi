@@ -15,7 +15,7 @@ namespace Skadi.Command.ImageSearch;
 /// <summary>
 /// 搜图指令
 /// </summary>
-[CommandGroup]
+[CommandSeries]
 public static class SearchCommands
 {
     [UsedImplicitly]

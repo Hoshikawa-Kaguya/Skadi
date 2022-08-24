@@ -23,7 +23,7 @@ namespace Skadi.Command;
 /// <summary>
 /// BV/AV号解析
 /// </summary>
-[CommandGroup]
+[CommandSeries]
 public static class BlibiliVideo
 {
     public static HashSet<string> cmdRecord = new();

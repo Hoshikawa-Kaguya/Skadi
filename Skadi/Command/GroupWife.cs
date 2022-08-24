@@ -11,7 +11,7 @@ using YukariToolBox.LightLog;
 
 namespace Skadi.Command;
 
-[CommandGroup]
+[CommandSeries]
 public class GroupWife
 {
     private readonly List<long> _waitingList = new();

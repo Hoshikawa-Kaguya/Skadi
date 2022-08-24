@@ -18,7 +18,7 @@ namespace Skadi.Command;
 /// <summary>
 /// 问答
 /// </summary>
-[CommandGroup(SeriesName = "QA")]
+[CommandSeries(SeriesName = "QA")]
 public class QA
 {
     private struct QABuf

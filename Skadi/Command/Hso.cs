@@ -25,7 +25,7 @@ using MatchType = Sora.Enumeration.MatchType;
 
 namespace Skadi.Command;
 
-[CommandGroup(SeriesName = "hso")]
+[CommandSeries(SeriesName = "hso")]
 public class HsoCommand
 {
     #region 指令响应

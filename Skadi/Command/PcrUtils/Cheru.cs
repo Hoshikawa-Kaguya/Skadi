@@ -15,7 +15,7 @@ namespace Skadi.Command.PcrUtils;
 /// 参考自HoshinoBot
 /// 对原算法有所改进
 /// </summary>
-[CommandGroup]
+[CommandSeries]
 public static class Cheru
 {
     #region 字符集常量

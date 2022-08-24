@@ -14,7 +14,7 @@ using Sora.EventArgs.SoraEvent;
 
 namespace Skadi.Command;
 
-[CommandGroup]
+[CommandSeries]
 public class Surprise
 {
     #region 私有方法

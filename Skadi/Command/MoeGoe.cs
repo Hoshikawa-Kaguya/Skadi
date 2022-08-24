@@ -11,7 +11,7 @@ using Sora.EventArgs.SoraEvent;
 
 namespace Skadi.Command
 {
-    [CommandGroup(SeriesName = "MoeGoe")]
+    [CommandSeries(SeriesName = "MoeGoe")]
     public class MoeGoe
     {
         [UsedImplicitly]

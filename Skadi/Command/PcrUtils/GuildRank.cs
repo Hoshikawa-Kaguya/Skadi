@@ -16,7 +16,7 @@ using YukariToolBox.LightLog;
 
 namespace Skadi.Command.PcrUtils;
 
-[CommandGroup]
+[CommandSeries]
 public static class GuildRank
 {
     #region 查询指令
