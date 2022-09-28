@@ -22,7 +22,7 @@ internal static class SubscriptionTimer
         SubscriptionEvent, //事件处理
         null,              //初始化数据
         new TimeSpan(0),   //即刻执行
-        new TimeSpan(0, 0, 0, 60));
+        new TimeSpan(0, 0, 1, 0));
 
     /// <summary>
     /// 订阅列表
@@ -39,6 +39,7 @@ internal static class SubscriptionTimer
     /// <param name="eventArgs">ConnectEventArgs</param>
     internal static void TimerEventAdd(ConnectEventArgs eventArgs)
     {
+        Log.Info("SubTimer", "添加订阅");
         //尝试添加订阅
         if (!_subDictionary.Exists(args => args.LoginUid == eventArgs.LoginUid))
         {

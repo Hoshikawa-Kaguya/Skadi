@@ -159,7 +159,6 @@ internal class SubscriptionDbHelper
                     .Where(biliLive => biliLive.SubscriptionId == biliUserId &&
                                        biliLive.Gid            == groupId)
                     .Any())
-            //没有记录插入新行
             return dbClient.Queryable<Tables.BiliLiveSubscription>()
                            .Where(biliLive => biliLive.SubscriptionId == biliUserId &&
                                               biliLive.Gid            == groupId)

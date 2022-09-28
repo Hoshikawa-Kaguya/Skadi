@@ -1,16 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BilibiliApi.Dynamic;
-using BilibiliApi.Dynamic.Enums;
-using BilibiliApi.Dynamic.Models;
-using BilibiliApi.Dynamic.Models.Card;
-using BilibiliApi.Live;
+using BilibiliApi;
 using BilibiliApi.Live.Enums;
-using BilibiliApi.Live.Models;
-using BilibiliApi.User;
-using BilibiliApi.User.Models;
+using BilibiliApi.Models;
+using PuppeteerSharp;
 using Skadi.Config;
 using Skadi.DatabaseUtils.Helpers;
 using Sora.Entities;
@@ -51,116 +45,70 @@ internal static class SubscriptionUpdate
         }
     }
 
-    private static async ValueTask GetLiveStatus(
-        SoraApi              soraApi, long biliUser, List<long> groupId,
-        SubscriptionDbHelper dbHelper)
+    private static async ValueTask GetLiveStatus(SoraApi              soraApi,
+                                                 long                 biliUser,
+                                                 List<long>           groupId,
+                                                 SubscriptionDbHelper dbHelper)
     {
-        LiveInfo      live;
-        UserSpaceInfo biliUserInfo;
-        //获取数据
-        try
+        //数据获取
+        UserInfo bUserInfo = await BiliApis.GetLiveUserInfo(biliUser);
+        if (bUserInfo is null)
         {
-            biliUserInfo = UserApis.GetLiveRoomInfo(biliUser);
-            live         = LiveAPIs.GetLiveRoomInfo(biliUserInfo.LiveRoomInfo.ShortId);
+            Log.Error("BiliApi", $"无法获取用户信息[{biliUser}]");
+            return;
         }
-        catch (Exception e)
+
+        LiveInfo liveInfo = await BiliApis.GetLiveRoomInfo(bUserInfo.LiveId);
+        if (liveInfo.Code != 0)
         {
-            Log.Error(e, "SubscriptionUpdate", "获取直播状态时发生错误");
+            Log.Error("BiliApi", $"无法获取用户[{biliUser}]的直播信息\r\nmsg:{liveInfo.Message}");
             return;
         }
 
         //需要更新数据的群
-        Dictionary<long, LiveStatusType> updateDict = groupId
-                                                     .Where(gid => dbHelper.GetLastLiveStatus(gid, biliUser) !=
-                                                                   live.LiveStatus)
-                                                     .ToDictionary(gid => gid, _ => live.LiveStatus);
+        Dictionary<long, LiveStatusType> updateDict =
+            groupId.Where(gid => dbHelper.GetLastLiveStatus(gid, biliUser) != liveInfo.LiveStatus)
+                   .ToDictionary(gid => gid, _ => liveInfo.LiveStatus);
 
         //更新数据库
         foreach (var status in updateDict)
-            if (!dbHelper.UpdateLiveStatus(status.Key, biliUser, live.LiveStatus))
+            if (!dbHelper.UpdateLiveStatus(status.Key, biliUser, liveInfo.LiveStatus))
                 Log.Error("Database", "更新直播订阅数据失败");
 
+
         //需要消息提示的群
-        var targetGroup = updateDict.Where(group => group.Value == LiveStatusType.Online)
-                                    .Select(group => group.Key)
-                                    .ToList();
+        var targetGroup = updateDict
+                          .Where(group => group.Value == LiveStatusType.Online)
+                          .Select(group => group.Key)
+                          .ToList();
         if (targetGroup.Count == 0)
             return;
 
         Log.Info("Sub", $"更新[{soraApi.GetLoginUserId()}]的Live订阅");
         //构建提示消息
-        var message = $"{biliUserInfo.Name} 正在直播！\r\n{biliUserInfo.LiveRoomInfo.Title}" +
-                      SoraSegment.Image(biliUserInfo.LiveRoomInfo.CoverUrl)             +
-                      $"直播间地址:{biliUserInfo.LiveRoomInfo.LiveUrl}";
+        var message = $"{bUserInfo.UserName} 正在直播！\r\n{liveInfo.Title}"
+                      + SoraSegment.Image(liveInfo.Cover)
+                      + $"直播间地址:https://live.bilibili.com/{liveInfo.RoomId}";
         foreach (var gid in targetGroup)
         {
-            Log.Info("直播订阅", $"获取到{biliUserInfo.Name}正在直播，向群[{gid}]发送动态信息");
+            Log.Info("直播订阅", $"获取到{bUserInfo.UserName}正在直播，向群[{gid}]发送动态信息");
             await soraApi.SendGroupMessage(gid, message);
         }
     }
 
-    private static async ValueTask GetDynamic(
-        SoraApi              soraApi, long biliUser, List<long> groupId,
-        SubscriptionDbHelper dbHelper)
+    private static async ValueTask GetDynamic(SoraApi              soraApi,
+                                              long                 biliUser,
+                                              List<long>           groupId,
+                                              SubscriptionDbHelper dbHelper)
     {
-        string  textMessage;
-        Dynamic biliDynamic;
-        var     imgList = new List<string>();
-        //获取动态文本
-        try
-        {
-            var (cardObj, cardType) = DynamicAPIs.GetLatestDynamic(biliUser);
-            switch (cardType)
-            {
-                //检查动态类型
-                case CardType.PlainText:
-                    var plainTextCard = (PlainTextCard) cardObj;
-                    textMessage = plainTextCard.ToString();
-                    biliDynamic = plainTextCard;
-                    break;
-                case CardType.TextAndPic:
-                    var textAndPicCard = (TextAndPicCard) cardObj;
-                    imgList.AddRange(textAndPicCard.ImgList);
-                    textMessage = textAndPicCard.ToString();
-                    biliDynamic = textAndPicCard;
-                    break;
-                case CardType.Forward:
-                    var forwardCard = (ForwardCard) cardObj;
-                    textMessage = forwardCard.ToString();
-                    biliDynamic = forwardCard;
-                    break;
-                case CardType.Video:
-                    var videoCard = (VideoCard) cardObj;
-                    imgList.Add(videoCard.CoverUrl);
-                    textMessage = videoCard.ToString();
-                    biliDynamic = videoCard;
-                    break;
-                case CardType.Error:
-                    //Log.Error("动态获取", $"ID:{biliUser}的动态获取失败");
-                    return;
-                default:
-                    Log.Debug("动态获取", $"ID:{biliUser}的动态获取成功，动态类型未知");
-                    foreach (var gid in groupId.Where(gid => !dbHelper.UpdateDynamic(gid, biliUser,
-                                                                 DateTime.Now.ToTimeStamp())))
-                        Log.Error("数据库", $"更新群[{gid}]动态记录时发生了数据库错误");
-
-                    return;
-            }
-        }
-        catch (Exception e)
-        {
-            Log.Error("获取动态更新时发生错误", Log.ErrorLogBuilder(e));
-            return;
-        }
-
         //获取用户信息
-        var sender = biliDynamic.GetUserInfo();
+        UserInfo sender = await BiliApis.GetLiveUserInfo(biliUser);
+        (ulong dId, long dTs) = await BiliApis.GetLatestDynamicId(biliUser);
         Log.Debug("动态获取", $"{sender.UserName}的动态获取成功");
         //检查是否是最新的
-        var targetGroups = groupId
-                          .Where(group => !dbHelper.IsLatestDynamic(group, sender.Uid,
-                                              biliDynamic.UpdateTime))
-                          .ToList();
+        var targetGroups =
+            groupId.Where(group => !dbHelper.IsLatestDynamic(group, sender.Uid, dTs.ToDateTime()))
+                   .ToList();
         //没有群需要发送消息
         if (targetGroups.Count == 0)
         {
@@ -171,20 +119,41 @@ internal static class SubscriptionUpdate
         Log.Info("Sub", $"更新[{soraApi.GetLoginUserId()}]的动态订阅");
 
         //构建消息
-        var message = new MessageBody();
-        message.Add($"获取到了来自 {sender.UserName} 的动态：\r\n{textMessage}");
-        //添加图片
-        foreach (var img in imgList)
-            message.Add(SoraSegment.Image(img));
-
-        message += SoraSegment.Text($"\r\n更新时间：{biliDynamic.UpdateTime:MM-dd HH:mm:ss}");
+        MessageBody message = new MessageBody();
+        message += await GetChromePic($"https://t.bilibili.com/{dId}");
         //向未发送消息的群发送消息
-        foreach (var targetGroup in targetGroups)
+        foreach (long targetGroup in targetGroups)
         {
             Log.Info("动态获取", $"获取到{sender.UserName}的最新动态，向群{targetGroup}发送动态信息");
             await soraApi.SendGroupMessage(targetGroup, message);
-            if (!dbHelper.UpdateDynamic(targetGroup, sender.Uid, biliDynamic.UpdateTime))
+            if (!dbHelper.UpdateDynamic(targetGroup, sender.Uid, dTs.ToDateTime()))
                 Log.Error("数据库", "更新动态记录时发生了数据库错误");
         }
+    }
+
+    private static async Task<SoraSegment> GetChromePic(string url)
+    {
+        Page page = await StaticVar.Chrome.NewPageAsync();
+        await page.SetViewportAsync(new ViewPortOptions
+        {
+            Width  = 2000,
+            Height = 1500
+        });
+
+        await page.GoToAsync(url);
+
+        //动态
+        ElementHandle dyElement =
+            await page.QuerySelectorAsync("#app > div.content > div > div > div.bili-dyn-item__main");
+        Log.Debug("Puppeteer", $"获取到动态元素[{dyElement.RemoteObject.ObjectId}]");
+
+        string picB64 = await dyElement.ScreenshotBase64Async(new ScreenshotOptions { Type = ScreenshotType.Png });
+
+        //关闭页面
+        await page.CloseAsync();
+        await page.DisposeAsync();
+
+        SoraSegment img = SoraSegment.Image($"base64://{picB64}");
+        return img;
     }
 }

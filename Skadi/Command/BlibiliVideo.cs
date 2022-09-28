@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using BilibiliApi.Video;
+using BilibiliApi;
 using BilibiliApi.Video.Models;
 using JetBrains.Annotations;
 using SixLabors.ImageSharp;
@@ -53,7 +53,7 @@ public static class BlibiliVideo
             return;
         cmdRecord.Add(eventArgs.Message.RawText);
 
-        VideoInfo videoInfo = VideoApis.GetVideoInfo(eventArgs.Message.RawText);
+        VideoInfo videoInfo = await BiliApis.GetVideoInfo(eventArgs.Message.RawText);
         if (videoInfo.Code != 0)
         {
             await eventArgs.Reply($"API发生错误({videoInfo.Code})\r\nmessage:{videoInfo.Message}");
@@ -94,7 +94,7 @@ public static class BlibiliVideo
         }
 
         //获取视频信息
-        VideoInfo videoInfo = VideoApis.GetVideoInfo(videoIdStr);
+        VideoInfo videoInfo = await BiliApis.GetVideoInfo(videoIdStr);
         if (videoInfo.Code != 0)
         {
             await eventArgs.Reply($"API发生错误({videoInfo.Code})\r\nmessage:{videoInfo.Message}");

@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,7 +32,7 @@ public static class Utils
     [UsedImplicitly]
     [SoraCommand(
         SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"^echo\s[\s\S]+$"},
+        CommandExpressions = new[] { @"^echo\s[\s\S]+$" },
         MatchType = MatchType.Regex,
         SuperUserCommand = true)]
     public static async ValueTask Echo(GroupMessageEventArgs eventArgs)
@@ -57,7 +56,7 @@ public static class Utils
     [UsedImplicitly]
     [SoraCommand(
         SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"#sk"},
+        CommandExpressions = new[] { @"#sk" },
         MatchType = MatchType.Full,
         SuperUserCommand = true)]
     public static async ValueTask Status(GroupMessageEventArgs eventArgs)
@@ -91,16 +90,16 @@ public static class Utils
     [UsedImplicitly]
     [SoraCommand(
         SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"^看看\s.+$"},
+        CommandExpressions = new[] { @"^看看\s.+$" },
         MatchType = MatchType.Regex,
         PermissionLevel = MemberRoleType.Admin)]
     public static async ValueTask Curl(GroupMessageEventArgs eventArgs)
     {
-        string[] args        = eventArgs.Message.RawText.Split(' ');
-        string   url         = args[1];
-        bool     all         = args.Contains("-a");
-        bool     autoRemove  = args.Contains("-ar");
-        bool     fakeMessage = args.Contains("-f");
+        string[] args = eventArgs.Message.RawText.Split(' ');
+        string url = args[1];
+        bool all = args.Contains("-a");
+        bool autoRemove = args.Contains("-ar");
+        bool fakeMessage = args.Contains("-f");
 
         if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
         {
@@ -113,64 +112,78 @@ public static class Utils
         await eventArgs.Reply("running...");
         Log.Info("Curl", $"获取到url [{url}]");
 
-        Page page = await StaticVar.Chrome.NewPageAsync();
-        await page.SetViewportAsync(new ViewPortOptions
-        {
-            Width  = 1920,
-            Height = 1080
-        });
+        //尝试以图片方式直接发送
+        Log.Info("Curl", "尝试直接发送图片");
+        if (await eventArgs.SendParaMessage(SoraSegment.Image(url), fakeMessage, autoRemove))
+            return;
 
-        Response    resp    = await page.GoToAsync(url);
-        MessageBody message = new MessageBody();
-        TimeSpan    timeout = TimeSpan.FromMinutes(1);
-
-        //单图网页
-        if (resp.Status == HttpStatusCode.OK
-         && resp.Headers.ContainsKey("content-type")
-         && resp.Headers["content-type"].Contains("image/"))
-        {
-            Log.Info("Curl", "获取到图片");
-            message.Add(SoraSegment.Image(url));
-        }
-        else
-        {
-            Log.Info("Curl", "生成截图...");
-            string picB64 = await page.ScreenshotBase64Async(new ScreenshotOptions
-            {
-                FullPage = all,
-                Type     = ScreenshotType.Png
-            });
-            message.Add(SoraSegment.Image($"base64://{picB64}"));
-        }
-        //关闭页面
-        await page.CloseAsync();
-        await page.DisposeAsync();
-
-        (ApiStatus status, int msgId) ret;
-        if (fakeMessage)
-            ret = await eventArgs.SourceGroup.SendGroupForwardMsg(new[] {new CustomNode("色色", 114514, message)},
-                      timeout);
-        else
-            ret = await eventArgs.Reply(message, timeout);
-
-        if (ret.status.RetCode == ApiStatusType.Ok && autoRemove)
-        {
-            Log.Info("Curl", $"自动撤回消息[{ret.msgId}]");
-            BotUtil.AutoRemoveMessage(ret.msgId, eventArgs.LoginUid);
-        }
+        Log.Info("Curl", "使用浏览器进行发送");
+        SoraSegment image = await GetChromePic(url, all);
+        await eventArgs.SendParaMessage(image, fakeMessage, autoRemove);
     }
 
     private static async Task<double> GetCpuUsageForProcess()
     {
-        var startTime     = DateTime.UtcNow;
+        var startTime = DateTime.UtcNow;
         var startCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
         await Task.Delay(500);
 
-        var endTime       = DateTime.UtcNow;
-        var endCpuUsage   = Process.GetCurrentProcess().TotalProcessorTime;
-        var cpuUsedMs     = (endCpuUsage - startCpuUsage).TotalMilliseconds;
-        var totalMsPassed = (endTime     - startTime).TotalMilliseconds;
+        var endTime = DateTime.UtcNow;
+        var endCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
+        var cpuUsedMs = (endCpuUsage - startCpuUsage).TotalMilliseconds;
+        var totalMsPassed = (endTime - startTime).TotalMilliseconds;
         var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
         return cpuUsageTotal * 100;
+    }
+
+    private static async Task<SoraSegment> GetChromePic(string url,
+                                                        bool   all)
+    {
+        Page page = await StaticVar.Chrome.NewPageAsync();
+        await page.SetViewportAsync(new ViewPortOptions
+        {
+            Width = 1920,
+            Height = 1080
+        });
+
+        await page.GoToAsync(url);
+
+        Log.Info("Curl", "生成截图...");
+        string picB64 = await page.ScreenshotBase64Async(new ScreenshotOptions
+        {
+            FullPage = all,
+            Type = ScreenshotType.Png
+        });
+
+        //关闭页面
+        await page.CloseAsync();
+        await page.DisposeAsync();
+
+        SoraSegment img = SoraSegment.Image($"base64://{picB64}");
+        return img;
+    }
+
+    private static async ValueTask<bool> SendParaMessage(this GroupMessageEventArgs eventArgs,
+                                                         MessageBody                message,
+                                                         bool                       fakeMessage,
+                                                         bool                       autoRemove)
+    {
+        (ApiStatus status, int msgId) ret;
+        TimeSpan timeout = TimeSpan.FromMinutes(1);
+        if (fakeMessage)
+            ret = await eventArgs.SourceGroup.SendGroupForwardMsg(new[] { new CustomNode("色色", 114514, message) },
+                timeout);
+        else
+            ret = await eventArgs.Reply(message, timeout);
+
+        if (ret.status.RetCode != ApiStatusType.Ok) return false;
+
+        if (autoRemove)
+        {
+            Log.Info("Curl", $"自动撤回消息[{ret.msgId}]");
+            BotUtil.AutoRemoveMessage(ret.msgId, eventArgs.LoginUid);
+        }
+
+        return true;
     }
 }
