@@ -7,6 +7,7 @@ using BilibiliApi.Models;
 using PuppeteerSharp;
 using Skadi.Config;
 using Skadi.DatabaseUtils.Helpers;
+using Sora;
 using Sora.Entities;
 using Sora.Entities.Base;
 using Sora.Entities.Segment;
@@ -33,15 +34,20 @@ internal static class SubscriptionUpdate
         //检查模块是否启用
         if (!moduleEnable.BiliSubscription)
             return;
+        if (!SoraServiceFactory.TryGetApi(connectEventArgs.LoginUid, out SoraApi api))
+        {
+            Log.Error("SoraApi", $"无法获取账号[{connectEventArgs.LoginUid}]API实例");
+            return;
+        }
         foreach (var subscription in subscriptions)
         {
             //臭DD的订阅
             foreach (var biliUser in subscription.SubscriptionId)
-                await GetDynamic(connectEventArgs.SoraApi, biliUser, subscription.GroupId, dbHelper);
+                await GetDynamic(api, biliUser, subscription.GroupId, dbHelper);
 
             //直播动态订阅
             foreach (var biliUser in subscription.LiveSubscriptionId)
-                await GetLiveStatus(connectEventArgs.SoraApi, biliUser, subscription.GroupId, dbHelper);
+                await GetLiveStatus(api, biliUser, subscription.GroupId, dbHelper);
         }
     }
 
@@ -52,16 +58,20 @@ internal static class SubscriptionUpdate
     {
         //数据获取
         UserInfo bUserInfo = await BiliApis.GetLiveUserInfo(biliUser);
-        if (bUserInfo is null)
+        if (bUserInfo is null || bUserInfo.Code != 0)
         {
             Log.Error("BiliApi", $"无法获取用户信息[{biliUser}]");
+            if (bUserInfo is not null)
+                Log.Error("BiliApi[GetLiveUserInfo]", $"Api error:{bUserInfo.Message}");
             return;
         }
 
         LiveInfo liveInfo = await BiliApis.GetLiveRoomInfo(bUserInfo.LiveId);
-        if (liveInfo.Code != 0)
+        if (liveInfo is null || liveInfo.Code != 0)
         {
-            Log.Error("BiliApi", $"无法获取用户[{biliUser}]的直播信息\r\nmsg:{liveInfo.Message}");
+            Log.Error("BiliApi", $"无法获取直播间信息[{biliUser}]");
+            if (liveInfo is not null)
+                Log.Error("BiliApi[GetLiveRoomInfo]", $"Api error:{bUserInfo.Message}");
             return;
         }
 
@@ -103,7 +113,21 @@ internal static class SubscriptionUpdate
     {
         //获取用户信息
         UserInfo sender = await BiliApis.GetLiveUserInfo(biliUser);
+        if (sender is null || sender.Code != 0)
+        {
+            Log.Error("BiliApi", $"无法获取用户信息[{biliUser}]");
+            if (sender is not null)
+                Log.Error("BiliApi[GetLiveUserInfo]", $"Api error:{sender.Message}");
+            return;
+        }
+
         (ulong dId, long dTs) = await BiliApis.GetLatestDynamicId(biliUser);
+        if (dId == 0 || dTs == 0)
+        {
+            Log.Error("BiliApi", $"无法获取用户动态信息[{biliUser}]");
+            return;
+        }
+
         Log.Debug("动态获取", $"{sender.UserName}的动态获取成功");
         //检查是否是最新的
         var targetGroups =

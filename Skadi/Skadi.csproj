@@ -62,7 +62,7 @@
 
     <ItemGroup>
         <PackageReference Include="BeetleX.FastHttpApi" Version="2.2.18.1803" />
-        <PackageReference Include="BilibiliApi" Version="0.5.3" />
+        <PackageReference Include="BilibiliApi" Version="0.5.4" />
         <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
         <PackageReference Include="PuppeteerSharp" Version="7.1.0" />
         <PackageReference Include="PyLibSharp.Requests" Version="1.2.10" />
