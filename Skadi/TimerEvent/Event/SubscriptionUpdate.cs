@@ -10,9 +10,9 @@ using Skadi.Config;
 using Skadi.Config.ConfigModule;
 using Skadi.DatabaseUtils.Helpers;
 using Sora;
-using Sora.Entities;
 using Sora.Entities.Base;
 using Sora.Entities.Segment;
+using Sora.Entities.Segment.DataModel;
 using Sora.EventArgs.SoraEvent;
 using Sora.Util;
 using YukariToolBox.LightLog;
@@ -41,6 +41,7 @@ internal static class SubscriptionUpdate
             Log.Error("SoraApi", $"无法获取账号[{connectEventArgs.LoginUid}]API实例");
             return;
         }
+
         foreach (var subscription in subscriptions)
         {
             //臭DD的订阅
@@ -123,7 +124,7 @@ internal static class SubscriptionUpdate
             return;
         }
 
-        (ulong dId, long dTs, JToken dyjson) = await BiliApis.GetLatestDynamicId(biliUser);
+        (ulong dId, long dTs, JToken dyJson) = await BiliApis.GetLatestDynamicId(biliUser);
         if (dId == 0 || dTs == 0)
         {
             Log.Error("BiliApi", $"无法获取用户动态信息[{biliUser}]");
@@ -132,7 +133,7 @@ internal static class SubscriptionUpdate
 
         Log.Debug("动态获取", $"{sender.UserName}的动态获取成功");
         //检查是否是最新的
-        var targetGroups =
+        List<long> targetGroups =
             groupId.Where(group => !dbHelper.IsLatestDynamic(group, sender.Uid, dTs.ToDateTime()))
                    .ToList();
         //没有群需要发送消息
@@ -145,13 +146,28 @@ internal static class SubscriptionUpdate
         Log.Info("Sub", $"更新[{soraApi.GetLoginUserId()}]的动态订阅");
 
         //构建消息
-        MessageBody message = new MessageBody();
-        message += await GetChromePic($"https://t.bilibili.com/{dId}");
+        List<CustomNode> nodes = new()
+        {
+            //动态渲染图
+            new CustomNode(sender.UserName, 114514, await GetChromePic($"https://t.bilibili.com/{dId}")),
+            new CustomNode(sender.UserName, 114514, "动态内容:")
+        };
+        //动态文字
+        if (dyJson["modules"]?["module_dynamic"]?["desc"]?["text"] is not null)
+            nodes.Add(new CustomNode(sender.UserName,
+                                     114514,
+                                     dyJson["modules"]?["module_dynamic"]?["desc"]?["text"]?.Value<string>() ?? string.Empty));
+        nodes.Add(new CustomNode(sender.UserName, 114514, "动态图片:"));
+        //动态图片
+        if (dyJson["modules"]?["module_dynamic"]?["major"]?["draw"]?["items"] is JArray array) 
+            nodes.AddRange(array.Select(item => new CustomNode(sender.UserName, 114514, SoraSegment.Image(item?.Value<string>("src")))));
+
         //向未发送消息的群发送消息
         foreach (long targetGroup in targetGroups)
         {
             Log.Info("动态获取", $"获取到{sender.UserName}的最新动态，向群{targetGroup}发送动态信息");
-            await soraApi.SendGroupMessage(targetGroup, message);
+            await soraApi.SendGroupMessage(targetGroup, $"{sender.UserName}有新动态！");
+            await soraApi.SendGroupForwardMsg(targetGroup, nodes);
             if (!dbHelper.UpdateDynamic(targetGroup, sender.Uid, dTs.ToDateTime()))
                 Log.Error("数据库", "更新动态记录时发生了数据库错误");
         }
