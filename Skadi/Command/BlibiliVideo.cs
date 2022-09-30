@@ -53,10 +53,11 @@ public static class BlibiliVideo
             return;
         cmdRecord.Add(eventArgs.Message.RawText);
 
-        VideoInfo videoInfo = await BiliApis.GetVideoInfo(eventArgs.Message.RawText);
-        if (videoInfo.Code != 0)
+        (VideoInfo videoInfo, _) = await BiliApis.GetVideoInfo(eventArgs.Message.RawText);
+        if (videoInfo is null || videoInfo.Code != 0)
         {
-            await eventArgs.Reply($"API发生错误({videoInfo.Code})\r\nmessage:{videoInfo.Message}");
+            await eventArgs.Reply($"API发生错误");
+            Log.Error("BVideo", videoInfo?.Message ?? "Null response");
             return;
         }
 
@@ -94,10 +95,11 @@ public static class BlibiliVideo
         }
 
         //获取视频信息
-        VideoInfo videoInfo = await BiliApis.GetVideoInfo(videoIdStr);
-        if (videoInfo.Code != 0)
+        (VideoInfo videoInfo, _) = await BiliApis.GetVideoInfo(videoIdStr);
+        if (videoInfo is null || videoInfo.Code != 0)
         {
-            await eventArgs.Reply($"API发生错误({videoInfo.Code})\r\nmessage:{videoInfo.Message}");
+            await eventArgs.Reply($"API发生错误");
+            Log.Error("BVideo", videoInfo?.Message ?? "Null response");
             return;
         }
 

@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using BilibiliApi;
 using BilibiliApi.Live.Enums;
 using BilibiliApi.Models;
+using Newtonsoft.Json.Linq;
 using PuppeteerSharp;
 using Skadi.Config;
+using Skadi.Config.ConfigModule;
 using Skadi.DatabaseUtils.Helpers;
 using Sora;
 using Sora.Entities;
@@ -27,8 +29,8 @@ internal static class SubscriptionUpdate
     {
         //读取配置文件
         ConfigManager.TryGetUserConfig(connectEventArgs.LoginUid, out var loadedConfig);
-        var moduleEnable  = loadedConfig.ModuleSwitch;
-        var subscriptions = loadedConfig.SubscriptionConfig.GroupsConfig;
+        ModuleSwitch            moduleEnable  = loadedConfig.ModuleSwitch;
+        List<GroupSubscription> subscriptions = loadedConfig.SubscriptionConfig.GroupsConfig;
         //数据库
         var dbHelper = new SubscriptionDbHelper(connectEventArgs.LoginUid);
         //检查模块是否启用
@@ -57,7 +59,7 @@ internal static class SubscriptionUpdate
                                                  SubscriptionDbHelper dbHelper)
     {
         //数据获取
-        UserInfo bUserInfo = await BiliApis.GetLiveUserInfo(biliUser);
+        (UserInfo bUserInfo, _) = await BiliApis.GetLiveUserInfo(biliUser);
         if (bUserInfo is null || bUserInfo.Code != 0)
         {
             Log.Error("BiliApi", $"无法获取用户信息[{biliUser}]");
@@ -66,7 +68,7 @@ internal static class SubscriptionUpdate
             return;
         }
 
-        LiveInfo liveInfo = await BiliApis.GetLiveRoomInfo(bUserInfo.LiveId);
+        (LiveInfo liveInfo, _) = await BiliApis.GetLiveRoomInfo(bUserInfo.LiveId);
         if (liveInfo is null || liveInfo.Code != 0)
         {
             Log.Error("BiliApi", $"无法获取直播间信息[{biliUser}]");
@@ -112,7 +114,7 @@ internal static class SubscriptionUpdate
                                               SubscriptionDbHelper dbHelper)
     {
         //获取用户信息
-        UserInfo sender = await BiliApis.GetLiveUserInfo(biliUser);
+        (UserInfo sender, _) = await BiliApis.GetLiveUserInfo(biliUser);
         if (sender is null || sender.Code != 0)
         {
             Log.Error("BiliApi", $"无法获取用户信息[{biliUser}]");
@@ -121,7 +123,7 @@ internal static class SubscriptionUpdate
             return;
         }
 
-        (ulong dId, long dTs) = await BiliApis.GetLatestDynamicId(biliUser);
+        (ulong dId, long dTs, JToken dyjson) = await BiliApis.GetLatestDynamicId(biliUser);
         if (dId == 0 || dTs == 0)
         {
             Log.Error("BiliApi", $"无法获取用户动态信息[{biliUser}]");
