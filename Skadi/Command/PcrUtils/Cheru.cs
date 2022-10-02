@@ -18,24 +18,23 @@ namespace Skadi.Command.PcrUtils;
 [CommandSeries]
 public static class Cheru
 {
-    #region 字符集常量
+#region 字符集常量
 
     //切噜字符集
     private const string CHERU_SET = "切卟叮咧哔唎啪啰啵嘭噜噼巴拉蹦铃";
 
-    #endregion
+#endregion
 
-    #region 公有方法
+#region 公有方法
 
     /// <summary>
     /// 将切噜语解码为原句
     /// </summary>
     /// <param name="eventArgs">事件参数</param>
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {"^切噜(?:~|～)"},
-        MatchType = MatchType.Regex)]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { "^切噜(?:~|～)" },
+                 MatchType = MatchType.Regex)]
     public static async void CheruToString(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -63,10 +62,9 @@ public static class Cheru
     /// </summary>
     /// <param name="eventArgs">事件参数</param>
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {"^切噜一下"},
-        MatchType = MatchType.Regex)]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { "^切噜一下" },
+                 MatchType = MatchType.Regex)]
     public static async void StringToCheru(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -89,9 +87,9 @@ public static class Cheru
         await eventArgs.SourceGroup.SendGroupMessage($"切噜～{cheruBuilder}");
     }
 
-    #endregion
+#endregion
 
-    #region 私有方法
+#region 私有方法
 
     /// <summary>
     /// 将中文词语为切噜词
@@ -107,7 +105,7 @@ public static class Cheru
         //将字符byte拆分高低四位并与字符集对应
         foreach (var cheruByte in cheruBytes)
         {
-            res.Append(CHERU_SET[cheruByte        & 0x0F]);
+            res.Append(CHERU_SET[cheruByte & 0x0F]);
             res.Append(CHERU_SET[(cheruByte >> 4) & 0x0F]);
         }
 
@@ -125,23 +123,22 @@ public static class Cheru
         string cheruContent = cheru[1..];
 
         //转换为正常语句
-        List<byte> wordBytes = new List<byte>();
+        List<byte> wordBytes = new();
         for (var i = 0; i < cheruContent.Length; i += 2)
         {
             if (i + 1 >= cheruContent.Length)
                 continue;
             //将index作为高低四位合并为八位
-            var wordByte = (byte) (CHERU_SET.IndexOf(cheruContent[i]) +
-                                   (CHERU_SET.IndexOf(cheruContent[i + 1]) << 4));
+            var wordByte = (byte)(CHERU_SET.IndexOf(cheruContent[i]) + (CHERU_SET.IndexOf(cheruContent[i + 1]) << 4));
             wordBytes.Add(wordByte);
         }
 
         //剩下的单字符
         Regex isPunctuation = new Regex(@"\b"); //跳过标点符号
         if (cheruContent.Length % 2 == 1 && !isPunctuation.IsMatch(cheruContent[^1].ToString()))
-            wordBytes.Add((byte) CHERU_SET[CHERU_SET.IndexOf(cheruContent[^1])]);
+            wordBytes.Add((byte)CHERU_SET[CHERU_SET.IndexOf(cheruContent[^1])]);
         return Encoding.GetEncoding("GB18030").GetString(wordBytes.ToArray());
     }
 
-    #endregion
+#endregion
 }

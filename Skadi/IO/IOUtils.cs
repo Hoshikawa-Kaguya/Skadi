@@ -10,7 +10,7 @@ namespace Skadi.IO;
 
 internal static class IoUtils
 {
-    #region IO工具
+#region IO工具
 
     /// <summary>
     /// 获取错误报告路径
@@ -105,9 +105,9 @@ internal static class IoUtils
     public static long GetHsoSize()
     {
         return new DirectoryInfo(GetHsoPath())
-              .GetFiles("*", SearchOption.AllDirectories)
-              .Select(file => file.Length)
-              .Sum();
+               .GetFiles("*", SearchOption.AllDirectories)
+               .Select(file => file.Length)
+               .Sum();
     }
 
     /// <summary>
@@ -133,9 +133,9 @@ internal static class IoUtils
         }
     }
 
-    #endregion
+#endregion
 
-    #region 文件读取工具
+#region 文件读取工具
 
     /// <summary>
     /// 读取Json文件并返回为一个JObject
@@ -158,9 +158,9 @@ internal static class IoUtils
         }
     }
 
-    #endregion
+#endregion
 
-    #region 文件写入工具
+#region 文件写入工具
 
     /// <summary>
     /// 将byte数组转换为文件并保存到指定地址
@@ -189,5 +189,5 @@ internal static class IoUtils
         }
     }
 
-    #endregion
+#endregion
 }

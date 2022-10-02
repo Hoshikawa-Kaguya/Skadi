@@ -19,21 +19,19 @@ namespace Skadi.Command.PcrUtils;
 [CommandSeries]
 public static class GuildRank
 {
-    #region 查询指令
+#region 查询指令
 
     /// <summary>
     /// 镜华站查询
     /// </summary>
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"^镜华排名\S*$"},
-        MatchType = MatchType.Regex)]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { @"^镜华排名\S*$" },
+                 MatchType = MatchType.Regex)]
     public static async ValueTask KyoukaRank(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config) &&
-            !config.ModuleSwitch.PcrGuildRank)
+        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config) && !config.ModuleSwitch.PcrGuildRank)
             return;
         //网络响应
         JToken response;
@@ -55,34 +53,31 @@ public static class GuildRank
             await eventArgs.Reply($"正在查询公会[{guildName}]的排名...");
             var reqResponse =
                 await Requests.PostAsync("https://service-kjcbcnmw-1254119946.gz.apigw.tencentcs.com/name/0",
-                    new ReqParams
-                    {
-                        Timeout = 3000,
-                        PostJson = new JObject
-                        {
-                            ["clanName"] = guildName,
-                            ["history"]  = 0
-                        },
-                        Header = new Dictionary<HttpRequestHeader, string>
-                        {
-                            {
-                                HttpRequestHeader.Referer,
-                                "https://kyouka.kengxxiao.com/"
-                            }
-                        },
-                        CustomHeader = new Dictionary<string, string>
-                        {
-                            {"Custom-Source", "SkadiBot"},
-                            {"Origin", "https://kyouka.kengxxiao.com/"}
-                        }
-                    });
+                                         new ReqParams
+                                         {
+                                             Timeout = 3000,
+                                             PostJson = new JObject
+                                             {
+                                                 ["clanName"] = guildName,
+                                                 ["history"]  = 0
+                                             },
+                                             Header = new Dictionary<HttpRequestHeader, string>
+                                             {
+                                                 { HttpRequestHeader.Referer, "https://kyouka.kengxxiao.com/" }
+                                             },
+                                             CustomHeader = new Dictionary<string, string>
+                                             {
+                                                 { "Custom-Source", "SkadiBot" },
+                                                 { "Origin", "https://kyouka.kengxxiao.com/" }
+                                             }
+                                         });
             //判断响应
             if (reqResponse.StatusCode != HttpStatusCode.OK)
             {
                 await
                     eventArgs
-                       .Reply($"哇哦~发生了网络错误，请联系机器人所在服务器管理员\r\n{reqResponse.StatusCode}({(int) reqResponse.StatusCode})");
-                Log.Error("网络发生错误", $"Code[{reqResponse.StatusCode}({(int) reqResponse.StatusCode})]");
+                        .Reply($"哇哦~发生了网络错误，请联系机器人所在服务器管理员\r\n{reqResponse.StatusCode}({(int)reqResponse.StatusCode})");
+                Log.Error("网络发生错误", $"Code[{reqResponse.StatusCode}({(int)reqResponse.StatusCode})]");
                 //阻止下一步处理
                 return;
             }
@@ -124,13 +119,13 @@ public static class GuildRank
                     await eventArgs.Reply("查询到多个公会，可能存在重名或关键词错误");
                 Log.Info("JSON处理成功", "向用户发送数据");
                 long.TryParse(response["ts"]?.ToString() ?? "0", out long updateTimeStamp);
-                await eventArgs.Reply("查询成功！\n"                                                 +
-                                      $"公会:{guildName}\n"                                       +
-                                      $"排名:{response["data"]?[0]?["rank"]}\n"                   +
-                                      $"总分数:{response["data"]?[0]?["damage"]}\n"                +
-                                      $"会长:{response["data"]?[0]?["leader_name"]}\n"            +
-                                      $"数据更新时间:{updateTimeStamp.ToDateTime():MM-dd HH:mm:ss}\n" +
-                                      "如果查询到的信息有误，有可能关键词错误或公会排名在20060之后");
+                await eventArgs.Reply("查询成功！\n"
+                                      + $"公会:{guildName}\n"
+                                      + $"排名:{response["data"]?[0]?["rank"]}\n"
+                                      + $"总分数:{response["data"]?[0]?["damage"]}\n"
+                                      + $"会长:{response["data"]?[0]?["leader_name"]}\n"
+                                      + $"数据更新时间:{updateTimeStamp.ToDateTime():MM-dd HH:mm:ss}\n"
+                                      + "如果查询到的信息有误，有可能关键词错误或公会排名在20060之后");
             }
             else
             {
@@ -145,5 +140,5 @@ public static class GuildRank
         }
     }
 
-    #endregion
+#endregion
 }

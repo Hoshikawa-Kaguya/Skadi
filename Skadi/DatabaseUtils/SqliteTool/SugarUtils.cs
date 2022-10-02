@@ -5,6 +5,7 @@ using System.Data;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using DbType = SqlSugar.DbType;
 
 namespace Skadi.DatabaseUtils.SqliteTool;
 
@@ -14,14 +15,14 @@ namespace Skadi.DatabaseUtils.SqliteTool;
 /// </summary>
 internal static class SugarUtils
 {
-    #region 数据库常量
+#region 数据库常量
 
     //资源数据库名
     public const string GLOBAL_RES_DB_NAME = "res";
 
-    #endregion
+#endregion
 
-    #region IO辅助函数
+#region IO辅助函数
 
     /// <summary>
     /// 获取应用数据库的绝对路径
@@ -62,9 +63,9 @@ internal static class SugarUtils
         return dbPath.ToString();
     }
 
-    #endregion
+#endregion
 
-    #region 表辅助函数
+#region 表辅助函数
 
     /// <summary>
     /// 删除表
@@ -117,10 +118,10 @@ internal static class SugarUtils
             i++;
             //写入字段信息
             cmd.CommandText +=
-                $"{SugarColUtils.GetColName(colInfo)} "    +
-                $"{SugarColUtils.GetColType(colInfo)} "    +
-                $"{SugarColUtils.ColIsNullable(colInfo)} " +
-                $"{SugarColUtils.ColIsIdentity(colInfo)}";
+                $"{SugarColUtils.GetColName(colInfo)} "
+                + $"{SugarColUtils.GetColType(colInfo)} "
+                + $"{SugarColUtils.ColIsNullable(colInfo)} "
+                + $"{SugarColUtils.ColIsIdentity(colInfo)}";
             if (i != properties.Length)
                 cmd.CommandText += ",";
             if (SugarColUtils.ColIsPrimaryKey(colInfo) && string.IsNullOrEmpty(SugarColUtils.ColIsIdentity(colInfo))
@@ -170,9 +171,9 @@ internal static class SugarUtils
         return Convert.ToBoolean(cmd.ExecuteScalar());
     }
 
-    #endregion
+#endregion
 
-    #region 简单辅助函数
+#region 简单辅助函数
 
     /// <summary>
     /// 执行sql语句
@@ -195,9 +196,9 @@ internal static class SugarUtils
         return ret;
     }
 
-    #endregion
+#endregion
 
-    #region Client简单创建函数
+#region Client简单创建函数
 
     /// <summary>
     /// 创建一个SQLiteClient
@@ -209,11 +210,11 @@ internal static class SugarUtils
         return new SqlSugarClient(new ConnectionConfig
         {
             ConnectionString      = $"DATA SOURCE={dbPath}",
-            DbType                = SqlSugar.DbType.Sqlite,
+            DbType                = DbType.Sqlite,
             IsAutoCloseConnection = true,
             InitKeyType           = InitKeyType.Attribute
         });
     }
 
-    #endregion
+#endregion
 }

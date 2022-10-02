@@ -19,9 +19,8 @@ namespace Skadi.Command.ImageSearch;
 public static class SearchCommands
 {
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {"搜图"})]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { "搜图" })]
     public static async ValueTask SearchRequest(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -35,7 +34,7 @@ public static class SearchCommands
 
         var imgArgs =
             await eventArgs.WaitForNextMessageAsync(e => e.Message.IsSingleImageMessage(),
-                TimeSpan.FromMinutes(1));
+                                                    TimeSpan.FromMinutes(1));
         Log.Info("pic search", $"[{eventArgs.Sender.Id}]搜索色图");
         if (imgArgs == null)
         {
@@ -46,11 +45,10 @@ public static class SearchCommands
         Log.Debug("pic", $"get pic {imgArgs.Message.RawText} searching...");
         //发送图片
         (ApiStatus apiStatus, _) =
-            await eventArgs.Reply(await SaucenaoApi.SearchByUrl(
-                                      "92a805aff18cbc56c4723d7e2d5100c6892fe256",
-                                      (imgArgs.Message[0].Data as ImageSegment)!.Url,
-                                      imgArgs.LoginUid),
-                TimeSpan.FromSeconds(15));
+            await eventArgs.Reply(await SaucenaoApi.SearchByUrl("92a805aff18cbc56c4723d7e2d5100c6892fe256",
+                                                                (imgArgs.Message[0].Data as ImageSegment)!.Url,
+                                                                imgArgs.LoginUid),
+                                  TimeSpan.FromSeconds(15));
         if (apiStatus.RetCode != ApiStatusType.Ok)
             await eventArgs.Reply("图被夹了，你找服务器要去");
     }

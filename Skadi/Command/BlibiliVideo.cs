@@ -32,19 +32,17 @@ public static class BlibiliVideo
     /// 计时器
     /// </summary>
     [UsedImplicitly]
-    private static readonly Timer _subTimer = new(
-        CleanUpEvent, //事件处理
-        null,         //初始化数据
-        new TimeSpan(0, 0, 0, 120),
-        new TimeSpan(0, 0, 0, 120));
+    private static readonly Timer _subTimer = new(CleanUpEvent, //事件处理
+                                                  null,         //初始化数据
+                                                  new TimeSpan(0, 0, 0, 120),
+                                                  new TimeSpan(0, 0, 0, 120));
 
-    #region 指令
+#region 指令
 
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"^BV1[1-9A-NP-Za-km-z]{9}$", @"^AV[1-9][0-9]*$"},
-        MatchType = MatchType.Regex)]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { @"^BV1[1-9A-NP-Za-km-z]{9}$", @"^AV[1-9][0-9]*$" },
+                 MatchType = MatchType.Regex)]
     public static async ValueTask BiliVideoGet(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -56,7 +54,7 @@ public static class BlibiliVideo
         (VideoInfo videoInfo, _) = await BiliApis.GetVideoInfo(eventArgs.Message.RawText);
         if (videoInfo is null || videoInfo.Code != 0)
         {
-            await eventArgs.Reply($"API发生错误");
+            await eventArgs.Reply("API发生错误");
             Log.Error("BVideo", videoInfo?.Message ?? "Null response");
             return;
         }
@@ -66,11 +64,10 @@ public static class BlibiliVideo
     }
 
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"https://b23\.tv/[a-zA-Z0-9]+"},
-        MatchType = MatchType.Regex,
-        Priority = 0)]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { @"https://b23\.tv/[a-zA-Z0-9]+" },
+                 MatchType = MatchType.Regex,
+                 Priority = 0)]
     public static async ValueTask VideoInfoByShortUrl(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -82,7 +79,7 @@ public static class BlibiliVideo
             return;
         cmdRecord.Add(videoUrlStr);
         //网络请求获取跳转地址
-        HttpClientHandler   handler  = new HttpClientHandler {AllowAutoRedirect = false};
+        HttpClientHandler   handler  = new HttpClientHandler { AllowAutoRedirect = false };
         HttpClient          client   = new HttpClient(handler);
         HttpResponseMessage response = await client.GetAsync(videoUrlStr);
         //解析id
@@ -98,7 +95,7 @@ public static class BlibiliVideo
         (VideoInfo videoInfo, _) = await BiliApis.GetVideoInfo(videoIdStr);
         if (videoInfo is null || videoInfo.Code != 0)
         {
-            await eventArgs.Reply($"API发生错误");
+            await eventArgs.Reply("API发生错误");
             Log.Error("BVideo", videoInfo?.Message ?? "Null response");
             return;
         }
@@ -110,7 +107,7 @@ public static class BlibiliVideo
         await eventArgs.Reply(GenReplyMessage(videoInfo));
     }
 
-    #endregion
+#endregion
 
     private static MessageBody GenReplyMessage(VideoInfo info)
     {

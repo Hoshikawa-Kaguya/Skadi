@@ -17,48 +17,42 @@ namespace Skadi.Command;
 [CommandSeries]
 public class Surprise
 {
-    #region 私有方法
+#region 私有方法
 
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {"dice"})]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { "dice" })]
     public async ValueTask RandomNumber(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig config) &&
-            !config.ModuleSwitch.HaveFun)
+        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig config) && !config.ModuleSwitch.HaveFun)
             return;
-        await eventArgs.SourceGroup.SendGroupMessage(
-            SoraSegment.At(eventArgs.Sender.Id) +
-            "丢出了\r\n"                           +
-            Random.Shared.Next(1, 6).ToString());
+        await eventArgs.SourceGroup.SendGroupMessage(SoraSegment.At(eventArgs.Sender.Id)
+                                                     + "丢出了\r\n"
+                                                     + Random.Shared.Next(1, 6).ToString());
     }
 
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {"优质睡眠", "昏睡红茶", "昏睡套餐", "健康睡眠"})]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { "优质睡眠", "昏睡红茶", "昏睡套餐", "健康睡眠" })]
     public async ValueTask RedTea(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig config) &&
-            !config.ModuleSwitch.HaveFun)
+        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig config) && !config.ModuleSwitch.HaveFun)
             return;
         await eventArgs.SourceGroup.EnableGroupMemberMute(eventArgs.Sender.Id,
-            28800);
+                                                          28800);
     }
 
     //TODO 支持图片消息
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"^选择.+(还是.+)+$"},
-        MatchType = MatchType.Regex)]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { @"^选择.+(还是.+)+$" },
+                 MatchType = MatchType.Regex)]
     public async ValueTask Choice(GroupMessageEventArgs eventArgs)
     {
-        if (eventArgs.Message.MessageBody.Count          != 1 &&
-            eventArgs.Message.MessageBody[0].MessageType != SegmentType.Text)
+        if (eventArgs.Message.MessageBody.Count != 1
+            && eventArgs.Message.MessageBody[0].MessageType != SegmentType.Text)
             return;
         eventArgs.IsContinueEventChain = false;
         string       text    = (eventArgs.Message.MessageBody[0].Data as TextSegment)!.Content[2..].Trim();
@@ -90,5 +84,5 @@ public class Surprise
         // await eventArgs.Reply("选择" + msg);
     }
 
-    #endregion
+#endregion
 }

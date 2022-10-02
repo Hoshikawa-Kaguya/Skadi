@@ -8,22 +8,22 @@ namespace Skadi.DatabaseUtils.Helpers;
 
 internal class HsoDbHelper
 {
-    #region 属性
+#region 属性
 
     private readonly string _dbPath; //数据库路径
 
-    #endregion
+#endregion
 
-    #region 构造函数
+#region 构造函数
 
     public HsoDbHelper(long uid)
     {
         _dbPath = SugarUtils.GetDbPath(uid.ToString());
     }
 
-    #endregion
+#endregion
 
-    #region 数据更新
+#region 数据更新
 
     /// <summary>
     /// 又有新的lsp来了
@@ -36,23 +36,22 @@ internal class HsoDbHelper
         {
             using var dbClient = SugarUtils.CreateSqlSugarClient(_dbPath);
             var countData = dbClient.Queryable<Tables.HsoCount>()
-                                    .First(member => member.Gid == groupId &&
-                                                     member.Uid == userId);
+                                    .First(member => member.Gid == groupId && member.Uid == userId);
             //查找是否存在
             if (countData != null)
                 return dbClient.Updateable<Tables.HsoCount>(newCount => newCount.Count == countData.Count + 1)
-                               .Where(member => member.Gid == groupId &&
-                                                member.Uid == userId)
+                               .Where(member => member.Gid == groupId && member.Uid == userId)
                                .ExecuteCommandHasChange();
 
             //没有记录则插入新纪录
             return
-                dbClient.Insertable(new Tables.HsoCount()
+                dbClient.Insertable(new Tables.HsoCount
                 {
                     Gid   = groupId,
                     Uid   = userId,
                     Count = 1
-                }).ExecuteCommand() > 0;
+                }).ExecuteCommand()
+                > 0;
         }
         catch (Exception e)
         {
@@ -85,5 +84,5 @@ internal class HsoDbHelper
         }
     }
 
-    #endregion
+#endregion
 }

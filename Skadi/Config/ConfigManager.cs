@@ -12,16 +12,16 @@ namespace Skadi.Config;
 
 internal static class ConfigManager
 {
-    #region 配置存储区
+#region 配置存储区
 
     private static readonly Dictionary<long, UserConfig> _userConfigs  = new();
     private static          GlobalConfig                 _globalConfig = new();
 
     private const string CONFIG_FILE = "config.yaml";
 
-    #endregion
+#endregion
 
-    #region 公有方法
+#region 公有方法
 
     /// <summary>
     /// 初始化用户配置文件并返回当前配置文件内容
@@ -143,9 +143,9 @@ internal static class ConfigManager
         return _userConfigs.Remove(uid);
     }
 
-    #endregion
+#endregion
 
-    #region 私有读取方法
+#region 私有读取方法
 
     /// <summary>
     /// 加载用户配置文件
@@ -197,10 +197,10 @@ internal static class ConfigManager
             if (globalConfig is null)
                 return false;
             //参数合法性检查
-            if ((int) globalConfig.LogLevel is < 0 or > 3 ||
-                globalConfig.HeartBeatTimeOut == 0        ||
-                globalConfig.OnebotApiTimeOut == 0        ||
-                globalConfig.Port is 0 or > 65535)
+            if ((int)globalConfig.LogLevel is < 0 or > 3
+                || globalConfig.HeartBeatTimeOut == 0
+                || globalConfig.OnebotApiTimeOut == 0
+                || globalConfig.Port is 0 or > 65535)
             {
                 Log.Error("读取全局配置", "参数值超出合法范围，重新生成配置文件");
                 globalConfig = null;
@@ -217,5 +217,5 @@ internal static class ConfigManager
         }
     }
 
-    #endregion
+#endregion
 }

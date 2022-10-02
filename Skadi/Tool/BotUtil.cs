@@ -13,7 +13,7 @@ namespace Skadi.Tool;
 
 internal static class BotUtil
 {
-    #region 时间戳处理
+#region 时间戳处理
 
     /// <summary>
     /// 获取游戏刷新的时间戳
@@ -22,16 +22,29 @@ internal static class BotUtil
     public static long GetPcrUpdateStamp()
     {
         if (DateTime.Now > DateTime.Today.Add(new TimeSpan(5, 0, 0)))
-            return (long) (DateTime.Today - new DateTime(1970, 1, 1, 8, 0, 0, 0)).Add(new TimeSpan(5, 0, 0))
-               .TotalSeconds;
-        else
-            return (long) (DateTime.Today.AddDays(-1) - new DateTime(1970, 1, 1, 8, 0, 0, 0))
-                         .Add(new TimeSpan(5, 0, 0)).TotalSeconds;
+            return (long)(DateTime.Today
+                - new DateTime(1970,
+                               1,
+                               1,
+                               8,
+                               0,
+                               0,
+                               0)).Add(new TimeSpan(5, 0, 0))
+                                  .TotalSeconds;
+        return (long)(DateTime.Today.AddDays(-1)
+                     - new DateTime(1970,
+                                    1,
+                                    1,
+                                    8,
+                                    0,
+                                    0,
+                                    0))
+                     .Add(new TimeSpan(5, 0, 0)).TotalSeconds;
     }
 
-    #endregion
+#endregion
 
-    #region 字符串处理
+#region 字符串处理
 
     /// <summary>
     /// 获取字符串在QQ上显示的长度（用于PadQQ函数）
@@ -65,7 +78,7 @@ internal static class BotUtil
     {
         var sb = new StringBuilder();
 
-        var toPadNum = (int) Math.Floor(padNums - GetQQStrLength(input));
+        var toPadNum = (int)Math.Floor(padNums - GetQQStrLength(input));
         if (toPadNum <= 0)
             return input;
 
@@ -85,7 +98,9 @@ internal static class BotUtil
     /// <param name="fromQQid">（可选，但QQgroup给了的话本参数必填）\n要通知的人的QQ Id</param>
     /// <returns>Illegal不符合 Legitimate符合 Extra超出</returns>
     public static async ValueTask<LenType> CheckForLength(
-        string[] args, int len, Group qGroup = null,
+        string[] args,
+        int      len,
+        Group    qGroup   = null,
         long     fromQQid = 0)
     {
         if (args.Length >= len + 1)
@@ -96,9 +111,9 @@ internal static class BotUtil
         return LenType.Illegal;
     }
 
-    #endregion
+#endregion
 
-    #region crash处理
+#region crash处理
 
     /// <summary>
     /// bot崩溃日志生成
@@ -113,24 +128,24 @@ internal static class BotUtil
         c.Wait();
     }
 
-    #endregion
+#endregion
 
-    #region 重复的消息提示
+#region 重复的消息提示
 
     /// <summary>
     /// 数据库发生错误时的消息提示
     /// </summary>
     public static async ValueTask DatabaseFailedTips(GroupMessageEventArgs groupEventArgs)
     {
-        await groupEventArgs.SourceGroup.SendGroupMessage(SoraSegment.At(groupEventArgs.Sender.Id) +
-                                                          "\r\nERROR"                              +
-                                                          "\r\n数据库错误");
+        await groupEventArgs.SourceGroup.SendGroupMessage(SoraSegment.At(groupEventArgs.Sender.Id)
+                                                          + "\r\nERROR"
+                                                          + "\r\n数据库错误");
         Log.Error("database", "database error");
     }
 
-    #endregion
+#endregion
 
-    #region 消息工具
+#region 消息工具
 
     internal static void AutoRemoveMessage(int msgId, long selfId, TimeSpan? timeOffset = null)
     {
@@ -143,5 +158,5 @@ internal static class BotUtil
         });
     }
 
-    #endregion
+#endregion
 }

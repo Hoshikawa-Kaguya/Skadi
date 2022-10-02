@@ -26,7 +26,7 @@ namespace Skadi.Tool;
 
 internal static class MediaUtil
 {
-    #region 静态资源
+#region 静态资源
 
     private static Font Arial { get; }
 
@@ -40,9 +40,9 @@ internal static class MediaUtil
         Arial = arialFontFamily.CreateFont(35);
     }
 
-    #endregion
+#endregion
 
-    #region Pixiv图片消息段生成
+#region Pixiv图片消息段生成
 
     public static async Task SendPixivImageMessage(this GroupMessageEventArgs eventArgs, long pid, int index)
     {
@@ -87,8 +87,8 @@ internal static class MediaUtil
             var customNodes = new List<CustomNode>();
             for (int i = 0; i < count; i++)
                 customNodes.Add(new CustomNode("色色",
-                    114514,
-                    SoraSegment.Image($"{imageUrl}/{i}", true, 4)));
+                                               114514,
+                                               SoraSegment.Image($"{imageUrl}/{i}", true, 4)));
 
             (apiStatus, _) =
                 await eventArgs.SourceGroup.SendGroupForwardMsg(customNodes, TimeSpan.FromMinutes(2));
@@ -112,8 +112,8 @@ internal static class MediaUtil
     public static string GenPixivUrl(string proxy, long pid, int index = 0)
     {
         return string.IsNullOrEmpty(proxy)
-                   ? $"https://pixiv.lancercmd.cc/{pid}"
-                   : $"{proxy.Trim('/')}/{pid}/{index}";
+            ? $"https://pixiv.lancercmd.cc/{pid}"
+            : $"{proxy.Trim('/')}/{pid}/{index}";
     }
 
     public static (int statusCode, bool r18, int count) GetPixivImgInfo(long pid, out JToken json)
@@ -123,12 +123,12 @@ internal static class MediaUtil
         try
         {
             var pixApiReq = Requests.Get($"https://pixiv.yukari.one/api/illust/{pid}",
-                new ReqParams
-                {
-                    Timeout                   = 5000,
-                    IsThrowErrorForTimeout    = false,
-                    IsThrowErrorForStatusCode = false
-                });
+                                         new ReqParams
+                                         {
+                                             Timeout                   = 5000,
+                                             IsThrowErrorForTimeout    = false,
+                                             IsThrowErrorForStatusCode = false
+                                         });
 
             Log.Debug("pixiv api", $"get illust info response({pixApiReq.StatusCode})");
             if (pixApiReq.StatusCode == HttpStatusCode.OK)
@@ -138,11 +138,11 @@ internal static class MediaUtil
                 if (Convert.ToBoolean(infoJson["error"]))
                     return (200, false, 0);
                 return (200,
-                           Convert.ToBoolean(infoJson["body"]?["xRestrict"]),
-                           Convert.ToInt32(infoJson["body"]?["pageCount"]));
+                    Convert.ToBoolean(infoJson["body"]?["xRestrict"]),
+                    Convert.ToInt32(infoJson["body"]?["pageCount"]));
             }
 
-            return ((int) pixApiReq.StatusCode, false, 0);
+            return ((int)pixApiReq.StatusCode, false, 0);
         }
         catch (Exception e)
         {
@@ -151,9 +151,9 @@ internal static class MediaUtil
         }
     }
 
-    #endregion
+#endregion
 
-    #region 推特API处理
+#region 推特API处理
 
     /// <summary>
     /// 获取推特推文信息
@@ -168,15 +168,15 @@ internal static class MediaUtil
         try
         {
             var res = Requests.Get($"https://pixiv.yukari.one/api/tweet/{tweetId}",
-                new ReqParams
-                {
-                    IsThrowErrorForStatusCode = false,
-                    IsThrowErrorForTimeout    = false,
-                    Timeout                   = 10000
-                });
+                                   new ReqParams
+                                   {
+                                       IsThrowErrorForStatusCode = false,
+                                       IsThrowErrorForTimeout    = false,
+                                       Timeout                   = 10000
+                                   });
 
             Log.Info("Twitter", $"Twitter api http code:{res.StatusCode}");
-            if (res is not {StatusCode: HttpStatusCode.OK})
+            if (res is not { StatusCode: HttpStatusCode.OK })
             {
                 Log.Error("Twitter", "Twitter api net error");
                 return (false, string.Empty, $"Twitter api net error [{res.StatusCode}]", null);
@@ -193,9 +193,10 @@ internal static class MediaUtil
 
         Log.Debug("Twitter", $"Get twitter api data:{data.ToString(Formatting.None)}");
         var urls = data["includes"]?["media"]?
-                  .Where(m => m["type"]?.ToString() == "photo")
-                  .Select(t => t["url"]?.ToString() ?? string.Empty)
-                  .ToList() ?? new List<string>();
+                   .Where(m => m["type"]?.ToString() == "photo")
+                   .Select(t => t["url"]?.ToString() ?? string.Empty)
+                   .ToList()
+                   ?? new List<string>();
         urls.RemoveAll(string.IsNullOrEmpty);
         if (urls.Count == 0)
         {
@@ -204,18 +205,19 @@ internal static class MediaUtil
         }
 
         var authorName = data["includes"]?["users"]
-                       ?.First(t => t["id"]?.ToString() == data["data"]?["author_id"]?.ToString())
-                         ["name"]?.ToString() ?? string.Empty;
+                         ?.First(t => t["id"]?.ToString() == data["data"]?["author_id"]?.ToString())
+                         ["name"]?.ToString()
+                         ?? string.Empty;
         Log.Info("Twitter", $"Get twitter image [count:{urls.Count}]");
         return (true,
-                   authorName,
-                   data["data"]?["text"]?.ToString() ?? string.Empty,
-                   urls);
+            authorName,
+            data["data"]?["text"]?.ToString() ?? string.Empty,
+            urls);
     }
 
-    #endregion
+#endregion
 
-    #region 图片绘制
+#region 图片绘制
 
     /// <summary>
     /// 绘制文字图片
@@ -225,22 +227,22 @@ internal static class MediaUtil
         //计算图片大小
         FontRectangle strRect = TextMeasurer.Measure(text, new TextOptions(Arial));
         //图片大小
-        (int width, int height) = ((int) strRect.Width + frameSize * 2, (int) strRect.Height + frameSize * 2);
+        (int width, int height) = ((int)strRect.Width + frameSize * 2, (int)strRect.Height + frameSize * 2);
         //创建图片
-        using Image<Rgba32> img = new Image<Rgba32>(width, height);
+        using Image<Rgba32> img = new(width, height);
         //绘制
         img.Mutate(x =>
-            x.Fill(backColor)
-             .DrawText(text, Arial, fontColor, new PointF(frameSize, frameSize / 2 - 1)));
+                       x.Fill(backColor)
+                        .DrawText(text, Arial, fontColor, new PointF(frameSize, frameSize / 2 - 1)));
         //转换base64
         using var byteStream = new MemoryStream();
         img.Save(byteStream, PngFormat.Instance);
         img.Dispose();
 
         return byteStream.Length != 0
-                   ? Convert.ToBase64String(byteStream.GetBuffer(), 0, (int) byteStream.Length)
-                   : string.Empty;
+            ? Convert.ToBase64String(byteStream.GetBuffer(), 0, (int)byteStream.Length)
+            : string.Empty;
     }
 
-    #endregion
+#endregion
 }

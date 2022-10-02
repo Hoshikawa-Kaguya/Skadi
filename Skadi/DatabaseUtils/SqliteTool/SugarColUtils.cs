@@ -5,7 +5,7 @@ namespace Skadi.DatabaseUtils.SqliteTool;
 
 internal class SugarColUtils
 {
-    #region SugarColumn辅助方法
+#region SugarColumn辅助方法
 
     /// <summary>
     /// 判断字段类型
@@ -18,22 +18,22 @@ internal class SugarColUtils
         if (columnConfig?.ColumnDataType == null)
         {
             //整数类型
-            if (property.PropertyType == typeof(sbyte)  ||
-                property.PropertyType == typeof(byte)   ||
-                property.PropertyType == typeof(short)  ||
-                property.PropertyType == typeof(ushort) ||
-                property.PropertyType == typeof(int)    ||
-                property.PropertyType == typeof(uint)   ||
-                property.PropertyType == typeof(long)   ||
-                property.PropertyType == typeof(ulong)  ||
-                property.PropertyType == typeof(char)   ||
-                property.PropertyType == typeof(bool))
+            if (property.PropertyType == typeof(sbyte)
+                || property.PropertyType == typeof(byte)
+                || property.PropertyType == typeof(short)
+                || property.PropertyType == typeof(ushort)
+                || property.PropertyType == typeof(int)
+                || property.PropertyType == typeof(uint)
+                || property.PropertyType == typeof(long)
+                || property.PropertyType == typeof(ulong)
+                || property.PropertyType == typeof(char)
+                || property.PropertyType == typeof(bool))
                 return "INTEGER";
 
             //浮点数类型
-            if (property.PropertyType == typeof(double) ||
-                property.PropertyType == typeof(float)  ||
-                property.PropertyType == typeof(decimal))
+            if (property.PropertyType == typeof(double)
+                || property.PropertyType == typeof(float)
+                || property.PropertyType == typeof(decimal))
                 return "REAL";
 
             //字符串类型
@@ -70,8 +70,7 @@ internal class SugarColUtils
         SugarColumn columnConfig = property.GetCustomAttribute<SugarColumn>();
         if (columnConfig == null)
             return "";
-        else
-            return columnConfig.IsIdentity ? "PRIMARY KEY AUTOINCREMENT" : "";
+        return columnConfig.IsIdentity ? "PRIMARY KEY AUTOINCREMENT" : "";
     }
 
     /// <summary>
@@ -84,8 +83,7 @@ internal class SugarColUtils
         SugarColumn columnConfig = property.GetCustomAttribute<SugarColumn>();
         if (columnConfig == null)
             return "NOT NULL";
-        else
-            return columnConfig.IsNullable ? "" : "NOT NULL";
+        return columnConfig.IsNullable ? "" : "NOT NULL";
     }
 
     /// <summary>
@@ -98,9 +96,8 @@ internal class SugarColUtils
         SugarColumn columnConfig = property.GetCustomAttribute<SugarColumn>();
         if (columnConfig == null)
             return false;
-        else
-            return columnConfig.IsPrimaryKey;
+        return columnConfig.IsPrimaryKey;
     }
 
-    #endregion
+#endregion
 }

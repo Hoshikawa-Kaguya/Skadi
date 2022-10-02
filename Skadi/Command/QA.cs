@@ -44,11 +44,10 @@ public class QA
     private readonly List<QABuf> _commandGuids = new();
 
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"^有人问[\s\S]+你答[\s\S]+$"},
-        MatchType = MatchType.Regex,
-        PermissionLevel = MemberRoleType.Admin)]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { @"^有人问[\s\S]+你答[\s\S]+$" },
+                 MatchType = MatchType.Regex,
+                 PermissionLevel = MemberRoleType.Admin)]
     public async ValueTask GetGlobalQuestion(GroupMessageEventArgs eventArgs)
     {
         if (!MessageCheck(eventArgs.Message.MessageBody))
@@ -56,8 +55,8 @@ public class QA
         //查找分割点
         Guid backSegmentId = eventArgs.Message.MessageBody
                                       .Where(s =>
-                                           s.Data is TextSegment t
-                                        && t.Content.IndexOf("你答", StringComparison.Ordinal) != -1)
+                                                 s.Data is TextSegment t
+                                                 && t.Content.IndexOf("你答", StringComparison.Ordinal) != -1)
                                       .Select(s => s.Id)
                                       .FirstOrDefault();
         if (backSegmentId == Guid.Empty)
@@ -82,8 +81,8 @@ public class QA
         {
             int qEndIndex = srcFSegment.Content.IndexOf("你答", StringComparison.Ordinal);
             string msg = qEndIndex != -1
-                             ? srcFSegment.Content.Substring(3, qEndIndex - 3).Trim()
-                             : srcFSegment.Content[3..].Trim();
+                ? srcFSegment.Content.Substring(3, qEndIndex - 3).Trim()
+                : srcFSegment.Content[3..].Trim();
 
             if (!string.IsNullOrEmpty(msg))
             {
@@ -138,11 +137,10 @@ public class QA
     }
 
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"^不要回答[\s\S]+$"},
-        MatchType = MatchType.Regex,
-        PermissionLevel = MemberRoleType.Admin)]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { @"^不要回答[\s\S]+$" },
+                 MatchType = MatchType.Regex,
+                 PermissionLevel = MemberRoleType.Admin)]
     public async ValueTask DeleteGlobalQuestion(GroupMessageEventArgs eventArgs)
     {
         if (!MessageCheck(eventArgs.Message.MessageBody))
@@ -158,8 +156,8 @@ public class QA
 
         //查找相同问题的指令
         List<QABuf> qaBufs = _commandGuids
-                            .Where(s => MessageEqual(s.msg, question) && eventArgs.SourceGroup == s.gid)
-                            .ToList();
+                             .Where(s => MessageEqual(s.msg, question) && eventArgs.SourceGroup == s.gid)
+                             .ToList();
         if (qaBufs.Count == 0)
         {
             await eventArgs.Reply("没有这样的问题");
@@ -181,22 +179,20 @@ public class QA
     }
 
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"^DEQA[\s\S]+$"},
-        MatchType = MatchType.Regex,
-        SuperUserCommand = true)]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { @"^DEQA[\s\S]+$" },
+                 MatchType = MatchType.Regex,
+                 SuperUserCommand = true)]
     public async ValueTask DeleteGlobalQuestionSu(GroupMessageEventArgs eventArgs)
     {
         await DeleteGlobalQuestion(eventArgs);
     }
 
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"^看看有人问$"},
-        MatchType = MatchType.Regex,
-        PermissionLevel = MemberRoleType.Admin)]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { @"^看看有人问$" },
+                 MatchType = MatchType.Regex,
+                 PermissionLevel = MemberRoleType.Admin)]
     public async ValueTask GetAllQuestion(GroupMessageEventArgs eventArgs)
     {
         MessageBody questions = new MessageBody();
@@ -204,7 +200,7 @@ public class QA
             _commandGuids.Where(c => c.gid == eventArgs.SourceGroup)
                          .Select(c => c.msg)
                          .ToList();
-        List<MessageBody> temp = new List<MessageBody>();
+        List<MessageBody> temp = new();
 
         if (groupQuestion.Count == 0)
         {
@@ -227,14 +223,19 @@ public class QA
 
     public void RegisterNewQaCommand(MessageBody qMsg, MessageBody aMsg, long group)
     {
-        Guid cmdId = StaticVar.SoraCommandManager.RegisterGroupDynamicCommand(
-            args => MessageEqual(args.Message.MessageBody, qMsg),
-            async e =>
-            {
-                e.IsContinueEventChain = false;
-                await e.Reply(aMsg);
-            },
-            "qa_global", MemberRoleType.Member, false, 0, new[] {group});
+        Guid cmdId =
+            StaticVar.SoraCommandManager.RegisterGroupDynamicCommand(args => MessageEqual(args.Message.MessageBody,
+                                                                                          qMsg),
+                                                                     async e =>
+                                                                     {
+                                                                         e.IsContinueEventChain = false;
+                                                                         await e.Reply(aMsg);
+                                                                     },
+                                                                     "qa_global",
+                                                                     MemberRoleType.Member,
+                                                                     false,
+                                                                     0,
+                                                                     new[] { group });
 
         _commandGuids.Add(new QABuf
         {
@@ -251,7 +252,7 @@ public class QA
         bool check = true;
         foreach (SoraSegment segment in message)
             check &= segment.MessageType is
-                         SegmentType.Text or SegmentType.At or SegmentType.Face or SegmentType.Image;
+                SegmentType.Text or SegmentType.At or SegmentType.Face or SegmentType.Image;
         return check;
     }
 
@@ -266,8 +267,8 @@ public class QA
             switch (srcMsg[i].MessageType)
             {
                 case SegmentType.Text:
-                    if ((srcMsg[i].Data as TextSegment)!.Content !=
-                        ((rxMsg[i].Data as TextSegment)?.Content ?? string.Empty))
+                    if ((srcMsg[i].Data as TextSegment)!.Content
+                        != ((rxMsg[i].Data as TextSegment)?.Content ?? string.Empty))
                         return false;
                     break;
                 case SegmentType.Image:

@@ -23,8 +23,7 @@ public class GroupWife
     public async ValueTask RollWife(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config) &&
-            !config.ModuleSwitch.HaveFun)
+        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config) && !config.ModuleSwitch.HaveFun)
             return;
         //检查是否已经在抽选
         if (_waitingList.Exists(user => user == eventArgs.Sender))
@@ -56,9 +55,9 @@ public class GroupWife
         await Task.Delay(10000);
         _waitingList.RemoveAll(user => user == eventArgs.Sender);
         var rd = new Random();
-        await eventArgs.Reply(SoraSegment.At(memberList[rd.Next(0, memberList.Count - 1)].UserId) +
-                              "\r\n恭喜成为"                                                          +
-                              SoraSegment.At(eventArgs.Sender)                                    +
-                              "的老婆 ~");
+        await eventArgs.Reply(SoraSegment.At(memberList[rd.Next(0, memberList.Count - 1)].UserId)
+                              + "\r\n恭喜成为"
+                              + SoraSegment.At(eventArgs.Sender)
+                              + "的老婆 ~");
     }
 }

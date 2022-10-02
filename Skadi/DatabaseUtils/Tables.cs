@@ -5,7 +5,7 @@ namespace Skadi.DatabaseUtils;
 
 public class Tables
 {
-    #region 阿B订阅数据表定义
+#region 阿B订阅数据表定义
 
     [SugarTable("bili_dynamic_subscription")]
     public class BiliDynamicSubscription
@@ -20,9 +20,9 @@ public class Tables
         public long UpdateTime { set; get; }
     }
 
-    #endregion
+#endregion
 
-    #region 阿B订阅数据表定义
+#region 阿B订阅数据表定义
 
     [SugarTable("bili_live_subscription")]
     public class BiliLiveSubscription
@@ -37,7 +37,7 @@ public class Tables
         public LiveStatusType LiveStatus { set; get; }
     }
 
-    #endregion
+#endregion
 
     /// <summary>
     /// 老色批数据库

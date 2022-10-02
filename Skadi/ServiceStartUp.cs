@@ -55,7 +55,7 @@ internal static class ServiceStartUp
             Headless          = true,
             IgnoreHTTPSErrors = true,
             Timeout           = 60000,
-            Args              = new[] {"--no-sandbox"}
+            Args              = new[] { "--no-sandbox" }
         });
 
         //TODO 可能很久之后才会写了
@@ -67,12 +67,14 @@ internal static class ServiceStartUp
         //初始化服务器
         var server = SoraServiceFactory.CreateService(new ServerConfig
         {
-            Host                     = globalConfig.Location,
-            Port                     = globalConfig.Port,
-            AccessToken              = globalConfig.AccessToken,
-            UniversalPath            = globalConfig.UniversalPath,
-            HeartBeatTimeOut         = TimeSpan.FromSeconds(globalConfig.HeartBeatTimeOut),
-            ApiTimeOut               = TimeSpan.FromMilliseconds(globalConfig.OnebotApiTimeOut),
+            Host          = globalConfig.Location,
+            Port          = globalConfig.Port,
+            AccessToken   = globalConfig.AccessToken,
+            UniversalPath = globalConfig.UniversalPath,
+            HeartBeatTimeOut =
+                TimeSpan.FromSeconds(globalConfig.HeartBeatTimeOut),
+            ApiTimeOut =
+                TimeSpan.FromMilliseconds(globalConfig.OnebotApiTimeOut),
             SuperUsers               = globalConfig.SuperUsers,
             EnableSoraCommandManager = true,
             ThrowCommandException    = false,

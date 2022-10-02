@@ -12,26 +12,25 @@ namespace Skadi.TimerEvent;
 
 internal static class SubscriptionTimer
 {
-    #region 订阅数据
+#region 订阅数据
 
     /// <summary>
     /// 计时器
     /// </summary>
     [UsedImplicitly]
-    private static readonly Timer _subTimer = new(
-        SubscriptionEvent, //事件处理
-        null,              //初始化数据
-        new TimeSpan(0),   //即刻执行
-        new TimeSpan(0, 0, 1, 0));
+    private static readonly Timer _subTimer = new(SubscriptionEvent, //事件处理
+                                                  null,              //初始化数据
+                                                  new TimeSpan(0),   //即刻执行
+                                                  new TimeSpan(0, 0, 1, 0));
 
     /// <summary>
     /// 订阅列表
     /// </summary>
     private static readonly List<ConnectEventArgs> _subDictionary = new();
 
-    #endregion
+#endregion
 
-    #region 计时器初始化/停止
+#region 计时器初始化/停止
 
     /// <summary>
     /// 添加新的订阅
@@ -79,9 +78,9 @@ internal static class SubscriptionTimer
         return ValueTask.CompletedTask;
     }
 
-    #endregion
+#endregion
 
-    #region 更新事件方法
+#region 更新事件方法
 
     /// <summary>
     /// 提醒DD动态更新的事件
@@ -92,5 +91,5 @@ internal static class SubscriptionTimer
             SubscriptionUpdate.BiliUpdateCheck(eventArg);
     }
 
-    #endregion
+#endregion
 }

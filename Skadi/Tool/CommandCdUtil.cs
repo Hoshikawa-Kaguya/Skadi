@@ -9,7 +9,7 @@ namespace Skadi.Tool;
 
 internal static class CommandCdUtil
 {
-    #region 调用记录
+#region 调用记录
 
     public enum CommandFlag
     {
@@ -29,9 +29,9 @@ internal static class CommandCdUtil
     private static readonly ConcurrentDictionary<UserRecord, DateTime> _userRecords = new();
 #endif
 
-    #endregion
+#endregion
 
-    #region 调用时间检查
+#region 调用时间检查
 
     /// <summary>
     /// 检查用户调用时是否在CD中
@@ -69,5 +69,5 @@ internal static class CommandCdUtil
 #endif
     }
 
-    #endregion
+#endregion
 }

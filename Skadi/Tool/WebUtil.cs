@@ -13,11 +13,12 @@ public static class WebUtil
     public static JsonResult GenResult(object data, int code = 0, string message = "OK")
     {
         return new JsonResult(new
-        {
-            code,
-            message,
-            data
-        }, true);
+                              {
+                                  code,
+                                  message,
+                                  data
+                              },
+                              true);
     }
 
     /// <summary>

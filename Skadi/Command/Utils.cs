@@ -30,11 +30,10 @@ public static class Utils
     /// Echo
     /// </summary>
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] { @"^echo\s[\s\S]+$" },
-        MatchType = MatchType.Regex,
-        SuperUserCommand = true)]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { @"^echo\s[\s\S]+$" },
+                 MatchType = MatchType.Regex,
+                 SuperUserCommand = true)]
     public static async ValueTask Echo(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -54,11 +53,10 @@ public static class Utils
     }
 
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] { @"#sk" },
-        MatchType = MatchType.Full,
-        SuperUserCommand = true)]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { @"#sk" },
+                 MatchType = MatchType.Full,
+                 SuperUserCommand = true)]
     public static async ValueTask Status(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -88,18 +86,17 @@ public static class Utils
     }
 
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] { @"^看看\s.+$" },
-        MatchType = MatchType.Regex,
-        PermissionLevel = MemberRoleType.Admin)]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { @"^看看\s.+$" },
+                 MatchType = MatchType.Regex,
+                 PermissionLevel = MemberRoleType.Admin)]
     public static async ValueTask Curl(GroupMessageEventArgs eventArgs)
     {
-        string[] args = eventArgs.Message.RawText.Split(' ');
-        string url = args[1];
-        bool all = args.Contains("-a");
-        bool autoRemove = args.Contains("-ar");
-        bool fakeMessage = args.Contains("-f");
+        string[] args        = eventArgs.Message.RawText.Split(' ');
+        string   url         = args[1];
+        bool     all         = args.Contains("-a");
+        bool     autoRemove  = args.Contains("-ar");
+        bool     fakeMessage = args.Contains("-f");
 
         if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
         {
@@ -124,13 +121,13 @@ public static class Utils
 
     private static async Task<double> GetCpuUsageForProcess()
     {
-        var startTime = DateTime.UtcNow;
+        var startTime     = DateTime.UtcNow;
         var startCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
         await Task.Delay(500);
 
-        var endTime = DateTime.UtcNow;
-        var endCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
-        var cpuUsedMs = (endCpuUsage - startCpuUsage).TotalMilliseconds;
+        var endTime       = DateTime.UtcNow;
+        var endCpuUsage   = Process.GetCurrentProcess().TotalProcessorTime;
+        var cpuUsedMs     = (endCpuUsage - startCpuUsage).TotalMilliseconds;
         var totalMsPassed = (endTime - startTime).TotalMilliseconds;
         var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
         return cpuUsageTotal * 100;
@@ -142,7 +139,7 @@ public static class Utils
         Page page = await StaticVar.Chrome.NewPageAsync();
         await page.SetViewportAsync(new ViewPortOptions
         {
-            Width = 1920,
+            Width  = 1920,
             Height = 1080
         });
 
@@ -152,7 +149,7 @@ public static class Utils
         string picB64 = await page.ScreenshotBase64Async(new ScreenshotOptions
         {
             FullPage = all,
-            Type = ScreenshotType.Png
+            Type     = ScreenshotType.Png
         });
 
         //关闭页面
@@ -169,10 +166,10 @@ public static class Utils
                                                          bool                       autoRemove)
     {
         (ApiStatus status, int msgId) ret;
-        TimeSpan timeout = TimeSpan.FromMinutes(1);
+        TimeSpan                      timeout = TimeSpan.FromMinutes(1);
         if (fakeMessage)
             ret = await eventArgs.SourceGroup.SendGroupForwardMsg(new[] { new CustomNode("色色", 114514, message) },
-                timeout);
+                                                                  timeout);
         else
             ret = await eventArgs.Reply(message, timeout);
 

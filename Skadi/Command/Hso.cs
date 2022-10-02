@@ -28,15 +28,14 @@ namespace Skadi.Command;
 [CommandSeries(SeriesName = "hso")]
 public class HsoCommand
 {
-    #region 指令响应
+#region 指令响应
 
     /// <summary>
     /// 用于处理传入指令
     /// </summary>
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {"来点色图", "来点涩图", "我要看色图"})]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { "来点色图", "来点涩图", "我要看色图" })]
     public async void HsoPic(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -50,8 +49,7 @@ public class HsoCommand
             return;
         if (IsInCD(eventArgs.SourceGroup, eventArgs.Sender, CommandFlag.Setu))
         {
-            await eventArgs.SourceGroup.SendGroupMessage(SoraSegment.At(eventArgs.Sender) +
-                                                         "你是不是只会要色图(逊欸，冲的真快)");
+            await eventArgs.SourceGroup.SendGroupMessage(SoraSegment.At(eventArgs.Sender) + "你是不是只会要色图(逊欸，冲的真快)");
             return;
         }
 
@@ -87,15 +85,15 @@ public class HsoCommand
             if (!int.TryParse(data["code"]?.ToString() ?? "-100", out var retCode) && retCode != 0)
             {
                 Log.Error("Hso",
-                    retCode == -100
-                        ? "Server response null message"
-                        : $"Server response code {retCode}");
+                          retCode == -100
+                              ? "Server response null message"
+                              : $"Server response code {retCode}");
                 await eventArgs.SourceGroup.SendGroupMessage("哇奧色图不见了\n请联系机器人服务器管理员");
                 return;
             }
 
-            if (!long.TryParse(data["data"]?[0]?["pid"]?.ToString(), out var pid) ||
-                !int.TryParse(data["data"]?[0]?["index"]?.ToString(), out var index))
+            if (!long.TryParse(data["data"]?[0]?["pid"]?.ToString(), out var pid)
+                || !int.TryParse(data["data"]?[0]?["index"]?.ToString(), out var index))
             {
                 await eventArgs.SourceGroup.SendGroupMessage("无法获取到色图信息");
                 return;
@@ -105,9 +103,8 @@ public class HsoCommand
             Log.Debug("获取到图片", $"pid:{pid}|index:{index}");
             var url = MediaUtil.GenPixivUrl(hso.PximyProxy, pid, index);
             //检查是否有设置代理
-            await eventArgs.SourceGroup.SendGroupMessage(
-                HsoMessageBuilder(data["data"]?[0], hso.CardImage, url),
-                TimeSpan.FromSeconds(10));
+            await eventArgs.SourceGroup.SendGroupMessage(HsoMessageBuilder(data["data"]?[0], hso.CardImage, url),
+                                                         TimeSpan.FromSeconds(10));
         }
         catch (Exception e)
         {
@@ -116,10 +113,9 @@ public class HsoCommand
     }
 
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"^让我康康[0-9]+$"},
-        MatchType = MatchType.Regex)]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { @"^让我康康[0-9]+$" },
+                 MatchType = MatchType.Regex)]
     public async void HsoPicIndexSearchAll(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -130,10 +126,9 @@ public class HsoCommand
     }
 
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"^看看推特[0-9]+$"},
-        MatchType = MatchType.Regex)]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { @"^看看推特[0-9]+$" },
+                 MatchType = MatchType.Regex)]
     public async void TweetPic(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -146,10 +141,9 @@ public class HsoCommand
     }
 
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"^让我康康[0-9]+\s[0-9]+$"},
-        MatchType = MatchType.Regex)]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { @"^让我康康[0-9]+\s[0-9]+$" },
+                 MatchType = MatchType.Regex)]
     public async void HsoPicIndexSearch(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -162,10 +156,9 @@ public class HsoCommand
     }
 
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {"来点色批"},
-        MatchType = MatchType.Full)]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { "来点色批" },
+                 MatchType = MatchType.Full)]
     public static async void HsoRank(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -182,7 +175,7 @@ public class HsoCommand
         }
         else
         {
-            var message = new MessageBody {"让我康康到底谁最能冲\r\n"};
+            var message = new MessageBody { "让我康康到底谁最能冲\r\n" };
             foreach (var count in rankList)
                 message.AddRange(count.Uid.ToAt() + $"冲了{count.Count}次" + "\r\n");
 
@@ -193,9 +186,8 @@ public class HsoCommand
     }
 
     [UsedImplicitly]
-    [SoraCommand(
-        SourceType = SourceFlag.Group,
-        CommandExpressions = new[] {@"^AD[0-9]+\s[0-9]+$"})]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { @"^AD[0-9]+\s[0-9]+$" })]
     public async void HsoAddPic(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
@@ -229,18 +221,20 @@ public class HsoCommand
         JToken resData;
         try
         {
-            var res = await Requests.PostAsync("https://api.yukari.one/setu/add_pic", new ReqParams
-            {
-                PostJson = new
-                {
-                    apikey = userConfig.HsoConfig.YukariApiKey,
-                    pid    = picId,
-                    index  = picIndex
-                },
-                Timeout                   = 10000,
-                IsThrowErrorForStatusCode = false,
-                IsThrowErrorForTimeout    = false
-            });
+            var res = await Requests.PostAsync("https://api.yukari.one/setu/add_pic",
+                                               new ReqParams
+                                               {
+                                                   PostJson = new
+                                                   {
+                                                       apikey =
+                                                           userConfig.HsoConfig.YukariApiKey,
+                                                       pid   = picId,
+                                                       index = picIndex
+                                                   },
+                                                   Timeout                   = 10000,
+                                                   IsThrowErrorForStatusCode = false,
+                                                   IsThrowErrorForTimeout    = false
+                                               });
 
             if (res.StatusCode != HttpStatusCode.OK)
             {
@@ -284,9 +278,9 @@ public class HsoCommand
         await eventArgs.Reply($"success[{picId}]");
     }
 
-    #endregion
+#endregion
 
-    #region 私有方法
+#region 私有方法
 
     /// <summary>
     /// 获取随机图片信息
@@ -330,19 +324,20 @@ public class HsoCommand
 
             //向服务器发送请求
             Log.Debug("hso api server", serverUrl);
-            var reqResponse = await Requests.GetAsync(serverUrl, new ReqParams
-            {
-                Timeout = 3000,
-                Params = new Dictionary<string, string>
-                {
-                    {"apikey", apiKey}
-                },
-                isCheckSSLCert = hso.CheckSSLCert
-            });
+            var reqResponse = await Requests.GetAsync(serverUrl,
+                                                      new ReqParams
+                                                      {
+                                                          Timeout = 3000,
+                                                          Params = new Dictionary<string, string>
+                                                              {
+                                                                  { "apikey", apiKey }
+                                                              },
+                                                          isCheckSSLCert = hso.CheckSSLCert
+                                                      });
             if (reqResponse.StatusCode != HttpStatusCode.OK)
             {
-                Log.Error("Net", $"{serverUrl} return code {(int) reqResponse.StatusCode}");
-                return ((int) reqResponse.StatusCode, null);
+                Log.Error("Net", $"{serverUrl} return code {(int)reqResponse.StatusCode}");
+                return ((int)reqResponse.StatusCode, null);
             }
 
             return (200, reqResponse.Json());
@@ -350,7 +345,7 @@ public class HsoCommand
         catch (Exception e)
         {
             Log.Error("网络发生错误",
-                $"{Log.ErrorLogBuilder(e)}\r\n\r\n{PyLibSharp.Requests.Utils.GetInnerExceptionMessages(e)}");
+                      $"{Log.ErrorLogBuilder(e)}\r\n\r\n{PyLibSharp.Requests.Utils.GetInnerExceptionMessages(e)}");
             return (-1, null);
         }
     }
@@ -413,5 +408,5 @@ public class HsoCommand
         return config.HsoConfig.GroupBlock.Any(gid => gid == eventArgs.SourceGroup);
     }
 
-    #endregion
+#endregion
 }

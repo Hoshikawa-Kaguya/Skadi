@@ -23,8 +23,8 @@ internal static class InitializationEvent
         Log.Info("Skadi初始化", "与onebot客户端连接成功，初始化资源...");
         //初始化配置文件
         Log.Info("Skadi初始化", $"初始化用户[{connectEvent.LoginUid}]的配置");
-        if (!ConfigManager.UserConfigFileInit(connectEvent.LoginUid) ||
-            !ConfigManager.TryGetUserConfig(connectEvent.LoginUid, out var userConfig))
+        if (!ConfigManager.UserConfigFileInit(connectEvent.LoginUid)
+            || !ConfigManager.TryGetUserConfig(connectEvent.LoginUid, out var userConfig))
         {
             Log.Fatal(new IOException("无法获取用户配置文件(Initialization)"), "Skadi初始化", "用户配置文件初始化失败");
             Environment.Exit(-1);
@@ -33,7 +33,7 @@ internal static class InitializationEvent
 
         //在控制台显示启用模块
         Log.Info("已启用的模块",
-            $"\n{userConfig.ModuleSwitch}");
+                 $"\n{userConfig.ModuleSwitch}");
         //显示代理信息
         if (userConfig.ModuleSwitch.Hso && !string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
             Log.Debug("Hso Proxy", userConfig.HsoConfig.PximyProxy);

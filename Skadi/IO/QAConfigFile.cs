@@ -13,7 +13,7 @@ internal class QAConfigFile
 {
     private const string QA_CONFIG_FILE = "qa.json";
 
-    private string QAConfigPath { get; init; }
+    private string QAConfigPath { get; }
 
     public QAConfigFile(long loginId)
     {
