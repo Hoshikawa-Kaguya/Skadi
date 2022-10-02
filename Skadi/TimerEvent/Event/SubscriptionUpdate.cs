@@ -46,11 +46,17 @@ internal static class SubscriptionUpdate
         {
             //臭DD的订阅
             foreach (var biliUser in subscription.SubscriptionId)
-                await GetDynamic(api, biliUser, subscription.GroupId, dbHelper);
+                await GetDynamic(api,
+                                 biliUser,
+                                 subscription.GroupId,
+                                 dbHelper);
 
             //直播动态订阅
             foreach (var biliUser in subscription.LiveSubscriptionId)
-                await GetLiveStatus(api, biliUser, subscription.GroupId, dbHelper);
+                await GetLiveStatus(api,
+                                    biliUser,
+                                    subscription.GroupId,
+                                    dbHelper);
         }
     }
 
@@ -79,13 +85,16 @@ internal static class SubscriptionUpdate
         }
 
         //需要更新数据的群
-        Dictionary<long, LiveStatusType> updateDict =
-            groupId.Where(gid => dbHelper.GetLastLiveStatus(gid, biliUser) != liveInfo.LiveStatus)
-                   .ToDictionary(gid => gid, _ => liveInfo.LiveStatus);
+        Dictionary<long, LiveStatusType> updateDict = groupId
+                                                      .Where(gid => dbHelper.GetLastLiveStatus(gid, biliUser)
+                                                                    != liveInfo.LiveStatus)
+                                                      .ToDictionary(gid => gid, _ => liveInfo.LiveStatus);
 
         //更新数据库
         foreach (var status in updateDict)
-            if (!dbHelper.UpdateLiveStatus(status.Key, biliUser, liveInfo.LiveStatus))
+            if (!dbHelper.UpdateLiveStatus(status.Key,
+                                           biliUser,
+                                           liveInfo.LiveStatus))
                 Log.Error("Database", "更新直播订阅数据失败");
 
 
@@ -133,9 +142,9 @@ internal static class SubscriptionUpdate
 
         Log.Debug("动态获取", $"{sender.UserName}的动态获取成功");
         //检查是否是最新的
-        List<long> targetGroups =
-            groupId.Where(group => !dbHelper.IsLatestDynamic(group, sender.Uid, dTs.ToDateTime()))
-                   .ToList();
+        List<long> targetGroups = groupId.Where(group => !dbHelper.IsLatestDynamic(group,
+                                                                                   sender.Uid,
+                                                                                   dTs.ToDateTime())).ToList();
         //没有群需要发送消息
         if (targetGroups.Count == 0)
         {
@@ -149,18 +158,32 @@ internal static class SubscriptionUpdate
         List<CustomNode> nodes = new()
         {
             //动态渲染图
-            new CustomNode(sender.UserName, 114514, await GetChromePic($"https://t.bilibili.com/{dId}")),
-            new CustomNode(sender.UserName, 114514, "动态内容:")
+            new CustomNode(sender.UserName,
+                           114514,
+                           await GetChromePic($"https://t.bilibili.com/{dId}"))
         };
-        //动态文字
-        if (dyJson["modules"]?["module_dynamic"]?["desc"]?["text"] is not null)
+
+        //纯文本内容
+        if (dyJson.SelectToken("modules.module_dynamic.desc.text") is JValue textDetail)
+        {
             nodes.Add(new CustomNode(sender.UserName,
                                      114514,
-                                     dyJson["modules"]?["module_dynamic"]?["desc"]?["text"]?.Value<string>() ?? string.Empty));
-        nodes.Add(new CustomNode(sender.UserName, 114514, "动态图片:"));
-        //动态图片
-        if (dyJson["modules"]?["module_dynamic"]?["major"]?["draw"]?["items"] is JArray array) 
-            nodes.AddRange(array.Select(item => new CustomNode(sender.UserName, 114514, SoraSegment.Image(item?.Value<string>("src")))));
+                                     "动态内容:"));
+            nodes.Add(new CustomNode(sender.UserName,
+                                     114514,
+                                     textDetail.Value<string>() ?? string.Empty));
+        }
+
+        //图片内容
+        if (dyJson.SelectToken("modules.module_dynamic.major.draw.items") is JArray { HasValues: true } picDetail)
+        {
+            nodes.Add(new CustomNode(sender.UserName,
+                                     114514,
+                                     "动态图片:"));
+            nodes.AddRange(picDetail.Select(item => new CustomNode(sender.UserName,
+                                                                   114514,
+                                                                   SoraSegment.Image(item.Value<string>("src")))));
+        }
 
         //向未发送消息的群发送消息
         foreach (long targetGroup in targetGroups)
@@ -168,7 +191,9 @@ internal static class SubscriptionUpdate
             Log.Info("动态获取", $"获取到{sender.UserName}的最新动态，向群{targetGroup}发送动态信息");
             await soraApi.SendGroupMessage(targetGroup, $"{sender.UserName}有新动态！");
             await soraApi.SendGroupForwardMsg(targetGroup, nodes);
-            if (!dbHelper.UpdateDynamic(targetGroup, sender.Uid, dTs.ToDateTime()))
+            if (!dbHelper.UpdateDynamic(targetGroup,
+                                        sender.Uid,
+                                        dTs.ToDateTime()))
                 Log.Error("数据库", "更新动态记录时发生了数据库错误");
         }
     }
