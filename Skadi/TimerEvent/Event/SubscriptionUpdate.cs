@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using BilibiliApi;
@@ -200,7 +202,9 @@ internal static class SubscriptionUpdate
 
     private static async Task<SoraSegment> GetChromePic(string url)
     {
-        Page page = await StaticVar.Chrome.NewPageAsync();
+        Page   page = await StaticVar.Chrome.NewPageAsync();
+        string dId  = Path.GetFileName(url);
+        Log.Debug("动态ID", dId);
         await page.SetViewportAsync(new ViewPortOptions
         {
             Width  = 2000,
@@ -210,9 +214,16 @@ internal static class SubscriptionUpdate
         await page.GoToAsync(url);
 
         //动态
-        ElementHandle dyElement =
-            await page.QuerySelectorAsync("#app > div.content > div > div > div.bili-dyn-item__main");
-        Log.Debug("Puppeteer", $"获取到动态元素[{dyElement.RemoteObject.ObjectId}]");
+        //await page.QuerySelectorAsync("#app > div.content > div > div > div.bili-dyn-item__main");
+        ElementHandle dyElement = await page.WaitForXPathAsync("//*[@id=\"app\"]/div[2]/div/div/div[1]");
+
+        if (dyElement is null)
+        {
+            Log.Debug($"动态{dId}", "无法获取动态内容");
+            return "404";
+        }
+
+        Log.Debug($"动态{dId}", $"获取到动态元素[{dyElement.RemoteObject.ObjectId}]");
 
         string picB64 = await dyElement.ScreenshotBase64Async(new ScreenshotOptions { Type = ScreenshotType.Png });
 
