@@ -10,7 +10,7 @@ internal static class GroupPokeEvent
     internal static async ValueTask GroupPokeEventParse(object sender, GroupPokeEventArgs eventArgs)
     {
         if (eventArgs.TargetUser == eventArgs.LoginUid)
-        {
+        { 
             if (!IsInCD(eventArgs.SourceGroup, eventArgs.SendUser, CommandFlag.GroupPoke))
                 await eventArgs.SourceGroup.SendGroupMessage(SoraSegment.At(eventArgs.SendUser)
                                                              + "\r\n你今晚必被爽哥杀害\r\n"

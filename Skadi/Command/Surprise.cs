@@ -65,23 +65,6 @@ public class Surprise
         string result = Random.Shared.Next(0, 100) < 10 ? "我全都要" : options[Random.Shared.Next(0, options.Count)];
         re.Append($"建议你选择：{result}");
         await eventArgs.Reply(re.ToString());
-
-        // Guid id = eventArgs.Message.MessageBody
-        //                    .Where(m => m.Data is TextSegment t &&
-        //                         t.Content.IndexOf("还是", StringComparison.Ordinal) != -1)
-        //                    .Select(m => m.Id)
-        //                    .First();
-        // int index = eventArgs.Message.MessageBody.IndexOfById(id);
-        // Log.Info("index", $"{index}");
-        // bool selectL = Random.Shared.Next(0, 100) > 50;
-        // MessageBody msg = selectL
-        //     ? eventArgs.Message.MessageBody.Take(index).ToMessageBody()
-        //     : eventArgs.Message.MessageBody.Skip(index).ToMessageBody();
-        // string text = (msg[0].Data as TextSegment)!.Content[2..];
-        // if (string.IsNullOrEmpty(text)) msg.RemoveAt(0);
-        // else msg[0] = text;
-        //
-        // await eventArgs.Reply("选择" + msg);
     }
 
 #endregion

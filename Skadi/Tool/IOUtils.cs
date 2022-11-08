@@ -6,11 +6,11 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using YukariToolBox.LightLog;
 
-namespace Skadi.IO;
+namespace Skadi.Tool;
 
 internal static class IoUtils
 {
-#region IO工具
+    #region IO工具
 
     /// <summary>
     /// 获取错误报告路径
@@ -133,9 +133,9 @@ internal static class IoUtils
         }
     }
 
-#endregion
+    #endregion
 
-#region 文件读取工具
+    #region 文件读取工具
 
     /// <summary>
     /// 读取Json文件并返回为一个JObject
@@ -146,9 +146,9 @@ internal static class IoUtils
     {
         try
         {
-            StreamReader   jsonFile   = File.OpenText(jsonPath);
-            JsonTextReader reader     = new JsonTextReader(jsonFile);
-            JToken         jsonObject = JToken.ReadFrom(reader);
+            StreamReader jsonFile = File.OpenText(jsonPath);
+            JsonTextReader reader = new JsonTextReader(jsonFile);
+            JToken jsonObject = JToken.ReadFrom(reader);
             return jsonObject;
         }
         catch (Exception e)
@@ -158,9 +158,9 @@ internal static class IoUtils
         }
     }
 
-#endregion
+    #endregion
 
-#region 文件写入工具
+    #region 文件写入工具
 
     /// <summary>
     /// 将byte数组转换为文件并保存到指定地址
@@ -175,7 +175,7 @@ internal static class IoUtils
                 File.Delete(savePath);
 
             //将byte数组数据写入文件流
-            using FileStream   fileStream   = new FileStream(savePath, FileMode.CreateNew);
+            using FileStream fileStream = new FileStream(savePath, FileMode.CreateNew);
             using BinaryWriter binaryWriter = new BinaryWriter(fileStream);
             binaryWriter.Write(buff, 0, buff.Length);
             binaryWriter.Close();
@@ -189,5 +189,5 @@ internal static class IoUtils
         }
     }
 
-#endregion
+    #endregion
 }

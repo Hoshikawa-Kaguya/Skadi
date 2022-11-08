@@ -3,35 +3,31 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Skadi.Command;
+using Skadi.Entities;
+using Skadi.Tool;
 using Sora.Entities;
 using Sora.Util;
 using YukariToolBox.LightLog;
 
-namespace Skadi.IO;
+namespace Skadi.Services;
 
-internal class QAConfigFile
+//TODO IOC
+internal class QaConfigService
 {
     private const string QA_CONFIG_FILE = "qa.json";
 
-    private string QAConfigPath { get; }
+    private string QaConfigPath { get; }
 
-    public QAConfigFile(long loginId)
+    public QaConfigService(long loginId)
     {
-        QAConfigPath = IoUtils.GetUserConfigPath(loginId, QA_CONFIG_FILE);
-        if (!File.Exists(QAConfigPath))
+        QaConfigPath = IoUtils.GetUserConfigPath(loginId, QA_CONFIG_FILE);
+        if (!File.Exists(QaConfigPath))
         {
             Log.Warning("QA", "未找到QA配置文件，创建新的配置文件");
-            using TextWriter writer = File.CreateText(QAConfigPath);
+            using TextWriter writer = File.CreateText(QaConfigPath);
             writer.Write("[]");
             writer.Close();
         }
-    }
-
-    internal struct QaData
-    {
-        public MessageBody qMsg;
-        public MessageBody aMsg;
-        public long        GroupId;
     }
 
     public void AddNewQA(QaData newQA)
@@ -57,7 +53,7 @@ internal class QAConfigFile
     {
         List<QaData> commands = new();
 
-        JToken qaJson = JToken.Parse(File.ReadAllText(QAConfigPath));
+        JToken qaJson = JToken.Parse(File.ReadAllText(QaConfigPath));
 
         List<(string qMsg, string aMsg, long groupId)> temp =
             qaJson.ToObject<List<(string qMsg, string aMsg, long groupId)>>();
@@ -67,8 +63,8 @@ internal class QAConfigFile
         foreach ((string qMsgStr, string aMsgStr, long groupId) in temp)
             commands.Add(new QaData
             {
-                qMsg    = CQCodeUtil.DeserializeMessage(qMsgStr),
-                aMsg    = CQCodeUtil.DeserializeMessage(aMsgStr),
+                qMsg = CQCodeUtil.DeserializeMessage(qMsgStr),
+                aMsg = CQCodeUtil.DeserializeMessage(aMsgStr),
                 GroupId = groupId
             });
 
@@ -83,6 +79,6 @@ internal class QAConfigFile
             temp.Add((qaData.qMsg.SerializeMessage(), qaData.aMsg.SerializeMessage(), qaData.GroupId));
 
         JToken json = JToken.FromObject(temp);
-        File.WriteAllText(QAConfigPath, json.ToString(Formatting.None));
+        File.WriteAllText(QaConfigPath, json.ToString(Formatting.None));
     }
 }

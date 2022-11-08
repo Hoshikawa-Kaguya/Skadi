@@ -23,12 +23,6 @@ internal class UserConfig
     /// 色图相关设置
     /// </summary>
     public Hso HsoConfig { set; get; }
-
-    /// <summary>
-    /// 推特API Token(v2)
-    /// </summary>
-    [UsedImplicitly] //TODO 推特API扩展
-    public string TwitterApiToken { get; set; }
 }
 
 /// <summary>

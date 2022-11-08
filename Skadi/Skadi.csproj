@@ -38,7 +38,7 @@
       <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
-    <ItemGroup>
+	<ItemGroup>
       <None Remove="Resource\Deng.ttf" />
     </ItemGroup>
 
@@ -46,9 +46,13 @@
         <EmbeddedResource Include="Config\InitGlobalConfig.yaml" />
         <EmbeddedResource Include="Config\InitUserConfig.yaml" />
         <EmbeddedResource Include="Resource\Deng.ttf" />
-        <EmbeddedResource Update="Resource\FontRes.resx">
+        <EmbeddedResource Update="FontResource.resx">
           <Generator>ResXFileCodeGenerator</Generator>
-          <LastGenOutput>FontRes.Designer.cs</LastGenOutput>
+          <LastGenOutput>FontResource.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+        <EmbeddedResource Update="ImageResourse.resx">
+          <Generator>ResXFileCodeGenerator</Generator>
+          <LastGenOutput>ImageResourse.Designer.cs</LastGenOutput>
         </EmbeddedResource>
         <EmbeddedResource Update="Resource\Fonts.resx">
           <Generator>ResXFileCodeGenerator</Generator>
@@ -61,17 +65,16 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="BeetleX.FastHttpApi" Version="2.2.18.1803" />
         <PackageReference Include="BilibiliApi" Version="0.5.6" />
-        <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
-        <PackageReference Include="PuppeteerSharp" Version="7.1.0" />
+        <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" />
+        <PackageReference Include="PuppeteerSharp" Version="8.0.0" />
         <PackageReference Include="PyLibSharp.Requests" Version="1.2.10" />
         <PackageReference Include="SharpYaml" Version="2.1.0" />
         <PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
         <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta15" />
-        <PackageReference Include="Sora" Version="1.0.0-rc.78" />
-        <PackageReference Include="sqlSugarCore" Version="5.1.3.22" />
-        <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
+        <PackageReference Include="Sora" Version="1.0.0-rc.79" />
+        <PackageReference Include="sqlSugarCore" Version="5.1.3.30" />
+        <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -80,10 +83,15 @@
             <AutoGen>True</AutoGen>
             <DependentUpon>InitRes.resx</DependentUpon>
         </Compile>
-        <Compile Update="Resource\FontRes.Designer.cs">
+        <Compile Update="FontResource.Designer.cs">
           <DesignTime>True</DesignTime>
           <AutoGen>True</AutoGen>
-          <DependentUpon>FontRes.resx</DependentUpon>
+          <DependentUpon>FontResource.resx</DependentUpon>
+        </Compile>
+        <Compile Update="ImageResourse.Designer.cs">
+          <DesignTime>True</DesignTime>
+          <AutoGen>True</AutoGen>
+          <DependentUpon>ImageResourse.resx</DependentUpon>
         </Compile>
         <Compile Update="Resource\Fonts.Designer.cs">
           <DesignTime>True</DesignTime>

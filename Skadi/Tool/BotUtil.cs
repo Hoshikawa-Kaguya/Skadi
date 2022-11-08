@@ -1,8 +1,7 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using Skadi.IO;
-using Skadi.TypeEnum;
+using Skadi.Entities;
 using Sora;
 using Sora.Entities;
 using Sora.Entities.Segment;
@@ -124,7 +123,7 @@ internal static class BotUtil
         //生成错误报告
         IoUtils.CrashLogGen(Log.ErrorLogBuilder(e));
         //关闭浏览器
-        Task c = StaticVar.Chrome.CloseAsync();
+        Task c = StaticStuff.Chrome.CloseAsync();
         c.Wait();
     }
 

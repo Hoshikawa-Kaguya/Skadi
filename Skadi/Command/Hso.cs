@@ -12,7 +12,6 @@ using Skadi.Command.ImageSearch;
 using Skadi.Config;
 using Skadi.Config.ConfigModule;
 using Skadi.DatabaseUtils.Helpers;
-using Skadi.IO;
 using Skadi.Tool;
 using Sora.Attributes.Command;
 using Sora.Entities;

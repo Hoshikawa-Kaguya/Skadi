@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using SharpYaml.Serialization;
 using Skadi.Config.ConfigModule;
-using Skadi.IO;
+using Skadi.Tool;
 using YukariToolBox.LightLog;
 
 namespace Skadi.Config;

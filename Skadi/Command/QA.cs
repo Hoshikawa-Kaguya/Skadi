@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using Skadi.IO;
+using Skadi.Entities;
 using Sora.Attributes.Command;
 using Sora.Entities;
 using Sora.Entities.Segment;
@@ -28,17 +28,13 @@ public class QA
         internal long        gid;
     }
 
-    public QA()
+    public void QaInit(long loginUid)
     {
-        Task.Run(() =>
-        {
-            StaticVar.ServiceReady.WaitOne();
-            Log.Info("QA", "QA初始化");
-            List<QAConfigFile.QaData> qaMsg = StaticVar.QaConfigFile.GetAllQA();
-            foreach (QAConfigFile.QaData data in qaMsg)
-                RegisterNewQaCommand(data.qMsg, data.aMsg, data.GroupId);
-            Log.Info("QA", $"加载了{qaMsg.Count}条QA");
-        });
+        Log.Info("QA", "QA初始化");
+        List<QaData> qaMsg = StaticStuff.QaConfig.GetAllQA();
+        foreach (QaData data in qaMsg)
+            RegisterNewQaCommand(data.qMsg, data.aMsg, data.GroupId);
+        Log.Info("QA", $"加载了{qaMsg.Count}条QA");
     }
 
     private readonly List<QABuf> _commandGuids = new();
@@ -127,7 +123,7 @@ public class QA
 
         //处理问题
         RegisterNewQaCommand(fMessage, bMessage, eventArgs.SourceGroup);
-        StaticVar.QaConfigFile.AddNewQA(new QAConfigFile.QaData
+        StaticStuff.QaConfig.AddNewQA(new QaData
         {
             qMsg    = fMessage,
             aMsg    = bMessage,
@@ -167,9 +163,9 @@ public class QA
             foreach (QABuf buf in qaBufs)
             {
                 //取消注册指令
-                StaticVar.SoraCommandManager.DeleteDynamicCommand(buf.cmdId);
+                StaticStuff.CommandManager.DeleteDynamicCommand(buf.cmdId);
                 //删除数据文件中的qa数据
-                StaticVar.QaConfigFile.DeleteQA(buf.msg);
+                StaticStuff.QaConfig.DeleteQA(buf.msg);
                 //删除缓存中的qa
                 _commandGuids.RemoveAll(s => MessageEqual(s.msg, question));
             }
@@ -224,18 +220,18 @@ public class QA
     public void RegisterNewQaCommand(MessageBody qMsg, MessageBody aMsg, long group)
     {
         Guid cmdId =
-            StaticVar.SoraCommandManager.RegisterGroupDynamicCommand(args => MessageEqual(args.Message.MessageBody,
-                                                                                          qMsg),
-                                                                     async e =>
-                                                                     {
-                                                                         e.IsContinueEventChain = false;
-                                                                         await e.Reply(aMsg);
-                                                                     },
-                                                                     "qa_global",
-                                                                     MemberRoleType.Member,
-                                                                     false,
-                                                                     0,
-                                                                     new[] { group });
+            StaticStuff.CommandManager.RegisterGroupDynamicCommand(args => MessageEqual(args.Message.MessageBody,
+                                                                                        qMsg),
+                                                                   async e =>
+                                                                   {
+                                                                       e.IsContinueEventChain = false;
+                                                                       await e.Reply(aMsg);
+                                                                   },
+                                                                   "qa_global",
+                                                                   MemberRoleType.Member,
+                                                                   false,
+                                                                   0,
+                                                                   new[] { group });
 
         _commandGuids.Add(new QABuf
         {

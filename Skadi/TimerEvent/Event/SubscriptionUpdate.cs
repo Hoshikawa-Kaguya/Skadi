@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -202,7 +201,7 @@ internal static class SubscriptionUpdate
 
     private static async Task<SoraSegment> GetChromePic(string url)
     {
-        Page   page = await StaticVar.Chrome.NewPageAsync();
+        IPage  page = await StaticStuff.Chrome.NewPageAsync();
         string dId  = Path.GetFileName(url);
         Log.Debug("动态ID", dId);
         await page.SetViewportAsync(new ViewPortOptions
@@ -215,7 +214,7 @@ internal static class SubscriptionUpdate
 
         //动态
         //await page.QuerySelectorAsync("#app > div.content > div > div > div.bili-dyn-item__main");
-        ElementHandle dyElement = await page.WaitForXPathAsync("//*[@id=\"app\"]/div[2]/div/div/div[1]");
+        IElementHandle dyElement = await page.WaitForXPathAsync("//*[@id=\"app\"]/div[2]/div/div/div[1]");
 
         if (dyElement is null)
         {

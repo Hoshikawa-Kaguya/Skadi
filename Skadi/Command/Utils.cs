@@ -68,16 +68,16 @@ public static class Utils
             return;
         }
 
-        ulong msgCount = Convert.ToUInt64(data["message_received"] ?? 0) + Convert.ToUInt64(data["message_sent"] ?? 0);
-        StringBuilder msg = new StringBuilder();
-        float tMem = GC.GetTotalAllocatedBytes(true) / (1024 * 1024f);
-        float mem = Environment.WorkingSet / (1024 * 1024f);
-        double cpu = await GetCpuUsageForProcess();
+        ulong         msgCount = Convert.ToUInt64(data["message_received"] ?? 0) + Convert.ToUInt64(data["message_sent"] ?? 0);
+        StringBuilder msg      = new();
+        float         tMem     = GC.GetTotalAllocatedBytes(true) / (1024 * 1024f);
+        float         mem      = Environment.WorkingSet / (1024 * 1024f);
+        double        cpu      = await GetCpuUsageForProcess();
 
         msg.AppendLine("Skadi-Status");
         msg.AppendLine("Ciallo～(∠・ω< )⌒☆");
         msg.AppendLine($"消息数量:{msgCount}");
-        msg.AppendLine($"运行时间:{DateTime.Now - StaticVar.StartTime:g}");
+        msg.AppendLine($"运行时间:{DateTime.Now - StaticStuff.StartTime:g}");
         msg.AppendLine($"GC Allocated:{tMem.ToString("F2")}MB");
         msg.AppendLine($"RAM:{mem.ToString("F2")}MB");
         msg.AppendLine($"CPU:{cpu.ToString("F2")}%");
@@ -136,7 +136,7 @@ public static class Utils
     private static async Task<SoraSegment> GetChromePic(string url,
                                                         bool   all)
     {
-        Page page = await StaticVar.Chrome.NewPageAsync();
+        IPage page = await StaticStuff.Chrome.NewPageAsync();
         await page.SetViewportAsync(new ViewPortOptions
         {
             Width  = 1920,

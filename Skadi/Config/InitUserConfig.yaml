@@ -11,9 +11,6 @@ ModuleSwitch:
   # 公会排名查询
   PcrGuildRank: false
 
-# 推特API Token(v2)
-TwitterApiToken: null
-
 # 随机色图设置
 HsoConfig:
   # 色图源 Local/Lolicon/Yukari/自定义服务器

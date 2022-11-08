@@ -14,7 +14,6 @@ using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using Skadi.Config;
-using Skadi.Resource;
 using Sora.Entities;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
@@ -34,7 +33,7 @@ internal static class MediaUtil
     {
         //加载字体
         Log.Debug("Arial Font", "Init font");
-        using var arialFontMs         = new MemoryStream(FontRes.Deng);
+        using var arialFontMs         = new MemoryStream(FontResource.Deng);
         var       arialFontCollection = new FontCollection();
         var       arialFontFamily     = arialFontCollection.Add(arialFontMs);
         Arial = arialFontFamily.CreateFont(35);
@@ -76,7 +75,7 @@ internal static class MediaUtil
 
         if (r18)
         {
-            await eventArgs.Reply("H是不行的！冲了这么多，休息一下吧");
+            await eventArgs.Reply(SoraSegment.Image(new MemoryStream(ImageResourse.R18_NO)));
             return;
         }
 

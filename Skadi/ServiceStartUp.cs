@@ -12,6 +12,7 @@ using Skadi.Tool;
 using Sora;
 using Sora.Entities.Segment;
 using Sora.EventArgs.SoraEvent;
+using Sora.Interfaces;
 using Sora.Net.Config;
 using Sora.Util;
 using YukariToolBox.LightLog;
@@ -49,8 +50,9 @@ internal static class ServiceStartUp
 
         //初始化浏览器
         Log.Info("初始化", "初始化浏览器...");
+
         await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
-        StaticVar.Chrome = await Puppeteer.LaunchAsync(new LaunchOptions
+        StaticStuff.Chrome = await Puppeteer.LaunchAsync(new LaunchOptions
         {
             Headless          = true,
             IgnoreHTTPSErrors = true,
@@ -58,14 +60,9 @@ internal static class ServiceStartUp
             Args              = new[] { "--no-sandbox" }
         });
 
-        //TODO 可能很久之后才会写了
-        // //启动机器人WebAPI服务器
-        // Log.Info("初始化", "启动机器人WebAPI服务器...");
-        // ConsoleInterface = new ConsoleInterface(globalConfig.SkadiAPILocation, globalConfig.SkadiAPIPort);
-
         Log.Info("初始化", "启动反向WS服务器...");
         //初始化服务器
-        var server = SoraServiceFactory.CreateService(new ServerConfig
+        ISoraService server = SoraServiceFactory.CreateService(new ServerConfig
         {
             Host          = globalConfig.Location,
             Port          = globalConfig.Port,
@@ -85,16 +82,8 @@ internal static class ServiceStartUp
         {
             BotUtil.BotCrash(args.ExceptionObject as Exception);
         };
-        Console.CancelKeyPress += (_, args) =>
-        {
-            Log.Info("Ctr-C", "Skadi正在停止...");
-            StaticVar.Chrome.CloseAsync();
-            Thread.Sleep(1000);
-            args.Cancel = true;
-            Environment.Exit(0);
-        };
 
-        StaticVar.SoraCommandManager = server.Event.CommandManager;
+        StaticStuff.CommandManager = server.Event.CommandManager;
 
         //服务器回调
         //初始化
@@ -109,7 +98,17 @@ internal static class ServiceStartUp
 
         //启动服务器
         await server.StartService().RunCatch(BotUtil.BotCrash);
-        StaticVar.StartTime = DateTime.Now;
+        StaticStuff.StartTime = DateTime.Now;
+
+        Console.CancelKeyPress += (_, args) =>
+        {
+            Log.Info("Ctr-C", "Skadi正在停止...");
+            StaticStuff.Chrome.CloseAsync();
+            Thread.Sleep(1000);
+            args.Cancel = true;
+            Environment.Exit(0);
+        };
+
         await Task.Delay(-1);
     }
 

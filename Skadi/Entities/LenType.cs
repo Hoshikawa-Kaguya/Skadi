@@ -1,4 +1,4 @@
-namespace Skadi.TypeEnum;
+namespace Skadi.Entities;
 
 internal enum LenType
 {

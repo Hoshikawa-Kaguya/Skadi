@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Skadi.Resource {
+namespace Skadi {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace Skadi.Resource {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class FontRes {
+    internal class ImageResourse {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal FontRes() {
+        internal ImageResourse() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Skadi.Resource {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Skadi.Resource.FontRes", typeof(FontRes).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Skadi.ImageResourse", typeof(ImageResourse).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -63,9 +63,9 @@ namespace Skadi.Resource {
         /// <summary>
         ///   查找 System.Byte[] 类型的本地化资源。
         /// </summary>
-        internal static byte[] Deng {
+        internal static byte[] R18_NO {
             get {
-                object obj = ResourceManager.GetObject("Deng", resourceCulture);
+                object obj = ResourceManager.GetObject("R18_NO", resourceCulture);
                 return ((byte[])(obj));
             }
         }
