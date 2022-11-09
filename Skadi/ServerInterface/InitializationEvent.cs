@@ -1,6 +1,8 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Skadi.Command;
 using Skadi.Config;
 using Skadi.DatabaseUtils;
@@ -53,13 +55,8 @@ internal static class InitializationEvent
         DatabaseInit.UserDataInit(connectEvent);
 
         //初始化QA
-        StaticStuff.QaConfig = new QaConfigService(connectEvent.LoginUid);
-
-        if (SoraServiceFactory.TryGetService(connectEvent.ServiceId, out ISoraService service) &&
-            service.Event.CommandManager.GetInstance<QA>(out QA qa))
-        {
-            qa.QaInit(connectEvent.LoginUid);
-        }
+        Log.Info("Skadi初始化", "reg QA serv");
+        StaticStuff.Services.AddSingleton<IQaService>(new QaService(connectEvent.LoginUid));
 
         //初始化定时器线程
         if (userConfig.ModuleSwitch.BiliSubscription)
