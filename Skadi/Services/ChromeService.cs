@@ -14,7 +14,7 @@ public class ChromeService : IChromeService, IDisposable
 
     public ChromeService()
     {
-        Log.Info("Chrome", "Browser Start");
+        Log.Debug("Chrome", "Browser Start");
         Task<IBrowser> initTask = Puppeteer.LaunchAsync(new LaunchOptions
         {
             Headless          = true,
@@ -71,7 +71,6 @@ public class ChromeService : IChromeService, IDisposable
 
         await page.GoToAsync(url);
 
-        Log.Info("Curl", "生成截图...");
         string picB64 = await page.ScreenshotBase64Async(new ScreenshotOptions
         {
             FullPage = all,
@@ -88,7 +87,7 @@ public class ChromeService : IChromeService, IDisposable
 
     public async void Dispose()
     {
-        Log.Info("Chrome", "Browser Stop");
+        Log.Debug("Chrome", "Browser Stop");
         await _browser.CloseAsync();
         _browser.Dispose();
     }
