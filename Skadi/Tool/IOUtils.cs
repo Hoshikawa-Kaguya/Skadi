@@ -23,7 +23,7 @@ internal static class IoUtils
 #else
             pathBuilder.Append(Environment.CurrentDirectory);
 #endif
-        pathBuilder.Append("/crashlog");
+        pathBuilder.Append("/crashlog/");
         //检查目录是否存在，不存在则新建一个
         Directory.CreateDirectory(pathBuilder.ToString());
         return pathBuilder.ToString();
@@ -89,13 +89,16 @@ internal static class IoUtils
     /// <param name="errorMessage">错误信息</param>
     public static void CrashLogGen(string errorMessage)
     {
-        var pathBuilder = new StringBuilder();
+        StringBuilder pathBuilder = new StringBuilder();
         pathBuilder.Append(GetCrashLogPath());
         pathBuilder.Append("crash-");
         pathBuilder.Append(DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss"));
         pathBuilder.Append(".log");
 
-        using StreamWriter streamWriter = File.CreateText(pathBuilder.ToString());
+        string path = pathBuilder.ToString();
+        Log.Info("CrashLog", $"get crash log path:{path}");
+
+        using StreamWriter streamWriter = File.CreateText(path);
         streamWriter.Write(errorMessage);
     }
 
