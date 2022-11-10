@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Skadi.Entities;
 using Skadi.Tool;
+using Sora.Command;
 using Sora.Entities;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
@@ -104,7 +106,8 @@ internal class QaService : IQaService
         QaBufs.RemoveAll(q => MessageEqual(qMsg, q.qMsg) && q.gid == groupId);
         foreach (Guid id in ids)
         {
-            StaticStuff.CommandManager.DeleteDynamicCommand(id);
+            CommandManager cmd = StaticStuff.ServiceProvider.GetService<CommandManager>();
+            cmd?.DeleteDynamicCommand(id);
         }
 
         return 0;
@@ -129,21 +132,21 @@ internal class QaService : IQaService
 
     private Guid RegisterNewQaCommand(QaData qaData)
     {
+        CommandManager cmd = StaticStuff.ServiceProvider.GetService<CommandManager>();
         Guid cmdId =
-            StaticStuff.CommandManager
-                       .RegisterGroupDynamicCommand(args => MessageEqual(args.Message.MessageBody, qaData.qMsg),
-                                                    async e =>
-                                                    {
-                                                        e.IsContinueEventChain = false;
-                                                        await e.Reply(qaData.aMsg);
-                                                    },
-                                                    "qa_global",
-                                                    MemberRoleType.Member,
-                                                    false,
-                                                    0,
-                                                    new[] { qaData.GroupId },
-                                                    null,
-                                                    new[] { LoginUid });
+            cmd?.RegisterGroupDynamicCommand(args => MessageEqual(args.Message.MessageBody, qaData.qMsg),
+                                             async e =>
+                                             {
+                                                 e.IsContinueEventChain = false;
+                                                 await e.Reply(qaData.aMsg);
+                                             },
+                                             "qa_global",
+                                             MemberRoleType.Member,
+                                             false,
+                                             0,
+                                             new[] { qaData.GroupId },
+                                             null,
+                                             new[] { LoginUid }) ?? Guid.Empty;
         if (cmdId != Guid.Empty)
             QaBufs.Add(new QABuf
             {

@@ -1,15 +1,15 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using BilibiliApi;
 using BilibiliApi.Live.Enums;
 using BilibiliApi.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
-using PuppeteerSharp;
 using Skadi.Config;
 using Skadi.Config.ConfigModule;
 using Skadi.DatabaseUtils.Helpers;
+using Skadi.Services;
 using Sora;
 using Sora.Entities.Base;
 using Sora.Entities.Segment;
@@ -33,7 +33,7 @@ internal static class SubscriptionUpdate
         ModuleSwitch            moduleEnable  = loadedConfig.ModuleSwitch;
         List<GroupSubscription> subscriptions = loadedConfig.SubscriptionConfig.GroupsConfig;
         //数据库
-        var dbHelper = new SubscriptionDbHelper(connectEventArgs.LoginUid);
+        SubscriptionDbHelper dbHelper = new(connectEventArgs.LoginUid);
         //检查模块是否启用
         if (!moduleEnable.BiliSubscription)
             return;
@@ -43,17 +43,26 @@ internal static class SubscriptionUpdate
             return;
         }
 
-        foreach (var subscription in subscriptions)
+        using IServiceScope scope  = StaticStuff.ServiceProvider.CreateScope();
+        IChromeService      chrome = scope.ServiceProvider.GetService<IChromeService>();
+        if (chrome is null)
+        {
+            Log.Error("Serv", "未找到浏览器服务，跳过本次更新");
+            return;
+        }
+        
+        foreach (GroupSubscription subscription in subscriptions)
         {
             //臭DD的订阅
-            foreach (var biliUser in subscription.SubscriptionId)
+            foreach (long biliUser in subscription.SubscriptionId)
                 await GetDynamic(api,
                                  biliUser,
                                  subscription.GroupId,
-                                 dbHelper);
-
+                                 dbHelper,
+                                 chrome);
+        
             //直播动态订阅
-            foreach (var biliUser in subscription.LiveSubscriptionId)
+            foreach (long biliUser in subscription.LiveSubscriptionId)
                 await GetLiveStatus(api,
                                     biliUser,
                                     subscription.GroupId,
@@ -122,7 +131,8 @@ internal static class SubscriptionUpdate
     private static async ValueTask GetDynamic(SoraApi              soraApi,
                                               long                 biliUser,
                                               List<long>           groupId,
-                                              SubscriptionDbHelper dbHelper)
+                                              SubscriptionDbHelper dbHelper,
+                                              IChromeService       chrome)
     {
         //获取用户信息
         (UserInfo sender, _) = await BiliApis.GetLiveUserInfo(biliUser);
@@ -161,7 +171,8 @@ internal static class SubscriptionUpdate
             //动态渲染图
             new CustomNode(sender.UserName,
                            114514,
-                           await GetChromePic($"https://t.bilibili.com/{dId}"))
+                           await chrome.GetChromeXPathPic($"https://t.bilibili.com/{dId}",
+                                                          "//*[@id=\"app\"]/div[2]/div/div/div[1]"))
         };
 
         //纯文本内容
@@ -197,40 +208,5 @@ internal static class SubscriptionUpdate
                                         dTs.ToDateTime()))
                 Log.Error("数据库", "更新动态记录时发生了数据库错误");
         }
-    }
-
-    private static async Task<SoraSegment> GetChromePic(string url)
-    {
-        IPage  page = await StaticStuff.Chrome.NewPageAsync();
-        string dId  = Path.GetFileName(url);
-        Log.Debug("动态ID", dId);
-        await page.SetViewportAsync(new ViewPortOptions
-        {
-            Width  = 2000,
-            Height = 1500
-        });
-
-        await page.GoToAsync(url);
-
-        //动态
-        //await page.QuerySelectorAsync("#app > div.content > div > div > div.bili-dyn-item__main");
-        IElementHandle dyElement = await page.WaitForXPathAsync("//*[@id=\"app\"]/div[2]/div/div/div[1]");
-
-        if (dyElement is null)
-        {
-            Log.Debug($"动态{dId}", "无法获取动态内容");
-            return "404";
-        }
-
-        Log.Debug($"动态{dId}", $"获取到动态元素[{dyElement.RemoteObject.ObjectId}]");
-
-        string picB64 = await dyElement.ScreenshotBase64Async(new ScreenshotOptions { Type = ScreenshotType.Png });
-
-        //关闭页面
-        await page.CloseAsync();
-        await page.DisposeAsync();
-
-        SoraSegment img = SoraSegment.Image($"base64://{picB64}");
-        return img;
     }
 }

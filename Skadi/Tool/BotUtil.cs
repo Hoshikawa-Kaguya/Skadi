@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using SixLabors.ImageSharp;
 using Skadi.Entities;
 using Sora;
 using Sora.Entities;
@@ -22,22 +23,22 @@ internal static class BotUtil
     {
         if (DateTime.Now > DateTime.Today.Add(new TimeSpan(5, 0, 0)))
             return (long)(DateTime.Today
-                - new DateTime(1970,
-                               1,
-                               1,
-                               8,
-                               0,
-                               0,
-                               0)).Add(new TimeSpan(5, 0, 0))
-                                  .TotalSeconds;
+                          - new DateTime(1970,
+                                         1,
+                                         1,
+                                         8,
+                                         0,
+                                         0,
+                                         0)).Add(new TimeSpan(5, 0, 0))
+                                            .TotalSeconds;
         return (long)(DateTime.Today.AddDays(-1)
-                     - new DateTime(1970,
-                                    1,
-                                    1,
-                                    8,
-                                    0,
-                                    0,
-                                    0))
+                      - new DateTime(1970,
+                                     1,
+                                     1,
+                                     8,
+                                     0,
+                                     0,
+                                     0))
                      .Add(new TimeSpan(5, 0, 0)).TotalSeconds;
     }
 
@@ -122,9 +123,23 @@ internal static class BotUtil
     {
         //生成错误报告
         IoUtils.CrashLogGen(Log.ErrorLogBuilder(e));
-        //关闭浏览器
-        Task c = StaticStuff.Chrome.CloseAsync();
-        c.Wait();
+        //清理服务
+        StaticStuff.Services.Clear();
+    }
+
+    public static async void CommandError(Exception e, BaseMessageEventArgs eventArgs, string log)
+    {
+        string b64Pic =
+            MediaUtil.DrawTextImage(log, Color.Red, Color.Black);
+        switch (eventArgs)
+        {
+            case GroupMessageEventArgs g:
+                await g.Reply(SoraSegment.Image($"base64://{b64Pic}"));
+                break;
+            case PrivateMessageEventArgs p:
+                await p.Reply(SoraSegment.Image($"base64://{b64Pic}"));
+                break;
+        }
     }
 
 #endregion

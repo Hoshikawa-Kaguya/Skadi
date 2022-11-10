@@ -34,7 +34,7 @@ public class QA
             return;
         eventArgs.IsContinueEventChain = false;
         IQaService qaService = StaticStuff.ServiceProvider.GetServices<IQaService>()
-                                          ?.SingleOrDefault(s => s.LoginUid == eventArgs.LoginUid);
+                                          .SingleOrDefault(s => s.LoginUid == eventArgs.LoginUid);
         if (qaService is null)
         {
             Log.Error("QA", "未找到QA服务");
@@ -149,7 +149,7 @@ public class QA
             return;
         eventArgs.IsContinueEventChain = false;
         IQaService qaService = StaticStuff.ServiceProvider.GetServices<IQaService>()
-                                          ?.SingleOrDefault(s => s.LoginUid == eventArgs.LoginUid);
+                                          .SingleOrDefault(s => s.LoginUid == eventArgs.LoginUid);
         if (qaService is null)
         {
             Log.Error("QA", "未找到QA服务");
@@ -195,7 +195,7 @@ public class QA
     {
         eventArgs.IsContinueEventChain = false;
         IQaService qaService = StaticStuff.ServiceProvider.GetServices<IQaService>()
-                                          ?.SingleOrDefault(s => s.LoginUid == eventArgs.LoginUid);
+                                          .SingleOrDefault(s => s.LoginUid == eventArgs.LoginUid);
         if (qaService is null)
         {
             Log.Error("QA", "未找到QA服务");

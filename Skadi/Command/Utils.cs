@@ -5,8 +5,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
-using PuppeteerSharp;
+using Skadi.Services;
 using Skadi.Tool;
 using Sora.Attributes.Command;
 using Sora.Entities;
@@ -68,11 +69,11 @@ public static class Utils
             return;
         }
 
-        ulong         msgCount = Convert.ToUInt64(data["message_received"] ?? 0) + Convert.ToUInt64(data["message_sent"] ?? 0);
-        StringBuilder msg      = new();
-        float         tMem     = GC.GetTotalAllocatedBytes(true) / (1024 * 1024f);
-        float         mem      = Environment.WorkingSet / (1024 * 1024f);
-        double        cpu      = await GetCpuUsageForProcess();
+        ulong msgCount = Convert.ToUInt64(data["message_received"] ?? 0) + Convert.ToUInt64(data["message_sent"] ?? 0);
+        StringBuilder msg = new();
+        float tMem = GC.GetTotalAllocatedBytes(true) / (1024 * 1024f);
+        float mem = Environment.WorkingSet / (1024 * 1024f);
+        double cpu = await GetCpuUsageForProcess();
 
         msg.AppendLine("Skadi-Status");
         msg.AppendLine("Ciallo～(∠・ω< )⌒☆");
@@ -106,6 +107,15 @@ public static class Utils
 
         eventArgs.IsContinueEventChain = false;
 
+        using IServiceScope scope  = StaticStuff.ServiceProvider.CreateScope();
+        IChromeService      chrome = scope.ServiceProvider.GetService<IChromeService>();
+        if (chrome is null)
+        {
+            Log.Error("Serv", "未找到浏览器服务，跳过本次更新");
+            await eventArgs.Reply("浏览器⑧见了");
+            return;
+        }
+
         await eventArgs.Reply("running...");
         Log.Info("Curl", $"获取到url [{url}]");
 
@@ -115,49 +125,22 @@ public static class Utils
             return;
 
         Log.Info("Curl", "使用浏览器进行发送");
-        SoraSegment image = await GetChromePic(url, all);
+        SoraSegment image = await chrome.GetChromePagePic(url, all);
         await eventArgs.SendParaMessage(image, fakeMessage, autoRemove);
     }
 
     private static async Task<double> GetCpuUsageForProcess()
     {
-        var startTime     = DateTime.UtcNow;
-        var startCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
+        DateTime startTime     = DateTime.UtcNow;
+        TimeSpan startCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
         await Task.Delay(500);
 
-        var endTime       = DateTime.UtcNow;
-        var endCpuUsage   = Process.GetCurrentProcess().TotalProcessorTime;
-        var cpuUsedMs     = (endCpuUsage - startCpuUsage).TotalMilliseconds;
-        var totalMsPassed = (endTime - startTime).TotalMilliseconds;
-        var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
+        DateTime endTime       = DateTime.UtcNow;
+        TimeSpan endCpuUsage   = Process.GetCurrentProcess().TotalProcessorTime;
+        double   cpuUsedMs     = (endCpuUsage - startCpuUsage).TotalMilliseconds;
+        double   totalMsPassed = (endTime - startTime).TotalMilliseconds;
+        double   cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
         return cpuUsageTotal * 100;
-    }
-
-    private static async Task<SoraSegment> GetChromePic(string url,
-                                                        bool   all)
-    {
-        IPage page = await StaticStuff.Chrome.NewPageAsync();
-        await page.SetViewportAsync(new ViewPortOptions
-        {
-            Width  = 1920,
-            Height = 1080
-        });
-
-        await page.GoToAsync(url);
-
-        Log.Info("Curl", "生成截图...");
-        string picB64 = await page.ScreenshotBase64Async(new ScreenshotOptions
-        {
-            FullPage = all,
-            Type     = ScreenshotType.Png
-        });
-
-        //关闭页面
-        await page.CloseAsync();
-        await page.DisposeAsync();
-
-        SoraSegment img = SoraSegment.Image($"base64://{picB64}");
-        return img;
     }
 
     private static async ValueTask<bool> SendParaMessage(this GroupMessageEventArgs eventArgs,

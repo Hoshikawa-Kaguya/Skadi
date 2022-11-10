@@ -3,15 +3,14 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using PuppeteerSharp;
-using SixLabors.ImageSharp;
 using Skadi.Config;
 using Skadi.ServerInterface;
+using Skadi.Services;
 using Skadi.TimerEvent;
 using Skadi.Tool;
 using Sora;
-using Sora.Entities.Segment;
-using Sora.EventArgs.SoraEvent;
 using Sora.Interfaces;
 using Sora.Net.Config;
 using Sora.Util;
@@ -21,9 +20,6 @@ namespace Skadi;
 
 internal static class ServiceStartUp
 {
-    // //控制台实例
-    // private static ConsoleInterface ConsoleInterface { get; set; }
-
     public static async Task Main()
     {
         Log.LogConfiguration.EnableConsoleOutput();
@@ -50,15 +46,8 @@ internal static class ServiceStartUp
 
         //初始化浏览器
         Log.Info("初始化", "初始化浏览器...");
-
         await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
-        StaticStuff.Chrome = await Puppeteer.LaunchAsync(new LaunchOptions
-        {
-            Headless          = true,
-            IgnoreHTTPSErrors = true,
-            Timeout           = 60000,
-            Args              = new[] { "--no-sandbox" }
-        });
+        StaticStuff.Services.AddScoped<IChromeService, ChromeService>();
 
         Log.Info("初始化", "启动反向WS服务器...");
         //初始化服务器
@@ -76,14 +65,13 @@ internal static class ServiceStartUp
             EnableSoraCommandManager = true,
             ThrowCommandException    = false,
             SendCommandErrMsg        = false,
-            CommandExceptionHandle   = CommandError
+            CommandExceptionHandle   = BotUtil.CommandError
         });
+        StaticStuff.Services.AddSingleton(server.Event.CommandManager);
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
             BotUtil.BotCrash(args.ExceptionObject as Exception);
         };
-
-        StaticStuff.CommandManager = server.Event.CommandManager;
 
         //服务器回调
         //初始化
@@ -103,27 +91,12 @@ internal static class ServiceStartUp
         Console.CancelKeyPress += (_, args) =>
         {
             Log.Info("Ctr-C", "Skadi正在停止...");
-            StaticStuff.Chrome.CloseAsync();
+            StaticStuff.Services.Clear();
             Thread.Sleep(1000);
             args.Cancel = true;
             Environment.Exit(0);
         };
 
         await Task.Delay(-1);
-    }
-
-    private static async void CommandError(Exception e, BaseMessageEventArgs eventArgs, string log)
-    {
-        string b64Pic =
-            MediaUtil.DrawTextImage(log, Color.Red, Color.Black);
-        switch (eventArgs)
-        {
-            case GroupMessageEventArgs g:
-                await g.Reply(SoraSegment.Image($"base64://{b64Pic}"));
-                break;
-            case PrivateMessageEventArgs p:
-                await p.Reply(SoraSegment.Image($"base64://{b64Pic}"));
-                break;
-        }
     }
 }
