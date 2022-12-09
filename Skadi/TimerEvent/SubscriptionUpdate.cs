@@ -11,35 +11,37 @@ using Skadi.Config.ConfigModule;
 using Skadi.DatabaseUtils.Helpers;
 using Skadi.Services;
 using Sora;
+using Sora.Entities;
 using Sora.Entities.Base;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
-using Sora.EventArgs.SoraEvent;
+using Sora.Enumeration;
 using Sora.Util;
 using YukariToolBox.LightLog;
 
-namespace Skadi.TimerEvent.Event;
+namespace Skadi.TimerEvent;
 
 internal static class SubscriptionUpdate
 {
     /// <summary>
     /// 自动获取B站动态
     /// </summary>
-    /// <param name="connectEventArgs">连接事件参数</param>
-    public static async void BiliUpdateCheck(ConnectEventArgs connectEventArgs)
+    /// <param name="groupId">连接锁登录的账号</param>
+    /// <param name="fStart">是否是第一次启动</param>
+    public static async void BiliUpdateCheck(long groupId, bool fStart)
     {
         //读取配置文件
-        ConfigManager.TryGetUserConfig(connectEventArgs.LoginUid, out var loadedConfig);
+        ConfigManager.TryGetUserConfig(groupId, out var loadedConfig);
         ModuleSwitch            moduleEnable  = loadedConfig.ModuleSwitch;
         List<GroupSubscription> subscriptions = loadedConfig.SubscriptionConfig.GroupsConfig;
         //数据库
-        SubscriptionDbHelper dbHelper = new(connectEventArgs.LoginUid);
+        SubscriptionDbHelper dbHelper = new(groupId);
         //检查模块是否启用
         if (!moduleEnable.BiliSubscription)
             return;
-        if (!SoraServiceFactory.TryGetApi(connectEventArgs.LoginUid, out SoraApi api))
+        if (!SoraServiceFactory.TryGetApi(groupId, out SoraApi api))
         {
-            Log.Error("SoraApi", $"无法获取账号[{connectEventArgs.LoginUid}]API实例");
+            Log.Error("SoraApi", $"无法获取账号[{groupId}]API实例");
             return;
         }
 
@@ -50,7 +52,7 @@ internal static class SubscriptionUpdate
             Log.Error("Serv", "未找到浏览器服务，跳过本次更新");
             return;
         }
-        
+
         foreach (GroupSubscription subscription in subscriptions)
         {
             //臭DD的订阅
@@ -59,21 +61,24 @@ internal static class SubscriptionUpdate
                                  biliUser,
                                  subscription.GroupId,
                                  dbHelper,
-                                 chrome);
-        
+                                 chrome,
+                                 fStart);
+
             //直播动态订阅
             foreach (long biliUser in subscription.LiveSubscriptionId)
                 await GetLiveStatus(api,
                                     biliUser,
                                     subscription.GroupId,
-                                    dbHelper);
+                                    dbHelper,
+                                    fStart);
         }
     }
 
     private static async ValueTask GetLiveStatus(SoraApi              soraApi,
                                                  long                 biliUser,
                                                  List<long>           groupId,
-                                                 SubscriptionDbHelper dbHelper)
+                                                 SubscriptionDbHelper dbHelper,
+                                                 bool                 fStart)
     {
         //数据获取
         (UserInfo bUserInfo, _) = await BiliApis.GetLiveUserInfo(biliUser);
@@ -107,6 +112,7 @@ internal static class SubscriptionUpdate
                                            liveInfo.LiveStatus))
                 Log.Error("Database", "更新直播订阅数据失败");
 
+        if (fStart) return;
 
         //需要消息提示的群
         var targetGroup = updateDict
@@ -118,10 +124,17 @@ internal static class SubscriptionUpdate
 
         Log.Info("Sub", $"更新[{soraApi.GetLoginUserId()}]的Live订阅");
         //构建提示消息
-        var message = $"{bUserInfo.UserName} 正在直播！\r\n{liveInfo.Title}"
-                      + SoraSegment.Image(liveInfo.Cover)
-                      + $"直播间地址:https://live.bilibili.com/{liveInfo.RoomId}";
-        foreach (var gid in targetGroup)
+        SoraSegment coverImg = SoraSegment.Image(liveInfo.Cover);
+        if (coverImg.MessageType == SegmentType.Ignore)
+        {
+            Log.Error("BiliSub", "构建订阅消息失败（没有图片信息）");
+            return;
+        }
+
+        MessageBody message = $"{bUserInfo.UserName} 正在直播！\r\n{liveInfo.Title}"
+                              + SoraSegment.Image(liveInfo.Cover)
+                              + $"直播间地址:https://live.bilibili.com/{liveInfo.RoomId}";
+        foreach (long gid in targetGroup)
         {
             Log.Info("直播订阅", $"获取到{bUserInfo.UserName}正在直播，向群[{gid}]发送动态信息");
             await soraApi.SendGroupMessage(gid, message);
@@ -132,7 +145,8 @@ internal static class SubscriptionUpdate
                                               long                 biliUser,
                                               List<long>           groupId,
                                               SubscriptionDbHelper dbHelper,
-                                              IChromeService       chrome)
+                                              IChromeService       chrome,
+                                              bool                 fStart)
     {
         //获取用户信息
         (UserInfo sender, _) = await BiliApis.GetLiveUserInfo(biliUser);
@@ -156,6 +170,14 @@ internal static class SubscriptionUpdate
         List<long> targetGroups = groupId.Where(group => !dbHelper.IsLatestDynamic(group,
                                                                                    sender.Uid,
                                                                                    dTs.ToDateTime())).ToList();
+
+        if (!dbHelper.UpdateDynamic(targetGroups,
+                                    sender.Uid,
+                                    dTs.ToDateTime()))
+            Log.Error("数据库", "更新动态记录时发生了数据库错误");
+
+        if (fStart) return;
+
         //没有群需要发送消息
         if (targetGroups.Count == 0)
         {
@@ -203,10 +225,6 @@ internal static class SubscriptionUpdate
             Log.Info("动态获取", $"获取到{sender.UserName}的最新动态，向群{targetGroup}发送动态信息");
             await soraApi.SendGroupMessage(targetGroup, $"{sender.UserName}有新动态！");
             await soraApi.SendGroupForwardMsg(targetGroup, nodes);
-            if (!dbHelper.UpdateDynamic(targetGroup,
-                                        sender.Uid,
-                                        dTs.ToDateTime()))
-                Log.Error("数据库", "更新动态记录时发生了数据库错误");
         }
     }
 }

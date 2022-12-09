@@ -44,7 +44,6 @@ public class Surprise
                                                           28800);
     }
 
-    //TODO 支持图片消息
     [UsedImplicitly]
     [SoraCommand(SourceType = SourceFlag.Group,
                  CommandExpressions = new[] { @"^选择.+(还是.+)+$" },

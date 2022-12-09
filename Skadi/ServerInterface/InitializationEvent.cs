@@ -1,17 +1,14 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Skadi.Command;
 using Skadi.Config;
 using Skadi.DatabaseUtils;
 using Skadi.Services;
 using Skadi.TimerEvent;
-using Sora;
 using Sora.EventArgs.SoraEvent;
-using Sora.Interfaces;
 using YukariToolBox.LightLog;
+// ReSharper disable RedundantDefaultMemberInitializer
 
 namespace Skadi.ServerInterface;
 

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using Skadi.TimerEvent.Event;
 using Sora.EventArgs.SoraEvent;
 using Sora.EventArgs.WebsocketEvent;
 using YukariToolBox.LightLog;
@@ -26,7 +25,9 @@ internal static class SubscriptionTimer
     /// <summary>
     /// 订阅列表
     /// </summary>
-    private static readonly List<ConnectEventArgs> _subDictionary = new();
+    private static readonly HashSet<long> _subSet = new();
+
+    private static bool _firstStart = true;
 
 #endregion
 
@@ -40,15 +41,7 @@ internal static class SubscriptionTimer
     {
         Log.Info("SubTimer", "添加订阅");
         //尝试添加订阅
-        if (!_subDictionary.Exists(args => args.LoginUid == eventArgs.LoginUid))
-        {
-            _subDictionary.Add(eventArgs);
-        }
-        else
-        {
-            _subDictionary.RemoveAll(arg => arg.LoginUid == eventArgs.LoginUid);
-            _subDictionary.Add(eventArgs);
-        }
+        _subSet.Add(eventArgs.LoginUid);
     }
 
     /// <summary>
@@ -59,21 +52,7 @@ internal static class SubscriptionTimer
     internal static ValueTask DelTimerEvent(Guid _, ConnectionEventArgs eventArgs)
     {
         //尝试移除订阅
-        if (!_subDictionary.Exists(args => args.LoginUid == eventArgs.SelfId))
-        {
-            Log.Error("SubTimer", "未找到该账号的订阅信息");
-            return ValueTask.CompletedTask;
-        }
-
-        try
-        {
-            _subDictionary.RemoveAll(args => args.LoginUid == eventArgs.SelfId);
-        }
-        catch (Exception e)
-        {
-            Log.Error("SubTimer", "移除订阅账号失败");
-            Log.Error("SubTimer", Log.ErrorLogBuilder(e));
-        }
+        _subSet.Remove(eventArgs.SelfId);
 
         return ValueTask.CompletedTask;
     }
@@ -87,8 +66,9 @@ internal static class SubscriptionTimer
     /// </summary>
     private static void SubscriptionEvent(object obj)
     {
-        foreach (var eventArg in _subDictionary)
-            SubscriptionUpdate.BiliUpdateCheck(eventArg);
+        foreach (long gId in _subSet)
+            SubscriptionUpdate.BiliUpdateCheck(gId, _firstStart);
+        _firstStart = false;
     }
 
 #endregion

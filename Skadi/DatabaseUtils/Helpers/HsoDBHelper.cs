@@ -6,7 +6,6 @@ using YukariToolBox.LightLog;
 
 namespace Skadi.DatabaseUtils.Helpers;
 
-//TODO IOC
 internal class HsoDbHelper
 {
 #region 属性

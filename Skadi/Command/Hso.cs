@@ -235,18 +235,18 @@ public class HsoCommand
                                                    IsThrowErrorForTimeout    = false
                                                });
 
+            if (res is null)
+            {
+                Log.Error("net", "net error");
+                await eventArgs.Reply("error:net error");
+                return;
+            }
+
             if (res.StatusCode != HttpStatusCode.OK)
             {
                 string message = res.Json()?["message"]?.ToString() ?? "unknown";
                 Log.Error("api error", $"{res.StatusCode}|{message}");
                 await eventArgs.Reply($"error:api err\r\n{message}");
-                return;
-            }
-
-            if (res is null)
-            {
-                Log.Error("net", "net error");
-                await eventArgs.Reply("error:net error");
                 return;
             }
 

@@ -3,11 +3,11 @@ using System.IO;
 using System.Threading.Tasks;
 using PuppeteerSharp;
 using Sora.Entities.Segment;
+using Sora.Util;
 using YukariToolBox.LightLog;
 
 namespace Skadi.Services;
 
-//TODO IOC
 public class ChromeService : IChromeService, IDisposable
 {
     private IBrowser _browser { get; }
@@ -22,12 +22,21 @@ public class ChromeService : IChromeService, IDisposable
             Timeout           = 60000,
             Args              = new[] { "--no-sandbox" }
         });
-        initTask.Wait();
-        _browser = initTask.Result;
+        try
+        {
+            initTask.Wait();
+            _browser = initTask.Result;
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "Chrome", "chrome start failed");
+            _browser = null;
+        }
     }
 
     public async Task<SoraSegment> GetChromeXPathPic(string url, string xpath)
     {
+        if (_browser is null) return "chrome 错误";
         IPage  page = await _browser.NewPageAsync();
         string dId  = Path.GetFileName(url);
         Log.Debug("动态ID", dId);
@@ -37,20 +46,31 @@ public class ChromeService : IChromeService, IDisposable
             Height = 1500
         });
 
-        await page.GoToAsync(url);
+        Exception exception = null;
 
-        //动态
-        IElementHandle dyElement = await page.WaitForXPathAsync(xpath);
+        await page.GoToAsync(url).RunCatch(e => exception = e);
 
-        if (dyElement is null)
+        IElementHandle element = await page.WaitForXPathAsync(xpath).RunCatch(e =>
+        {
+            exception = e;
+            return null;
+        });
+
+        if (exception is not null)
+        {
+            Log.Error(exception, "Chrome", $"Url:{url}");
+            return "浏览器错误";
+        }
+
+        if (element is null)
         {
             Log.Debug("Chrome", "无法获取XPath元素内容");
             return "404";
         }
 
-        Log.Debug("Chrome", $"获取到XPath元素[{dyElement.RemoteObject.ObjectId}]");
+        Log.Debug("Chrome", $"获取到XPath元素[{element.RemoteObject.ObjectId}]");
 
-        string picB64 = await dyElement.ScreenshotBase64Async(new ScreenshotOptions { Type = ScreenshotType.Png });
+        string picB64 = await element.ScreenshotBase64Async(new ScreenshotOptions { Type = ScreenshotType.Png });
 
         //关闭页面
         await page.CloseAsync();
@@ -62,6 +82,7 @@ public class ChromeService : IChromeService, IDisposable
 
     public async Task<SoraSegment> GetChromePagePic(string url, bool all)
     {
+        if (_browser is null) return "chrome 错误";
         IPage page = await _browser.NewPageAsync();
         await page.SetViewportAsync(new ViewPortOptions
         {
@@ -69,7 +90,15 @@ public class ChromeService : IChromeService, IDisposable
             Height = 1080
         });
 
-        await page.GoToAsync(url);
+        Exception exception = null;
+
+        await page.GoToAsync(url).RunCatch(e => exception = e);
+
+        if (exception is not null)
+        {
+            Log.Error(exception, "Chrome", $"Url:{url}");
+            return "浏览器错误";
+        }
 
         string picB64 = await page.ScreenshotBase64Async(new ScreenshotOptions
         {

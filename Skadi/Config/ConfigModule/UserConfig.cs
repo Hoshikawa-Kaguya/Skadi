@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Reflection;
-using JetBrains.Annotations;
 
 namespace Skadi.Config.ConfigModule;
 

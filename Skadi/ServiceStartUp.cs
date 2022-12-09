@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using PuppeteerSharp;
@@ -92,7 +91,6 @@ internal static class ServiceStartUp
         {
             Log.Info("Ctr-C", "Skadi正在停止...");
             StaticStuff.Services.Clear();
-            Thread.Sleep(1000);
             args.Cancel = true;
             Environment.Exit(0);
         };

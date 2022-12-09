@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using BilibiliApi.Live.Enums;
 using Skadi.DatabaseUtils.SqliteTool;
 using Sora.Util;
@@ -7,7 +8,6 @@ using YukariToolBox.LightLog;
 
 namespace Skadi.DatabaseUtils.Helpers;
 
-//TODO IOC
 internal class SubscriptionDbHelper
 {
 #region 属性
@@ -59,38 +59,39 @@ internal class SubscriptionDbHelper
     /// <summary>
     /// 更新数据库数据
     /// </summary>
-    /// <param name="groupId"></param>
-    /// <param name="biliUserId"></param>
-    /// <param name="updateTime"></param>
     /// <returns>是否成功修改</returns>
-    public bool UpdateDynamic(long groupId, long biliUserId, DateTime updateTime)
+    public bool UpdateDynamic(List<long> groupIds, long biliUserId, DateTime updateTime)
     {
         try
         {
             using SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(_dbPath);
-            //查找是否有历史记录
-            if (!dbClient.Queryable<Tables.BiliDynamicSubscription>()
-                         .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId && biliDynamic.Gid == groupId)
-                         .Any())
+            long                 ts       = updateTime.ToTimeStamp();
+
+            foreach (long id in groupIds)
             {
-                //没有记录插入新行
-                return
+                //查找是否有历史记录
+                if (!dbClient.Queryable<Tables.BiliDynamicSubscription>()
+                             .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId && biliDynamic.Gid == id)
+                             .Any())
+                {
+                    //没有记录插入新行
                     dbClient.Insertable(new Tables.BiliDynamicSubscription
                     {
-                        Gid            = groupId,
+                        Gid            = id,
                         SubscriptionId = biliUserId,
                         UpdateTime     = updateTime.ToTimeStamp()
-                    }).ExecuteCommand()
-                    > 0;
-            }
-
-            var ts = updateTime.ToTimeStamp();
-            //有记录更新时间
-            return
+                    }).ExecuteCommand();
+                    continue;
+                }
+                
+                //有记录更新时间
                 dbClient.Updateable<Tables.BiliDynamicSubscription>(newBiliDynamic =>
                                                                         newBiliDynamic.UpdateTime == ts)
-                        .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId && biliDynamic.Gid == groupId)
+                        .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId && biliDynamic.Gid == id)
                         .ExecuteCommandHasChange();
+
+            }
+            return true;
         }
         catch (Exception e)
         {
