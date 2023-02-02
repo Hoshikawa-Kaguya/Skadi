@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
-using SharpYaml.Serialization;
 using Skadi.Config.ConfigModule;
 using Skadi.Tool;
+using YamlDotNet.Serialization;
 using YukariToolBox.LightLog;
 
 namespace Skadi.Config;
@@ -16,12 +16,20 @@ internal static class ConfigManager
 
     private static readonly Dictionary<long, UserConfig> _userConfigs  = new();
     private static          GlobalConfig                 _globalConfig = new();
+    private static readonly IDeserializer                _deserializer;
 
     private const string CONFIG_FILE = "config.yaml";
 
 #endregion
 
 #region 公有方法
+
+    static ConfigManager()
+    {
+        _deserializer = new DeserializerBuilder()
+                        .IgnoreUnmatchedProperties()
+                        .Build();
+    }
 
     /// <summary>
     /// 初始化用户配置文件并返回当前配置文件内容
@@ -159,17 +167,14 @@ internal static class ConfigManager
         try
         {
             //反序列化配置文件
-            var              serializer = new Serializer();
             using TextReader reader     = File.OpenText(path);
-            userConfig = serializer.Deserialize<UserConfig>(reader);
+            userConfig = _deserializer.Deserialize<UserConfig>(reader);
             if (userConfig is null)
                 return false;
             //参数合法性检查
             if (userConfig.HsoConfig.SizeLimit >= 1)
-                return true;
-            Log.Error("读取用户配置", "参数值超出合法范围，重新生成配置文件");
-            userConfig = null;
-            return false;
+                userConfig.HsoConfig.SizeLimit = 1024;
+            return true;
         }
         catch (Exception e)
         {
@@ -191,22 +196,19 @@ internal static class ConfigManager
         try
         {
             //反序列化配置文件
-            var              serializer = new Serializer();
             using TextReader reader     = File.OpenText(path);
-            globalConfig = serializer.Deserialize<GlobalConfig>(reader);
+            globalConfig = _deserializer.Deserialize<GlobalConfig>(reader);
             if (globalConfig is null)
                 return false;
             //参数合法性检查
-            if ((int)globalConfig.LogLevel is < 0 or > 3
-                || globalConfig.HeartBeatTimeOut == 0
-                || globalConfig.OnebotApiTimeOut == 0
-                || globalConfig.Port is 0 or > 65535)
-            {
-                Log.Error("读取全局配置", "参数值超出合法范围，重新生成配置文件");
-                globalConfig = null;
-                return false;
-            }
-
+            if ((int)globalConfig.LogLevel is < 0 or > 3)
+                globalConfig.LogLevel = LogLevel.Info;
+            if (globalConfig.HeartBeatTimeOut == 0)
+                globalConfig.HeartBeatTimeOut = 10;
+            if(globalConfig.OnebotApiTimeOut == 0)
+                globalConfig.OnebotApiTimeOut = 2000;
+            if (globalConfig.Port is 0 or > 65535)
+                globalConfig.Port = 9200;
             return true;
         }
         catch (Exception e)

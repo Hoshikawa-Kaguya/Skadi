@@ -89,7 +89,7 @@ internal static class MediaUtil
                                                114514,
                                                SoraSegment.Image($"{imageUrl}/{i}", true, 4)));
 
-            (apiStatus, _) =
+            (apiStatus, _, _) =
                 await eventArgs.SourceGroup.SendGroupForwardMsg(customNodes, TimeSpan.FromMinutes(2));
         }
         else

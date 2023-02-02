@@ -33,7 +33,7 @@ internal class Hso
     public bool CardImage { set; get; }
 
     /// <summary>
-    /// 色图文件夹大小限制
+    /// 色图文件夹大小限制[MB]
     /// </summary>
     public long SizeLimit { set; get; }
 
