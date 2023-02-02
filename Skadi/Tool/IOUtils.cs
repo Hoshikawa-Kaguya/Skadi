@@ -178,8 +178,8 @@ internal static class IoUtils
                 File.Delete(savePath);
 
             //将byte数组数据写入文件流
-            using FileStream fileStream = new FileStream(savePath, FileMode.CreateNew);
-            using BinaryWriter binaryWriter = new BinaryWriter(fileStream);
+            using FileStream   fileStream   = new(savePath, FileMode.CreateNew);
+            using BinaryWriter binaryWriter = new(fileStream);
             binaryWriter.Write(buff, 0, buff.Length);
             binaryWriter.Close();
             fileStream.Close();

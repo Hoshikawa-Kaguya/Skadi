@@ -61,8 +61,8 @@ internal static class MediaUtil
         }
         else
         {
-            imageUrl = $"https://pixiv.lancercmd.cc/{pid}";
-            Log.Warning("Hso", "未找到代理服务器已使用默认代理:https://pixiv.lancercmd.cc/");
+            Log.Warning("Hso", "未设置代理服务器");
+            return;
         }
 
         (int statusCode, bool r18, int count) = GetPixivImgInfo(Convert.ToInt64(pid), out _);
@@ -110,9 +110,7 @@ internal static class MediaUtil
 
     public static string GenPixivUrl(string proxy, long pid, int index = 0)
     {
-        return string.IsNullOrEmpty(proxy)
-            ? $"https://pixiv.lancercmd.cc/{pid}"
-            : $"{proxy.Trim('/')}/{pid}/{index}";
+        return $"{proxy.Trim('/')}/{pid}/{index}";
     }
 
     public static (int statusCode, bool r18, int count) GetPixivImgInfo(long pid, out JToken json)
@@ -130,18 +128,15 @@ internal static class MediaUtil
                                          });
 
             Log.Debug("pixiv api", $"get illust info response({pixApiReq.StatusCode})");
-            if (pixApiReq.StatusCode == HttpStatusCode.OK)
-            {
-                JToken infoJson = pixApiReq.Json();
-                json = infoJson;
-                if (Convert.ToBoolean(infoJson["error"]))
-                    return (200, false, 0);
-                return (200,
-                    Convert.ToBoolean(infoJson["body"]?["xRestrict"]),
-                    Convert.ToInt32(infoJson["body"]?["pageCount"]));
-            }
+            if (pixApiReq.StatusCode != HttpStatusCode.OK) 
+                return ((int)pixApiReq.StatusCode, false, 0);
 
-            return ((int)pixApiReq.StatusCode, false, 0);
+            JToken infoJson = pixApiReq.Json();
+            json = infoJson;
+            return (200,
+                Convert.ToBoolean(infoJson["illust"]?["x_restrict"]),
+                Convert.ToInt32(infoJson["illust"]?["page_count"]));
+
         }
         catch (Exception e)
         {

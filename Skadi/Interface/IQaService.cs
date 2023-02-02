@@ -2,7 +2,7 @@
 using Skadi.Entities;
 using Sora.Entities;
 
-namespace Skadi.Services;
+namespace Skadi.Interface;
 
 public interface IQaService
 {

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Skadi.Config;
 using Skadi.DatabaseUtils;
+using Skadi.Interface;
 using Skadi.Services;
 using Skadi.TimerEvent;
 using Sora.EventArgs.SoraEvent;

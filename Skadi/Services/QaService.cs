@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Skadi.Entities;
+using Skadi.Interface;
 using Skadi.Tool;
 using Sora.Command;
 using Sora.Entities;

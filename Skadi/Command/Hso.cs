@@ -197,9 +197,9 @@ public class HsoCommand
             return;
         }
 
-        var picInfos = eventArgs.Message.RawText.Split(' ');
-        var picId    = picInfos[0][2..];
-        var picIndex = picInfos[1];
+        string[] picInfos = eventArgs.Message.RawText.Split(' ');
+        string   picId    = picInfos[0][2..];
+        string   picIndex = picInfos[1];
         Log.Info("cloud database", $"[{eventArgs.Sender.Id}]正在添加图片:{picId}-{picIndex}");
         await eventArgs.Reply($"Adding[{picId}]...");
         //读取用户配置
@@ -220,20 +220,20 @@ public class HsoCommand
         JToken resData;
         try
         {
-            var res = await Requests.PostAsync("https://api.yukari.one/setu/add_pic",
-                                               new ReqParams
-                                               {
-                                                   PostJson = new
-                                                   {
-                                                       apikey =
-                                                           userConfig.HsoConfig.YukariApiKey,
-                                                       pid   = picId,
-                                                       index = picIndex
-                                                   },
-                                                   Timeout                   = 10000,
-                                                   IsThrowErrorForStatusCode = false,
-                                                   IsThrowErrorForTimeout    = false
-                                               });
+            var res =
+                await Requests.PostAsync("https://api.yukari.one/setu/add_pic",
+                                         new ReqParams
+                                         {
+                                             PostJson = new
+                                             {
+                                                 apikey = userConfig.HsoConfig.YukariApiKey,
+                                                 pid    = picId,
+                                                 index  = picIndex
+                                             },
+                                             Timeout                   = 10000,
+                                             IsThrowErrorForStatusCode = false,
+                                             IsThrowErrorForTimeout    = false
+                                         });
 
             if (res is null)
             {
@@ -328,9 +328,9 @@ public class HsoCommand
                                                       {
                                                           Timeout = 3000,
                                                           Params = new Dictionary<string, string>
-                                                              {
-                                                                  { "apikey", apiKey }
-                                                              },
+                                                          {
+                                                              { "apikey", apiKey }
+                                                          },
                                                           isCheckSSLCert = hso.CheckSSLCert
                                                       });
             if (reqResponse.StatusCode != HttpStatusCode.OK)

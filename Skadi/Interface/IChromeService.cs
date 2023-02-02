@@ -1,7 +1,7 @@
 ﻿using Sora.Entities.Segment;
 using System.Threading.Tasks;
 
-namespace Skadi.Services;
+namespace Skadi.Interface;
 
 public interface IChromeService
 {

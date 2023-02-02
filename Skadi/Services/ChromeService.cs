@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using PuppeteerSharp;
+using Skadi.Interface;
 using Sora.Entities.Segment;
 using Sora.Util;
 using YukariToolBox.LightLog;

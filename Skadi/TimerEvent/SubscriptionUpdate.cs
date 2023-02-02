@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 using Skadi.Config;
 using Skadi.Config.ConfigModule;
 using Skadi.DatabaseUtils.Helpers;
-using Skadi.Services;
+using Skadi.Interface;
 using Sora;
 using Sora.Entities;
 using Sora.Entities.Base;

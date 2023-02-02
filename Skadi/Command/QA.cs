@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Skadi.Entities;
+using Skadi.Interface;
 using Skadi.Services;
 using Sora.Attributes.Command;
 using Sora.Entities;

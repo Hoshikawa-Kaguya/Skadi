@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
-using Skadi.Services;
+using Skadi.Interface;
 using Skadi.Tool;
 using Sora.Attributes.Command;
 using Sora.Entities;

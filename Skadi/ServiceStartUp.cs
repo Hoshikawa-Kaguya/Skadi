@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using PuppeteerSharp;
 using Skadi.Config;
+using Skadi.Interface;
 using Skadi.ServerInterface;
 using Skadi.Services;
 using Skadi.TimerEvent;

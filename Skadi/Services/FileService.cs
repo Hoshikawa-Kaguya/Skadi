@@ -1,4 +1,6 @@
-﻿namespace Skadi.Services;
+﻿using Skadi.Interface;
+
+namespace Skadi.Services;
 
 public class FileService : IFileService
 {
