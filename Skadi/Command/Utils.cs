@@ -151,8 +151,8 @@ public static class Utils
         (ApiStatus status, int msgId) ret;
         TimeSpan                      timeout = TimeSpan.FromMinutes(1);
         if (fakeMessage)
-            ret = await eventArgs.SourceGroup.SendGroupForwardMsg(new[] { new CustomNode("色色", 114514, message) },
-                                                                  timeout);
+            (ret.status, ret.msgId, _) = await eventArgs.SourceGroup.SendGroupForwardMsg(new[] { new CustomNode("色色", 114514, message) },
+                                                                    timeout);
         else
             ret = await eventArgs.Reply(message, timeout);
 
