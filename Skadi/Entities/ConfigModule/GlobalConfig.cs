@@ -1,8 +1,8 @@
 using YukariToolBox.LightLog;
 
-namespace Skadi.Config.ConfigModule;
+namespace Skadi.Entities.ConfigModule;
 
-internal class GlobalConfig
+public class GlobalConfig
 {
     /// <summary>
     /// 日志等级

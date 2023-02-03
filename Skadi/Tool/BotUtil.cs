@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SixLabors.ImageSharp;
 using Skadi.Entities;
+using Skadi.Services;
 using Sora;
 using Sora.Entities;
 using Sora.Entities.Segment;
@@ -122,9 +123,9 @@ internal static class BotUtil
     public static void BotCrash(Exception e)
     {
         //生成错误报告
-        IoUtils.CrashLogGen(Log.ErrorLogBuilder(e));
+        StorageService.CrashLogGen(Log.ErrorLogBuilder(e));
         //清理服务
-        StaticStuff.Services.Clear();
+        SkadiApp.Services.Clear();
     }
 
     public static async void CommandError(Exception e, BaseMessageEventArgs eventArgs, string log)

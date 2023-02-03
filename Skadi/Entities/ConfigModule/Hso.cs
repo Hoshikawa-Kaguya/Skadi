@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 
-namespace Skadi.Config.ConfigModule;
+namespace Skadi.Entities.ConfigModule;
 
 [UsedImplicitly]
-internal class Hso
+public class Hso
 {
     /// <summary>
     /// 色图源类型
@@ -18,9 +18,9 @@ internal class Hso
     public bool CheckSSLCert { set; get; }
 
     /// <summary>
-    /// Pximy代理
+    /// Pximg代理
     /// </summary>
-    public string PximyProxy { set; get; }
+    public string PximgProxy { set; get; }
 
     /// <summary>
     /// 是否启用本地缓存

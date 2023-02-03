@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Skadi.Config {
+namespace Skadi.Resource {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace Skadi.Config {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class InitRes {
+    internal class ConfigResourse {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal InitRes() {
+        internal ConfigResourse() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Skadi.Config {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Skadi.Config.InitRes", typeof(InitRes).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Skadi.Resource.ConfigResourse", typeof(ConfigResourse).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

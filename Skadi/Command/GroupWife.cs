@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using Skadi.Config;
+using Skadi.Entities.ConfigModule;
+using Skadi.Interface;
 using Sora.Attributes.Command;
 using Sora.Entities.Segment;
 using Sora.Enumeration.ApiType;
@@ -23,7 +24,10 @@ public class GroupWife
     public async ValueTask RollWife(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config) && !config.ModuleSwitch.HaveFun)
+        IStorageService storageService = SkadiApp.GetService<IStorageService>();
+        UserConfig config = storageService.GetUserConfig(eventArgs.LoginUid);
+
+        if (config is null || !config.ModuleSwitch.HaveFun)
             return;
         //检查是否已经在抽选
         if (_waitingList.Exists(user => user == eventArgs.Sender))

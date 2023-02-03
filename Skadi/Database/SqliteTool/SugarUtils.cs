@@ -1,13 +1,12 @@
-using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Reflection;
-using System.Text;
+using Skadi.Services;
+using SqlSugar;
 using DbType = SqlSugar.DbType;
 
-namespace Skadi.DatabaseUtils.SqliteTool;
+namespace Skadi.Database.SqliteTool;
 
 /// <summary>
 /// SQLite数据库ORM工具类
@@ -19,49 +18,6 @@ internal static class SugarUtils
 
     //资源数据库名
     public const string GLOBAL_RES_DB_NAME = "res";
-
-#endregion
-
-#region IO辅助函数
-
-    /// <summary>
-    /// 获取应用数据库的绝对路径
-    /// </summary>
-    public static string GetDbPath(string dirName = null)
-    {
-        StringBuilder dbPath = new();
-#if DEBUG
-        dbPath.Append(Environment.GetEnvironmentVariable("DebugDataPath"));
-#else
-            dbPath.Append(Environment.CurrentDirectory);
-#endif
-        dbPath.Append("/data");
-        //自定义二级文件夹
-        if (!string.IsNullOrEmpty(dirName))
-            dbPath.Append($"/{dirName}");
-        //检查目录是否存在，不存在则新建一个
-        Directory.CreateDirectory(dbPath.ToString());
-        dbPath.Append("/data.db");
-        return dbPath.ToString();
-    }
-
-    /// <summary>
-    /// 获取目标数据库的绝对路径
-    /// </summary>
-    public static string GetDataDbPath(string dbFileName)
-    {
-        StringBuilder dbPath = new();
-#if DEBUG
-        dbPath.Append(Environment.GetEnvironmentVariable("DebugDataPath"));
-#else
-            dbPath.Append(Environment.CurrentDirectory);
-#endif
-        dbPath.Append("/data");
-        //检查目录是否存在，不存在则新建一个
-        Directory.CreateDirectory(dbPath.ToString());
-        dbPath.Append($"/{dbFileName}.db");
-        return dbPath.ToString();
-    }
 
 #endregion
 
@@ -203,10 +159,11 @@ internal static class SugarUtils
     /// <summary>
     /// 创建一个SQLiteClient
     /// </summary>
-    /// <param name="dbPath">数据库路径</param>
+    /// <param name="loginUid">登录账户ID</param>
     /// <returns>默认开启的SqlSugarClient</returns>
-    internal static SqlSugarClient CreateSqlSugarClient(string dbPath)
+    internal static SqlSugarClient CreateUserDbClient(long loginUid)
     {
+        string dbPath = StorageService.GetUserDbPath(loginUid);
         return new SqlSugarClient(new ConnectionConfig
         {
             ConnectionString      = $"DATA SOURCE={dbPath}",

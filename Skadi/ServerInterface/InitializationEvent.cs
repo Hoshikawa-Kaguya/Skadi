@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Skadi.Config;
-using Skadi.DatabaseUtils;
+using Skadi.Database;
+using Skadi.Entities.ConfigModule;
 using Skadi.Interface;
 using Skadi.Services;
 using Skadi.TimerEvent;
@@ -34,8 +34,10 @@ internal static class InitializationEvent
         Log.Info("Skadi初始化", "与onebot客户端连接成功，初始化资源...");
         //初始化配置文件
         Log.Info("Skadi初始化", $"初始化用户[{connectEvent.LoginUid}]的配置");
-        if (!ConfigManager.UserConfigFileInit(connectEvent.LoginUid) ||
-            !ConfigManager.TryGetUserConfig(connectEvent.LoginUid, out var userConfig))
+
+        IStorageService storageService = SkadiApp.GetService<IStorageService>();
+        UserConfig      userConfig     = storageService.GetUserConfig(connectEvent.LoginUid);
+        if (userConfig is null)
         {
             Log.Fatal(new IOException("无法获取用户配置文件(Initialization)"), "Skadi初始化", "用户配置文件初始化失败");
             Environment.Exit(-1);
@@ -46,15 +48,15 @@ internal static class InitializationEvent
         Log.Info("已启用的模块",
                  $"\n{userConfig.ModuleSwitch}");
         //显示代理信息
-        if (userConfig.ModuleSwitch.Hso && !string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
-            Log.Debug("Hso Proxy", userConfig.HsoConfig.PximyProxy);
+        if (userConfig.ModuleSwitch.Hso && !string.IsNullOrEmpty(userConfig.HsoConfig.PximgProxy))
+            Log.Debug("Hso Proxy", userConfig.HsoConfig.PximgProxy);
 
         //初始化数据库
         DatabaseInit.UserDataInit(connectEvent);
 
         //初始化QA
         Log.Info("Skadi初始化", "reg QA serv");
-        StaticStuff.Services.AddSingleton<IQaService>(new QaService(connectEvent.LoginUid));
+        SkadiApp.Services.AddSingleton<IQaService>(new QaService(connectEvent.LoginUid));
 
         //初始化定时器线程
         if (userConfig.ModuleSwitch.BiliSubscription)

@@ -9,9 +9,10 @@ using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
 using Skadi.Command.ImageSearch;
-using Skadi.Config;
-using Skadi.Config.ConfigModule;
-using Skadi.DatabaseUtils.Helpers;
+using Skadi.Database.Helpers;
+using Skadi.Entities.ConfigModule;
+using Skadi.Interface;
+using Skadi.Services;
 using Skadi.Tool;
 using Sora.Attributes.Command;
 using Sora.Entities;
@@ -38,7 +39,10 @@ public class HsoCommand
     public async void HsoPic(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var userConfig))
+
+        IStorageService storageService = SkadiApp.GetService<IStorageService>();
+        UserConfig      userConfig     = storageService.GetUserConfig(eventArgs.LoginUid);
+        if (userConfig is null)
         {
             Log.Error("Config|Hso", "无法获取用户配置文件");
             return;
@@ -100,7 +104,7 @@ public class HsoCommand
 
             //图片链接
             Log.Debug("获取到图片", $"pid:{pid}|index:{index}");
-            var url = MediaUtil.GenPixivUrl(hso.PximyProxy, pid, index);
+            var url = MediaUtil.GenPixivUrl(hso.PximgProxy, pid, index);
             //检查是否有设置代理
             await eventArgs.SourceGroup.SendGroupMessage(HsoMessageBuilder(data["data"]?[0], hso.CardImage, url),
                                                          TimeSpan.FromSeconds(10));
@@ -203,7 +207,9 @@ public class HsoCommand
         Log.Info("cloud database", $"[{eventArgs.Sender.Id}]正在添加图片:{picId}-{picIndex}");
         await eventArgs.Reply($"Adding[{picId}]...");
         //读取用户配置
-        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var userConfig))
+        IStorageService storageService = SkadiApp.GetService<IStorageService>();
+        UserConfig      userConfig     = storageService.GetUserConfig(eventArgs.LoginUid);
+        if (userConfig is null)
         {
             Log.Error("Config|Hso", "无法获取用户配置文件");
             await eventArgs.Reply("Try load user config error");
@@ -351,7 +357,7 @@ public class HsoCommand
 
     private static async void SendLocalPic(Hso hso, GroupMessageEventArgs eventArgs)
     {
-        var picNames = Directory.GetFiles(IoUtils.GetHsoPath());
+        var picNames = Directory.GetFiles(StorageService.GetHsoPath());
         if (picNames.Length == 0)
         {
             await eventArgs.SourceGroup.SendGroupMessage("机器人管理者没有在服务器上塞色图\r\n你去找他要啦!");

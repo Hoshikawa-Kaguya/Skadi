@@ -2,7 +2,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
-using Skadi.Config;
+using Skadi.Entities.ConfigModule;
+using Skadi.Interface;
 using Sora.Attributes.Command;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
@@ -38,13 +39,15 @@ public static class Cheru
     public static async void CheruToString(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config))
+        IStorageService storageService = SkadiApp.GetService<IStorageService>();
+        UserConfig      userConfig     = storageService.GetUserConfig(eventArgs.LoginUid);
+        if (userConfig is null)
         {
             Log.Error("Config|Cheru", "无法获取用户配置文件");
             return;
         }
 
-        if (!config.ModuleSwitch.Cheru)
+        if (!userConfig.ModuleSwitch.Cheru)
             return;
         if (eventArgs.Message.RawText.Length <= 3)
             return;
@@ -68,13 +71,15 @@ public static class Cheru
     public static async void StringToCheru(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config))
+        IStorageService storageService = SkadiApp.GetService<IStorageService>();
+        UserConfig      userConfig     = storageService.GetUserConfig(eventArgs.LoginUid);
+        if (userConfig is null)
         {
             Log.Error("Config|Cheru", "无法获取用户配置文件");
             return;
         }
 
-        if (!config.ModuleSwitch.Cheru)
+        if (!userConfig.ModuleSwitch.Cheru)
             return;
         if (eventArgs.Message.RawText.Length <= 4)
             return;

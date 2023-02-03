@@ -5,7 +5,7 @@ namespace Skadi.Interface;
 
 public interface IChromeService
 {
-    public Task<SoraSegment> GetChromeXPathPic(string url, string xpath);
+    Task<SoraSegment> GetChromeXPathPic(string url, string xpath);
 
-    public Task<SoraSegment> GetChromePagePic(string url, bool all);
+    Task<SoraSegment> GetChromePagePic(string url, bool all);
 }

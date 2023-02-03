@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using Microsoft.Extensions.DependencyInjection;
 using Skadi.Entities;
 using Skadi.Interface;
 using Skadi.Services;
@@ -34,8 +33,8 @@ public class QA
         if (!QaService.MessageCheck(eventArgs.Message.MessageBody))
             return;
         eventArgs.IsContinueEventChain = false;
-        IQaService qaService = StaticStuff.ServiceProvider.GetServices<IQaService>()
-                                          .SingleOrDefault(s => s.LoginUid == eventArgs.LoginUid);
+        IQaService qaService = SkadiApp.GetServices<IQaService>()
+                                       .SingleOrDefault(s => s.LoginUid == eventArgs.LoginUid);
         if (qaService is null)
         {
             Log.Error("QA", "未找到QA服务");
@@ -149,8 +148,8 @@ public class QA
         if (!QaService.MessageCheck(eventArgs.Message.MessageBody))
             return;
         eventArgs.IsContinueEventChain = false;
-        IQaService qaService = StaticStuff.ServiceProvider.GetServices<IQaService>()
-                                          .SingleOrDefault(s => s.LoginUid == eventArgs.LoginUid);
+        IQaService qaService = SkadiApp.GetServices<IQaService>()
+                                       .SingleOrDefault(s => s.LoginUid == eventArgs.LoginUid);
         if (qaService is null)
         {
             Log.Error("QA", "未找到QA服务");
@@ -195,8 +194,8 @@ public class QA
     public async ValueTask GetAllQuestion(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        IQaService qaService = StaticStuff.ServiceProvider.GetServices<IQaService>()
-                                          .SingleOrDefault(s => s.LoginUid == eventArgs.LoginUid);
+        IQaService qaService = SkadiApp.GetServices<IQaService>()
+                                       .SingleOrDefault(s => s.LoginUid == eventArgs.LoginUid);
         if (qaService is null)
         {
             Log.Error("QA", "未找到QA服务");

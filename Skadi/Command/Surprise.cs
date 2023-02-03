@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using Skadi.Config;
-using Skadi.Config.ConfigModule;
+using Skadi.Entities.ConfigModule;
+using Skadi.Interface;
 using Sora.Attributes.Command;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
@@ -25,7 +25,9 @@ public class Surprise
     public async ValueTask RandomNumber(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig config) && !config.ModuleSwitch.HaveFun)
+        IStorageService storageService = SkadiApp.GetService<IStorageService>();
+        UserConfig      userConfig     = storageService.GetUserConfig(eventArgs.LoginUid);
+        if (userConfig is null || !userConfig.ModuleSwitch.HaveFun)
             return;
         await eventArgs.SourceGroup.SendGroupMessage(SoraSegment.At(eventArgs.Sender.Id)
                                                      + "丢出了\r\n"
@@ -38,7 +40,9 @@ public class Surprise
     public async ValueTask RedTea(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out UserConfig config) && !config.ModuleSwitch.HaveFun)
+        IStorageService storageService = SkadiApp.GetService<IStorageService>();
+        UserConfig      userConfig     = storageService.GetUserConfig(eventArgs.LoginUid);
+        if (userConfig is null || !userConfig.ModuleSwitch.HaveFun)
             return;
         await eventArgs.SourceGroup.EnableGroupMemberMute(eventArgs.Sender.Id,
                                                           28800);

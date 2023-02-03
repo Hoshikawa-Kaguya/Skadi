@@ -1,7 +1,7 @@
 using System.Reflection;
 using SqlSugar;
 
-namespace Skadi.DatabaseUtils.SqliteTool;
+namespace Skadi.Database.SqliteTool;
 
 internal class SugarColUtils
 {

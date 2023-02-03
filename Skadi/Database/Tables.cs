@@ -1,7 +1,7 @@
 using BilibiliApi.Live.Enums;
 using SqlSugar;
 
-namespace Skadi.DatabaseUtils;
+namespace Skadi.Database;
 
 public class Tables
 {

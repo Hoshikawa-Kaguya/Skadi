@@ -78,7 +78,7 @@ public static class Utils
         msg.AppendLine("Skadi-Status");
         msg.AppendLine("Ciallo～(∠・ω< )⌒☆");
         msg.AppendLine($"消息数量:{msgCount}");
-        msg.AppendLine($"运行时间:{DateTime.Now - StaticStuff.StartTime:g}");
+        msg.AppendLine($"运行时间:{DateTime.Now - SkadiApp.StartTime:g}");
         msg.AppendLine($"GC Allocated:{tMem.ToString("F2")}MB");
         msg.AppendLine($"RAM:{mem.ToString("F2")}MB");
         msg.AppendLine($"CPU:{cpu.ToString("F2")}%");
@@ -107,7 +107,7 @@ public static class Utils
 
         eventArgs.IsContinueEventChain = false;
 
-        using IServiceScope scope  = StaticStuff.ServiceProvider.CreateScope();
+        using IServiceScope scope  = SkadiApp.CreateScope();
         IChromeService      chrome = scope.ServiceProvider.GetService<IChromeService>();
         if (chrome is null)
         {

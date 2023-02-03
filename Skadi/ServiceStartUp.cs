@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using PuppeteerSharp;
-using Skadi.Config;
+using Skadi.Entities.ConfigModule;
 using Skadi.Interface;
 using Skadi.ServerInterface;
 using Skadi.Services;
@@ -26,10 +26,15 @@ internal static class ServiceStartUp
         //修改控制台标题
         Console.Title = @"Skadi";
         Log.Info("初始化", "Skadi初始化...");
+        SkadiApp.Services.AddSingleton<IStorageService>(new StorageService());
+        SkadiApp.Services.AddScoped<IChromeService, ChromeService>();
+
         //初始化配置文件
         Log.Info("初始化", "初始化服务器全局配置...");
+        IStorageService storageService = SkadiApp.GetService<IStorageService>();
+        GlobalConfig    globalConfig   = storageService.GetGlobalConfig();
 
-        if (!ConfigManager.GlobalConfigFileInit() || !ConfigManager.TryGetGlobalConfig(out var globalConfig))
+        if (globalConfig == null)
         {
             Log.Fatal(new IOException("无法获取用户配置文件(StartUp)"), "初始化", "用户配置文件初始化失败");
             Environment.Exit(-1);
@@ -47,7 +52,6 @@ internal static class ServiceStartUp
         //初始化浏览器
         Log.Info("初始化", "初始化浏览器...");
         await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
-        StaticStuff.Services.AddScoped<IChromeService, ChromeService>();
 
         Log.Info("初始化", "启动反向WS服务器...");
         //初始化服务器
@@ -67,7 +71,7 @@ internal static class ServiceStartUp
             SendCommandErrMsg        = false,
             CommandExceptionHandle   = BotUtil.CommandError
         });
-        StaticStuff.Services.AddSingleton(server.Event.CommandManager);
+        SkadiApp.Services.AddSingleton(server.Event.CommandManager);
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
             BotUtil.BotCrash(args.ExceptionObject as Exception);
@@ -86,12 +90,12 @@ internal static class ServiceStartUp
 
         //启动服务器
         await server.StartService().RunCatch(BotUtil.BotCrash);
-        StaticStuff.StartTime = DateTime.Now;
+        SkadiApp.StartTime = DateTime.Now;
 
         Console.CancelKeyPress += (_, args) =>
         {
             Log.Info("Ctr-C", "Skadi正在停止...");
-            StaticStuff.Services.Clear();
+            SkadiApp.Services.Clear();
             args.Cancel = true;
             Environment.Exit(0);
         };

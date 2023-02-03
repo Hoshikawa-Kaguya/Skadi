@@ -1,12 +1,14 @@
 using System.Collections.Generic;
 using System.Reflection;
+using JetBrains.Annotations;
 
-namespace Skadi.Config.ConfigModule;
+namespace Skadi.Entities.ConfigModule;
 
 /// <summary>
 /// 单用户配置文件定义
 /// </summary>
-internal class UserConfig
+[UsedImplicitly]
+public class UserConfig
 {
     /// <summary>
     /// 各模块的控制开关
@@ -27,7 +29,7 @@ internal class UserConfig
 /// <summary>
 /// 各模块开关
 /// </summary>
-internal class ModuleSwitch
+public class ModuleSwitch
 {
     /// <summary>
     /// 神必娱乐模块
@@ -54,7 +56,7 @@ internal class ModuleSwitch
     /// </summary>
     public bool Cheru { set; get; }
 
-#region 将已启用的模块名转为字符串
+    #region 将已启用的模块名转为字符串
 
     public override string ToString()
     {
@@ -67,5 +69,5 @@ internal class ModuleSwitch
         return string.Join("\n", ret);
     }
 
-#endregion
+    #endregion
 }

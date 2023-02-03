@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Skadi.Entities;
 using Skadi.Interface;
-using Skadi.Tool;
 using Sora.Command;
 using Sora.Entities;
 using Sora.Entities.Segment;
@@ -22,8 +20,6 @@ namespace Skadi.Services;
 
 internal class QaService : IQaService
 {
-    private const string QA_CONFIG_FILE = "qa.json";
-
     private string QaConfigPath { get; }
 
     private List<QABuf> QaBufs { get; }
@@ -33,9 +29,9 @@ internal class QaService : IQaService
     public QaService(long loginUid)
     {
         LoginUid = loginUid;
-        Log.Info($"QA[{LoginUid}]", $"QA初始化");
-        QaConfigPath = IoUtils.GetUserConfigPath(LoginUid, QA_CONFIG_FILE);
-        QaBufs        = new List<QABuf>();
+        Log.Info($"QA[{LoginUid}]", "QA初始化");
+        QaConfigPath = StorageService.GetQAFilePath(LoginUid);
+        QaBufs       = new List<QABuf>();
         if (!File.Exists(QaConfigPath))
         {
             Log.Warning($"QA[{LoginUid}]", "未找到QA配置文件，创建新的配置文件");
@@ -107,7 +103,7 @@ internal class QaService : IQaService
         QaBufs.RemoveAll(q => MessageEqual(qMsg, q.qMsg) && q.gid == groupId);
         foreach (Guid id in ids)
         {
-            CommandManager cmd = StaticStuff.ServiceProvider.GetService<CommandManager>();
+            CommandManager cmd = SkadiApp.GetService<CommandManager>();
             cmd?.DeleteDynamicCommand(id);
         }
 
@@ -133,7 +129,7 @@ internal class QaService : IQaService
 
     private Guid RegisterNewQaCommand(QaData qaData)
     {
-        CommandManager cmd = StaticStuff.ServiceProvider.GetService<CommandManager>();
+        CommandManager cmd = SkadiApp.GetService<CommandManager>();
         Guid cmdId =
             cmd?.RegisterGroupDynamicCommand(args => MessageEqual(args.Message.MessageBody, qaData.qMsg),
                                              async e =>

@@ -13,7 +13,9 @@ using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using Skadi.Config;
+using Skadi.Entities.ConfigModule;
+using Skadi.Interface;
+using Skadi.Resource;
 using Sora.Entities;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
@@ -45,7 +47,10 @@ internal static class MediaUtil
 
     public static async Task SendPixivImageMessage(this GroupMessageEventArgs eventArgs, long pid, int index)
     {
-        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var userConfig))
+        IStorageService storageService = SkadiApp.GetService<IStorageService>();
+        UserConfig      userConfig     = storageService.GetUserConfig(eventArgs.LoginUid);
+
+        if (userConfig is null)
         {
             Log.Error("Config|Hso", "无法获取用户配置文件");
             await eventArgs.Reply("ERR:无法获取用户配置文件");
@@ -54,9 +59,9 @@ internal static class MediaUtil
 
         //处理图片代理连接
         string imageUrl;
-        if (!string.IsNullOrEmpty(userConfig.HsoConfig.PximyProxy))
+        if (!string.IsNullOrEmpty(userConfig.HsoConfig.PximgProxy))
         {
-            imageUrl = $"{userConfig.HsoConfig.PximyProxy.Trim('/')}/{pid}";
+            imageUrl = $"{userConfig.HsoConfig.PximgProxy.Trim('/')}/{pid}";
             Log.Debug("Hso", $"Get proxy url {imageUrl}");
         }
         else

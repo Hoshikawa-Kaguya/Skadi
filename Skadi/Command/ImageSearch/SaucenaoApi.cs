@@ -9,7 +9,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
 using SixLabors.ImageSharp;
-using Skadi.Config;
+using Skadi.Entities.ConfigModule;
+using Skadi.Interface;
 using Skadi.Tool;
 using Sora.Entities;
 using Sora.Entities.Segment;
@@ -71,8 +72,9 @@ public static class SaucenaoApi
         JToken twitterPic = resData.Where(t => Convert.ToInt32(t["header"]?["index_id"]) == DbIndex.TWITTER)
                                    .MaxBy(t => Convert.ToSingle(t["header"]?["similarity"]));
 
-
-        if (!ConfigManager.TryGetUserConfig(selfId, out var userConfig))
+        IStorageService storageService = SkadiApp.GetService<IStorageService>();
+        UserConfig      userConfig     = storageService.GetUserConfig(selfId);
+        if (userConfig is null)
         {
             //用户配置获取失败
             Log.Error("Config|SaucenaoApi", "无法获取用户配置文件");
@@ -87,7 +89,7 @@ public static class SaucenaoApi
         {
             var pid = Convert.ToInt64(pixivPic["data"]?["pixiv_id"]);
             Log.Info("SaucenaoApi", $"获取到pixiv图片[{pid}]");
-            var imageUrl = MediaUtil.GenPixivUrl(userConfig.HsoConfig.PximyProxy, pid);
+            var imageUrl = MediaUtil.GenPixivUrl(userConfig.HsoConfig.PximgProxy, pid);
             return GenPixivResult(imageUrl, pid, parsedPic);
         }
 
@@ -132,7 +134,7 @@ public static class SaucenaoApi
                      || source.IndexOf("pximg", StringComparison.Ordinal) != -1)
                     && long.TryParse(Path.GetFileName(source), out long pid))
                 {
-                    var imageUrl = MediaUtil.GenPixivUrl(userConfig.HsoConfig.PximyProxy, pid);
+                    var imageUrl = MediaUtil.GenPixivUrl(userConfig.HsoConfig.PximgProxy, pid);
                     return GenPixivResult(imageUrl, pid, parsedPic);
                 }
 
@@ -150,7 +152,7 @@ public static class SaucenaoApi
                 if (!string.IsNullOrEmpty(purl))
                 {
                     long.TryParse(Path.GetFileName(purl), out long pxPid);
-                    var imageUrl = MediaUtil.GenPixivUrl(userConfig.HsoConfig.PximyProxy, pxPid);
+                    var imageUrl = MediaUtil.GenPixivUrl(userConfig.HsoConfig.PximgProxy, pxPid);
                     return GenPixivResult(imageUrl, pxPid, parsedPic);
                 }
 

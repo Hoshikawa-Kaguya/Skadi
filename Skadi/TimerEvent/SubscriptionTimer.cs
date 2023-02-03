@@ -66,8 +66,8 @@ internal static class SubscriptionTimer
     /// </summary>
     private static void SubscriptionEvent(object obj)
     {
-        foreach (long gId in _subSet)
-            SubscriptionUpdate.BiliUpdateCheck(gId, _firstStart);
+        foreach (long uid in _subSet)
+            SubscriptionUpdate.BiliUpdateCheck(uid, _firstStart);
         _firstStart = false;
     }
 

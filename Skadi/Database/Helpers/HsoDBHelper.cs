@@ -1,24 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using Skadi.DatabaseUtils.SqliteTool;
+using Skadi.Database.SqliteTool;
 using SqlSugar;
 using YukariToolBox.LightLog;
 
-namespace Skadi.DatabaseUtils.Helpers;
+namespace Skadi.Database.Helpers;
 
 internal class HsoDbHelper
 {
 #region 属性
 
-    private readonly string _dbPath; //数据库路径
+    private readonly long _loginUid; //数据库路径
 
 #endregion
 
 #region 构造函数
 
-    public HsoDbHelper(long uid)
+    public HsoDbHelper(long loginUid)
     {
-        _dbPath = SugarUtils.GetDbPath(uid.ToString());
+        _loginUid = loginUid;
     }
 
 #endregion
@@ -28,13 +28,13 @@ internal class HsoDbHelper
     /// <summary>
     /// 又有新的lsp来了
     /// </summary>
-    /// <param name="userId">uid</param>
+    /// <param name="userId">loginUid</param>
     /// <param name="groupId">gid</param>
     public bool AddOrUpdate(long userId, long groupId)
     {
         try
         {
-            using var dbClient = SugarUtils.CreateSqlSugarClient(_dbPath);
+            using SqlSugarClient dbClient = SugarUtils.CreateUserDbClient(_loginUid);
             var countData = dbClient.Queryable<Tables.HsoCount>()
                                     .First(member => member.Gid == groupId && member.Uid == userId);
             //查找是否存在
@@ -69,7 +69,7 @@ internal class HsoDbHelper
     {
         try
         {
-            using var dbClient = SugarUtils.CreateSqlSugarClient(_dbPath);
+            using SqlSugarClient dbClient = SugarUtils.CreateUserDbClient(_loginUid);
             rankList = dbClient.Queryable<Tables.HsoCount>()
                                .Where(group => group.Gid == groupId)
                                .OrderBy(c => c.Count, OrderByType.Desc)

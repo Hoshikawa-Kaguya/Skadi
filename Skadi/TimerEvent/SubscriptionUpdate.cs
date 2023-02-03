@@ -6,9 +6,8 @@ using BilibiliApi.Live.Enums;
 using BilibiliApi.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
-using Skadi.Config;
-using Skadi.Config.ConfigModule;
-using Skadi.DatabaseUtils.Helpers;
+using Skadi.Database.Helpers;
+using Skadi.Entities.ConfigModule;
 using Skadi.Interface;
 using Sora;
 using Sora.Entities;
@@ -26,26 +25,33 @@ internal static class SubscriptionUpdate
     /// <summary>
     /// 自动获取B站动态
     /// </summary>
-    /// <param name="groupId">连接锁登录的账号</param>
+    /// <param name="loginUid">机器人的账号</param>
     /// <param name="fStart">是否是第一次启动</param>
-    public static async void BiliUpdateCheck(long groupId, bool fStart)
+    public static async void BiliUpdateCheck(long loginUid, bool fStart)
     {
+        IStorageService storageService = SkadiApp.GetService<IStorageService>();
         //读取配置文件
-        ConfigManager.TryGetUserConfig(groupId, out var loadedConfig);
-        ModuleSwitch            moduleEnable  = loadedConfig.ModuleSwitch;
-        List<GroupSubscription> subscriptions = loadedConfig.SubscriptionConfig.GroupsConfig;
-        //数据库
-        SubscriptionDbHelper dbHelper = new(groupId);
-        //检查模块是否启用
-        if (!moduleEnable.BiliSubscription)
-            return;
-        if (!SoraServiceFactory.TryGetApi(groupId, out SoraApi api))
+        UserConfig config = storageService.GetUserConfig(loginUid);
+        if (config is null)
         {
-            Log.Error("SoraApi", $"无法获取账号[{groupId}]API实例");
+            Log.Error("Sub-Serv", $"无法获取用户[{loginUid}]的配置文件");
             return;
         }
 
-        using IServiceScope scope  = StaticStuff.ServiceProvider.CreateScope();
+        ModuleSwitch            moduleEnable  = config.ModuleSwitch;
+        List<GroupSubscription> subscriptions = config.SubscriptionConfig.GroupsConfig;
+        //数据库
+        SubscriptionDbHelper dbHelper = new(loginUid);
+        //检查模块是否启用
+        if (!moduleEnable.BiliSubscription)
+            return;
+        if (!SoraServiceFactory.TryGetApi(loginUid, out SoraApi api))
+        {
+            Log.Error("SoraApi", $"无法获取账号[{loginUid}]API实例");
+            return;
+        }
+
+        using IServiceScope scope  = SkadiApp.CreateScope();
         IChromeService      chrome = scope.ServiceProvider.GetService<IChromeService>();
         if (chrome is null)
         {

@@ -17,8 +17,8 @@ HsoConfig:
   Source: Local
   # 是否检查源证书
   CheckSSLCert: false
-  # Pximy代理服务器地址，如果没有设置为null即可
-  PximyProxy: null
+  # Pximg代理服务器地址，如果没有设置为null即可
+  PximgProxy: null
   # 是否使用本地缓存
   UseCache: false
   # 是否使用XML格式发送图片（装逼大图）

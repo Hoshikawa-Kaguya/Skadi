@@ -7,7 +7,8 @@ using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
-using Skadi.Config;
+using Skadi.Entities.ConfigModule;
+using Skadi.Interface;
 using Sora.Attributes.Command;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
@@ -31,7 +32,9 @@ public static class GuildRank
     public static async ValueTask KyoukaRank(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        if (!ConfigManager.TryGetUserConfig(eventArgs.LoginUid, out var config) && !config.ModuleSwitch.PcrGuildRank)
+        IStorageService storageService = SkadiApp.GetService<IStorageService>();
+        UserConfig      userConfig     = storageService.GetUserConfig(eventArgs.LoginUid);
+        if (userConfig is null || !userConfig.ModuleSwitch.PcrGuildRank)
             return;
         //网络响应
         JToken response;

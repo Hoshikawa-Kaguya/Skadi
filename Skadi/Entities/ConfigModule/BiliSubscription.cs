@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 
-namespace Skadi.Config.ConfigModule;
+namespace Skadi.Entities.ConfigModule;
 
-internal class BiliSubscription
+public class BiliSubscription
 {
     /// <summary>
     /// 群组订阅数组
@@ -13,7 +13,7 @@ internal class BiliSubscription
 /// <summary>
 /// 群订阅设置
 /// </summary>
-internal class GroupSubscription
+public class GroupSubscription
 {
     /// <summary>
     /// 群组数组

@@ -1,13 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Skadi.DatabaseUtils.SqliteTool;
-using Skadi.Tool;
+using Skadi.Database.SqliteTool;
 using Sora.EventArgs.SoraEvent;
 using SqlSugar;
 using YukariToolBox.LightLog;
 
-namespace Skadi.DatabaseUtils;
+namespace Skadi.Database;
 
 internal static class DatabaseInit //数据库初始化类
 {
@@ -17,20 +17,16 @@ internal static class DatabaseInit //数据库初始化类
     /// <param name="eventArgs">CQAppEnableEventArgs</param>
     public static void UserDataInit(ConnectEventArgs eventArgs)
     {
-        var dbPath = SugarUtils.GetDbPath(eventArgs.LoginUid.ToString());
-        Log.Debug("IO", $"获取用户数据路径{dbPath}");
-        //检查文件是否存在
-        IoUtils.CheckDbFileExists(dbPath);
         //创建数据库链接
-        SqlSugarClient dbClient = SugarUtils.CreateSqlSugarClient(dbPath);
+        SqlSugarClient dbClient = SugarUtils.CreateUserDbClient(eventArgs.LoginUid);
 
         try
         {
             //获取所有表格类
-            var tables = typeof(Tables).GetNestedTypes().Where(t => t.IsClass).ToList();
+            List<Type> tables = typeof(Tables).GetNestedTypes().Where(t => t.IsClass).ToList();
 
             //检查数据库表格
-            foreach (var table in tables)
+            foreach (Type table in tables)
             {
                 Log.Debug("数据库初始化", $"检查表[{table.Name}]");
                 if (table.TableExists(dbClient))
