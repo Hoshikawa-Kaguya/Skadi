@@ -169,12 +169,11 @@ public class StorageService : IStorageService
         }
     }
 
-    private static void CheckDir(string path)
+    private static void CheckDir(string path, bool isDir = false)
     {
         Log.Verbose("StorageService", $"Check work dir:{path}");
         Stack<string> paths = new();
-        if (Directory.Exists(path))
-            paths.Push(path);
+        if (isDir) paths.Push(path);
 
         string dir = Path.GetDirectoryName(path);
         while (dir != ROOT_DIR)
