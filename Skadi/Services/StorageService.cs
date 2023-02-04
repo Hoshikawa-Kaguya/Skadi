@@ -173,8 +173,10 @@ public class StorageService : IStorageService
     {
         Log.Verbose("StorageService", $"Check work dir:{path}");
         Stack<string> paths = new();
-        string        dir   = Path.GetDirectoryName(path);
+        if (Directory.Exists(path))
+            paths.Push(path);
 
+        string dir = Path.GetDirectoryName(path);
         while (dir != ROOT_DIR)
         {
             paths.Push(dir);
