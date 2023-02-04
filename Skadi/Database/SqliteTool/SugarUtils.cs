@@ -30,7 +30,7 @@ internal static class SugarUtils
     /// <param name="sugarClient">SqlSugarClient</param>
     /// <param name="tableName">表名，为空值则为默认值</param>
     /// <returns>影响的记录数</returns>
-    public static int DeletTable(this Type tableType, SqlSugarClient sugarClient, string tableName = null)
+    public static int DeleteTable(this Type tableType, SqlSugarClient sugarClient, string tableName = null)
     {
         if (sugarClient == null)
             throw new NullReferenceException("null SqlSugarClient");

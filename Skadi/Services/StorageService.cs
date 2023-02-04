@@ -22,16 +22,6 @@ public class StorageService : IStorageService
 #else
     private static readonly string ROOT_DIR = Environment.CurrentDirectory;
 #endif
-
-    private const string SUB_CONFIG = "config";
-    private const string SUB_CRASH  = "crashlog";
-    private const string SUB_DATA   = "data";
-    private const string SUB_HSO    = "hso";
-
-    private const  string FILE_GLOBAL_CONFIG = "server_config.yaml";
-    private const  string FILE_USER_CONFIG   = "config.yaml";
-    private const  string FILE_QA            = "qa.json";
-    private const  string FILE_DB            = "data.db";
     private static string FILE_CRASH => $"crash-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.log";
 
 #endregion
@@ -109,43 +99,38 @@ public class StorageService : IStorageService
 
 #region Path
 
-    private static string GetSubDirPath(string subName)
-    {
-        string path = $"{ROOT_DIR.Trim('/').Trim('\\')}/{subName}";
-        CheckDirExistsOrCreate(path);
-        return path;
-    }
-
     private static string GetGlobalConfigFilePath()
     {
-        return $"{GetSubDirPath(SUB_CONFIG)}/{FILE_GLOBAL_CONFIG}";
+        string path = $"{ROOT_DIR}/config/server_config.yaml";
+        CheckDir(path);
+        return path;
     }
 
     private static string GetUserConfigFilePath(long userId)
     {
-        string path = $"{GetSubDirPath(SUB_CONFIG)}/{userId}/{FILE_USER_CONFIG}";
-        CheckDirExistsOrCreate(Path.GetDirectoryName(path));
+        string path = $"{ROOT_DIR}/config/{userId}/config.yaml";
+        CheckDir(path);
         return path;
     }
 
     //TODO ZoneTree替代QA持久化
     public static string GetQAFilePath(long userId)
     {
-        string path = $"{GetSubDirPath(SUB_CONFIG)}/{userId}/{FILE_QA}";
-        CheckDirExistsOrCreate(Path.GetDirectoryName(path));
+        string path = $"{ROOT_DIR}/config/{userId}/qa.json";
+        CheckDir(path);
         return path;
     }
 
     //TODO 使用服务直接接管
     public static string GetHsoPath()
     {
-        return $"{GetSubDirPath(SUB_HSO)}";
+        return $"{ROOT_DIR}/hso";
     }
 
     public static string GetUserDbPath(long userId)
     {
-        string path = $"{GetSubDirPath(SUB_DATA)}/{userId}/{FILE_DB}";
-        CheckDirExistsOrCreate(Path.GetDirectoryName(path));
+        string path = $"{ROOT_DIR}/data/{userId}/data.db";
+        CheckDir(path);
         if (!File.Exists(path))
         {
             //数据库文件不存在，新建数据库
@@ -157,7 +142,7 @@ public class StorageService : IStorageService
 
     public static void CrashLogGen(string errorMessage)
     {
-        string             crashFile    = $"{GetSubDirPath(SUB_CRASH)}/{FILE_CRASH}";
+        string             crashFile    = $"{ROOT_DIR}/crash/{FILE_CRASH}";
         using StreamWriter streamWriter = File.CreateText(crashFile);
         streamWriter.Write(errorMessage);
     }
@@ -184,6 +169,29 @@ public class StorageService : IStorageService
         }
     }
 
+    private static void CheckDir(string path)
+    {
+        Log.Verbose("StorageService", $"Check work dir:{path}");
+        Stack<string> paths = new();
+        string        dir   = Path.GetDirectoryName(path);
+
+        while (dir != ROOT_DIR)
+        {
+            paths.Push(dir);
+            dir = Path.GetDirectoryName(dir);
+        }
+
+        while (paths.Count != 0)
+        {
+            string temp = paths.Pop();
+            Log.Verbose("StorageService", $"dir_c:{temp}");
+            if(!Directory.Exists(temp))
+            {
+                Directory.CreateDirectory(dir);
+            }
+        }
+    }
+
     private T ReadYamlFile<T>(string path)
     {
         Log.Debug("StorageService", $"Try read yaml file:{path}");
@@ -196,14 +204,6 @@ public class StorageService : IStorageService
         {
             Log.Error("StorageService", Log.ErrorLogBuilder(e));
             return default;
-        }
-    }
-
-    private static void CheckDirExistsOrCreate(string dir)
-    {
-        if (!Directory.Exists(dir))
-        {
-            Directory.CreateDirectory(dir);
         }
     }
 

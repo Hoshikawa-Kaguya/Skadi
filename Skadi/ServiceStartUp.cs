@@ -42,7 +42,6 @@ internal static class ServiceStartUp
         }
 
         Log.SetLogLevel(globalConfig.LogLevel);
-
         //显示Log等级
         Log.Debug("Log Level", globalConfig.LogLevel.ToString());
 
@@ -57,14 +56,12 @@ internal static class ServiceStartUp
         //初始化服务器
         ISoraService server = SoraServiceFactory.CreateService(new ServerConfig
         {
-            Host          = globalConfig.Location,
-            Port          = globalConfig.Port,
-            AccessToken   = globalConfig.AccessToken,
-            UniversalPath = globalConfig.UniversalPath,
-            HeartBeatTimeOut =
-                TimeSpan.FromSeconds(globalConfig.HeartBeatTimeOut),
-            ApiTimeOut =
-                TimeSpan.FromMilliseconds(globalConfig.OnebotApiTimeOut),
+            Host                     = globalConfig.Location,
+            Port                     = globalConfig.Port,
+            AccessToken              = globalConfig.AccessToken,
+            UniversalPath            = globalConfig.UniversalPath,
+            HeartBeatTimeOut         = TimeSpan.FromSeconds(globalConfig.HeartBeatTimeOut),
+            ApiTimeOut               = TimeSpan.FromMilliseconds(globalConfig.OnebotApiTimeOut),
             SuperUsers               = globalConfig.SuperUsers,
             EnableSoraCommandManager = true,
             ThrowCommandException    = false,
