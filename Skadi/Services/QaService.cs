@@ -12,6 +12,7 @@ using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 using Sora.Enumeration.EventParamsType;
+using Sora.Serializer;
 using Sora.Util;
 using YukariToolBox.LightLog;
 // ReSharper disable PossibleMultipleEnumeration
@@ -172,8 +173,8 @@ internal class QaService : IQaService
         foreach ((string qMsgStr, string aMsgStr, long groupId) in temp)
             commands.Add(new QaData
             {
-                qMsg    = CQCodeUtil.DeserializeMessage(qMsgStr),
-                aMsg    = CQCodeUtil.DeserializeMessage(aMsgStr),
+                qMsg    = qMsgStr.DeserializeCqMessage(),
+                aMsg    = aMsgStr.DeserializeCqMessage(),
                 GroupId = groupId
             });
 
@@ -185,7 +186,7 @@ internal class QaService : IQaService
         List<(string qMsg, string aMsg, long groupId)> temp = new();
 
         foreach (QaData qaData in data)
-            temp.Add((qaData.qMsg.SerializeMessage(), qaData.aMsg.SerializeMessage(), qaData.GroupId));
+            temp.Add((qaData.qMsg.SerializeToCq(), qaData.aMsg.SerializeToCq(), qaData.GroupId));
 
         JToken json = JToken.FromObject(temp);
         File.WriteAllText(QaConfigPath, json.ToString(Formatting.None));
