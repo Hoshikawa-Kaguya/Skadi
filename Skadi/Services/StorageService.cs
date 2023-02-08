@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Skadi.Entities.ConfigModule;
 using Skadi.Interface;
 using Skadi.Resource;
@@ -34,7 +35,7 @@ public class StorageService : IStorageService
 
     private IDeserializer Deserializer { get; }
 
-#endregion
+    #endregion
 
     public StorageService()
     {
@@ -95,9 +96,51 @@ public class StorageService : IStorageService
         if (UserConfigs.ContainsKey(userId)) UserConfigs.Remove(userId, out _);
     }
 
+    #endregion
+
+#region GenericFile
+
+    public async ValueTask<bool> SaveOrUpdateDataFile(MemoryStream data, long userId, string fileType, string fileName)
+    {
+        string path = $"{GetUserDataDirPath(userId, fileType)}/{fileName}";
+        try
+        {
+            await using FileStream file = File.Create(path);
+            data.Position = 0;
+            await data.CopyToAsync(file);
+            file.Close();
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "StorageService", $"File[{path}]write error");
+            return false;
+        }
+        return true;
+    }
+
+    public async ValueTask<MemoryStream> ReadUserDataFile(long userId, string fileType, string fileName)
+    {
+        string path = $"{GetUserDataDirPath(userId, fileType)}/{fileName}";
+        if (File.Exists(path))
+        {
+            return null;
+        }
+        try
+        {
+            MemoryStream data = new(await File.ReadAllBytesAsync(path));
+            data.Position = 0;
+            return data;
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "StorageService", $"File[{path}]read error");
+            return null;
+        }
+    }
+
 #endregion
 
-#region Path
+    #region Path
 
     private static string GetGlobalConfigFilePath()
     {
@@ -137,6 +180,13 @@ public class StorageService : IStorageService
             Log.Warning("StorageService", "未找到数据库文件，创建新的数据库");
             File.Create(path).Close();
         }
+        return path;
+    }
+
+    public static string GetUserDataDirPath(long userId, string dataType)
+    {
+        string path = $"{ROOT_DIR}/data/{userId}/{dataType}";
+        CheckDir(path);
         return path;
     }
 
