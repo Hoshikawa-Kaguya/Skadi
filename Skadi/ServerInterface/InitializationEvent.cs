@@ -55,8 +55,9 @@ internal static class InitializationEvent
         DatabaseInit.UserDataInit(connectEvent);
 
         //初始化QA
-        Log.Info("Skadi初始化", "reg QA serv");
-        SkadiApp.Services.AddSingleton<IQaService>(new QaService(connectEvent.LoginUid));
+        //TODO 重构QA
+        // Log.Info("Skadi初始化", "reg QA serv");
+        // SkadiApp.Services.AddSingleton<IQaService>(new QaService(connectEvent.LoginUid));
 
         //初始化定时器线程
         if (userConfig.ModuleSwitch.BiliSubscription)

@@ -37,6 +37,12 @@ public class StorageService : IStorageService
 
     #endregion
 
+#region Qa Buffer
+
+    
+
+#endregion
+
     public StorageService()
     {
         Log.Info("StorageService", "Service init");
@@ -152,14 +158,6 @@ public class StorageService : IStorageService
     private static string GetUserConfigFilePath(long userId)
     {
         string path = $"{ROOT_DIR}/config/{userId}/config.yaml";
-        CheckDir(path);
-        return path;
-    }
-
-    //TODO ZoneTree替代QA持久化
-    public static string GetQAFilePath(long userId)
-    {
-        string path = $"{ROOT_DIR}/config/{userId}/qa.json";
         CheckDir(path);
         return path;
     }

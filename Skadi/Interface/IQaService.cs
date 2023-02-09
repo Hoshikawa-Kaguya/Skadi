@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Skadi.Entities;
 using Sora.Entities;
 
@@ -6,8 +7,6 @@ namespace Skadi.Interface;
 
 public interface IQaService
 {
-    long LoginUid { get; }
-
     /// <summary>
     /// 添加QA
     /// </summary>
@@ -15,7 +14,7 @@ public interface IQaService
     /// <para>-1 有相同QA</para>
     /// <para>-2 错误</para>
     /// </returns>
-    int AddNewQA(QaData newQA);
+    ValueTask<int> AddNewQA(long loginUid, long groupId, MessageBody message);
 
     /// <summary>
     /// 删除QA
@@ -23,7 +22,16 @@ public interface IQaService
     /// <returns>
     /// <para>-1 没有QA</para>
     /// </returns>
-    int DeleteQA(MessageBody qMsg, long groupId);
+    int DeleteQA(long loginUid, long groupId, MessageBody question);
 
-    List<MessageBody> GetAllQA(long groupId);
+    /// <summary>
+    /// 获取回答
+    /// </summary>
+    MessageBody GetAnswer(long loginUid, long groupId, MessageBody question);
+
+    /// <summary>
+    /// 获取所有的问题
+    /// </summary>
+    /// <returns></returns>
+    List<MessageBody> GetAllQA(long loginUid, long groupId);
 }

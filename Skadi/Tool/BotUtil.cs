@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Downloader;
 using SixLabors.ImageSharp;
 using Skadi.Entities;
 using Skadi.Services;
@@ -46,6 +48,11 @@ internal static class BotUtil
 #endregion
 
 #region 字符串处理
+
+    public static string ToHexString(this byte[] data)
+    {
+        return string.Join("", data.Select(x => x.ToString("X2")));
+    }
 
     /// <summary>
     /// 获取字符串在QQ上显示的长度（用于PadQQ函数）
@@ -171,6 +178,22 @@ internal static class BotUtil
             if (SoraServiceFactory.TryGetApi(selfId, out var api))
                 await api.RecallMessage(msgId);
         });
+    }
+
+    #endregion
+
+#region 下载相关
+
+    public static async ValueTask DownloadFile(string url, string path, int thread = 8)
+    {
+        DownloadConfiguration downloadOpt = new()
+        {
+            ChunkCount       = thread,
+            ParallelDownload = true,
+        };
+        IDownloadService downloader = new DownloadService(downloadOpt);
+        Log.Info("FileDownload", $"download file:{url}");
+        await downloader.DownloadFileTaskAsync(url, path);
     }
 
 #endregion

@@ -1,12 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
+using ProtoBuf;
+using Skadi.Entities;
 using Skadi.Interface;
 using Skadi.Tool;
 using Sora.Attributes.Command;
@@ -18,6 +23,7 @@ using Sora.Enumeration.ApiType;
 using Sora.Enumeration.EventParamsType;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.LightLog;
+using MatchType = Sora.Enumeration.MatchType;
 
 namespace Skadi.Command;
 
@@ -40,7 +46,7 @@ public static class Utils
         eventArgs.IsContinueEventChain = false;
         //处理开头字符串
         if (eventArgs.Message.MessageBody[0].MessageType == SegmentType.Text)
-            if (eventArgs.Message.MessageBody[0].Data is TextSegment str && str.Content.StartsWith("|echo "))
+            if (eventArgs.Message.MessageBody[0].Data is TextSegment str && str.Content.StartsWith("echo "))
             {
                 if (str.Content.Equals("echo "))
                     eventArgs.Message.MessageBody.RemoveAt(0);
@@ -129,6 +135,49 @@ public static class Utils
         await eventArgs.SendParaMessage(image, fakeMessage, autoRemove);
     }
 
+#if DEBUG
+
+    [UsedImplicitly]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { "TT" },
+                 MatchType = MatchType.Full,
+                 PermissionLevel = MemberRoleType.Admin)]
+    public static async ValueTask Test1(GroupMessageEventArgs eventArgs)
+    {
+        //TODO QA自动存储图片文件
+        //TODO QA使用PB的序列化方式保存数据
+        MemoryStream ms = new();
+
+        Dictionary<QaKey, MessageBody> keys = new();
+        QaKey key = new()
+        {
+            GroupId = eventArgs.SourceGroup,
+            ReqMsg = eventArgs.Message.MessageBody
+        };
+        keys.Add(key, eventArgs.Message.MessageBody);
+        Shit shit = new()
+        {
+            Data = keys
+        };
+
+        Serializer.Serialize(ms, shit);
+        ms.Position = 0;
+        var wow = Serializer.Deserialize<Shit>(ms);
+        ms.Position = 0;
+        MD5 md5 = MD5.Create();
+        byte[] sMd5 = md5.ComputeHash(ms.ToArray());
+        await eventArgs.Reply($"shit:{sMd5.ToHexString()}\nkek:{key.GetQaKeyMd5().ToHexString()}\ndata:{ms.ToArray().ToHexString()}");
+    }
+
+    [ProtoContract]
+    public class Shit
+    {
+        [ProtoMember(1)]
+        public Dictionary<QaKey, MessageBody> Data { get; set; }
+    }
+
+#endif
+
     private static async Task<double> GetCpuUsageForProcess()
     {
         DateTime startTime     = DateTime.UtcNow;
@@ -151,8 +200,9 @@ public static class Utils
         (ApiStatus status, int msgId) ret;
         TimeSpan                      timeout = TimeSpan.FromMinutes(1);
         if (fakeMessage)
-            (ret.status, ret.msgId, _) = await eventArgs.SourceGroup.SendGroupForwardMsg(new[] { new CustomNode("色色", 114514, message) },
-                                                                    timeout);
+            (ret.status, ret.msgId, _) =
+                await eventArgs.SourceGroup.SendGroupForwardMsg(new[] { new CustomNode("色色", 114514, message) },
+                                                                timeout);
         else
             ret = await eventArgs.Reply(message, timeout);
 
