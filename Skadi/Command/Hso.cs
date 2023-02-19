@@ -40,8 +40,8 @@ public class HsoCommand
     {
         eventArgs.IsContinueEventChain = false;
 
-        IStorageService storageService = SkadiApp.GetService<IStorageService>();
-        UserConfig      userConfig     = storageService.GetUserConfig(eventArgs.LoginUid);
+        IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
+        UserConfig      userConfig     = genericStorage.GetUserConfig(eventArgs.LoginUid);
         if (userConfig is null)
         {
             Log.Error("Config|Hso", "无法获取用户配置文件");
@@ -207,8 +207,8 @@ public class HsoCommand
         Log.Info("cloud database", $"[{eventArgs.Sender.Id}]正在添加图片:{picId}-{picIndex}");
         await eventArgs.Reply($"Adding[{picId}]...");
         //读取用户配置
-        IStorageService storageService = SkadiApp.GetService<IStorageService>();
-        UserConfig      userConfig     = storageService.GetUserConfig(eventArgs.LoginUid);
+        IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
+        UserConfig      userConfig     = genericStorage.GetUserConfig(eventArgs.LoginUid);
         if (userConfig is null)
         {
             Log.Error("Config|Hso", "无法获取用户配置文件");
@@ -357,7 +357,7 @@ public class HsoCommand
 
     private static async void SendLocalPic(Hso hso, GroupMessageEventArgs eventArgs)
     {
-        var picNames = Directory.GetFiles(StorageService.GetHsoPath());
+        var picNames = Directory.GetFiles(GenericStorage.GetHsoPath());
         if (picNames.Length == 0)
         {
             await eventArgs.SourceGroup.SendGroupMessage("机器人管理者没有在服务器上塞色图\r\n你去找他要啦!");

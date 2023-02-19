@@ -72,8 +72,8 @@ public static class SaucenaoApi
         JToken twitterPic = resData.Where(t => Convert.ToInt32(t["header"]?["index_id"]) == DbIndex.TWITTER)
                                    .MaxBy(t => Convert.ToSingle(t["header"]?["similarity"]));
 
-        IStorageService storageService = SkadiApp.GetService<IStorageService>();
-        UserConfig      userConfig     = storageService.GetUserConfig(selfId);
+        IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
+        UserConfig      userConfig     = genericStorage.GetUserConfig(selfId);
         if (userConfig is null)
         {
             //用户配置获取失败

@@ -163,7 +163,7 @@ internal static class SugarUtils
     /// <returns>默认开启的SqlSugarClient</returns>
     internal static SqlSugarClient CreateUserDbClient(long loginUid)
     {
-        string dbPath = StorageService.GetUserDbPath(loginUid);
+        string dbPath = GenericStorage.GetUserDbPath(loginUid);
         return new SqlSugarClient(new ConnectionConfig
         {
             ConnectionString      = $"DATA SOURCE={dbPath}",

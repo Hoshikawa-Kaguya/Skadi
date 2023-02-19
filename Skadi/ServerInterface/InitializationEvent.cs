@@ -35,8 +35,8 @@ internal static class InitializationEvent
         //初始化配置文件
         Log.Info("Skadi初始化", $"初始化用户[{connectEvent.LoginUid}]的配置");
 
-        IStorageService storageService = SkadiApp.GetService<IStorageService>();
-        UserConfig      userConfig     = storageService.GetUserConfig(connectEvent.LoginUid);
+        IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
+        UserConfig      userConfig     = genericStorage.GetUserConfig(connectEvent.LoginUid);
         if (userConfig is null)
         {
             Log.Fatal(new IOException("无法获取用户配置文件(Initialization)"), "Skadi初始化", "用户配置文件初始化失败");

@@ -130,7 +130,7 @@ internal static class BotUtil
     public static void BotCrash(Exception e)
     {
         //生成错误报告
-        StorageService.CrashLogGen(Log.ErrorLogBuilder(e));
+        GenericStorage.CrashLogGen(Log.ErrorLogBuilder(e));
         //清理服务
         SkadiApp.Services.Clear();
     }

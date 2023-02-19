@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Skadi.Entities;
 using Skadi.Interface;
 using Skadi.Tool;
 using Sora.Entities;
@@ -16,6 +18,14 @@ namespace Skadi.Services;
 
 internal class QaService : IQaService
 {
+#region Qa Buffer
+
+    private ConcurrentDictionary<QaKey, MessageBody> QaMessages { get; }
+
+    private int QaModifyCount { get; set; }
+
+#endregion
+
     public async ValueTask<int> AddNewQA(long loginUid, long groupId, MessageBody message)
     {
         (MessageBody qMsg, MessageBody aMsg) = GenQaSlice(message);
@@ -100,24 +110,27 @@ internal class QaService : IQaService
         }
         if (imgUrls.Count == 0) return input;
 
-        string path = StorageService.GetUserDataDirPath(loginUid, "qa_img");
+        string path = GenericStorage.GetUserDataDirPath(loginUid, "qa_img");
         foreach ((int index, string url) in imgUrls)
         {
             string ext = Path.GetExtension(url);
             if (string.IsNullOrEmpty(ext))
                 ext = ".jpg";
             string file = $"{path}/{Guid.NewGuid()}{ext}";
+            //尝试下载文件，失败后重试四次
             for (int i = 0; i < 5; i++)
-            {
-                await BotUtil.DownloadFile(url, file);
-                await Task.Delay(200);
-                if (File.Exists(file))
+                if (await TryDownloadFile(url, file))
                     break;
-            }
-            if (!File.Exists(file))
-                continue;
+            if (!File.Exists(file)) continue;
             input[index] = SoraSegment.Image(file);
         }
         return input;
+    }
+
+    private async ValueTask<bool> TryDownloadFile(string url, string file)
+    {
+        await BotUtil.DownloadFile(url, file);
+        await Task.Delay(20);
+        return File.Exists(file);
     }
 }

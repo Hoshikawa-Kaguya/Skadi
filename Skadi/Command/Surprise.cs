@@ -25,8 +25,8 @@ public class Surprise
     public async ValueTask RandomNumber(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        IStorageService storageService = SkadiApp.GetService<IStorageService>();
-        UserConfig      userConfig     = storageService.GetUserConfig(eventArgs.LoginUid);
+        IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
+        UserConfig      userConfig     = genericStorage.GetUserConfig(eventArgs.LoginUid);
         if (userConfig is null || !userConfig.ModuleSwitch.HaveFun)
             return;
         await eventArgs.SourceGroup.SendGroupMessage(SoraSegment.At(eventArgs.Sender.Id)
@@ -40,8 +40,8 @@ public class Surprise
     public async ValueTask RedTea(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        IStorageService storageService = SkadiApp.GetService<IStorageService>();
-        UserConfig      userConfig     = storageService.GetUserConfig(eventArgs.LoginUid);
+        IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
+        UserConfig      userConfig     = genericStorage.GetUserConfig(eventArgs.LoginUid);
         if (userConfig is null || !userConfig.ModuleSwitch.HaveFun)
             return;
         await eventArgs.SourceGroup.EnableGroupMemberMute(eventArgs.Sender.Id,

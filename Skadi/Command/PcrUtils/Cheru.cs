@@ -39,8 +39,8 @@ public static class Cheru
     public static async void CheruToString(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        IStorageService storageService = SkadiApp.GetService<IStorageService>();
-        UserConfig      userConfig     = storageService.GetUserConfig(eventArgs.LoginUid);
+        IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
+        UserConfig      userConfig     = genericStorage.GetUserConfig(eventArgs.LoginUid);
         if (userConfig is null)
         {
             Log.Error("Config|Cheru", "无法获取用户配置文件");
@@ -71,8 +71,8 @@ public static class Cheru
     public static async void StringToCheru(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        IStorageService storageService = SkadiApp.GetService<IStorageService>();
-        UserConfig      userConfig     = storageService.GetUserConfig(eventArgs.LoginUid);
+        IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
+        UserConfig      userConfig     = genericStorage.GetUserConfig(eventArgs.LoginUid);
         if (userConfig is null)
         {
             Log.Error("Config|Cheru", "无法获取用户配置文件");

@@ -29,9 +29,9 @@ internal static class SubscriptionUpdate
     /// <param name="fStart">是否是第一次启动</param>
     public static async void BiliUpdateCheck(long loginUid, bool fStart)
     {
-        IStorageService storageService = SkadiApp.GetService<IStorageService>();
+        IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
         //读取配置文件
-        UserConfig config = storageService.GetUserConfig(loginUid);
+        UserConfig config = genericStorage.GetUserConfig(loginUid);
         if (config is null)
         {
             Log.Error("Sub-Serv", $"无法获取用户[{loginUid}]的配置文件");

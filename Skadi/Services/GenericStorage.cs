@@ -5,16 +5,20 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ProtoBuf;
+using Skadi.Entities;
 using Skadi.Entities.ConfigModule;
 using Skadi.Interface;
 using Skadi.Resource;
-using YamlDotNet.Serialization;
+using Sora.Entities;
 using YukariToolBox.LightLog;
 using Path = System.IO.Path;
+using YamlSerialization = YamlDotNet.Serialization;
+using PbSerializer = ProtoBuf.Serializer;
 
 namespace Skadi.Services;
 
-public class StorageService : IStorageService
+public class GenericStorage : IGenericStorage, IDisposable
 {
 #region 只读量
 
@@ -25,6 +29,8 @@ public class StorageService : IStorageService
 #endif
     private static string FILE_CRASH => $"crash-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.log";
 
+    private const string QA_FILE = "qa.bin";
+
 #endregion
 
 #region Config Buffer
@@ -33,24 +39,27 @@ public class StorageService : IStorageService
 
     private GlobalConfig GlobalConfigInstance { get; set; }
 
-    private IDeserializer Deserializer { get; }
-
-    #endregion
-
-#region Qa Buffer
-
-    
+    private YamlSerialization.IDeserializer YamlDeserializer { get; }
 
 #endregion
 
-    public StorageService()
+    public GenericStorage()
     {
-        Log.Info("StorageService", "Service init");
+        Log.Info("GenericStorage", "Service init");
         UserConfigs          = new ConcurrentDictionary<long, UserConfig>();
         GlobalConfigInstance = null;
-        Deserializer = new DeserializerBuilder()
-                       .IgnoreUnmatchedProperties()
-                       .Build();
+        YamlDeserializer = new YamlSerialization.DeserializerBuilder()
+                           .IgnoreUnmatchedProperties()
+                           .Build();
+    }
+
+    public void Dispose()
+    {
+    }
+
+    ~GenericStorage()
+    {
+        Dispose();
     }
 
 #region Config
@@ -59,7 +68,7 @@ public class StorageService : IStorageService
     {
         if (GlobalConfigInstance != null) return GlobalConfigInstance;
 
-        Log.Debug("StorageService", "读取全局配置文件");
+        Log.Debug("GenericStorage", "读取全局配置文件");
         string path = GetGlobalConfigFilePath();
         if (!File.Exists(path)) CreateAndWriteStrFile(path, ConfigResourse.InitGlobalConfig);
 
@@ -83,7 +92,7 @@ public class StorageService : IStorageService
     {
         if (UserConfigs.ContainsKey(userId)) return UserConfigs[userId];
 
-        Log.Debug("StorageService", $"读取用户[{userId}]配置文件");
+        Log.Debug("GenericStorage", $"读取用户[{userId}]配置文件");
         string path = GetUserConfigFilePath(userId);
         if (!File.Exists(path)) CreateAndWriteStrFile(path, ConfigResourse.InitUserConfig);
 
@@ -102,51 +111,95 @@ public class StorageService : IStorageService
         if (UserConfigs.ContainsKey(userId)) UserConfigs.Remove(userId, out _);
     }
 
-    #endregion
+#endregion
 
-#region GenericFile
+#region QA
 
-    public async ValueTask<bool> SaveOrUpdateDataFile(MemoryStream data, long userId, string fileType, string fileName)
+    public async ValueTask<ConcurrentDictionary<QaKey, MessageBody>> ReadQaData()
     {
-        string path = $"{GetUserDataDirPath(userId, fileType)}/{fileName}";
+        string path = $"{GetDataDirPath()}/{QA_FILE}";
+
+        using MemoryStream data = await ReadFile(path);
+        if (data is null) return null;
         try
         {
-            await using FileStream file = File.Create(path);
-            data.Position = 0;
-            await data.CopyToAsync(file);
-            file.Close();
+            QaDataFile qaData = PbSerializer.Deserialize<QaDataFile>(data);
+            return qaData.Data;
         }
         catch (Exception e)
         {
-            Log.Error(e, "StorageService", $"File[{path}]write error");
+            Log.Error(e, "GenericStorage", "读取QA数据时发生错误");
+            return null;
+        }
+    }
+
+    public async ValueTask<bool> SaveQaData(ConcurrentDictionary<QaKey, MessageBody> saveData)
+    {
+        QaDataFile file = new()
+        {
+            Data = saveData
+        };
+        string             path = $"{GetDataDirPath()}/{QA_FILE}";
+        using MemoryStream data = file.SerializeData();
+        return await SaveOrUpdateFile(data, path);
+    }
+
+    [ProtoContract]
+    private class QaDataFile
+    {
+        [ProtoMember(1)]
+        public ConcurrentDictionary<QaKey, MessageBody> Data;
+
+        public MemoryStream SerializeData()
+        {
+            MemoryStream ms = new();
+            PbSerializer.Serialize(ms, this);
+            ms.Position = 0;
+            return ms;
+        }
+    }
+
+#endregion
+
+#region GenericFile
+
+    public async ValueTask<bool> SaveOrUpdateFile(MemoryStream data, string file)
+    {
+        try
+        {
+            await using FileStream fileStream = File.Create(file);
+            data.Position = 0;
+            await data.CopyToAsync(fileStream);
+            fileStream.Close();
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "GenericStorage", $"File[{file}]write error");
             return false;
         }
+
         return true;
     }
 
-    public async ValueTask<MemoryStream> ReadUserDataFile(long userId, string fileType, string fileName)
+    public async ValueTask<MemoryStream> ReadFile(string file)
     {
-        string path = $"{GetUserDataDirPath(userId, fileType)}/{fileName}";
-        if (File.Exists(path))
-        {
-            return null;
-        }
+        if (File.Exists(file)) return null;
         try
         {
-            MemoryStream data = new(await File.ReadAllBytesAsync(path));
+            MemoryStream data = new(await File.ReadAllBytesAsync(file));
             data.Position = 0;
             return data;
         }
         catch (Exception e)
         {
-            Log.Error(e, "StorageService", $"File[{path}]read error");
+            Log.Error(e, "GenericStorage", $"File[{file}]read error");
             return null;
         }
     }
 
 #endregion
 
-    #region Path
+#region Path
 
     private static string GetGlobalConfigFilePath()
     {
@@ -175,15 +228,23 @@ public class StorageService : IStorageService
         if (!File.Exists(path))
         {
             //数据库文件不存在，新建数据库
-            Log.Warning("StorageService", "未找到数据库文件，创建新的数据库");
+            Log.Warning("GenericStorage", "未找到数据库文件，创建新的数据库");
             File.Create(path).Close();
         }
+
         return path;
     }
 
     public static string GetUserDataDirPath(long userId, string dataType)
     {
         string path = $"{ROOT_DIR}/data/{userId}/{dataType}";
+        CheckDir(path);
+        return path;
+    }
+
+    public static string GetDataDirPath()
+    {
+        string path = $"{ROOT_DIR}/data";
         CheckDir(path);
         return path;
     }
@@ -201,7 +262,7 @@ public class StorageService : IStorageService
 
     private void CreateAndWriteStrFile(string path, byte[] data)
     {
-        Log.Debug("StorageService", $"Try write file:{path}");
+        Log.Debug("GenericStorage", $"Try write file:{path}");
         try
         {
             string           text   = Encoding.UTF8.GetString(data);
@@ -211,7 +272,7 @@ public class StorageService : IStorageService
         }
         catch (Exception e)
         {
-            Log.Fatal(e, "StorageService", "无法读取全局配置文件");
+            Log.Fatal(e, "GenericStorage", "无法读取全局配置文件");
             Thread.Sleep(5000);
             Environment.Exit(-1);
         }
@@ -219,7 +280,7 @@ public class StorageService : IStorageService
 
     private static void CheckDir(string path, bool isDir = false)
     {
-        Log.Verbose("StorageService", $"Check work dir:{path}");
+        Log.Verbose("GenericStorage", $"Check work dir:{path}");
         Stack<string> paths = new();
         if (isDir) paths.Push(path);
 
@@ -233,25 +294,22 @@ public class StorageService : IStorageService
         while (paths.Count != 0)
         {
             string temp = paths.Pop();
-            Log.Verbose("StorageService", $"dir_c:{temp}");
-            if(!Directory.Exists(temp))
-            {
-                Directory.CreateDirectory(dir);
-            }
+            Log.Verbose("GenericStorage", $"dir_c:{temp}");
+            if (!Directory.Exists(temp)) Directory.CreateDirectory(dir);
         }
     }
 
     private T ReadYamlFile<T>(string path)
     {
-        Log.Debug("StorageService", $"Try read yaml file:{path}");
+        Log.Debug("GenericStorage", $"Try read yaml file:{path}");
         try
         {
             using TextReader reader = File.OpenText(path);
-            return Deserializer.Deserialize<T>(reader);
+            return YamlDeserializer.Deserialize<T>(reader);
         }
         catch (Exception e)
         {
-            Log.Error("StorageService", Log.ErrorLogBuilder(e));
+            Log.Error("GenericStorage", Log.ErrorLogBuilder(e));
             return default;
         }
     }

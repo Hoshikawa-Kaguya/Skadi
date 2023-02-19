@@ -26,13 +26,13 @@ internal static class ServiceStartUp
         //修改控制台标题
         Console.Title = @"Skadi";
         Log.Info("初始化", "Skadi初始化...");
-        SkadiApp.Services.AddSingleton<IStorageService>(new StorageService());
+        SkadiApp.Services.AddSingleton<IGenericStorage>(new GenericStorage());
         SkadiApp.Services.AddScoped<IChromeService, ChromeService>();
 
         //初始化配置文件
         Log.Info("初始化", "初始化服务器全局配置...");
-        IStorageService storageService = SkadiApp.GetService<IStorageService>();
-        GlobalConfig    globalConfig   = storageService.GetGlobalConfig();
+        IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
+        GlobalConfig    globalConfig   = genericStorage.GetGlobalConfig();
 
         if (globalConfig == null)
         {

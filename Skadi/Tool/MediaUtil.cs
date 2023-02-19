@@ -47,8 +47,8 @@ internal static class MediaUtil
 
     public static async Task SendPixivImageMessage(this GroupMessageEventArgs eventArgs, long pid, int index)
     {
-        IStorageService storageService = SkadiApp.GetService<IStorageService>();
-        UserConfig      userConfig     = storageService.GetUserConfig(eventArgs.LoginUid);
+        IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
+        UserConfig      userConfig     = genericStorage.GetUserConfig(eventArgs.LoginUid);
 
         if (userConfig is null)
         {

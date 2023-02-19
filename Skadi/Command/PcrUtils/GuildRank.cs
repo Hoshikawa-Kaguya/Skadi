@@ -32,8 +32,8 @@ public static class GuildRank
     public static async ValueTask KyoukaRank(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        IStorageService storageService = SkadiApp.GetService<IStorageService>();
-        UserConfig      userConfig     = storageService.GetUserConfig(eventArgs.LoginUid);
+        IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
+        UserConfig      userConfig     = genericStorage.GetUserConfig(eventArgs.LoginUid);
         if (userConfig is null || !userConfig.ModuleSwitch.PcrGuildRank)
             return;
         //网络响应

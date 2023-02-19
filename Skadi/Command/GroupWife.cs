@@ -24,8 +24,8 @@ public class GroupWife
     public async ValueTask RollWife(GroupMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        IStorageService storageService = SkadiApp.GetService<IStorageService>();
-        UserConfig config = storageService.GetUserConfig(eventArgs.LoginUid);
+        IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
+        UserConfig config = genericStorage.GetUserConfig(eventArgs.LoginUid);
 
         if (config is null || !config.ModuleSwitch.HaveFun)
             return;

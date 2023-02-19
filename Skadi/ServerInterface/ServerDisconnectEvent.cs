@@ -10,10 +10,10 @@ internal static class ServerDisconnectEvent
 {
     public static ValueTask OnServerDisconnectEvent(Guid _, ConnectionEventArgs eventArgs)
     {
-        IStorageService storageService = SkadiApp.GetService<IStorageService>();
+        IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
 
         Log.Info("ServerDisconnect", "移除无效的配置");
-        storageService.RemoveUserConfig(eventArgs.SelfId);
+        genericStorage.RemoveUserConfig(eventArgs.SelfId);
 
         return ValueTask.CompletedTask;
     }
