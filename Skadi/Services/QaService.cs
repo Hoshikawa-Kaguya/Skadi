@@ -14,6 +14,7 @@ using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.LightLog;
+using Path = System.IO.Path;
 
 // ReSharper disable PossibleMultipleEnumeration
 
@@ -62,14 +63,16 @@ internal class QaService : IQaService, IDisposable
     {
         //处理消息切片
         (MessageBody qMsg, MessageBody aMsg) = GenQaSlice(message);
-        MessageBody localAMsg = await RebuildMessage(aMsg, loginUid);
+        MessageBody localQMsg = RebuildQMessage(qMsg);
+        MessageBody localAMsg = await RebuildAMessage(aMsg, loginUid);
         //构建qa内容
         QaKey key = new()
         {
             GroupId  = groupId,
             SourceId = loginUid,
-            ReqMsg   = qMsg
+            ReqMsg   = localQMsg
         };
+        Log.Error("fuck", key.GetQaKeyMd5());
         if (MessageBuffer.TryAdd(key.GetQaKeyMd5(), (key, localAMsg)))
         {
             ModifyCount++;
@@ -81,11 +84,12 @@ internal class QaService : IQaService, IDisposable
 
     public async ValueTask<bool> DeleteQA(long loginUid, long groupId, MessageBody question)
     {
+        MessageBody localQMsg = RebuildQMessage(question);
         QaKey key = new()
         {
             GroupId  = groupId,
             SourceId = loginUid,
-            ReqMsg   = question
+            ReqMsg   = localQMsg
         };
         string md5 = key.GetQaKeyMd5();
         var (q, a) = GetQaData(md5);
@@ -98,11 +102,12 @@ internal class QaService : IQaService, IDisposable
 
     public async ValueTask GetAnswer(GroupMessageEventArgs args)
     {
+        MessageBody localQMsg = RebuildQMessage(args.Message.MessageBody);
         QaKey input = new()
         {
             GroupId  = args.SourceGroup,
             SourceId = args.LoginUid,
-            ReqMsg   = args.Message.MessageBody
+            ReqMsg   = localQMsg
         };
         string md5 = input.GetQaKeyMd5();
         var (q, a) = GetQaData(md5);
@@ -131,14 +136,16 @@ internal class QaService : IQaService, IDisposable
     {
         if (args is not GroupMessageEventArgs gArgs)
             return false;
+        MessageBody localQMsg = RebuildQMessage(args.Message.MessageBody);
         QaKey input = new()
         {
             GroupId  = gArgs.SourceGroup,
             SourceId = gArgs.LoginUid,
-            ReqMsg   = gArgs.Message.MessageBody
+            ReqMsg   = localQMsg
         };
-        string md5     = input.GetQaKeyMd5();
-        bool   matched = MessageBuffer.ContainsKey(md5);
+        string md5 = input.GetQaKeyMd5();
+        Log.Error("fuck", md5);
+        bool matched = MessageBuffer.ContainsKey(md5);
         if (matched) Log.Info("QA", $"触发回答{md5}");
         return matched;
     }
@@ -210,15 +217,15 @@ internal class QaService : IQaService, IDisposable
 
         //回答切片
         int aStrIndex = aFirstSegment.Content.IndexOf("你答", StringComparison.Ordinal);
-        if (aStrIndex == 0)
-        {
-            aMessage[0] = aFirstSegment.Content[2..].Trim();
-        }
+        string aPrefix = aStrIndex == 0
+            ? aFirstSegment.Content[2..].Trim()
+            : aFirstSegment.Content[(aStrIndex + 2)..].Trim();
+        if (!string.IsNullOrEmpty(aPrefix))
+            aMessage[0] = aPrefix;
         else
-        {
-            aMessage[0] = aFirstSegment.Content[(aStrIndex + 2)..].Trim();
-            if (!aFirstSegment.Content.Contains("有人问")) qMessage.Add(aFirstSegment.Content[..aStrIndex].Trim());
-        }
+            aMessage.RemoveAt(0);
+        if (!aFirstSegment.Content.Contains("有人问") && aStrIndex != 0)
+            qMessage.Add(aFirstSegment.Content[..aStrIndex].Trim());
 
         return (qMessage, aMessage);
     }
@@ -244,21 +251,18 @@ internal class QaService : IQaService, IDisposable
     /// <summary>
     /// 重构qa的消息，下载图片并替换防止图片过期
     /// </summary>
-    private async ValueTask<MessageBody> RebuildMessage(MessageBody input, long loginUid)
+    private async ValueTask<MessageBody> RebuildAMessage(MessageBody input, long loginUid)
     {
         Dictionary<int, string> imgUrls = new();
-        if (input.Count == 1 && input[0].Data is CardImageSegment cardImage) imgUrls.Add(0, cardImage.ImageFile);
-
         for (int i = 0; i < input.Count; i++)
         {
             if (input[i].MessageType != SegmentType.Image
                 || input[i].Data is not ImageSegment image)
                 continue;
-            imgUrls.Add(i, image.ImgFile);
+            imgUrls.Add(i, image.Url);
         }
 
         if (imgUrls.Count == 0) return input;
-
         string path = GenericStorage.GetUserDataDirPath(loginUid, "qa_img");
         foreach ((int index, string url) in imgUrls)
         {
@@ -271,16 +275,35 @@ internal class QaService : IQaService, IDisposable
                 if (await TryDownloadFile(url, file))
                     break;
             if (!File.Exists(file)) continue;
-            input[index] = SoraSegment.Image(file);
+            input.RemoveAt(index);
+            input.Insert(index, SoraSegment.Image(file));
         }
 
         return input;
     }
 
+    private MessageBody RebuildQMessage(MessageBody input)
+    {
+        MessageBody msg = new();
+        for (int i = 0; i < input.Count; i++)
+        {
+            if (input[i].MessageType == SegmentType.Image
+                && input[i].Data is ImageSegment image)
+            {
+                msg.Add(SoraSegment.Image(image.ImgFile));
+                continue;
+            }
+
+            msg.Add(input[i]);
+        }
+
+        return msg;
+    }
+
     private async ValueTask<bool> TryDownloadFile(string url, string file)
     {
-        await BotUtil.DownloadFile(url, file);
-        await Task.Delay(20);
+        await BotUtil.DownloadFile(url, file, 1);
+        await Task.Delay(200);
         return File.Exists(file);
     }
 

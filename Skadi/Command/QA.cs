@@ -32,6 +32,7 @@ public class QA
             Log.Error("QA", "未找到QA服务");
             return;
         }
+
         bool success =
             await qaService.AddNewQA(eventArgs.LoginUid, eventArgs.SourceGroup, eventArgs.Message.MessageBody);
         if (success)
@@ -55,6 +56,7 @@ public class QA
             Log.Error("QA", "未找到QA服务");
             return;
         }
+
         bool success =
             await qaService.DeleteQA(eventArgs.LoginUid, eventArgs.SourceGroup, eventArgs.Message.MessageBody);
         if (success)
