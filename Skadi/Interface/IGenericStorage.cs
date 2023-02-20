@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Skadi.Entities;
@@ -19,7 +19,9 @@ public interface IGenericStorage
 
     ValueTask<MemoryStream> ReadFile(string file);
 
-    ValueTask<ConcurrentDictionary<QaKey, MessageBody>> ReadQaData();
+    ValueTask<bool> DeleteFile(string file);
 
-    ValueTask<bool> SaveQaData(ConcurrentDictionary<QaKey, MessageBody> saveData);
+    ValueTask<Dictionary<QaKey, MessageBody>> ReadQaData();
+
+    ValueTask<bool> SaveQaData(Dictionary<QaKey, MessageBody> saveData);
 }

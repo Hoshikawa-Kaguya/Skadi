@@ -1,52 +1,182 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Skadi.Entities;
 using Skadi.Interface;
 using Skadi.Tool;
+using Sora.Command;
 using Sora.Entities;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
+using Sora.EventArgs.SoraEvent;
+using YukariToolBox.LightLog;
 
 // ReSharper disable PossibleMultipleEnumeration
 
 namespace Skadi.Services;
 
-internal class QaService : IQaService
+internal class QaService : IQaService, IDisposable
 {
+    private Guid MatchCmdId { get; }
+
 #region Qa Buffer
 
-    private ConcurrentDictionary<QaKey, MessageBody> QaMessages { get; }
+    private Dictionary<string, (QaKey a, MessageBody q)> MessageBuffer { get; }
 
-    private int QaModifyCount { get; set; }
+    private int ModifyCount { get; set; }
+
+    private Task SyncTask { get; }
+
+    private CancellationTokenSource SyncCancelToken { get; }
 
 #endregion
 
-    public async ValueTask<int> AddNewQA(long loginUid, long groupId, MessageBody message)
+    public QaService()
     {
+        Log.Info("QA", "Service init");
+        IGenericStorage storage = SkadiApp.GetService<IGenericStorage>();
+        CommandManager  command = SkadiApp.GetService<CommandManager>();
+
+        var readTask = storage.ReadQaData();
+        readTask.AsTask().Wait();
+        MessageBuffer = readTask.Result.ToDictionary(i => i.Key.GetQaKeyMd5(),
+                                                     i => (i.Key, i.Value));
+        Log.Info("QA", $"获取到{MessageBuffer.Count}条QA记录");
+
+        MatchCmdId =
+            command.RegisterGroupDynamicCommand(MessageMatch, GetAnswer, "qa_service");
+
+        SyncCancelToken = new CancellationTokenSource();
+        SyncTask        = SaveQaData(SyncCancelToken.Token);
+        // SyncTask.Start();
+        Log.Info("QA", $"sync: {SyncTask.Status}");
+
+        ModifyCount = 0;
+    }
+
+    public async ValueTask<bool> AddNewQA(long loginUid, long groupId, MessageBody message)
+    {
+        //处理消息切片
         (MessageBody qMsg, MessageBody aMsg) = GenQaSlice(message);
         MessageBody localAMsg = await RebuildMessage(aMsg, loginUid);
-        throw new NotImplementedException();
+        //构建qa内容
+        QaKey key = new()
+        {
+            GroupId  = groupId,
+            SourceId = loginUid,
+            ReqMsg   = qMsg
+        };
+        if (MessageBuffer.TryAdd(key.GetQaKeyMd5(), (key, localAMsg)))
+        {
+            ModifyCount++;
+            return true;
+        }
+
+        return false;
     }
 
-    public int DeleteQA(long loginUid, long groupId, MessageBody question)
+    public async ValueTask<bool> DeleteQA(long loginUid, long groupId, MessageBody question)
     {
-        throw new NotImplementedException();
+        QaKey key = new()
+        {
+            GroupId  = groupId,
+            SourceId = loginUid,
+            ReqMsg   = question
+        };
+        string md5 = key.GetQaKeyMd5();
+        var (q, a) = GetQaData(md5);
+        if (q is null || a is null) return false;
+        MessageBuffer.Remove(md5);
+        ModifyCount++;
+        await DeleteQaImgFile(a);
+        return true;
     }
 
-    public MessageBody GetAnswer(long loginUid, long groupId, MessageBody question)
+    public async ValueTask GetAnswer(GroupMessageEventArgs args)
     {
-        throw new NotImplementedException();
+        QaKey input = new()
+        {
+            GroupId  = args.SourceGroup,
+            SourceId = args.LoginUid,
+            ReqMsg   = args.Message.MessageBody
+        };
+        string md5 = input.GetQaKeyMd5();
+        var (q, a) = GetQaData(md5);
+        if (q is null || a is null)
+            Log.Error("QA", $"未找到[{md5}]的QA数据");
+        await args.Reply(a);
     }
 
     public List<MessageBody> GetAllQA(long loginUid, long groupId)
     {
-        throw new NotImplementedException();
+        List<MessageBody> msg =
+            MessageBuffer.Values.Where(i => i.a.SourceId == loginUid && i.a.GroupId == groupId)
+                         .Select(i => i.q)
+                         .ToList();
+        return msg;
     }
+
+    private (QaKey, MessageBody) GetQaData(string md5)
+    {
+        return !MessageBuffer.TryGetValue(md5, out var message) ? (null, null) : message;
+    }
+
+#region Match
+
+    public bool MessageMatch(BaseMessageEventArgs args)
+    {
+        if (args is not GroupMessageEventArgs gArgs)
+            return false;
+        QaKey input = new()
+        {
+            GroupId  = gArgs.SourceGroup,
+            SourceId = gArgs.LoginUid,
+            ReqMsg   = gArgs.Message.MessageBody
+        };
+        string md5     = input.GetQaKeyMd5();
+        bool   matched = MessageBuffer.ContainsKey(md5);
+        if (matched) Log.Info("QA", $"触发回答{md5}");
+        return matched;
+    }
+
+#endregion
+
+#region Data
+
+    private Dictionary<QaKey, MessageBody> GetQaDataDict()
+    {
+        return MessageBuffer.ToDictionary(i => i.Value.a, i => i.Value.q);
+    }
+
+    public Task SaveQaData(CancellationToken token)
+    {
+        return Task.Run(() =>
+                        {
+                            IGenericStorage storage = SkadiApp.GetService<IGenericStorage>();
+                            while (true)
+                                try
+                                {
+                                    Task.Delay(TimeSpan.FromMinutes(30), token).Wait(token);
+                                    if (ModifyCount == 0) continue;
+                                    storage.SaveQaData(GetQaDataDict()).AsTask().Wait(token);
+                                    if (token.IsCancellationRequested) break;
+                                }
+                                catch (OperationCanceledException)
+                                {
+                                    Log.Warning("QA SYNC", "task cancel requested");
+                                    break;
+                                }
+                        },
+                        token);
+    }
+
+#endregion
+
+#region Util
 
     /// <summary>
     /// qa消息切片
@@ -69,7 +199,10 @@ internal class QaService : IQaService
             return (null, null);
 
         //问题切片
-        string qStrPrefix = qFirstSegment.Content[3..].Trim();
+        int aPrefixIndex = qFirstSegment.Content.IndexOf("你答", StringComparison.Ordinal);
+        string qStrPrefix = aPrefixIndex == -1
+            ? qFirstSegment.Content[3..].Trim()
+            : qFirstSegment.Content[3..aPrefixIndex].Trim();
         if (string.IsNullOrEmpty(qStrPrefix))
             qMessage.RemoveAt(0);
         else
@@ -84,10 +217,28 @@ internal class QaService : IQaService
         else
         {
             aMessage[0] = aFirstSegment.Content[(aStrIndex + 2)..].Trim();
-            qMessage.Add(aFirstSegment.Content[..aStrIndex].Trim());
+            if (!aFirstSegment.Content.Contains("有人问")) qMessage.Add(aFirstSegment.Content[..aStrIndex].Trim());
         }
 
         return (qMessage, aMessage);
+    }
+
+    private async ValueTask DeleteQaImgFile(MessageBody aMessage)
+    {
+        IGenericStorage storage = SkadiApp.GetService<IGenericStorage>();
+        if (aMessage.Count == 1 && aMessage[0].Data is CardImageSegment cardImage)
+        {
+            await storage.DeleteFile(cardImage.ImageFile);
+            return;
+        }
+
+        for (int i = 0; i < aMessage.Count; i++)
+        {
+            if (aMessage[i].MessageType != SegmentType.Image
+                || aMessage[i].Data is not ImageSegment image)
+                continue;
+            await storage.DeleteFile(image.ImgFile);
+        }
     }
 
     /// <summary>
@@ -96,10 +247,7 @@ internal class QaService : IQaService
     private async ValueTask<MessageBody> RebuildMessage(MessageBody input, long loginUid)
     {
         Dictionary<int, string> imgUrls = new();
-        if (input.Count == 1 && input[0].Data is CardImageSegment cardImage)
-        {
-            imgUrls.Add(0, cardImage.ImageFile);
-        }
+        if (input.Count == 1 && input[0].Data is CardImageSegment cardImage) imgUrls.Add(0, cardImage.ImageFile);
 
         for (int i = 0; i < input.Count; i++)
         {
@@ -108,6 +256,7 @@ internal class QaService : IQaService
                 continue;
             imgUrls.Add(i, image.ImgFile);
         }
+
         if (imgUrls.Count == 0) return input;
 
         string path = GenericStorage.GetUserDataDirPath(loginUid, "qa_img");
@@ -124,6 +273,7 @@ internal class QaService : IQaService
             if (!File.Exists(file)) continue;
             input[index] = SoraSegment.Image(file);
         }
+
         return input;
     }
 
@@ -132,5 +282,24 @@ internal class QaService : IQaService
         await BotUtil.DownloadFile(url, file);
         await Task.Delay(20);
         return File.Exists(file);
+    }
+
+#endregion
+
+    public void Dispose()
+    {
+        SyncCancelToken.Cancel();
+        SyncTask.Wait();
+
+        IGenericStorage storage = SkadiApp.GetService<IGenericStorage>();
+        storage.SaveQaData(GetQaDataDict());
+
+        CommandManager cmd = SkadiApp.GetService<CommandManager>();
+        cmd.DeleteDynamicCommand(MatchCmdId);
+    }
+
+    ~QaService()
+    {
+        Dispose();
     }
 }

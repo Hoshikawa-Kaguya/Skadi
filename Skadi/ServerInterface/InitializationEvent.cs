@@ -1,11 +1,9 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Skadi.Database;
 using Skadi.Entities.ConfigModule;
 using Skadi.Interface;
-using Skadi.Services;
 using Skadi.TimerEvent;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.LightLog;
@@ -53,11 +51,6 @@ internal static class InitializationEvent
 
         //初始化数据库
         DatabaseInit.UserDataInit(connectEvent);
-
-        //初始化QA
-        //TODO 重构QA
-        // Log.Info("Skadi初始化", "reg QA serv");
-        // SkadiApp.Services.AddSingleton<IQaService>(new QaService(connectEvent.LoginUid));
 
         //初始化定时器线程
         if (userConfig.ModuleSwitch.BiliSubscription)

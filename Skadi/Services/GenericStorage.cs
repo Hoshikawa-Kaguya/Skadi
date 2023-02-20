@@ -18,7 +18,7 @@ using PbSerializer = ProtoBuf.Serializer;
 
 namespace Skadi.Services;
 
-public class GenericStorage : IGenericStorage, IDisposable
+public class GenericStorage : IGenericStorage
 {
 #region 只读量
 
@@ -51,15 +51,7 @@ public class GenericStorage : IGenericStorage, IDisposable
         YamlDeserializer = new YamlSerialization.DeserializerBuilder()
                            .IgnoreUnmatchedProperties()
                            .Build();
-    }
-
-    public void Dispose()
-    {
-    }
-
-    ~GenericStorage()
-    {
-        Dispose();
+        InitQaFile().AsTask().Wait();
     }
 
 #region Config
@@ -115,12 +107,14 @@ public class GenericStorage : IGenericStorage, IDisposable
 
 #region QA
 
-    public async ValueTask<ConcurrentDictionary<QaKey, MessageBody>> ReadQaData()
+    public async ValueTask<Dictionary<QaKey, MessageBody>> ReadQaData()
     {
         string path = $"{GetDataDirPath()}/{QA_FILE}";
-
+        await InitQaFile();
+        Log.Debug("GenericStorage", "read qa file");
         using MemoryStream data = await ReadFile(path);
         if (data is null) return null;
+        if (data.Length == 0) return new Dictionary<QaKey, MessageBody>();
         try
         {
             QaDataFile qaData = PbSerializer.Deserialize<QaDataFile>(data);
@@ -133,7 +127,7 @@ public class GenericStorage : IGenericStorage, IDisposable
         }
     }
 
-    public async ValueTask<bool> SaveQaData(ConcurrentDictionary<QaKey, MessageBody> saveData)
+    public async ValueTask<bool> SaveQaData(Dictionary<QaKey, MessageBody> saveData)
     {
         QaDataFile file = new()
         {
@@ -141,14 +135,30 @@ public class GenericStorage : IGenericStorage, IDisposable
         };
         string             path = $"{GetDataDirPath()}/{QA_FILE}";
         using MemoryStream data = file.SerializeData();
+        Log.Debug("GenericStorage", "save qa file");
         return await SaveOrUpdateFile(data, path);
+    }
+
+    private async ValueTask InitQaFile()
+    {
+        string path = $"{GetDataDirPath()}/{QA_FILE}";
+        if (!File.Exists(path))
+        {
+            Log.Warning("GenericStorage", "init qa file");
+            QaDataFile file = new()
+            {
+                Data = new Dictionary<QaKey, MessageBody>()
+            };
+            using MemoryStream data = file.SerializeData();
+            await SaveOrUpdateFile(data, path);
+        }
     }
 
     [ProtoContract]
     private class QaDataFile
     {
         [ProtoMember(1)]
-        public ConcurrentDictionary<QaKey, MessageBody> Data;
+        public Dictionary<QaKey, MessageBody> Data;
 
         public MemoryStream SerializeData()
         {
@@ -183,10 +193,11 @@ public class GenericStorage : IGenericStorage, IDisposable
 
     public async ValueTask<MemoryStream> ReadFile(string file)
     {
-        if (File.Exists(file)) return null;
+        if (!File.Exists(file)) return null;
         try
         {
-            MemoryStream data = new(await File.ReadAllBytesAsync(file));
+            byte[] buf = await File.ReadAllBytesAsync(file);
+            MemoryStream data = new(buf);
             data.Position = 0;
             return data;
         }
@@ -195,6 +206,13 @@ public class GenericStorage : IGenericStorage, IDisposable
             Log.Error(e, "GenericStorage", $"File[{file}]read error");
             return null;
         }
+    }
+
+    public ValueTask<bool> DeleteFile(string file)
+    {
+        if (!File.Exists(file)) return new ValueTask<bool>(false);
+        File.Delete(file);
+        return new ValueTask<bool>(true);
     }
 
 #endregion

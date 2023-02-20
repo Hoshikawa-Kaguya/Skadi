@@ -69,6 +69,8 @@ internal static class ServiceStartUp
             CommandExceptionHandle   = BotUtil.CommandError
         });
         SkadiApp.Services.AddSingleton(server.Event.CommandManager);
+        //初始化QA
+        SkadiApp.Services.AddSingleton<IQaService>(new QaService());
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
             BotUtil.BotCrash(args.ExceptionObject as Exception);
@@ -92,6 +94,9 @@ internal static class ServiceStartUp
         Console.CancelKeyPress += (_, args) =>
         {
             Log.Info("Ctr-C", "Skadi正在停止...");
+            //QA服务停止
+            QaService qaService = SkadiApp.GetService<IQaService>() as QaService;
+            qaService?.Dispose();
             SkadiApp.Services.Clear();
             args.Cancel = true;
             Environment.Exit(0);

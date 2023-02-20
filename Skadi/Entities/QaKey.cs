@@ -1,10 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Security.Cryptography;
 using ProtoBuf;
+using Skadi.Tool;
 using Sora.Entities;
-using Sora.Serializer;
 using PbSerializer = ProtoBuf.Serializer;
 
 namespace Skadi.Entities;
@@ -16,27 +14,20 @@ public record QaKey
     public long GroupId { get; init; }
 
     [ProtoMember(2)]
+    public long SourceId { get; init; }
+
+    [ProtoMember(3)]
     public MessageBody ReqMsg { get; init; }
 
-    public byte[] GetQaKeyMd5()
+    public string GetQaKeyMd5()
     {
         MD5 md5 = MD5.Create();
 
         using MemoryStream ms = new();
         PbSerializer.Serialize(ms, this);
         ms.Position = 0;
+        byte[] md5buf = md5.ComputeHash(ms.ToArray());
 
-        return md5.ComputeHash(ms.ToArray());
-    }
-
-    public virtual bool Equals(QaKey other)
-    {
-        byte[] reqBytes = ReqMsg.SerializeToPb().ToArray();
-        return other.GroupId == GroupId && reqBytes.SequenceEqual(other.ReqMsg.SerializeToPb().ToArray());
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(GetQaKeyMd5);
+        return md5buf.ToHexString();
     }
 }

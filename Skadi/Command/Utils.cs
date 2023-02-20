@@ -1,17 +1,12 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
-using ProtoBuf;
-using Skadi.Entities;
 using Skadi.Interface;
 using Skadi.Tool;
 using Sora.Attributes.Command;
@@ -134,49 +129,6 @@ public static class Utils
         SoraSegment image = await chrome.GetChromePagePic(url, all);
         await eventArgs.SendParaMessage(image, fakeMessage, autoRemove);
     }
-
-#if DEBUG
-
-    [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
-                 CommandExpressions = new[] { "TT" },
-                 MatchType = MatchType.Full,
-                 PermissionLevel = MemberRoleType.Admin)]
-    public static async ValueTask Test1(GroupMessageEventArgs eventArgs)
-    {
-        //TODO QA自动存储图片文件
-        //TODO QA使用PB的序列化方式保存数据
-        MemoryStream ms = new();
-
-        Dictionary<QaKey, MessageBody> keys = new();
-        QaKey key = new()
-        {
-            GroupId = eventArgs.SourceGroup,
-            ReqMsg = eventArgs.Message.MessageBody
-        };
-        keys.Add(key, eventArgs.Message.MessageBody);
-        Shit shit = new()
-        {
-            Data = keys
-        };
-
-        Serializer.Serialize(ms, shit);
-        ms.Position = 0;
-        var wow = Serializer.Deserialize<Shit>(ms);
-        ms.Position = 0;
-        MD5 md5 = MD5.Create();
-        byte[] sMd5 = md5.ComputeHash(ms.ToArray());
-        await eventArgs.Reply($"shit:{sMd5.ToHexString()}\nkek:{key.GetQaKeyMd5().ToHexString()}\ndata:{ms.ToArray().ToHexString()}");
-    }
-
-    [ProtoContract]
-    public class Shit
-    {
-        [ProtoMember(1)]
-        public Dictionary<QaKey, MessageBody> Data { get; set; }
-    }
-
-#endif
 
     private static async Task<double> GetCpuUsageForProcess()
     {
