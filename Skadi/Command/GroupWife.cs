@@ -25,7 +25,7 @@ public class GroupWife
     {
         eventArgs.IsContinueEventChain = false;
         IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
-        UserConfig config = genericStorage.GetUserConfig(eventArgs.LoginUid);
+        UserConfig      config         = genericStorage.GetUserConfig(eventArgs.LoginUid);
 
         if (config is null || !config.ModuleSwitch.HaveFun)
             return;

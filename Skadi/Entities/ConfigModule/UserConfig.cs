@@ -56,7 +56,7 @@ public class ModuleSwitch
     /// </summary>
     public bool Cheru { set; get; }
 
-    #region 将已启用的模块名转为字符串
+#region 将已启用的模块名转为字符串
 
     public override string ToString()
     {
@@ -69,5 +69,5 @@ public class ModuleSwitch
         return string.Join("\n", ret);
     }
 
-    #endregion
+#endregion
 }

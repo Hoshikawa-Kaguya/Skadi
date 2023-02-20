@@ -72,18 +72,18 @@ public static class BlibiliVideo
     {
         eventArgs.IsContinueEventChain = false;
         //获取短链
-        Regex  urlRegex    = new Regex(@"https://b23\.tv/[a-zA-Z0-9]+");
+        Regex  urlRegex    = new(@"https://b23\.tv/[a-zA-Z0-9]+");
         string videoUrlStr = urlRegex.Match(eventArgs.Message.RawText).Value;
         //检查空字符或近期匹配过
         if (string.IsNullOrEmpty(videoUrlStr) || cmdRecord.Contains(videoUrlStr))
             return;
         cmdRecord.Add(videoUrlStr);
         //网络请求获取跳转地址
-        HttpClientHandler   handler  = new HttpClientHandler { AllowAutoRedirect = false };
-        HttpClient          client   = new HttpClient(handler);
+        HttpClientHandler   handler  = new() { AllowAutoRedirect = false };
+        HttpClient          client   = new(handler);
         HttpResponseMessage response = await client.GetAsync(videoUrlStr);
         //解析id
-        Regex  idRegex    = new Regex(@"(?:BV|bv|AV|av)[a-zA-Z0-9]+");
+        Regex  idRegex    = new(@"(?:BV|bv|AV|av)[a-zA-Z0-9]+");
         string videoIdStr = idRegex.Match(response.Headers.Location?.ToString() ?? string.Empty).Value;
         if (string.IsNullOrEmpty(videoIdStr))
         {

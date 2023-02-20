@@ -139,7 +139,7 @@ public static class Cheru
         }
 
         //剩下的单字符
-        Regex isPunctuation = new Regex(@"\b"); //跳过标点符号
+        Regex isPunctuation = new(@"\b"); //跳过标点符号
         if (cheruContent.Length % 2 == 1 && !isPunctuation.IsMatch(cheruContent[^1].ToString()))
             wordBytes.Add((byte)CHERU_SET[CHERU_SET.IndexOf(cheruContent[^1])]);
         return Encoding.GetEncoding("GB18030").GetString(wordBytes.ToArray());

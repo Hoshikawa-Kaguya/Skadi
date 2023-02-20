@@ -196,7 +196,7 @@ public class GenericStorage : IGenericStorage
         if (!File.Exists(file)) return null;
         try
         {
-            byte[] buf = await File.ReadAllBytesAsync(file);
+            byte[]       buf  = await File.ReadAllBytesAsync(file);
             MemoryStream data = new(buf);
             data.Position = 0;
             return data;
@@ -233,7 +233,6 @@ public class GenericStorage : IGenericStorage
         return path;
     }
 
-    //TODO 使用服务直接接管
     public static string GetHsoPath()
     {
         return $"{ROOT_DIR}/hso";

@@ -61,7 +61,7 @@ public class Surprise
         string       text    = (eventArgs.Message.MessageBody[0].Data as TextSegment)!.Content[2..].Trim();
         List<string> options = text.Split("还是").ToList();
 
-        StringBuilder re = new StringBuilder();
+        StringBuilder re = new();
         re.AppendLine("你的选项有：");
         for (int i = 0; i < options.Count; i++)
             re.AppendLine($"{i + 1}、{options[i]}");

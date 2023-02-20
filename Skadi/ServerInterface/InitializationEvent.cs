@@ -7,6 +7,7 @@ using Skadi.Interface;
 using Skadi.TimerEvent;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.LightLog;
+
 // ReSharper disable RedundantDefaultMemberInitializer
 
 namespace Skadi.ServerInterface;

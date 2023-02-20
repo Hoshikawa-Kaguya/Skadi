@@ -83,14 +83,14 @@ internal class SubscriptionDbHelper
                     }).ExecuteCommand();
                     continue;
                 }
-                
+
                 //有记录更新时间
                 dbClient.Updateable<Tables.BiliDynamicSubscription>(newBiliDynamic =>
                                                                         newBiliDynamic.UpdateTime == ts)
                         .Where(biliDynamic => biliDynamic.SubscriptionId == biliUserId && biliDynamic.Gid == id)
                         .ExecuteCommandHasChange();
-
             }
+
             return true;
         }
         catch (Exception e)

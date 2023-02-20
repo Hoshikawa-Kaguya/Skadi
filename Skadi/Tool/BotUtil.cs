@@ -180,7 +180,7 @@ internal static class BotUtil
         });
     }
 
-    #endregion
+#endregion
 
 #region 下载相关
 
@@ -189,7 +189,7 @@ internal static class BotUtil
         DownloadConfiguration downloadOpt = new()
         {
             ChunkCount       = thread,
-            ParallelDownload = true,
+            ParallelDownload = true
         };
         IDownloadService downloader = new DownloadService(downloadOpt);
         Log.Info("FileDownload", $"download file:{url}");

@@ -133,7 +133,7 @@ internal static class MediaUtil
                                          });
 
             Log.Debug("pixiv api", $"get illust info response({pixApiReq.StatusCode})");
-            if (pixApiReq.StatusCode != HttpStatusCode.OK) 
+            if (pixApiReq.StatusCode != HttpStatusCode.OK)
                 return ((int)pixApiReq.StatusCode, false, 0);
 
             JToken infoJson = pixApiReq.Json();
@@ -141,7 +141,6 @@ internal static class MediaUtil
             return (200,
                 Convert.ToBoolean(infoJson["illust"]?["x_restrict"]),
                 Convert.ToInt32(infoJson["illust"]?["page_count"]));
-
         }
         catch (Exception e)
         {
