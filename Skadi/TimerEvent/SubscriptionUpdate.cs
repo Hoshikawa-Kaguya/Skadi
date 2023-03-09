@@ -13,7 +13,6 @@ using Sora;
 using Sora.Entities;
 using Sora.Entities.Base;
 using Sora.Entities.Segment;
-using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 using Sora.Util;
 using YukariToolBox.LightLog;
@@ -194,43 +193,48 @@ internal static class SubscriptionUpdate
         Log.Info("Sub", $"更新[{soraApi.GetLoginUserId()}]的动态订阅");
 
         //构建消息
-        List<CustomNode> nodes = new()
-        {
-            //动态渲染图
-            new CustomNode(sender.UserName,
-                           114514,
-                           await chrome.GetChromeXPathPic($"https://t.bilibili.com/{dId}",
-                                                          "//*[@id=\"app\"]/div[2]/div/div/div[1]"))
-        };
+        // List<CustomNode> nodes = new()
+        // {
+        //     //动态渲染图
+        //     new CustomNode(sender.UserName,
+        //                    114514,
+        //                    await chrome.GetChromeXPathPic($"https://t.bilibili.com/{dId}",
+        //                                                   "//*[@id=\"app\"]/div[2]/div/div/div[1]"))
+        // };
+        //
+        // //纯文本内容
+        // if (dyJson.SelectToken("modules.module_dynamic.desc.text") is JValue textDetail)
+        // {
+        //     nodes.Add(new CustomNode(sender.UserName,
+        //                              114514,
+        //                              "动态内容:"));
+        //     nodes.Add(new CustomNode(sender.UserName,
+        //                              114514,
+        //                              textDetail.Value<string>() ?? string.Empty));
+        // }
+        //
+        // //图片内容
+        // if (dyJson.SelectToken("modules.module_dynamic.major.draw.items") is JArray { HasValues: true } picDetail)
+        // {
+        //     nodes.Add(new CustomNode(sender.UserName,
+        //                              114514,
+        //                              "动态图片:"));
+        //     nodes.AddRange(picDetail.Select(item => new CustomNode(sender.UserName,
+        //                                                            114514,
+        //                                                            SoraSegment.Image(item.Value<string>("src")))));
+        // }
 
-        //纯文本内容
-        if (dyJson.SelectToken("modules.module_dynamic.desc.text") is JValue textDetail)
-        {
-            nodes.Add(new CustomNode(sender.UserName,
-                                     114514,
-                                     "动态内容:"));
-            nodes.Add(new CustomNode(sender.UserName,
-                                     114514,
-                                     textDetail.Value<string>() ?? string.Empty));
-        }
 
-        //图片内容
-        if (dyJson.SelectToken("modules.module_dynamic.major.draw.items") is JArray { HasValues: true } picDetail)
-        {
-            nodes.Add(new CustomNode(sender.UserName,
-                                     114514,
-                                     "动态图片:"));
-            nodes.AddRange(picDetail.Select(item => new CustomNode(sender.UserName,
-                                                                   114514,
-                                                                   SoraSegment.Image(item.Value<string>("src")))));
-        }
-
+        SoraSegment image =
+            await chrome.GetChromeXPathPic($"https://t.bilibili.com/{dId}",
+                                           "//*[@id=\"app\"]/div[2]/div/div/div[1]");
         //向未发送消息的群发送消息
         foreach (long targetGroup in targetGroups)
         {
             Log.Info("动态获取", $"获取到{sender.UserName}的最新动态，向群{targetGroup}发送动态信息");
-            await soraApi.SendGroupMessage(targetGroup, $"{sender.UserName}有新动态！");
-            await soraApi.SendGroupForwardMsg(targetGroup, nodes);
+            // await soraApi.SendGroupMessage(targetGroup, $"{sender.UserName}有新动态！");
+            // await soraApi.SendGroupForwardMsg(targetGroup, nodes);
+            await soraApi.SendGroupMessage(targetGroup, image);
         }
     }
 }

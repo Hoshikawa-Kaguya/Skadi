@@ -50,7 +50,7 @@ internal static class ServiceStartUp
 
         //初始化浏览器
         Log.Info("初始化", "初始化浏览器...");
-        await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
+        await new BrowserFetcher().DownloadAsync();
 
         Log.Info("初始化", "启动反向WS服务器...");
         //初始化服务器

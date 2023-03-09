@@ -72,7 +72,6 @@ internal class QaService : IQaService, IDisposable
             SourceId = loginUid,
             ReqMsg   = localQMsg
         };
-        Log.Error("fuck", key.GetQaKeyMd5());
         if (MessageBuffer.TryAdd(key.GetQaKeyMd5(), (key, localAMsg)))
         {
             ModifyCount++;
@@ -143,9 +142,8 @@ internal class QaService : IQaService, IDisposable
             SourceId = gArgs.LoginUid,
             ReqMsg   = localQMsg
         };
-        string md5 = input.GetQaKeyMd5();
-        Log.Error("fuck", md5);
-        bool matched = MessageBuffer.ContainsKey(md5);
+        string md5     = input.GetQaKeyMd5();
+        bool   matched = MessageBuffer.ContainsKey(md5);
         if (matched) Log.Info("QA", $"触发回答{md5}");
         return matched;
     }
