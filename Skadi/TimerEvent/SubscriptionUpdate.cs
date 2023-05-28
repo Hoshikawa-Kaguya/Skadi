@@ -25,8 +25,7 @@ internal static class SubscriptionUpdate
     /// 自动获取B站动态
     /// </summary>
     /// <param name="loginUid">机器人的账号</param>
-    /// <param name="fStart">是否是第一次启动</param>
-    public static async void BiliUpdateCheck(long loginUid, bool fStart)
+    public static async void BiliUpdateCheck(long loginUid)
     {
         IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
         //读取配置文件
@@ -66,24 +65,21 @@ internal static class SubscriptionUpdate
                                  biliUser,
                                  subscription.GroupId,
                                  dbHelper,
-                                 chrome,
-                                 fStart);
+                                 chrome);
 
             //直播动态订阅
             foreach (long biliUser in subscription.LiveSubscriptionId)
                 await GetLiveStatus(api,
                                     biliUser,
                                     subscription.GroupId,
-                                    dbHelper,
-                                    fStart);
+                                    dbHelper);
         }
     }
 
     private static async ValueTask GetLiveStatus(SoraApi              soraApi,
                                                  long                 biliUser,
                                                  List<long>           groupId,
-                                                 SubscriptionDbHelper dbHelper,
-                                                 bool                 fStart)
+                                                 SubscriptionDbHelper dbHelper)
     {
         //数据获取
         (UserInfo bUserInfo, _) = await BiliApis.GetLiveUserInfo(biliUser);
@@ -117,8 +113,6 @@ internal static class SubscriptionUpdate
                                            liveInfo.LiveStatus))
                 Log.Error("Database", "更新直播订阅数据失败");
 
-        if (fStart) return;
-
         //需要消息提示的群
         var targetGroup = updateDict
                           .Where(group => group.Value == LiveStatusType.Online)
@@ -150,8 +144,7 @@ internal static class SubscriptionUpdate
                                               long                 biliUser,
                                               List<long>           groupId,
                                               SubscriptionDbHelper dbHelper,
-                                              IChromeService       chrome,
-                                              bool                 fStart)
+                                              IChromeService       chrome)
     {
         //获取用户信息
         (UserInfo sender, _) = await BiliApis.GetLiveUserInfo(biliUser);
@@ -181,8 +174,6 @@ internal static class SubscriptionUpdate
                                     dTs.ToDateTime()))
             Log.Error("数据库", "更新动态记录时发生了数据库错误");
 
-        if (fStart) return;
-
         //没有群需要发送消息
         if (targetGroups.Count == 0)
         {
@@ -191,39 +182,6 @@ internal static class SubscriptionUpdate
         }
 
         Log.Info("Sub", $"更新[{soraApi.GetLoginUserId()}]的动态订阅");
-
-        //构建消息
-        // List<CustomNode> nodes = new()
-        // {
-        //     //动态渲染图
-        //     new CustomNode(sender.UserName,
-        //                    114514,
-        //                    await chrome.GetChromeXPathPic($"https://t.bilibili.com/{dId}",
-        //                                                   "//*[@id=\"app\"]/div[2]/div/div/div[1]"))
-        // };
-        //
-        // //纯文本内容
-        // if (dyJson.SelectToken("modules.module_dynamic.desc.text") is JValue textDetail)
-        // {
-        //     nodes.Add(new CustomNode(sender.UserName,
-        //                              114514,
-        //                              "动态内容:"));
-        //     nodes.Add(new CustomNode(sender.UserName,
-        //                              114514,
-        //                              textDetail.Value<string>() ?? string.Empty));
-        // }
-        //
-        // //图片内容
-        // if (dyJson.SelectToken("modules.module_dynamic.major.draw.items") is JArray { HasValues: true } picDetail)
-        // {
-        //     nodes.Add(new CustomNode(sender.UserName,
-        //                              114514,
-        //                              "动态图片:"));
-        //     nodes.AddRange(picDetail.Select(item => new CustomNode(sender.UserName,
-        //                                                            114514,
-        //                                                            SoraSegment.Image(item.Value<string>("src")))));
-        // }
-
 
         SoraSegment image =
             await chrome.GetChromeXPathPic($"https://t.bilibili.com/{dId}",

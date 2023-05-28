@@ -46,6 +46,7 @@ public class ChromeService : IChromeService, IDisposable
             Width  = 2000,
             Height = 1500
         });
+        await page.SetUserAgentAsync("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36");
 
         Exception exception = null;
 

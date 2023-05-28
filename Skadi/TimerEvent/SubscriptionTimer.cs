@@ -27,8 +27,6 @@ internal static class SubscriptionTimer
     /// </summary>
     private static readonly HashSet<long> _subSet = new();
 
-    private static bool _firstStart = true;
-
 #endregion
 
 #region 计时器初始化/停止
@@ -67,8 +65,7 @@ internal static class SubscriptionTimer
     private static void SubscriptionEvent(object obj)
     {
         foreach (long uid in _subSet)
-            SubscriptionUpdate.BiliUpdateCheck(uid, _firstStart);
-        _firstStart = false;
+            SubscriptionUpdate.BiliUpdateCheck(uid);
     }
 
 #endregion
