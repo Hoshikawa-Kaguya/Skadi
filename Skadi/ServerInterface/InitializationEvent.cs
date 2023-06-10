@@ -46,9 +46,6 @@ internal static class InitializationEvent
         //在控制台显示启用模块
         Log.Info("已启用的模块",
                  $"\n{userConfig.ModuleSwitch}");
-        //显示代理信息
-        if (userConfig.ModuleSwitch.Hso && !string.IsNullOrEmpty(userConfig.HsoConfig.PximgProxy))
-            Log.Debug("Hso Proxy", userConfig.HsoConfig.PximgProxy);
 
         //初始化数据库
         DatabaseInit.UserDataInit(connectEvent);

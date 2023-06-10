@@ -18,11 +18,6 @@ public class Hso
     public bool CheckSSLCert { set; get; }
 
     /// <summary>
-    /// Pximg代理
-    /// </summary>
-    public string PximgProxy { set; get; }
-
-    /// <summary>
     /// 是否启用本地缓存
     /// </summary>
     public bool UseCache { set; get; }

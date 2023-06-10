@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -16,11 +18,8 @@ using SixLabors.ImageSharp.Processing;
 using Skadi.Entities.ConfigModule;
 using Skadi.Interface;
 using Skadi.Resource;
-using Sora.Entities;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
-using Sora.Enumeration.ApiType;
-using Sora.EventArgs.SoraEvent;
 using YukariToolBox.LightLog;
 
 namespace Skadi.Tool;
@@ -45,86 +44,79 @@ internal static class MediaUtil
 
 #region Pixiv图片消息段生成
 
-    public static async Task SendPixivImageMessage(this GroupMessageEventArgs eventArgs, long pid, int index)
+    public static async ValueTask<SoraSegment> GetPixivImage(long loginUid, long pid, int index)
     {
         IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
-        UserConfig      userConfig     = genericStorage.GetUserConfig(eventArgs.LoginUid);
+        UserConfig      userConfig     = genericStorage.GetUserConfig(loginUid);
 
-        if (userConfig is null)
+        if (userConfig?.HsoConfig.YukariApiKey is null)
         {
             Log.Error("Config|Hso", "无法获取用户配置文件");
-            await eventArgs.Reply("ERR:无法获取用户配置文件");
-            return;
+            return "ERR:无法获取用户配置文件";
         }
+        //处理图片信息
+        (int statusCode, bool r18, int count) = GetPixivImgInfo(Convert.ToInt64(pid), out JToken data);
 
-        //处理图片代理连接
-        string imageUrl;
-        if (!string.IsNullOrEmpty(userConfig.HsoConfig.PximgProxy))
+        switch (statusCode)
         {
-            imageUrl = $"{userConfig.HsoConfig.PximgProxy.Trim('/')}/{pid}";
-            Log.Debug("Hso", $"Get proxy url {imageUrl}");
-        }
-        else
-        {
-            Log.Warning("Hso", "未设置代理服务器");
-            return;
-        }
-
-        (int statusCode, bool r18, int count) = GetPixivImgInfo(Convert.ToInt64(pid), out _);
-
-        if (statusCode != 200)
-        {
-            await eventArgs.Reply($"哇哦，发生了网络错误[{statusCode}]");
-            return;
+            case 200:
+                break;
+            case 400:
+                return $"""
+                    http code:{statusCode}
+                    pixiv api err:{data}
+                    """;
+            default:
+                return $"哇哦，发生了网络错误[{statusCode}]";
         }
 
         if (r18)
         {
-            await eventArgs.Reply(SoraSegment.Image(new MemoryStream(ImageResourse.R18_NO)));
-            return;
+            return SoraSegment.Image(new MemoryStream(ImageResourse.R18_NO));
         }
 
-        ApiStatus apiStatus;
-
-        if (index == -1 && count > 1)
+        if (index > count - 1)
         {
-            var customNodes = new List<CustomNode>();
-            for (int i = 0; i < count; i++)
-                customNodes.Add(new CustomNode("色色",
-                                               114514,
-                                               SoraSegment.Image($"{imageUrl}/{i}", true, 4)));
-
-            (apiStatus, _, _) =
-                await eventArgs.SourceGroup.SendGroupForwardMsg(customNodes, TimeSpan.FromMinutes(2));
-        }
-        else
-        {
-            if ((index > 0 && count <= 1) || index > count - 1)
-            {
-                await eventArgs.Reply("没有这张色图欸(404)");
-                return;
-            }
-
-            (apiStatus, _) =
-                await eventArgs.Reply(SoraSegment.Image(imageUrl, true, 4), TimeSpan.FromMinutes(2));
+            return "没有这张色图欸(404)";
         }
 
-        if (apiStatus.RetCode != ApiStatusType.Ok)
-            await eventArgs.Reply("图被夹了啊啊啊啊啊啊啊啊啊啊啊");
+
+        Log.Info("Pixiv", $"download image with token:{userConfig.HsoConfig.YukariApiKey}");
+        HttpClient client = new();
+        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {userConfig.HsoConfig.YukariApiKey}");
+        string imageUrl = $"https://api.yukari.one/pixiv/{pid}/{index}";
+
+        HttpResponseMessage response = await client.GetAsync(imageUrl);
+        if (!response.IsSuccessStatusCode)
+            return $"代理服务器错误{response.StatusCode}";
+
+        Stream image = await response.Content.ReadAsStreamAsync();
+        Log.Info("Pixiv", $"image len:{image.Length}");
+        return SoraSegment.Image(image);
     }
 
-    public static string GenPixivUrl(string proxy, long pid, int index = 0)
+    public static async ValueTask<List<CustomNode>> GetMultiPixivImage(long loginUid, long pid)
     {
-        return $"{proxy.Trim('/')}/{pid}/{index}";
+        //处理图片信息
+        (_, _, int count) = GetPixivImgInfo(Convert.ToInt64(pid), out _);
+        //发送一次错误信息
+        if (count == 0) count = 1;
+
+        var customNodes = new List<CustomNode>();
+        for (int i = 0; i < count; i++)
+            customNodes.Add(new CustomNode("色色",
+                                           114514,
+                                           await GetPixivImage(loginUid, pid, i)));
+
+        return customNodes;
     }
 
     public static (int statusCode, bool r18, int count) GetPixivImgInfo(long pid, out JToken json)
     {
         Log.Debug("pixiv api", "sending illust info request");
-        json = null;
         try
         {
-            var pixApiReq = Requests.Get($"https://pixiv.yukari.one/api/illust/{pid}",
+            var pixApiReq = Requests.Get($"https://api.yukari.one/pixiv/illust?pid={pid}",
                                          new ReqParams
                                          {
                                              Timeout                   = 5000,
@@ -134,17 +126,21 @@ internal static class MediaUtil
 
             Log.Debug("pixiv api", $"get illust info response({pixApiReq.StatusCode})");
             if (pixApiReq.StatusCode != HttpStatusCode.OK)
+            {
+                json = pixApiReq.Json();
                 return ((int)pixApiReq.StatusCode, false, 0);
+            }
 
             JToken infoJson = pixApiReq.Json();
             json = infoJson;
             return (200,
-                Convert.ToBoolean(infoJson["illust"]?["x_restrict"]),
-                Convert.ToInt32(infoJson["illust"]?["page_count"]));
+                Convert.ToBoolean(infoJson["data"]?["illust"]?["x_restrict"]),
+                Convert.ToInt32(infoJson["data"]?["illust"]?["page_count"]));
         }
         catch (Exception e)
         {
             Log.Error(e, "GetPixivImg", "can not get illust info");
+            json = null;
             return (-1, false, 0);
         }
     }
@@ -231,6 +227,7 @@ internal static class MediaUtil
         //绘制
         img.Mutate(x =>
                        x.Fill(backColor)
+                        // ReSharper disable once PossibleLossOfFraction
                         .DrawText(text, Arial, fontColor, new PointF(frameSize, frameSize / 2 - 1)));
         //转换base64
         using var byteStream = new MemoryStream();

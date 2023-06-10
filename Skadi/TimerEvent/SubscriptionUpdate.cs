@@ -5,7 +5,6 @@ using BilibiliApi;
 using BilibiliApi.Live.Enums;
 using BilibiliApi.Models;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Linq;
 using Skadi.Database.Helpers;
 using Skadi.Entities.ConfigModule;
 using Skadi.Interface;
@@ -156,7 +155,7 @@ internal static class SubscriptionUpdate
             return;
         }
 
-        (ulong dId, long dTs, JToken dyJson) = await BiliApis.GetLatestDynamicId(biliUser);
+        (ulong dId, long dTs, _) = await BiliApis.GetLatestDynamicId(biliUser);
         if (dId == 0 || dTs == 0)
         {
             Log.Error("BiliApi", $"无法获取用户动态信息[{biliUser}]");

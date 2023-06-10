@@ -74,7 +74,7 @@ public class GenericStorage : IGenericStorage
             config.HeartBeatTimeOut = 10;
         if (config.OnebotApiTimeOut == 0)
             config.OnebotApiTimeOut = 2000;
-        if (config.Port is 0 or > 65535)
+        if (config.Port is 0)
             config.Port = 9200;
         GlobalConfigInstance = config;
         return config;
@@ -82,7 +82,8 @@ public class GenericStorage : IGenericStorage
 
     public UserConfig GetUserConfig(long userId)
     {
-        if (UserConfigs.ContainsKey(userId)) return UserConfigs[userId];
+        if (UserConfigs.TryGetValue(userId, out UserConfig userConfig)) 
+            return userConfig;
 
         Log.Debug("GenericStorage", $"读取用户[{userId}]配置文件");
         string path = GetUserConfigFilePath(userId);

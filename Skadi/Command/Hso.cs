@@ -17,6 +17,7 @@ using Skadi.Tool;
 using Sora.Attributes.Command;
 using Sora.Entities;
 using Sora.Entities.Segment;
+using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.LightLog;
@@ -52,7 +53,7 @@ public class HsoCommand
             return;
         if (IsInCD(eventArgs.SourceGroup, eventArgs.Sender, CommandFlag.Setu))
         {
-            await eventArgs.SourceGroup.SendGroupMessage(SoraSegment.At(eventArgs.Sender) + "你是不是只会要色图(逊欸，冲的真快)");
+            await eventArgs.Reply(SoraSegment.At(eventArgs.Sender) + "你是不是只会要色图(逊欸，冲的真快)");
             return;
         }
 
@@ -72,42 +73,40 @@ public class HsoCommand
         }
 
         Log.Info("NET", "尝试获取色图");
-        await eventArgs.SourceGroup.SendGroupMessage("正在获取色图中...");
+        await eventArgs.Reply("正在获取色图中...");
 
         (int code, JToken data) = await GetRandomSetuJson(hso);
         if (code != 200)
         {
-            await eventArgs.SourceGroup
-                           .SendGroupMessage($"哇哦~发生了网络错误[{code}]，请联系机器人所在服务器管理员");
+            await eventArgs.Reply($"哇哦~发生了网络错误[{code}]，请联系机器人所在服务器管理员");
             return;
         }
 
         //json处理
         try
         {
-            if (!int.TryParse(data["code"]?.ToString() ?? "-100", out var retCode) && retCode != 0)
+            if (!int.TryParse(data["statusCode"]?.ToString() ?? "-100", out var retCode) && retCode != 200)
             {
                 Log.Error("Hso",
                           retCode == -100
                               ? "Server response null message"
                               : $"Server response code {retCode}");
-                await eventArgs.SourceGroup.SendGroupMessage("哇奧色图不见了\n请联系机器人服务器管理员");
+                await eventArgs.Reply("哇奧色图不见了\n请联系机器人服务器管理员");
                 return;
             }
 
             if (!long.TryParse(data["data"]?[0]?["pid"]?.ToString(), out var pid)
                 || !int.TryParse(data["data"]?[0]?["index"]?.ToString(), out var index))
             {
-                await eventArgs.SourceGroup.SendGroupMessage("无法获取到色图信息");
+                await eventArgs.Reply("无法获取到色图信息");
                 return;
             }
 
             //图片链接
             Log.Debug("获取到图片", $"pid:{pid}|index:{index}");
-            var url = MediaUtil.GenPixivUrl(hso.PximgProxy, pid, index);
+            SoraSegment image = await MediaUtil.GetPixivImage(eventArgs.LoginUid, pid, index);
             //检查是否有设置代理
-            await eventArgs.SourceGroup.SendGroupMessage(HsoMessageBuilder(data["data"]?[0], hso.CardImage, url),
-                                                         TimeSpan.FromSeconds(10));
+            await eventArgs.Reply(HsoMessageBuilder(data["data"]?[0], image), TimeSpan.FromSeconds(20));
         }
         catch (Exception e)
         {
@@ -125,7 +124,9 @@ public class HsoCommand
         long pid = Convert.ToInt64(eventArgs.Message.RawText[4..]);
         Log.Info("让我康康", $"[{eventArgs.Sender.Id}]加载图片:{pid}");
         await eventArgs.Reply("什么，有好康的");
-        await eventArgs.SendPixivImageMessage(pid, -1);
+
+        List<CustomNode> images = await MediaUtil.GetMultiPixivImage(eventArgs.LoginUid, pid);
+        await eventArgs.SourceGroup.SendGroupForwardMsg(images, TimeSpan.FromMinutes(1));
     }
 
     [UsedImplicitly]
@@ -155,7 +156,9 @@ public class HsoCommand
         int  index    = Convert.ToInt32(picInfos[1]);
         Log.Info("让我康康", $"加载图片:{pid}-{index}");
         await eventArgs.Reply("什么，有好康的");
-        await eventArgs.SendPixivImageMessage(pid, index);
+
+        SoraSegment image = await MediaUtil.GetPixivImage(eventArgs.LoginUid, pid, index);
+        await eventArgs.Reply(image, TimeSpan.FromSeconds(20));
     }
 
     [UsedImplicitly]
@@ -227,7 +230,7 @@ public class HsoCommand
         try
         {
             var res =
-                await Requests.PostAsync("https://api.yukari.one/setu/add_pic",
+                await Requests.PostAsync("https://api.yukari.one/setu/illust",
                                          new ReqParams
                                          {
                                              PostJson = new
@@ -294,54 +297,16 @@ public class HsoCommand
     {
         try
         {
-            string apiKey;
-            string serverUrl;
-            //源切换
-            switch (hso.Source)
-            {
-                case "Mix":
-                    var randSource = new Random();
-                    if (randSource.Next(1, 100) > 50)
-                    {
-                        serverUrl = "https://api.lolicon.app/setu/";
-                        apiKey    = hso.LoliconApiKey ?? string.Empty;
-                    }
-                    else
-                    {
-                        serverUrl = "https://api.yukari.one/setu/";
-                        apiKey    = hso.YukariApiKey ?? string.Empty;
-                    }
-
-                    break;
-                case "Yukari":
-                    serverUrl = "https://api.yukari.one/setu/";
-                    apiKey    = hso.YukariApiKey ?? string.Empty;
-                    break;
-                case "Lolicon":
-                    serverUrl = "https://api.yukari.one/setu/";
-                    apiKey    = hso.YukariApiKey ?? string.Empty;
-                    break;
-                default:
-                    serverUrl = hso.Source;
-                    apiKey    = string.Empty;
-                    break;
-            }
-
             //向服务器发送请求
-            Log.Debug("hso api server", serverUrl);
-            var reqResponse = await Requests.GetAsync(serverUrl,
+            var reqResponse = await Requests.GetAsync("https://api.yukari.one/setu/",
                                                       new ReqParams
                                                       {
-                                                          Timeout = 3000,
-                                                          Params = new Dictionary<string, string>
-                                                          {
-                                                              { "apikey", apiKey }
-                                                          },
+                                                          Timeout        = 3000,
                                                           isCheckSSLCert = hso.CheckSSLCert
                                                       });
             if (reqResponse.StatusCode != HttpStatusCode.OK)
             {
-                Log.Error("Net", $"{serverUrl} return code {(int)reqResponse.StatusCode}");
+                Log.Error("Net", $"return code {(int)reqResponse.StatusCode}");
                 return ((int)reqResponse.StatusCode, null);
             }
 
@@ -360,25 +325,24 @@ public class HsoCommand
         var picNames = Directory.GetFiles(GenericStorage.GetHsoPath());
         if (picNames.Length == 0)
         {
-            await eventArgs.SourceGroup.SendGroupMessage("机器人管理者没有在服务器上塞色图\r\n你去找他要啦!");
+            await eventArgs.Reply("机器人管理者没有在服务器上塞色图\r\n你去找他要啦!");
             return;
         }
 
         var randFile     = new Random();
         var localPicPath = $"{picNames[randFile.Next(0, picNames.Length - 1)]}";
         Log.Debug("发送图片", localPicPath);
-        await eventArgs.SourceGroup.SendGroupMessage(hso.CardImage
-                                                         ? SoraSegment.CardImage(localPicPath)
-                                                         : SoraSegment.Image(localPicPath));
+        await eventArgs.Reply(hso.CardImage
+                                  ? SoraSegment.CardImage(localPicPath)
+                                  : SoraSegment.Image(localPicPath));
     }
 
     /// <summary>
     /// 构建发送用的消息段
     /// </summary>
     /// <param name="picInfo">图片信息Json</param>
-    /// <param name="cardImg">是否为装逼大图</param>
-    /// <param name="picStr">图片路径/b64字符串</param>
-    private static MessageBody HsoMessageBuilder(JToken picInfo, bool cardImg, string picStr)
+    /// <param name="image">图片</param>
+    private static MessageBody HsoMessageBuilder(JToken picInfo, SoraSegment image)
     {
         var textBuilder = new StringBuilder();
         textBuilder.AppendLine();
@@ -392,12 +356,11 @@ public class HsoCommand
 
         textBuilder.AppendLine();
         textBuilder.Append($"作者:{picInfo["author"]}");
+
         //构建消息
-        var msg = new MessageBody
+        MessageBody msg = new()
         {
-            cardImg
-                ? SoraSegment.CardImage(picStr)
-                : SoraSegment.Image(picStr, true, 4),
+            image,
             textBuilder.ToString()
         };
         return msg;

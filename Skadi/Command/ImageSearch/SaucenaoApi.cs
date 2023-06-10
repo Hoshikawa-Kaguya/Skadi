@@ -28,7 +28,7 @@ public static class SaucenaoApi
         internal const int N_HENTAI = 18;
     }
 
-    public static async ValueTask<MessageBody> SearchByUrl(string apiKey, string url, long selfId)
+    public static async ValueTask<MessageBody> SearchByUrl(string apiKey, string url, long loginUid)
     {
         Log.Debug("pic search", "send api request");
         JToken res;
@@ -73,7 +73,7 @@ public static class SaucenaoApi
                                    .MaxBy(t => Convert.ToSingle(t["header"]?["similarity"]));
 
         IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
-        UserConfig      userConfig     = genericStorage.GetUserConfig(selfId);
+        UserConfig      userConfig     = genericStorage.GetUserConfig(loginUid);
         if (userConfig is null)
         {
             //用户配置获取失败
@@ -89,8 +89,7 @@ public static class SaucenaoApi
         {
             var pid = Convert.ToInt64(pixivPic["data"]?["pixiv_id"]);
             Log.Info("SaucenaoApi", $"获取到pixiv图片[{pid}]");
-            var imageUrl = MediaUtil.GenPixivUrl(userConfig.HsoConfig.PximgProxy, pid);
-            return GenPixivResult(imageUrl, pid, parsedPic);
+            return await GenPixivResult(loginUid, pid, parsedPic);
         }
 
         //优先推特
@@ -134,8 +133,7 @@ public static class SaucenaoApi
                      || source.IndexOf("pximg", StringComparison.Ordinal) != -1)
                     && long.TryParse(Path.GetFileName(source), out long pid))
                 {
-                    var imageUrl = MediaUtil.GenPixivUrl(userConfig.HsoConfig.PximgProxy, pid);
-                    return GenPixivResult(imageUrl, pid, parsedPic);
+                    return await GenPixivResult(loginUid, pid, parsedPic);
                 }
 
                 //包含twitter链接
@@ -152,8 +150,7 @@ public static class SaucenaoApi
                 if (!string.IsNullOrEmpty(purl))
                 {
                     long.TryParse(Path.GetFileName(purl), out long pxPid);
-                    var imageUrl = MediaUtil.GenPixivUrl(userConfig.HsoConfig.PximgProxy, pxPid);
-                    return GenPixivResult(imageUrl, pxPid, parsedPic);
+                    return await GenPixivResult(loginUid, pxPid, parsedPic);
                 }
 
                 //danbooru
@@ -204,10 +201,10 @@ public static class SaucenaoApi
         return msg;
     }
 
-    private static MessageBody GenPixivResult(string image, long pid, JToken apiRet)
+    private static async ValueTask<MessageBody> GenPixivResult(long loginUid, long pid, JToken apiRet)
     {
         (int statusCode, bool r18, int count) = MediaUtil.GetPixivImgInfo(pid, out JToken json);
-        if (statusCode is not 200 and not 404)
+        if (statusCode is not 200 and not 400)
             return $"[网络错误{statusCode}]";
         MessageBody   msg = new();
         StringBuilder sb  = new();
@@ -220,10 +217,10 @@ public static class SaucenaoApi
 
         if (r18)
             msg.Add($"{Environment.NewLine}[H是不行的]{Environment.NewLine}");
-        else if (statusCode != 404)
-            msg.Add(SoraSegment.Image(image, true, 4));
+        else if (statusCode != 400)
+            msg.Add(await MediaUtil.GetPixivImage(loginUid, pid, 0));
         else
-            return "哈哈，图被删了(404 NOT FOUND)";
+            return $"哈哈，图被删了({json?["statusCode"]?.ToString() ?? string.Empty})";
 
         sb.AppendLine($"Pixiv Id:{pid}");
         sb.Append($"[{apiRet["header"]?["similarity"]}%]");
