@@ -51,6 +51,7 @@ public class ChromeService : IChromeService, IDisposable
         Exception exception = null;
 
         await page.GoToAsync(url).RunCatch(e => exception = e);
+        await Task.Delay(1000);
 
         IElementHandle element = await page.WaitForXPathAsync(xpath).RunCatch(e =>
         {
@@ -95,6 +96,7 @@ public class ChromeService : IChromeService, IDisposable
         Exception exception = null;
 
         await page.GoToAsync(url).RunCatch(e => exception = e);
+        await Task.Delay(1000);
 
         if (exception is not null)
         {

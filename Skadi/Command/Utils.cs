@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,7 @@ using Skadi.Interface;
 using Skadi.Tool;
 using Sora.Attributes.Command;
 using Sora.Entities;
+using Sora.Entities.Info;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
@@ -128,6 +130,33 @@ public static class Utils
         Log.Info("Curl", "使用浏览器进行发送");
         SoraSegment image = await chrome.GetChromePagePic(url, all);
         await eventArgs.SendParaMessage(image, fakeMessage, autoRemove);
+    }
+
+    [UsedImplicitly]
+    [SoraCommand(SourceType = SourceFlag.Group,
+                 CommandExpressions = new[] { @"^#bc\s.+$" },
+                 MatchType = MatchType.Regex,
+                 PermissionLevel = MemberRoleType.Admin)]
+    public static async ValueTask Broadcast(GroupMessageEventArgs eventArgs)
+    {
+        (ApiStatus status, List<GroupInfo> gList) = await eventArgs.SoraApi.GetGroupList();
+        if (status.RetCode == ApiStatusType.Ok)
+        {
+            string msg = eventArgs.Message.RawText.Split(' ')[1];
+            foreach (GroupInfo info in gList)
+            {
+                await eventArgs.SoraApi.SendGroupMessage(info.GroupId,
+                                                         $"""
+                    [机器人公告]
+                    发送者:{eventArgs.SenderInfo.Nick}
+                    {msg}
+                    """);
+            }
+        }
+        else
+        {
+            await eventArgs.Reply("发送失败，无法获取群列表");
+        }
     }
 
     private static async Task<double> GetCpuUsageForProcess()

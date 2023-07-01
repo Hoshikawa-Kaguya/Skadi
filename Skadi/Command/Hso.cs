@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using PyLibSharp.Requests;
-using Skadi.Command.ImageSearch;
 using Skadi.Database.Helpers;
 using Skadi.Entities.ConfigModule;
 using Skadi.Interface;
