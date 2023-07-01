@@ -126,22 +126,10 @@ public class HsoCommand
         await eventArgs.Reply("什么，有好康的");
 
         List<CustomNode> images = await MediaUtil.GetMultiPixivImage(eventArgs.LoginUid, pid);
-        await eventArgs.SourceGroup.SendGroupForwardMsg(images, TimeSpan.FromMinutes(1));
-    }
-
-    [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
-                 CommandExpressions = new[] { @"^看看推特[0-9]+$" },
-                 MatchType = MatchType.Regex)]
-    public async void TweetPic(GroupMessageEventArgs eventArgs)
-    {
-        eventArgs.IsContinueEventChain = false;
-
-        await eventArgs.Reply("我超，色色");
-        string      tid = eventArgs.Message.RawText[4..];
-        MessageBody msg = SaucenaoApi.GenTwitterResult(tid);
-
-        await eventArgs.Reply(msg);
+        if (images.Count != 1)
+            await eventArgs.SourceGroup.SendGroupForwardMsg(images, TimeSpan.FromMinutes(1));
+        else
+            await eventArgs.Reply(images[0].GetMessageBody());
     }
 
     [UsedImplicitly]

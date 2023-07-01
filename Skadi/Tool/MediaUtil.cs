@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -143,70 +142,6 @@ internal static class MediaUtil
             json = null;
             return (-1, false, 0);
         }
-    }
-
-#endregion
-
-#region 推特API处理
-
-    /// <summary>
-    /// 获取推特推文信息
-    /// </summary>
-    /// <param name="tweetId">推文ID</param>
-    internal static (bool success, string sender, string text, List<string> media)
-        GetTweet(string tweetId)
-    {
-        Log.Info("Twitter", $"Get tweet by id[{tweetId}]");
-
-        JToken data;
-        try
-        {
-            var res = Requests.Get($"https://pixiv.yukari.one/api/tweet/{tweetId}",
-                                   new ReqParams
-                                   {
-                                       IsThrowErrorForStatusCode = false,
-                                       IsThrowErrorForTimeout    = false,
-                                       Timeout                   = 10000
-                                   });
-
-            Log.Info("Twitter", $"Twitter api http code:{res.StatusCode}");
-            if (res is not { StatusCode: HttpStatusCode.OK })
-            {
-                Log.Error("Twitter", "Twitter api net error");
-                return (false, string.Empty, $"Twitter api net error [{res.StatusCode}]", null);
-            }
-
-            data = res.Json();
-        }
-        catch (Exception e)
-        {
-            Log.Error(e, "Twitter API", "调用推特API时发生网络错误");
-            return (false, null, "调用推特api时发生网路错误", null);
-        }
-
-
-        Log.Debug("Twitter", $"Get twitter api data:{data.ToString(Formatting.None)}");
-        var urls = data["includes"]?["media"]?
-                   .Where(m => m["type"]?.ToString() == "photo")
-                   .Select(t => t["url"]?.ToString() ?? string.Empty)
-                   .ToList()
-                   ?? new List<string>();
-        urls.RemoveAll(string.IsNullOrEmpty);
-        if (urls.Count == 0)
-        {
-            Log.Error("Twitter", "Twitter api no content(no url)");
-            return (false, string.Empty, "Twitter api no content(no url)", null);
-        }
-
-        var authorName = data["includes"]?["users"]
-                         ?.First(t => t["id"]?.ToString() == data["data"]?["author_id"]?.ToString())
-                         ["name"]?.ToString()
-                         ?? string.Empty;
-        Log.Info("Twitter", $"Get twitter image [count:{urls.Count}]");
-        return (true,
-            authorName,
-            data["data"]?["text"]?.ToString() ?? string.Empty,
-            urls);
     }
 
 #endregion

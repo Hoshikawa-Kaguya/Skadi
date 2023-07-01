@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -23,7 +22,6 @@ public static class SaucenaoApi
     private readonly struct DbIndex
     {
         internal const int PIXIV    = 5;
-        internal const int TWITTER  = 41;
         internal const int E_HENTAI = 38;
         internal const int N_HENTAI = 18;
     }
@@ -34,7 +32,7 @@ public static class SaucenaoApi
         JToken res;
         try
         {
-            var serverResponse = await
+            ReqResponse serverResponse = await
                 Requests.PostAsync($"http://saucenao.com/search.php?output_type=2&numres=16&db=999&api_key={apiKey}&url={HttpUtility.UrlEncode(url)}",
                                    new ReqParams
                                    {
@@ -69,9 +67,6 @@ public static class SaucenaoApi
         JToken pixivPic = resData.Where(t => Convert.ToInt32(t["header"]?["index_id"]) == DbIndex.PIXIV)
                                  .MaxBy(t => Convert.ToSingle(t["header"]?["similarity"]));
 
-        JToken twitterPic = resData.Where(t => Convert.ToInt32(t["header"]?["index_id"]) == DbIndex.TWITTER)
-                                   .MaxBy(t => Convert.ToSingle(t["header"]?["similarity"]));
-
         IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
         UserConfig      userConfig     = genericStorage.GetUserConfig(loginUid);
         if (userConfig is null)
@@ -85,24 +80,11 @@ public static class SaucenaoApi
         if (pixivPic is not null
             && Math.Abs(Convert.ToSingle(pixivPic["header"]?["similarity"])
                         - Convert.ToSingle(parsedPic["header"]?["similarity"]))
-            <= 5)
+            <= 10)
         {
             var pid = Convert.ToInt64(pixivPic["data"]?["pixiv_id"]);
             Log.Info("SaucenaoApi", $"获取到pixiv图片[{pid}]");
             return await GenPixivResult(loginUid, pid, parsedPic);
-        }
-
-        //优先推特
-        if (twitterPic is not null
-            && Math.Abs(Convert.ToSingle(twitterPic["header"]?["similarity"])
-                        - Convert.ToSingle(parsedPic["header"]?["similarity"]))
-            <= 5)
-        {
-            var tweetUrl = twitterPic["data"]?["ext_urls"]?[0]?.ToString();
-            Log.Info("SaucenaoApi", $"获取到tweet[{tweetUrl}]");
-            return string.IsNullOrEmpty(tweetUrl)
-                ? "服务器歇逼了（无法获取推文链接，请稍后再试）"
-                : GenTwitterResult(tweetUrl, parsedPic);
         }
 
         int databaseId = Convert.ToInt32(parsedPic["header"]?["index_id"]);
@@ -132,21 +114,14 @@ public static class SaucenaoApi
                 if ((source.IndexOf("pixiv", StringComparison.Ordinal) != -1
                      || source.IndexOf("pximg", StringComparison.Ordinal) != -1)
                     && long.TryParse(Path.GetFileName(source), out long pid))
-                {
                     return await GenPixivResult(loginUid, pid, parsedPic);
-                }
-
-                //包含twitter链接
-                if (source.IndexOf("twitter", StringComparison.Ordinal) != -1)
-                    return GenTwitterResult(source, parsedPic);
 
                 //ext url
                 //pixiv
-                string purl = parsedPic["data"]?["ext_urls"]?.Select(t => t.ToString()).ToArray()
-                                                            .FirstOrDefault(pu =>
-                                                                                pu.IndexOf("pximg",
-                                                                                           StringComparison.Ordinal)
-                                                                                != -1);
+                string purl = parsedPic["data"]?["ext_urls"]?
+                              .Select(t => t.ToString())
+                              .ToArray()
+                              .FirstOrDefault(pu => pu.IndexOf("pximg", StringComparison.Ordinal) != -1);
                 if (!string.IsNullOrEmpty(purl))
                 {
                     long.TryParse(Path.GetFileName(purl), out long pxPid);
@@ -154,13 +129,16 @@ public static class SaucenaoApi
                 }
 
                 //danbooru
-                string durl = parsedPic["data"]?["ext_urls"]?.Select(t => t.ToString()).ToArray()
-                                                            .FirstOrDefault(du =>
-                                                                                du.IndexOf("danbooru",
-                                                                                           StringComparison.Ordinal)
-                                                                                != -1);
-                if (!string.IsNullOrEmpty(durl))
-                    return $"[Danbooru]{Environment.NewLine}{durl}";
+                string dUrl = parsedPic["data"]?["ext_urls"]?
+                              .Select(t => t.ToString()).ToArray()
+                              .FirstOrDefault(du => du.IndexOf("danbooru", StringComparison.Ordinal) != -1);
+
+                if (!string.IsNullOrEmpty(dUrl))
+                    return $"""
+                        [Danbooru]
+                        {dUrl}
+                        source:{source}
+                        """;
 
                 Log.Debug("pic search", $"get unknown source:{source}");
                 string b64Pic =
@@ -168,7 +146,7 @@ public static class SaucenaoApi
                                             Color.Black,
                                             Color.White);
 
-                var msg = new MessageBody
+                MessageBody msg = new()
                 {
                     $"[Saucenao-UnknownDatabase]{Environment.NewLine}{parsedPic["header"]?["index_name"]}",
                     SoraSegment.Image($"base64://{b64Pic}"),
@@ -178,27 +156,6 @@ public static class SaucenaoApi
                 return msg;
             }
         }
-    }
-
-    public static MessageBody GenTwitterResult(string tweetUrl, JToken apiRet = null)
-    {
-        string tId = Path.GetFileName(tweetUrl);
-        (bool success, string sender, string text, List<string> media) = MediaUtil.GetTweet(tId);
-
-        if (!success)
-            return $"推特API错误{Environment.NewLine}Message:{text}";
-
-        var msg = new MessageBody
-        {
-            $"[Twitter]{Environment.NewLine}推文:{text}{Environment.NewLine}用户:{sender}{Environment.NewLine}"
-        };
-        foreach (var pic in media)
-            msg.Add(SoraSegment.Image($"https://pixiv.yukari.one/api/tweet/image?url={pic}"));
-
-        msg.Add($"{Environment.NewLine}Link:{tweetUrl}");
-        if (apiRet is not null)
-            msg.Add($"{Environment.NewLine}[{apiRet["header"]?["similarity"]}%]");
-        return msg;
     }
 
     private static async ValueTask<MessageBody> GenPixivResult(long loginUid, long pid, JToken apiRet)

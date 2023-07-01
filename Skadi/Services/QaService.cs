@@ -53,7 +53,6 @@ internal class QaService : IQaService, IDisposable
 
         SyncCancelToken = new CancellationTokenSource();
         SyncTask        = SaveQaData(SyncCancelToken.Token);
-        // SyncTask.Start();
         Log.Info("QA", $"sync: {SyncTask.Status}");
 
         ModifyCount = 0;
