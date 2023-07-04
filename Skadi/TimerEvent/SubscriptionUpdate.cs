@@ -56,6 +56,8 @@ internal static class SubscriptionUpdate
             return;
         }
 
+        await chrome.InitBilibili();
+
         foreach (GroupSubscription subscription in subscriptions)
         {
             //臭DD的订阅
@@ -146,49 +148,40 @@ internal static class SubscriptionUpdate
                                               IChromeService       chrome)
     {
         //获取用户信息
-        (UserInfo sender, _) = await BiliApis.GetLiveUserInfo(biliUser);
-        if (sender is null || sender.Code != 0)
-        {
-            Log.Error("BiliApi", $"无法获取用户信息[{biliUser}]");
-            if (sender is not null)
-                Log.Error("BiliApi[GetLiveUserInfo]", $"Api error:{sender.Message}");
-            return;
-        }
-
-        (ulong dId, long dTs, _) = await BiliApis.GetLatestDynamicId(biliUser);
+        (ulong dId, long dTs) = await chrome.GetBilibiliDynamic(biliUser);
         if (dId == 0 || dTs == 0)
         {
             Log.Error("BiliApi", $"无法获取用户动态信息[{biliUser}]");
             return;
         }
 
-        Log.Debug("动态获取", $"{sender.UserName}的动态获取成功");
+        Log.Debug("动态获取", $"{biliUser}的动态获取成功");
         //检查是否是最新的
         List<long> targetGroups = groupId.Where(group => !dbHelper.IsLatestDynamic(group,
-                                                                                   sender.Uid,
+                                                                                   biliUser,
                                                                                    dTs.ToDateTime())).ToList();
 
         if (!dbHelper.UpdateDynamic(targetGroups,
-                                    sender.Uid,
+                                    biliUser,
                                     dTs.ToDateTime()))
             Log.Error("数据库", "更新动态记录时发生了数据库错误");
 
         //没有群需要发送消息
         if (targetGroups.Count == 0)
         {
-            Log.Debug("动态获取", $"{sender.UserName}的动态已是最新");
+            Log.Debug("动态获取", $"{biliUser}的动态已是最新");
             return;
         }
 
         Log.Info("Sub", $"更新[{soraApi.GetLoginUserId()}]的动态订阅");
 
         SoraSegment image =
-            await chrome.GetChromeXPathPic($"https://t.bilibili.com/{dId}",
-                                           "//*[@id=\"app\"]/div[2]/div/div/div[1]");
+            await chrome.GetChromeSelectorPic($"https://t.bilibili.com/{dId}",
+                                              "#app > div.content > div > div > div.bili-dyn-item__main");
         //向未发送消息的群发送消息
         foreach (long targetGroup in targetGroups)
         {
-            Log.Info("动态获取", $"获取到{sender.UserName}的最新动态，向群{targetGroup}发送动态信息");
+            Log.Info("动态获取", $"获取到{biliUser}的最新动态，向群{targetGroup}发送动态信息");
             // await soraApi.SendGroupMessage(targetGroup, $"{sender.UserName}有新动态！");
             // await soraApi.SendGroupForwardMsg(targetGroup, nodes);
             await soraApi.SendGroupMessage(targetGroup, image);

@@ -144,14 +144,12 @@ public static class Utils
         {
             string msg = eventArgs.Message.RawText.Split(' ')[1];
             foreach (GroupInfo info in gList)
-            {
                 await eventArgs.SoraApi.SendGroupMessage(info.GroupId,
                                                          $"""
                     [机器人公告]
                     发送者:{eventArgs.SenderInfo.Nick}
                     {msg}
                     """);
-            }
         }
         else
         {
