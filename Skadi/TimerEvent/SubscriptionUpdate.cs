@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -56,7 +57,15 @@ internal static class SubscriptionUpdate
             return;
         }
 
-        await chrome.InitBilibili();
+        try
+        {
+            await chrome.InitBilibili();
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "Sub-Serv", "浏览器初始化错误");
+            return;
+        }
 
         foreach (GroupSubscription subscription in subscriptions)
         {
@@ -148,10 +157,18 @@ internal static class SubscriptionUpdate
                                               IChromeService       chrome)
     {
         //获取用户信息
-        (ulong dId, long dTs) = await chrome.GetBilibiliDynamic(biliUser);
+        ulong dId; long dTs;
+        try
+        {
+           (dId, dTs) = await chrome.GetBilibiliDynamic(biliUser);
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "动态获取", "chrome");
+            return;
+        }
         if (dId == 0 || dTs == 0)
         {
-            Log.Error("BiliApi", $"无法获取用户动态信息[{biliUser}]");
             return;
         }
 
@@ -175,9 +192,19 @@ internal static class SubscriptionUpdate
 
         Log.Info("Sub", $"更新[{soraApi.GetLoginUserId()}]的动态订阅");
 
-        SoraSegment image =
-            await chrome.GetChromeSelectorPic($"https://t.bilibili.com/{dId}",
-                                              "#app > div.content > div > div > div.bili-dyn-item__main");
+        SoraSegment image;
+
+        try
+        {
+            image = await chrome.GetChromeSelectorPic($"https://t.bilibili.com/{dId}",
+                                                      "#app > div.content > div > div > div.bili-dyn-item__main");
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "动态获取", "chrome");
+            return;
+        }
+
         //向未发送消息的群发送消息
         foreach (long targetGroup in targetGroups)
         {
