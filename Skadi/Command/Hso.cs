@@ -16,7 +16,6 @@ using Skadi.Tool;
 using Sora.Attributes.Command;
 using Sora.Entities;
 using Sora.Entities.Segment;
-using Sora.Entities.Segment.DataModel;
 using Sora.Enumeration;
 using Sora.EventArgs.SoraEvent;
 using YukariToolBox.LightLog;
@@ -34,23 +33,25 @@ public class HsoCommand
     /// 用于处理传入指令
     /// </summary>
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { "来点色图", "来点涩图", "我要看色图" })]
-    public async void HsoPic(GroupMessageEventArgs eventArgs)
+    public async void HsoPic(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
 
         IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
         UserConfig      userConfig     = genericStorage.GetUserConfig(eventArgs.LoginUid);
+        long            groupId        = (eventArgs as GroupMessageEventArgs)!.SourceGroup;
+
         if (userConfig is null)
         {
             Log.Error("Config|Hso", "无法获取用户配置文件");
             return;
         }
 
-        if (CheckGroupBlock(userConfig, eventArgs))
+        if (CheckGroupBlock(userConfig, (eventArgs as GroupMessageEventArgs)!))
             return;
-        if (IsInCD(eventArgs.SourceGroup, eventArgs.Sender, CommandFlag.Setu))
+        if (IsInCD(groupId, eventArgs.Sender, CommandFlag.Setu))
         {
             await eventArgs.Reply(SoraSegment.At(eventArgs.Sender) + "你是不是只会要色图(逊欸，冲的真快)");
             return;
@@ -59,7 +60,7 @@ public class HsoCommand
         Log.Info("HSO", $"[{eventArgs.Sender.Id}]加载色图");
         //刷新数据库计数
         var hsoDbHelper = new HsoDbHelper(eventArgs.LoginUid);
-        if (!hsoDbHelper.AddOrUpdate(eventArgs.Sender, eventArgs.SourceGroup))
+        if (!hsoDbHelper.AddOrUpdate(eventArgs.Sender, groupId))
             await eventArgs.Reply("数据库错误(count)");
 
         Hso hso = userConfig.HsoConfig;
@@ -67,7 +68,7 @@ public class HsoCommand
         //本地模式
         if (hso.Source.Equals("Local"))
         {
-            SendLocalPic(hso, eventArgs);
+            SendLocalPic(hso, (eventArgs as GroupMessageEventArgs)!);
             return;
         }
 
@@ -114,28 +115,30 @@ public class HsoCommand
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^让我康康[0-9]+$" },
                  MatchType = MatchType.Regex)]
-    public async void HsoPicIndexSearchAll(GroupMessageEventArgs eventArgs)
+    public async void HsoPicIndexSearchAll(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         long pid = Convert.ToInt64(eventArgs.Message.RawText[4..]);
         Log.Info("让我康康", $"[{eventArgs.Sender.Id}]加载图片:{pid}");
         await eventArgs.Reply("什么，有好康的");
 
-        List<CustomNode> images = await MediaUtil.GetMultiPixivImage(eventArgs.LoginUid, pid);
-        if (images.Count != 1)
-            await eventArgs.SourceGroup.SendGroupForwardMsg(images, TimeSpan.FromMinutes(1));
-        else
-            await eventArgs.Reply(images[0].GetMessageBody());
+        List<SoraSegment> images = await MediaUtil.GetMultiPixivImage(eventArgs.LoginUid, pid);
+        // ReSharper disable once AsyncVoidLambda
+        images.ForEach(async i =>
+        {
+            await eventArgs.Reply(i);
+            await Task.Delay(500);
+        });
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^让我康康[0-9]+\s[0-9]+$" },
                  MatchType = MatchType.Regex)]
-    public async void HsoPicIndexSearch(GroupMessageEventArgs eventArgs)
+    public async void HsoPicIndexSearch(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         var  picInfos = eventArgs.Message.RawText.Split(' ');
@@ -149,14 +152,14 @@ public class HsoCommand
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { "来点色批" },
                  MatchType = MatchType.Full)]
-    public static async void HsoRank(GroupMessageEventArgs eventArgs)
+    public static async void HsoRank(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         var hsoDbHelper = new HsoDbHelper(eventArgs.LoginUid);
-        if (!hsoDbHelper.GetGroupRank(eventArgs.SourceGroup, out var rankList))
+        if (!hsoDbHelper.GetGroupRank((eventArgs as GroupMessageEventArgs)!.SourceGroup, out var rankList))
         {
             await eventArgs.Reply("数据库错误(count)");
             return;
@@ -179,9 +182,9 @@ public class HsoCommand
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^AD[0-9]+\s[0-9]+$" })]
-    public async void HsoAddPic(GroupMessageEventArgs eventArgs)
+    public async void HsoAddPic(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         //判断权限

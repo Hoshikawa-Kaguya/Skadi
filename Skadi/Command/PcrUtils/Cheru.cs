@@ -33,10 +33,10 @@ public static class Cheru
     /// </summary>
     /// <param name="eventArgs">事件参数</param>
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { "^切噜(?:~|～)" },
                  MatchType = MatchType.Regex)]
-    public static async void CheruToString(GroupMessageEventArgs eventArgs)
+    public static async void CheruToString(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
@@ -57,7 +57,7 @@ public static class Cheru
         foreach (var cheruWord in Regex.Split(cheru, @"\b"))
             textBuilder.Append(isCheru.IsMatch(cheruWord) ? CheruToWord(cheruWord) : cheruWord);
 
-        await eventArgs.SourceGroup.SendGroupMessage($"切噜的意思是:{textBuilder}");
+        await (eventArgs as GroupMessageEventArgs)!.SourceGroup.SendGroupMessage($"切噜的意思是:{textBuilder}");
     }
 
     /// <summary>
@@ -65,10 +65,10 @@ public static class Cheru
     /// </summary>
     /// <param name="eventArgs">事件参数</param>
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { "^切噜一下" },
                  MatchType = MatchType.Regex)]
-    public static async void StringToCheru(GroupMessageEventArgs eventArgs)
+    public static async void StringToCheru(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
@@ -89,7 +89,7 @@ public static class Cheru
         foreach (var word in Regex.Split(text, @"\b"))
             cheruBuilder.Append(isCHN.IsMatch(word) ? WordToCheru(word) : word);
 
-        await eventArgs.SourceGroup.SendGroupMessage($"切噜～{cheruBuilder}");
+        await (eventArgs as GroupMessageEventArgs)!.SourceGroup.SendGroupMessage($"切噜～{cheruBuilder}");
     }
 
 #endregion

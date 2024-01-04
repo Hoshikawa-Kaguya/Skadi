@@ -27,7 +27,7 @@ public interface IQaService
     /// <summary>
     /// 获取回答
     /// </summary>
-    ValueTask GetAnswer(GroupMessageEventArgs args);
+    ValueTask GetAnswer(BaseMessageEventArgs args);
 
     /// <summary>
     /// 获取所有的问题

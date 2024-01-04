@@ -53,7 +53,10 @@ public class ChromeService : IChromeService, IDisposable
         Exception exception = null;
 
         await page.GoToAsync(url).RunCatch(e => exception = e);
-        await Task.Delay(1000);
+        await page.WaitForNavigationAsync(new NavigationOptions
+        {
+            WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
+        });
 
         IElementHandle element = await page.QuerySelectorAsync(selector).RunCatch(e =>
         {
@@ -125,7 +128,10 @@ public class ChromeService : IChromeService, IDisposable
         Exception exception = null;
 
         await page.GoToAsync(url).RunCatch(e => exception = e);
-        await Task.Delay(1000);
+        await page.WaitForNavigationAsync(new NavigationOptions
+        {
+            WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
+        });
 
         if (exception is not null)
         {

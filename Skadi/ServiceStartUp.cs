@@ -66,7 +66,9 @@ internal static class ServiceStartUp
             EnableSoraCommandManager = true,
             ThrowCommandException    = false,
             SendCommandErrMsg        = false,
-            CommandExceptionHandle   = BotUtil.CommandError
+            CommandExceptionHandle   = BotUtil.CommandError,
+            AutoMarkMessageRead      = false,
+            EnableSocketMessage      = true
         });
         SkadiApp.Services.AddSingleton(server.Event.CommandManager);
         //初始化QA

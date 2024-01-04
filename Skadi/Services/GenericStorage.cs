@@ -82,7 +82,7 @@ public class GenericStorage : IGenericStorage
 
     public UserConfig GetUserConfig(long userId)
     {
-        if (UserConfigs.TryGetValue(userId, out UserConfig userConfig)) 
+        if (UserConfigs.TryGetValue(userId, out UserConfig userConfig))
             return userConfig;
 
         Log.Debug("GenericStorage", $"读取用户[{userId}]配置文件");

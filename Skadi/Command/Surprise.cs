@@ -20,39 +20,39 @@ public class Surprise
 #region 私有方法
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { "dice" })]
-    public async ValueTask RandomNumber(GroupMessageEventArgs eventArgs)
+    public async ValueTask RandomNumber(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
         UserConfig      userConfig     = genericStorage.GetUserConfig(eventArgs.LoginUid);
         if (userConfig is null || !userConfig.ModuleSwitch.HaveFun)
             return;
-        await eventArgs.SourceGroup.SendGroupMessage(SoraSegment.At(eventArgs.Sender.Id)
-                                                     + "丢出了\r\n"
-                                                     + Random.Shared.Next(1, 6).ToString());
+        await (eventArgs as GroupMessageEventArgs)!.SourceGroup.SendGroupMessage(SoraSegment.At(eventArgs.Sender.Id)
+                                                                                 + "丢出了\r\n"
+                                                                                 + Random.Shared.Next(1, 6).ToString());
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { "优质睡眠", "昏睡红茶", "昏睡套餐", "健康睡眠" })]
-    public async ValueTask RedTea(GroupMessageEventArgs eventArgs)
+    public async ValueTask RedTea(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
         UserConfig      userConfig     = genericStorage.GetUserConfig(eventArgs.LoginUid);
         if (userConfig is null || !userConfig.ModuleSwitch.HaveFun)
             return;
-        await eventArgs.SourceGroup.EnableGroupMemberMute(eventArgs.Sender.Id,
-                                                          28800);
+        await (eventArgs as GroupMessageEventArgs)!.SourceGroup.EnableGroupMemberMute(eventArgs.Sender.Id,
+                                                                                      28800);
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^选择.+(还是.+)+$" },
                  MatchType = MatchType.Regex)]
-    public async ValueTask Choice(GroupMessageEventArgs eventArgs)
+    public async ValueTask Choice(BaseMessageEventArgs eventArgs)
     {
         if (eventArgs.Message.MessageBody.Count != 1
             && eventArgs.Message.MessageBody[0].MessageType != SegmentType.Text)

@@ -19,9 +19,9 @@ public class GroupWife
 
     [UsedImplicitly]
     // [SoraCommand(
-    //     SourceType = SourceFlag.Group,
+    //     SourceType = MessageSourceMatchFlag.Group,
     //     CommandExpressions = new[] {"抽老婆"})]
-    public async ValueTask RollWife(GroupMessageEventArgs eventArgs)
+    public async ValueTask RollWife(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
@@ -36,7 +36,7 @@ public class GroupWife
             return;
         }
 
-        var (apiStatus, memberList) = await eventArgs.SourceGroup.GetGroupMemberList();
+        var (apiStatus, memberList) = await (eventArgs as GroupMessageEventArgs)!.SourceGroup.GetGroupMemberList();
         if (apiStatus.RetCode != ApiStatusType.Ok)
         {
             Log.Error("api错误", $"api return {apiStatus}");

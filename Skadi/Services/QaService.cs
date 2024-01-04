@@ -49,7 +49,7 @@ internal class QaService : IQaService, IDisposable
         Log.Info("QA", $"获取到{MessageBuffer.Count}条QA记录");
 
         MatchCmdId =
-            command.RegisterGroupDynamicCommand(MessageMatch, GetAnswer, "qa_service");
+            command.RegisterDynamicCommand(MessageMatch, GetAnswer, MessageSourceMatchFlag.Group, "qa_service");
 
         SyncCancelToken = new CancellationTokenSource();
         SyncTask        = SaveQaData(SyncCancelToken.Token);
@@ -98,12 +98,12 @@ internal class QaService : IQaService, IDisposable
         return true;
     }
 
-    public async ValueTask GetAnswer(GroupMessageEventArgs args)
+    public async ValueTask GetAnswer(BaseMessageEventArgs args)
     {
         MessageBody localQMsg = RebuildQMessage(args.Message.MessageBody);
         QaKey input = new()
         {
-            GroupId  = args.SourceGroup,
+            GroupId  = (args as GroupMessageEventArgs)?.SourceGroup,
             SourceId = args.LoginUid,
             ReqMsg   = localQMsg
         };

@@ -157,20 +157,19 @@ internal static class SubscriptionUpdate
                                               IChromeService       chrome)
     {
         //获取用户信息
-        ulong dId; long dTs;
+        ulong dId;
+        long  dTs;
         try
         {
-           (dId, dTs) = await chrome.GetBilibiliDynamic(biliUser);
+            (dId, dTs) = await chrome.GetBilibiliDynamic(biliUser);
         }
         catch (Exception e)
         {
             Log.Error(e, "动态获取", "chrome");
             return;
         }
-        if (dId == 0 || dTs == 0)
-        {
-            return;
-        }
+
+        if (dId == 0 || dTs == 0) return;
 
         Log.Debug("动态获取", $"{biliUser}的动态获取成功");
         //检查是否是最新的

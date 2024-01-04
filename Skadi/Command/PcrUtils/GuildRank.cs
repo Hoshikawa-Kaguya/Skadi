@@ -26,10 +26,10 @@ public static class GuildRank
     /// 镜华站查询
     /// </summary>
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^镜华排名\S*$" },
                  MatchType = MatchType.Regex)]
-    public static async ValueTask KyoukaRank(GroupMessageEventArgs eventArgs)
+    public static async ValueTask KyoukaRank(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();

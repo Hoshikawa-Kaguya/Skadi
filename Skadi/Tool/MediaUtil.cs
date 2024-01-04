@@ -16,7 +16,6 @@ using Skadi.Entities.ConfigModule;
 using Skadi.Interface;
 using Skadi.Resource;
 using Sora.Entities.Segment;
-using Sora.Entities.Segment.DataModel;
 using YukariToolBox.LightLog;
 
 namespace Skadi.Tool;
@@ -51,6 +50,7 @@ internal static class MediaUtil
             Log.Error("Config|Hso", "无法获取用户配置文件");
             return "ERR:无法获取用户配置文件";
         }
+
         //处理图片信息
         (int statusCode, bool r18, int count) = GetPixivImgInfo(Convert.ToInt64(pid), out JToken data);
 
@@ -67,15 +67,9 @@ internal static class MediaUtil
                 return $"哇哦，发生了网络错误[{statusCode}]";
         }
 
-        if (r18)
-        {
-            return SoraSegment.Image(new MemoryStream(ImageResourse.R18_NO));
-        }
+        if (r18) return SoraSegment.Image(new MemoryStream(ImageResourse.R18_NO));
 
-        if (index > count - 1)
-        {
-            return "没有这张色图欸(404)";
-        }
+        if (index > count - 1) return "没有这张色图欸(404)";
 
 
         Log.Info("Pixiv", $"download image with token:{userConfig.HsoConfig.YukariApiKey}");
@@ -92,20 +86,18 @@ internal static class MediaUtil
         return SoraSegment.Image(image);
     }
 
-    public static async ValueTask<List<CustomNode>> GetMultiPixivImage(long loginUid, long pid)
+    public static async ValueTask<List<SoraSegment>> GetMultiPixivImage(long loginUid, long pid)
     {
         //处理图片信息
         (_, _, int count) = GetPixivImgInfo(Convert.ToInt64(pid), out _);
         //发送一次错误信息
         if (count == 0) count = 1;
 
-        var customNodes = new List<CustomNode>();
+        var pixivImages = new List<SoraSegment>();
         for (int i = 0; i < count; i++)
-            customNodes.Add(new CustomNode("色色",
-                                           114514,
-                                           await GetPixivImage(loginUid, pid, i)));
+            pixivImages.Add(await GetPixivImage(loginUid, pid, i));
 
-        return customNodes;
+        return pixivImages;
     }
 
     public static (int statusCode, bool r18, int count) GetPixivImgInfo(long pid, out JToken json)
@@ -152,7 +144,7 @@ internal static class MediaUtil
     public static string DrawTextImage(string text, Color fontColor, Color backColor, int frameSize = 5)
     {
         //计算图片大小
-        FontRectangle strRect = TextMeasurer.Measure(text, new TextOptions(Arial));
+        FontRectangle strRect = TextMeasurer.MeasureSize(text, new TextOptions(Arial));
         //图片大小
         (int width, int height) = ((int)strRect.Width + frameSize * 2, (int)strRect.Height + frameSize * 2);
         //创建图片

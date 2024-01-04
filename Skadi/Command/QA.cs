@@ -18,11 +18,11 @@ namespace Skadi.Command;
 public class QA
 {
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^有人问[\s\S]+你答[\s\S]+$" },
                  MatchType = MatchType.Regex,
                  PermissionLevel = MemberRoleType.Admin)]
-    public async ValueTask CreateQuestion(GroupMessageEventArgs eventArgs)
+    public async ValueTask CreateQuestion(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         IQaService qaService = SkadiApp.GetService<IQaService>();
@@ -34,7 +34,9 @@ public class QA
         }
 
         bool success =
-            await qaService.AddNewQA(eventArgs.LoginUid, eventArgs.SourceGroup, eventArgs.Message.MessageBody);
+            await qaService.AddNewQA(eventArgs.LoginUid,
+                                     (eventArgs as GroupMessageEventArgs)!.SourceGroup,
+                                     eventArgs.Message.MessageBody);
         if (success)
             await eventArgs.Reply("我记住了！");
         else
@@ -42,11 +44,11 @@ public class QA
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^不要回答[\s\S]+$" },
                  MatchType = MatchType.Regex,
                  PermissionLevel = MemberRoleType.Admin)]
-    public async ValueTask DeleteQuestion(GroupMessageEventArgs eventArgs)
+    public async ValueTask DeleteQuestion(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         IQaService qaService = SkadiApp.GetService<IQaService>();
@@ -58,7 +60,9 @@ public class QA
         }
 
         bool success =
-            await qaService.DeleteQA(eventArgs.LoginUid, eventArgs.SourceGroup, eventArgs.Message.MessageBody);
+            await qaService.DeleteQA(eventArgs.LoginUid,
+                                     (eventArgs as GroupMessageEventArgs)!.SourceGroup,
+                                     eventArgs.Message.MessageBody);
         if (success)
             await eventArgs.Reply("我不再回答这个问题了！");
         else
@@ -66,21 +70,21 @@ public class QA
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^DEQA[\s\S]+$" },
                  MatchType = MatchType.Regex,
                  SuperUserCommand = true)]
-    public async ValueTask DeleteGlobalQuestionSu(GroupMessageEventArgs eventArgs)
+    public async ValueTask DeleteGlobalQuestionSu(BaseMessageEventArgs eventArgs)
     {
         await DeleteQuestion(eventArgs);
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^看看有人问$" },
                  MatchType = MatchType.Regex,
                  PermissionLevel = MemberRoleType.Admin)]
-    public async ValueTask GetAllQuestion(GroupMessageEventArgs eventArgs)
+    public async ValueTask GetAllQuestion(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         IQaService qaService = SkadiApp.GetService<IQaService>();
@@ -91,7 +95,8 @@ public class QA
             return;
         }
 
-        List<MessageBody> qList = qaService.GetAllQA(eventArgs.LoginUid, eventArgs.SourceGroup);
+        List<MessageBody> qList =
+            qaService.GetAllQA(eventArgs.LoginUid, (eventArgs as GroupMessageEventArgs)!.SourceGroup);
 
         if (qList.Count == 0)
         {

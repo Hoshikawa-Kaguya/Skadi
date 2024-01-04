@@ -40,10 +40,10 @@ public static class BlibiliVideo
 #region 指令
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^BV1[1-9A-NP-Za-km-z]{9}$", @"^AV[1-9][0-9]*$" },
                  MatchType = MatchType.Regex)]
-    public static async ValueTask BiliVideoGet(GroupMessageEventArgs eventArgs)
+    public static async ValueTask BiliVideoGet(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         //检查近期匹配
@@ -64,11 +64,11 @@ public static class BlibiliVideo
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"https://b23\.tv/[a-zA-Z0-9]+" },
                  MatchType = MatchType.Regex,
                  Priority = 0)]
-    public static async ValueTask VideoInfoByShortUrl(GroupMessageEventArgs eventArgs)
+    public static async ValueTask VideoInfoByShortUrl(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         //获取短链

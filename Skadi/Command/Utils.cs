@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Linq;
 using Skadi.Interface;
 using Skadi.Tool;
 using Sora.Attributes.Command;
@@ -34,11 +33,11 @@ public static class Utils
     /// Echo
     /// </summary>
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^echo\s[\s\S]+$" },
                  MatchType = MatchType.Regex,
                  SuperUserCommand = true)]
-    public static async ValueTask Echo(GroupMessageEventArgs eventArgs)
+    public static async ValueTask Echo(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
         //处理开头字符串
@@ -57,22 +56,13 @@ public static class Utils
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"#sk" },
                  MatchType = MatchType.Full,
                  SuperUserCommand = true)]
-    public static async ValueTask Status(GroupMessageEventArgs eventArgs)
+    public static async ValueTask Status(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-
-        (ApiStatus apiStatus, _, _, JObject data) = await eventArgs.SoraApi.GetStatus();
-        if (apiStatus.RetCode != ApiStatusType.Ok)
-        {
-            await eventArgs.Reply("diannaobaozhale");
-            return;
-        }
-
-        ulong msgCount = Convert.ToUInt64(data["message_received"] ?? 0) + Convert.ToUInt64(data["message_sent"] ?? 0);
         StringBuilder msg = new();
         float tMem = GC.GetTotalAllocatedBytes(true) / (1024 * 1024f);
         float mem = Environment.WorkingSet / (1024 * 1024f);
@@ -80,7 +70,6 @@ public static class Utils
 
         msg.AppendLine("Skadi-Status");
         msg.AppendLine("Ciallo～(∠・ω< )⌒☆");
-        msg.AppendLine($"消息数量:{msgCount}");
         msg.AppendLine($"运行时间:{DateTime.Now - SkadiApp.StartTime:g}");
         msg.AppendLine($"GC Allocated:{tMem.ToString("F2")}MB");
         msg.AppendLine($"RAM:{mem.ToString("F2")}MB");
@@ -90,11 +79,11 @@ public static class Utils
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^看看\s.+$" },
                  MatchType = MatchType.Regex,
                  PermissionLevel = MemberRoleType.Admin)]
-    public static async ValueTask Curl(GroupMessageEventArgs eventArgs)
+    public static async ValueTask Curl(BaseMessageEventArgs eventArgs)
     {
         string[] args        = eventArgs.Message.RawText.Split(' ');
         string   url         = args[1];
@@ -124,20 +113,22 @@ public static class Utils
 
         //尝试以图片方式直接发送
         Log.Info("Curl", "尝试直接发送图片");
-        if (await eventArgs.SendParaMessage(SoraSegment.Image(url), fakeMessage, autoRemove))
+        if (await (eventArgs as GroupMessageEventArgs)!.SendParaMessage(SoraSegment.Image(url),
+                                                                        fakeMessage,
+                                                                        autoRemove))
             return;
 
         Log.Info("Curl", "使用浏览器进行发送");
         SoraSegment image = await chrome.GetChromePagePic(url, all);
-        await eventArgs.SendParaMessage(image, fakeMessage, autoRemove);
+        await (eventArgs as GroupMessageEventArgs)!.SendParaMessage(image, fakeMessage, autoRemove);
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^#bc\s.+$" },
                  MatchType = MatchType.Regex,
                  PermissionLevel = MemberRoleType.Admin)]
-    public static async ValueTask Broadcast(GroupMessageEventArgs eventArgs)
+    public static async ValueTask Broadcast(BaseMessageEventArgs eventArgs)
     {
         (ApiStatus status, List<GroupInfo> gList) = await eventArgs.SoraApi.GetGroupList();
         if (status.RetCode == ApiStatusType.Ok)
@@ -147,7 +138,7 @@ public static class Utils
                 await eventArgs.SoraApi.SendGroupMessage(info.GroupId,
                                                          $"""
                     [机器人公告]
-                    发送者:{eventArgs.SenderInfo.Nick}
+                    发送者:{(eventArgs as GroupMessageEventArgs)!.SenderInfo.Nick}
                     {msg}
                     """);
         }

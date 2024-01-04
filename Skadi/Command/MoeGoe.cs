@@ -15,30 +15,30 @@ namespace Skadi.Command;
 public class MoeGoe
 {
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^宁宁说.+$" },
                  MatchType = MatchType.Regex)]
-    public async ValueTask NeneSpeak(GroupMessageEventArgs eventArgs)
+    public async ValueTask NeneSpeak(BaseMessageEventArgs eventArgs)
     {
         string text = eventArgs.Message.RawText[3..];
         await GetVoice(text, 0, eventArgs);
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^咩咕噜说.+$" },
                  MatchType = MatchType.Regex)]
-    public async ValueTask MeguruSpeak(GroupMessageEventArgs eventArgs)
+    public async ValueTask MeguruSpeak(BaseMessageEventArgs eventArgs)
     {
         string text = eventArgs.Message.RawText[3..];
         await GetVoice(text, 1, eventArgs);
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^芳乃说.+$" },
                  MatchType = MatchType.Regex)]
-    public async ValueTask YoshinoSpeak(GroupMessageEventArgs eventArgs)
+    public async ValueTask YoshinoSpeak(BaseMessageEventArgs eventArgs)
     {
         string text = eventArgs.Message.RawText[3..];
         if (text is null) return;
@@ -47,46 +47,46 @@ public class MoeGoe
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^茉子说.+$" },
                  MatchType = MatchType.Regex)]
-    public async ValueTask MakoSpeak(GroupMessageEventArgs eventArgs)
+    public async ValueTask MakoSpeak(BaseMessageEventArgs eventArgs)
     {
         string text = eventArgs.Message.RawText[3..];
         await GetVoice(text, 3, eventArgs);
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^丛雨说.+$" },
                  MatchType = MatchType.Regex)]
-    public async ValueTask MurasameSpeak(GroupMessageEventArgs eventArgs)
+    public async ValueTask MurasameSpeak(BaseMessageEventArgs eventArgs)
     {
         string text = eventArgs.Message.RawText[3..];
         await GetVoice(text, 4, eventArgs);
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^小春说.+$" },
                  MatchType = MatchType.Regex)]
-    public async ValueTask KoharuSpeak(GroupMessageEventArgs eventArgs)
+    public async ValueTask KoharuSpeak(BaseMessageEventArgs eventArgs)
     {
         string text = eventArgs.Message.RawText[3..];
         await GetVoice(text, 5, eventArgs);
     }
 
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { @"^七海说.+$" },
                  MatchType = MatchType.Regex)]
-    public async ValueTask NanamiSpeak(GroupMessageEventArgs eventArgs)
+    public async ValueTask NanamiSpeak(BaseMessageEventArgs eventArgs)
     {
         string text = eventArgs.Message.RawText[3..];
         await GetVoice(text, 6, eventArgs);
     }
 
-    private async ValueTask GetVoice(string text, int id, GroupMessageEventArgs eventArgs)
+    private async ValueTask GetVoice(string text, int id, BaseMessageEventArgs eventArgs)
     {
         ReqResponse response = await Requests.GetAsync("https://moegoe.azurewebsites.net/api/speak",
                                                        new ReqParams

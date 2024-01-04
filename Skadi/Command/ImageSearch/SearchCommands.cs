@@ -19,12 +19,12 @@ namespace Skadi.Command.ImageSearch;
 public static class SearchCommands
 {
     [UsedImplicitly]
-    [SoraCommand(SourceType = SourceFlag.Group,
+    [SoraCommand(SourceType = MessageSourceMatchFlag.Group,
                  CommandExpressions = new[] { "搜图" })]
-    public static async ValueTask SearchRequest(GroupMessageEventArgs eventArgs)
+    public static async ValueTask SearchRequest(BaseMessageEventArgs eventArgs)
     {
         eventArgs.IsContinueEventChain = false;
-        if (IsInCD(eventArgs.SourceGroup, eventArgs.Sender, CommandFlag.PicSearch))
+        if (IsInCD((eventArgs as GroupMessageEventArgs)!.SourceGroup, eventArgs.Sender, CommandFlag.PicSearch))
         {
             await eventArgs.Reply("你冲的太快了，要坏掉了(请等待CD冷却)");
             return;
@@ -33,8 +33,8 @@ public static class SearchCommands
         await eventArgs.Reply("图呢(请在1分钟内发送图片)");
 
         var imgArgs =
-            await eventArgs.WaitForNextMessageAsync(e => e.Message.IsSingleImageMessage(),
-                                                    TimeSpan.FromMinutes(1));
+            await (eventArgs as GroupMessageEventArgs)!.WaitForNextMessageAsync(e => e.Message.IsSingleImageMessage(),
+                                                                                TimeSpan.FromMinutes(1));
         Log.Info("pic search", $"[{eventArgs.Sender.Id}]搜索色图");
         if (imgArgs == null)
         {
