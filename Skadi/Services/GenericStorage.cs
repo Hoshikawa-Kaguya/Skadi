@@ -178,6 +178,7 @@ public class GenericStorage : IGenericStorage
     {
         try
         {
+            CheckDir(file);
             await using FileStream fileStream = File.Create(file);
             data.Position = 0;
             await data.CopyToAsync(fileStream);
