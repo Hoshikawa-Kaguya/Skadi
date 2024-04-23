@@ -78,7 +78,7 @@ public class ChromeService : IChromeService, IDisposable
 
         Log.Debug("Chrome", $"获取到XPath元素[{element.RemoteObject.ObjectId}]");
 
-        string picB64 = await element.ScreenshotBase64Async(new ScreenshotOptions { Type = ScreenshotType.Png });
+        string picB64 = await element.ScreenshotBase64Async(new ElementScreenshotOptions{ Type = ScreenshotType.Png });
 
         //关闭页面
         await page.CloseAsync();

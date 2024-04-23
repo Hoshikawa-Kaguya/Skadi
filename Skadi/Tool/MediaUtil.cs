@@ -157,7 +157,6 @@ internal static class MediaUtil
         //转换base64
         using var byteStream = new MemoryStream();
         img.Save(byteStream, PngFormat.Instance);
-        img.Dispose();
 
         return byteStream.Length != 0
             ? Convert.ToBase64String(byteStream.GetBuffer(), 0, (int)byteStream.Length)

@@ -1,114 +1,101 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>net7.0</TargetFramework>
-        <Authors>Yukari316</Authors>
-        <Copyright>Yukari316</Copyright>
-        <Platforms>AnyCPU;x64;x86</Platforms>
-        <Version>0.4.2</Version>
-        <FileVersion>0.4.2.0</FileVersion>
-        <Nullable>warnings</Nullable>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <DocumentationFile></DocumentationFile>
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-        <DocumentationFile />
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-        <DocumentationFile />
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-      <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-      <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-
-	<ItemGroup>
-      <None Remove="Resource\Deng.ttf" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <EmbeddedResource Include="Resource\InitGlobalConfig.yaml" />
-        <EmbeddedResource Include="Resource\InitUserConfig.yaml" />
-        <EmbeddedResource Include="Resource\Deng.ttf" />
-        <EmbeddedResource Update="Resource\ConfigResourse.resx">
-          <Generator>ResXFileCodeGenerator</Generator>
-          <LastGenOutput>ConfigResourse.Designer.cs</LastGenOutput>
-        </EmbeddedResource>
-        <EmbeddedResource Update="Resource\FontResource.resx">
-          <Generator>ResXFileCodeGenerator</Generator>
-          <LastGenOutput>FontResource.Designer.cs</LastGenOutput>
-        </EmbeddedResource>
-        <EmbeddedResource Update="Resource\Fonts.resx">
-          <Generator>ResXFileCodeGenerator</Generator>
-          <LastGenOutput>Fonts.Designer.cs</LastGenOutput>
-        </EmbeddedResource>
-        <EmbeddedResource Update="Resource\ImageResourse.resx">
-          <Generator>ResXFileCodeGenerator</Generator>
-          <LastGenOutput>ImageResourse.Designer.cs</LastGenOutput>
-        </EmbeddedResource>
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Include="..\.editorconfig" Link=".editorconfig" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="BilibiliApi" Version="0.5.6" />
-        <PackageReference Include="Downloader" Version="3.0.6" />
-        <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-        <PackageReference Include="PuppeteerSharp" Version="13.0.2" />
-        <PackageReference Include="PyLibSharp.Requests" Version="1.2.10" />
-        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.2" />
-        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.0" />
-        <PackageReference Include="Sora" Version="1.4.2" />
-        <!-- ReSharper disable once VulnerablePackage -->
-        <PackageReference Include="sqlSugarCore" Version="5.1.4.130" />
-        <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
-        <PackageReference Include="YamlDotNet" Version="13.7.1" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Compile Update="Resource\ConfigResourse.Designer.cs">
-          <DesignTime>True</DesignTime>
-          <AutoGen>True</AutoGen>
-          <DependentUpon>ConfigResourse.resx</DependentUpon>
-        </Compile>
-        <Compile Update="Resource\FontResource.Designer.cs">
-          <DesignTime>True</DesignTime>
-          <AutoGen>True</AutoGen>
-          <DependentUpon>FontResource.resx</DependentUpon>
-        </Compile>
-        <Compile Update="Resource\Fonts.Designer.cs">
-          <DesignTime>True</DesignTime>
-          <AutoGen>True</AutoGen>
-          <DependentUpon>Fonts.resx</DependentUpon>
-        </Compile>
-        <Compile Update="Resource\ImageResourse.Designer.cs">
-          <DesignTime>True</DesignTime>
-          <AutoGen>True</AutoGen>
-          <DependentUpon>ImageResourse.resx</DependentUpon>
-        </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Properties\PublishProfiles\" />
-    </ItemGroup>
-
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Authors>Yukari316</Authors>
+    <Copyright>Yukari316</Copyright>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+    <Version>0.4.2</Version>
+    <FileVersion>0.4.2.0</FileVersion>
+    <Nullable>warnings</Nullable>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>
+    </DocumentationFile>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <DocumentationFile />
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DocumentationFile />
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Resource\Deng.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resource\InitGlobalConfig.yaml" />
+    <EmbeddedResource Include="Resource\InitUserConfig.yaml" />
+    <EmbeddedResource Include="Resource\Deng.ttf" />
+    <EmbeddedResource Update="Resource\ConfigResourse.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ConfigResourse.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resource\FontResource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>FontResource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resource\Fonts.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Fonts.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resource\ImageResourse.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ImageResourse.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="BilibiliApi" Version="0.5.6" />
+    <PackageReference Include="Downloader" Version="3.0.6" />
+    <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
+    <PackageReference Include="PuppeteerSharp" Version="17.0.0" />
+    <PackageReference Include="PyLibSharp.Requests" Version="1.2.10" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.3" />
+    <PackageReference Include="Sora" Version="1.4.3" />
+    <!-- ReSharper disable once VulnerablePackage -->
+    <PackageReference Include="sqlSugarCore" Version="5.1.4.152" />
+    <PackageReference Include="YamlDotNet" Version="15.1.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Resource\ConfigResourse.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ConfigResourse.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resource\FontResource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>FontResource.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resource\Fonts.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Fonts.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resource\ImageResourse.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ImageResourse.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\PublishProfiles\" />
+  </ItemGroup>
 </Project>
