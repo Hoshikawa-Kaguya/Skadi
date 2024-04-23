@@ -25,7 +25,7 @@ public class GenericStorage : IGenericStorage
 #if DEBUG
     private static readonly string ROOT_DIR = Environment.GetEnvironmentVariable("DebugDataPath");
 #else
-    private static readonly string ROOT_DIR = Environment.CurrentDirectory;
+    private static readonly string ROOT_DIR = Path.GetDirectoryName(Environment.ProcessPath);
 #endif
     private static string FILE_CRASH => $"crash-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.log";
 
@@ -46,6 +46,7 @@ public class GenericStorage : IGenericStorage
     public GenericStorage()
     {
         Log.Info("GenericStorage", "Service init");
+        Log.Info("GenericStorage", $"Get ROOT_DIR:{ROOT_DIR}");
         UserConfigs          = new ConcurrentDictionary<long, UserConfig>();
         GlobalConfigInstance = null;
         YamlDeserializer = new YamlSerialization.DeserializerBuilder()
@@ -310,11 +311,16 @@ public class GenericStorage : IGenericStorage
             dir = Path.GetDirectoryName(dir);
         }
 
+        Log.Debug("GenericStorage", $"Check path:{path}, found dirs:{paths.Count}");
         while (paths.Count != 0)
         {
             string temp = paths.Pop();
             Log.Verbose("GenericStorage", $"dir_c:{temp}");
-            if (!Directory.Exists(temp)) Directory.CreateDirectory(dir);
+            if (!Directory.Exists(temp))
+            {
+                Log.Warning("GenericStorage", $"未找到文件夹:{temp}");
+                Directory.CreateDirectory(temp);
+            }
         }
     }
 
