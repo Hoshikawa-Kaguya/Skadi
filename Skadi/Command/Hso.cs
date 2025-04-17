@@ -51,9 +51,9 @@ public class HsoCommand
 
         if (CheckGroupBlock(userConfig, (eventArgs as GroupMessageEventArgs)!))
             return;
-        if (IsInCD(groupId, eventArgs.Sender, CommandFlag.Setu))
+        if (IsInCD(groupId, eventArgs.Sender, CommandFlag.Setu, 60))
         {
-            await eventArgs.Reply(SoraSegment.At(eventArgs.Sender) + "你是不是只会要色图(逊欸，冲的真快)");
+            Log.Warning("HSO", $"{eventArgs.LoginUid} 正在尝试CD内再次涩涩，重置CD");
             return;
         }
 
@@ -72,10 +72,16 @@ public class HsoCommand
             return;
         }
 
-        Log.Info("NET", "尝试获取色图");
-        await eventArgs.Reply("正在获取色图中...");
+        Log.Info("NET", "尝试获取涩图");
+        await eventArgs.Reply("正在获取涩图中...");
 
-        (int code, JToken data) = await GetRandomSetuJson(hso);
+        string apiServer = hso.Source switch
+                           {
+                               "Wakamo" => "https://api.kosaka-wakamo.top",
+                               _        => hso.Source
+                           };
+        
+        (int code, JToken data) = await GetRandomSetuJson(apiServer, hso.CheckSSLCert);
         if (code != 200)
         {
             await eventArgs.Reply($"哇哦~发生了网络错误[{code}]，请联系机器人所在服务器管理员");
@@ -104,7 +110,7 @@ public class HsoCommand
 
             //图片链接
             Log.Debug("获取到图片", $"pid:{pid}|index:{index}");
-            SoraSegment image = await MediaUtil.GetPixivImage(eventArgs.LoginUid, pid, index);
+            SoraSegment image = await MediaUtil.GetPixivImage(eventArgs.LoginUid, pid, index, apiServer, hso.CheckSSLCert);
             //检查是否有设置代理
             await eventArgs.Reply(HsoMessageBuilder(data["data"]?[0], image), TimeSpan.FromSeconds(20));
         }
@@ -125,7 +131,8 @@ public class HsoCommand
         Log.Info("让我康康", $"[{eventArgs.Sender.Id}]加载图片:{pid}");
         await eventArgs.Reply("什么，有好康的");
 
-        List<SoraSegment> images = await MediaUtil.GetMultiPixivImage(eventArgs.LoginUid, pid);
+        //TODO
+        List<SoraSegment> images = []; // await MediaUtil.GetMultiPixivImage(eventArgs.LoginUid, pid);
         // ReSharper disable once AsyncVoidLambda
         images.ForEach(async i =>
         {
@@ -147,7 +154,8 @@ public class HsoCommand
         Log.Info("让我康康", $"加载图片:{pid}-{index}");
         await eventArgs.Reply("什么，有好康的");
 
-        SoraSegment image = await MediaUtil.GetPixivImage(eventArgs.LoginUid, pid, index);
+        //TODO
+        SoraSegment image = "shit"; //await MediaUtil.GetPixivImage(eventArgs.LoginUid, pid, index);
         await eventArgs.Reply(image, TimeSpan.FromSeconds(20));
     }
 
@@ -283,16 +291,16 @@ public class HsoCommand
     /// <summary>
     /// 获取随机图片信息
     /// </summary>
-    private static async ValueTask<(int code, JToken json)> GetRandomSetuJson(Hso hso)
+    private static async ValueTask<(int code, JToken json)> GetRandomSetuJson(string server, bool checkSsl)
     {
         try
         {
             //向服务器发送请求
-            var reqResponse = await Requests.GetAsync("https://api.yukari.one/setu/",
+            var reqResponse = await Requests.GetAsync($"{server}/setu",
                                                       new ReqParams
                                                       {
                                                           Timeout        = 3000,
-                                                          isCheckSSLCert = hso.CheckSSLCert
+                                                          isCheckSSLCert = checkSsl
                                                       });
             if (reqResponse.StatusCode != HttpStatusCode.OK)
             {

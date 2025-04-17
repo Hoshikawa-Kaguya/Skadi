@@ -40,7 +40,7 @@ internal static class MediaUtil
 
 #region Pixiv图片消息段生成
 
-    public static async ValueTask<SoraSegment> GetPixivImage(long loginUid, long pid, int index)
+    public static async ValueTask<SoraSegment> GetPixivImage(long loginUid, long pid, int index, string server, bool checkSsl)
     {
         IGenericStorage genericStorage = SkadiApp.GetService<IGenericStorage>();
         UserConfig      userConfig     = genericStorage.GetUserConfig(loginUid);
@@ -52,7 +52,8 @@ internal static class MediaUtil
         }
 
         //处理图片信息
-        (int statusCode, bool r18, int count) = GetPixivImgInfo(Convert.ToInt64(pid), out JToken data);
+        //TODO 使用服务器返回的信息，而不再使用pixiv API代理
+        (int statusCode, bool r18, int count) = GetPixivImgInfo(Convert.ToInt64(pid), server, checkSsl, out JToken data);
 
         switch (statusCode)
         {
@@ -73,45 +74,54 @@ internal static class MediaUtil
 
 
         Log.Info("Pixiv", $"download image with token:{userConfig.HsoConfig.YukariApiKey}");
-        HttpClient client = new();
-        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {userConfig.HsoConfig.YukariApiKey}");
-        string imageUrl = $"https://api.yukari.one/pixiv/{pid}/{index}";
-
-        HttpResponseMessage response = await client.GetAsync(imageUrl);
-        if (!response.IsSuccessStatusCode)
+        
+        string imageUrl = $"{server}/pixiv/{pid}/{index}";
+        ReqResponse response = await Requests.GetAsync(imageUrl,
+                                                       new ReqParams
+                                                       {
+                                                           isCheckSSLCert = checkSsl,
+                                                           Timeout = 20000,
+                                                           Header = new Dictionary<HttpRequestHeader, string>
+                                                           {
+                                                               { HttpRequestHeader.Authorization, $"Bearer {userConfig.HsoConfig.YukariApiKey}"}
+                                                           }
+                                                       });
+        if (response.StatusCode != HttpStatusCode.OK)
             return $"代理服务器错误{response.StatusCode}";
 
-        Stream image = await response.Content.ReadAsStreamAsync();
+        MemoryStream image = new(response.Content);
         Log.Info("Pixiv", $"image len:{image.Length}");
         return SoraSegment.Image(image);
     }
 
-    public static async ValueTask<List<SoraSegment>> GetMultiPixivImage(long loginUid, long pid)
+    public static async ValueTask<List<SoraSegment>> GetMultiPixivImage(long loginUid, long pid, string server, bool checkSsl)
     {
         //处理图片信息
-        (_, _, int count) = GetPixivImgInfo(Convert.ToInt64(pid), out _);
+        (_, _, int count) = GetPixivImgInfo(Convert.ToInt64(pid), server, checkSsl, out _);
         //发送一次错误信息
         if (count == 0) count = 1;
 
         var pixivImages = new List<SoraSegment>();
-        for (int i = 0; i < count; i++)
-            pixivImages.Add(await GetPixivImage(loginUid, pid, i));
+        //TODO
+        // for (int i = 0; i < count; i++)
+        //     pixivImages.Add(await GetPixivImage(loginUid, pid, i));
 
         return pixivImages;
     }
 
-    public static (int statusCode, bool r18, int count) GetPixivImgInfo(long pid, out JToken json)
+    public static (int statusCode, bool r18, int count) GetPixivImgInfo(long pid, string server, bool checkSsl, out JToken json)
     {
         Log.Debug("pixiv api", "sending illust info request");
         try
         {
-            var pixApiReq = Requests.Get($"https://api.yukari.one/pixiv/illust?pid={pid}",
-                                         new ReqParams
-                                         {
-                                             Timeout                   = 5000,
-                                             IsThrowErrorForTimeout    = false,
-                                             IsThrowErrorForStatusCode = false
-                                         });
+            ReqResponse pixApiReq = Requests.Get($"{server}/pixiv/illust?pid={pid}",
+                                                 new ReqParams
+                                                 {
+                                                     Timeout                   = 5000,
+                                                     isCheckSSLCert = checkSsl,
+                                                     IsThrowErrorForTimeout    = false,
+                                                     IsThrowErrorForStatusCode = false
+                                                 });
 
             Log.Debug("pixiv api", $"get illust info response({pixApiReq.StatusCode})");
             if (pixApiReq.StatusCode != HttpStatusCode.OK)

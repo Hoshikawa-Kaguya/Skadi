@@ -160,7 +160,8 @@ public static class SaucenaoApi
 
     private static async ValueTask<MessageBody> GenPixivResult(long loginUid, long pid, JToken apiRet)
     {
-        (int statusCode, bool r18, int count) = MediaUtil.GetPixivImgInfo(pid, out JToken json);
+        //TODO
+        (int statusCode, bool r18, int count) = MediaUtil.GetPixivImgInfo(pid, "", false, out JToken json);
         if (statusCode is not 200 and not 400)
             return $"[网络错误{statusCode}]";
         MessageBody   msg = new();
@@ -175,7 +176,7 @@ public static class SaucenaoApi
         if (r18)
             msg.Add($"{Environment.NewLine}[H是不行的]{Environment.NewLine}");
         else if (statusCode != 400)
-            msg.Add(await MediaUtil.GetPixivImage(loginUid, pid, 0));
+            msg.Add(await MediaUtil.GetPixivImage(loginUid, pid, 0, "", false));
         else
             return $"哈哈，图被删了({json?["statusCode"]?.ToString() ?? string.Empty})";
 

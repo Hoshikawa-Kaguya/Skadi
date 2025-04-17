@@ -33,11 +33,6 @@ public class Hso
     public long SizeLimit { set; get; }
 
     /// <summary>
-    /// LoliconToken
-    /// </summary>
-    public string LoliconApiKey { set; get; }
-
-    /// <summary>
     /// YukariToken
     /// </summary>
     public string YukariApiKey { set; get; }
