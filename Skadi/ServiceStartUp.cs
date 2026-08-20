@@ -27,7 +27,7 @@ internal static class ServiceStartUp
         Console.Title = @"Skadi";
         Log.Info("初始化", "Skadi初始化...");
         SkadiApp.Services.AddSingleton<IGenericStorage>(new GenericStorage());
-        SkadiApp.Services.AddScoped<IChromeService, ChromeService>();
+        SkadiApp.Services.AddSingleton<IChromeService, ChromeService>();
 
         //初始化配置文件
         Log.Info("初始化", "初始化服务器全局配置...");
@@ -89,6 +89,9 @@ internal static class ServiceStartUp
         server.ConnManager.OnCloseConnectionAsync += SubscriptionTimer.DelTimerEvent;
         server.ConnManager.OnCloseConnectionAsync += ServerDisconnectEvent.OnServerDisconnectEvent;
 
+        IChromeService chrome = SkadiApp.GetService<IChromeService>();
+        await chrome.InitBilibili();
+        
         //启动服务器
         await server.StartService().RunCatch(BotUtil.BotCrash);
         SkadiApp.StartTime = DateTime.Now;

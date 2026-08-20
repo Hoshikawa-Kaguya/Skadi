@@ -3,7 +3,9 @@ using System.IO;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using PuppeteerSharp;
+using PuppeteerSharp.Media;
 using Skadi.Interface;
+using Skadi.Tool;
 using Sora.Entities.Segment;
 using Sora.Util;
 using YukariToolBox.LightLog;
@@ -14,15 +16,26 @@ public class ChromeService : IChromeService, IDisposable
 {
     private IBrowser _browser { get; }
 
+    private static readonly ViewPortOptions _defaultViewPortOptions = new()
+    {
+        Width  = 2000,
+        Height = 1500
+    };
+
     public ChromeService()
     {
         Log.Debug("Chrome", "Browser Start");
         Task<IBrowser> initTask = Puppeteer.LaunchAsync(new LaunchOptions
         {
-            Headless          = true,
-            IgnoreHTTPSErrors = true,
-            Timeout           = 60000,
-            Args              = new[] { "--no-sandbox" }
+#if !DEBUG
+            Headless = true,
+#else
+            Headless = false,
+#endif
+            AcceptInsecureCerts = true,
+            Timeout             = 60000,
+            UserDataDir         = GenericStorage.GetChromeDataPath(),
+            Args                = ["--no-sandbox"]
         });
         try
         {
@@ -92,8 +105,18 @@ public class ChromeService : IChromeService, IDisposable
     {
         if (_browser is null) return;
         IPage homePage = await _browser.NewPageAsync();
-        await homePage.GoToAsync("https://space.bilibili.com/1").RunCatch(e => throw e);
-        await Task.Delay(1000);
+        await homePage.SetViewportAsync(_defaultViewPortOptions);
+        await homePage.GoToAsync("https://www.bilibili.com/").RunCatch(e => throw e);
+        await homePage.HoverAsync("#i_cecream > div.bili-feed4 > div.bili-header.large-header > div.bili-header__bar > ul.right-entry > li:nth-child(1) > li > div > div");
+        await Task.Delay(100);
+        await homePage.ClickAsync("#i_cecream > div.bili-feed4 > div.bili-header.large-header > div.bili-header__bar > ul.right-entry > li:nth-child(1) > li > div > div");
+        await Task.Delay(500);
+        IElementHandle s = await homePage.QuerySelectorAsync(
+            "body > div.bili-mini-mask > div > div.login-scan-wp > div.login-scan-hover-wp");
+        byte[] ss = await s.ScreenshotDataAsync();
+        string qrCodeText = MediaUtil.DecodeQrCode(ss);
+        Log.Info("Chrome svc","未登录Bilibili，请扫描二维码登录");
+        Log.Info("Chrome svc", MediaUtil.GenerateConsoleQRCode(qrCodeText));
     }
 
     public async Task<(ulong, long)> GetBilibiliDynamic(long uid)

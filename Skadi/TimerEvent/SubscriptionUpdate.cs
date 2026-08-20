@@ -57,13 +57,8 @@ internal static class SubscriptionUpdate
             return;
         }
 
-        try
+        if (subscriptions.Count == 0)
         {
-            await chrome.InitBilibili();
-        }
-        catch (Exception e)
-        {
-            Log.Error(e, "Sub-Serv", "浏览器初始化错误");
             return;
         }
 

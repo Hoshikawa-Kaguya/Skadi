@@ -235,6 +235,13 @@ public class GenericStorage : IGenericStorage
         CheckDir(path);
         return path;
     }
+    
+    public static string GetChromeDataPath()
+    {
+        string path = $"{ROOT_DIR}/chrome_data";
+        CheckDir(path, true);
+        return path;
+    }
 
     public static string GetHsoPath()
     {
@@ -305,6 +312,7 @@ public class GenericStorage : IGenericStorage
         if (isDir) paths.Push(path);
 
         string dir = Path.GetDirectoryName(path);
+        //逐个入栈上级目录
         while (dir != ROOT_DIR)
         {
             paths.Push(dir);
@@ -316,11 +324,9 @@ public class GenericStorage : IGenericStorage
         {
             string temp = paths.Pop();
             Log.Verbose("GenericStorage", $"dir_c:{temp}");
-            if (!Directory.Exists(temp))
-            {
-                Log.Warning("GenericStorage", $"未找到文件夹:{temp}");
-                Directory.CreateDirectory(temp);
-            }
+            if (Directory.Exists(temp)) continue;
+            Log.Warning("GenericStorage", $"未找到文件夹:{temp}");
+            Directory.CreateDirectory(temp);
         }
     }
 

@@ -20,7 +20,7 @@ internal static class SubscriptionTimer
     private static readonly Timer _subTimer = new(SubscriptionEvent, //事件处理
                                                   null,              //初始化数据
                                                   new TimeSpan(0),   //即刻执行
-                                                  new TimeSpan(0, 0, 1, 0));
+                                                  new TimeSpan(0, 0, 10, 0));
 
     /// <summary>
     /// 订阅列表
